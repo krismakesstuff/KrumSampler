@@ -1,0 +1,600 @@
+/*
+  ==============================================================================
+
+    This file contains the basic framework code for a JUCE plugin processor.
+
+  ==============================================================================
+*/
+
+#include "PluginProcessor.h"
+#include "PluginEditor.h"
+
+//==============================================================================
+
+//juce::AudioProcessorParameterGroup makeModuleParameterGroup(int index, juce::String name)
+//{
+//    const float maxGain = juce::Decibels::decibelsToGain(2.0f);
+//
+//    
+//    auto gainParameter = std::make_unique<juce::AudioParameterFloat>("gain" + juce::String(index), name + "Gain",
+//                    juce::NormalisableRange<float> {0.0f, 2.0f, 0.01f}, 0.85f, 
+//                    "Module " +  name + " Gain",
+//                    juce::AudioProcessorParameter::genericParameter,
+//                    [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
+//                    [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+//
+//   // auto panParameter = std::make_unique<juce::AudioParameterFloat>("pan");
+//
+//    //auto outputChannelParameter = std::make_unique<juce::AudioParameterChoice>("outputChannel");
+//
+//    
+//
+//    
+//    
+//    /*auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("module" + juce::String(index), name, "|",
+//        std::move(gainParameter)
+//
+//        );*/
+//
+//    //juce::AudioProcessorParameterGroup moduleGroup("module" + juce::String(index), name, "|",
+//                                                    //std::move(gainParameter),
+//                                                    //std::move(panParameter),
+//                                                    //std::move(outputChannelParameter));
+//
+//    return moduleGroup;
+//}
+
+float dBToGain(float gainValue)
+{
+    return juce::Decibels::decibelsToGain<float>(gainValue);
+}
+
+float gainToDB(float decibels)
+{
+    return juce::Decibels::gainToDecibels<float>(decibels);
+}
+
+juce::ValueTree createValueTree()
+{
+    //add additional global settings here    
+    juce::ValueTree retValueTree
+    { "AppState" ,{},
+        {
+            {"GlobalSettings", {},
+                {
+                    {"PreviewerGain",       {{"value", "0.75"}}},
+                    {"PreviewerAutoPlay",   {{"value", "0"}}},
+                    {"BrowserHidden",       {{"value", "0"}}}
+                }
+            }
+        }
+    };
+
+    juce::ValueTree krumModulesTree{ "KrumModules" };
+    
+    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    {
+        juce::String index = juce::String(i);
+        juce::ValueTree newModule =
+        { "Module" + index, {{"name",""}},
+                {
+                    {"State", {{"id", TreeIDs::paramModuleActive_ID},       {"value", ""}}},
+                    {"State", {{"id", TreeIDs::paramModuleFile_ID},         {"value", ""}}},
+                    {"State", {{"id", TreeIDs::paramModuleMidiNote_ID},     {"value", ""}}},
+                    {"State", {{"id", TreeIDs::paramModuleMidiChannel_ID},  {"value", ""}}},
+                    {"State", {{"id", TreeIDs::paramModuleColor_ID},        {"value", ""}}},
+                    {"State", {{"id", TreeIDs::paramModuleDisplayIndex_ID}, {"value", ""}}}
+                }
+        };
+        krumModulesTree.addChild(newModule, i, nullptr);
+    }
+
+    retValueTree.addChild(krumModulesTree, -1, nullptr);
+
+    return retValueTree.createCopy();
+}
+
+juce::ValueTree createFileBrowserTree()
+{
+    juce::ValueTree retValTree{ "FileBrowserTree", {}, };
+    juce::ValueTree recTree = { "Recent" ,{} };
+    juce::ValueTree favTree = { "Favorites", {} };
+    juce::ValueTree openTree = { "OpennessState", {} };
+
+    retValTree.addChild(recTree, FileBrowserSectionIds::recentFolders_Ids, nullptr);
+    retValTree.addChild(favTree, FileBrowserSectionIds::favoritesFolders_Ids, nullptr);
+    retValTree.addChild(openTree, FileBrowserSectionIds::openness_Ids, nullptr);
+
+    return retValTree.createCopy();
+
+}
+
+
+juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+{
+    
+
+    std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
+    const juce::StringArray outputStrings {"1 & 2", "3 & 4", "5 & 6"};
+
+    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    {
+        juce::String index = " " + juce::String(i);
+        juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
+        gainRange.setSkewForCentre(dBToGain(0.0f));
+        gainRange.symmetricSkew = true;
+        auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain_ID + index, "Module Gain" + index,
+                            gainRange, dBToGain(0.0f),
+                            "Module" + index + " Gain",
+                            juce::AudioProcessorParameter::genericParameter,
+                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
+                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+
+       // juce::NormalisableRange<float> panRange{ 0.0f, 100.0f, 0.01f };
+
+        auto panParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePan_ID + index, "Module Pan" + index,
+                            juce::NormalisableRange<float>{0.01f, 1.0f, 0.001f}, 0.5f,
+                            "Module" + index + " Pan",
+                            juce::AudioProcessorParameter::genericParameter,
+                            [](float value, int) {return panRangeFrom0To1(value); },
+                            [](juce::String text) {return panRangeTo0to1(text); });
+
+        auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannels_ID + index,
+                            "Module Ouput" + index,
+                            outputStrings, 1);
+
+        auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
+                            "Module " + juce::String(i),
+                            "|",
+                            std::move(gainParam),
+                            std::move(panParam),
+                            std::move(outputParam));
+
+        paramsGroup.push_back(std::move(moduleGroup));
+    }
+    
+    juce::NormalisableRange<float> outGainRange{ dBToGain(-60.0f), dBToGain(2.0f), 0.0001f };
+    outGainRange.setSkewForCentre(dBToGain(0.0f));
+    outGainRange.symmetricSkew = true;
+    auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam_ID, "Output Gain",
+                            outGainRange, dBToGain(0.0f),
+                            "OutputGain",
+                            juce::AudioProcessorParameter::genericParameter,
+                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
+                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+
+    auto globalGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Globals", "Global Parameters",
+                            "|", std::move(outputGainParameter));
+
+
+    paramsGroup.push_back(std::move(globalGroup));
+    return { paramsGroup.begin(), paramsGroup.end() };
+}
+
+KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
+#ifndef JucePlugin_PreferredChannelConfigurations
+     : AudioProcessor(  BusesProperties()
+                        #if ! JucePlugin_IsMidiEffect
+                        #if ! JucePlugin_IsSynth
+                                    .withInput("Input", juce::AudioChannelSet::stereo(), true)
+                        #endif
+                                    .withOutput("Output", juce::AudioChannelSet::stereo(), true))
+                        #endif
+                                    ,parameters(*this, nullptr, "PARAMS", createParameterLayout())
+                        #endif
+{
+    valueTree = createValueTree();
+    fileBrowserValueTree = createFileBrowserTree();
+}
+
+KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
+{
+
+}
+
+
+void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+{
+    outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam_ID);
+    sampler.setCurrentPlaybackSampleRate(sampleRate);
+}
+
+void KrumSamplerAudioProcessor::releaseResources()
+{
+    //currentBuffer = nullptr;
+}
+
+
+void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
+    sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    buffer.applyGain(*outputGainParameter);
+    midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    //midiState.copyState(midiMessages, 0, buffer.getNumSamples(), true);
+    //processMidiKeyStateBlock(midiMessages, 0, buffer.getNumSamples(), true);
+}
+
+void KrumSamplerAudioProcessor::processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents)
+{
+    //midiState.processMidi(midiMessages, startSample, numSamples, injectDirectEvents);
+}
+
+void KrumSamplerAudioProcessor::addMidiKeyboardListener(juce::MidiKeyboardStateListener* newListener)
+{
+    midiState.addListener(newListener);
+}
+
+void KrumSamplerAudioProcessor::removeMidiKeyboardListener(juce::MidiKeyboardStateListener* listenerToRemove)
+{
+    midiState.removeListener(listenerToRemove);
+}
+
+
+//==============================================================================
+#ifndef JucePlugin_PreferredChannelConfigurations
+bool KrumSamplerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+{
+  #if JucePlugin_IsMidiEffect
+    juce::ignoreUnused (layouts);
+    return true;
+  #else
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+
+    // This checks if the input layout matches the output layout
+   #if ! JucePlugin_IsSynth
+    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+        return false;
+   #endif
+
+    return true;
+  #endif
+}
+#endif
+
+bool KrumSamplerAudioProcessor::hasEditor() const
+{
+    return true; 
+}
+
+juce::AudioProcessorEditor* KrumSamplerAudioProcessor::createEditor()
+{
+    auto editor = new KrumSamplerAudioProcessorEditor(*this, sampler, parameters, valueTree, fileBrowserValueTree);
+    return editor;
+}
+
+//=======================================================================================//
+const juce::String KrumSamplerAudioProcessor::getName() const
+{
+    return JucePlugin_Name;
+}
+
+bool KrumSamplerAudioProcessor::acceptsMidi() const
+{
+#if JucePlugin_WantsMidiInput
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool KrumSamplerAudioProcessor::producesMidi() const
+{
+#if JucePlugin_ProducesMidiOutput
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool KrumSamplerAudioProcessor::isMidiEffect() const
+{
+#if JucePlugin_IsMidiEffect
+    return true;
+#else
+    return false;
+#endif
+}
+
+double KrumSamplerAudioProcessor::getTailLengthSeconds() const
+{
+    return 0.0;
+}
+
+int KrumSamplerAudioProcessor::getNumPrograms()
+{
+    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
+                // so this should be at least 1, even if you're not really implementing programs.
+}
+
+int KrumSamplerAudioProcessor::getCurrentProgram()
+{
+    return 0;
+}
+
+void KrumSamplerAudioProcessor::setCurrentProgram(int index)
+{
+}
+
+const juce::String KrumSamplerAudioProcessor::getProgramName(int index)
+{
+    return {};
+}
+
+void KrumSamplerAudioProcessor::changeProgramName(int index, const juce::String& newName)
+{
+}
+
+//==============================================================================
+
+
+//==============================================================================
+void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
+    valueTree.appendChild(parameters.state, nullptr);
+    valueTree.appendChild(fileBrowserValueTree, nullptr);
+    
+    auto state = valueTree.createCopy();
+    std::unique_ptr<juce::XmlElement> xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
+
+    DBG("---SAVED STATE---");
+    DBG(xml->toString());
+
+}
+
+void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+{
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+    {
+        if (xmlState->hasTagName(valueTree.getType()))
+        {
+            //Audio parameters
+            parameters.replaceState(juce::ValueTree::fromXml(*xmlState->getChildByName("PARAMS")));
+            xmlState->removeChildElement(xmlState->getChildByName("PARAMS"), true);
+            
+            //File Browser 
+            auto xmlFileBrowserTree = xmlState->getChildByName("FileBrowserTree");
+            if (xmlFileBrowserTree != nullptr)
+            {
+                fileBrowserValueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlFileBrowserTree), nullptr);
+                xmlState->removeChildElement(xmlFileBrowserTree, true);
+                auto editor = getActiveEditor();
+                if (editor != nullptr)
+                {
+                    auto krumEditor = static_cast<KrumSamplerAudioProcessorEditor*>(editor);
+                    if (krumEditor != nullptr)
+                    {
+                        krumEditor->getFileBrowser()->rebuildBrowser(fileBrowserValueTree);
+                    }
+                }
+            }
+            
+            //Remaining App/Modules Settings
+            valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr); 
+            makeModulesFromValueTree();
+            //if (sampler.getNumModules() == 0)
+            //{
+            //}
+            
+            //juce::ScopedLock scopedLock(critSection);
+            
+            //DBG("---SET STATE---");
+            //auto newValueTree = juce::ValueTree::fromXml(*xmlState);
+            //DBG(newValueTree.toXmlString());
+            
+        }
+        else 
+        {
+            DBG("XML has no tagname from ValueTree");
+        }
+    }
+    else
+    {
+        DBG("XML state is null");
+        DBG("Data Size = " + juce::String(sizeInBytes));
+    }
+
+}
+
+juce::AudioFormatManager* KrumSamplerAudioProcessor::getFormatManager()
+{
+    return &formatManager;
+}
+
+
+juce::ValueTree* KrumSamplerAudioProcessor::getValueTree()
+{
+    return &valueTree;
+}
+
+juce::MidiKeyboardState& KrumSamplerAudioProcessor::getMidiState()
+{
+    return midiState;
+}
+
+void KrumSamplerAudioProcessor::makeModulesFromValueTree()
+{
+    sampler.clearModules();
+    auto modulesTree = valueTree.getChildWithName("KrumModules");
+    
+    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    {
+        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
+        if (moduleTree.isValid())
+        {
+            juce::var nameValue = moduleTree.getProperty("name");
+            //if (!value.isVoid())
+            {
+                //DBG("ValueTree is valid");
+                //DBG(moduleTree.toXmlString());
+                //DBG("ModuleName " + nameValue.toString());
+
+                juce::ValueTree stateTree;
+                bool moduleActive = false;
+                int midiChannel = 0;
+                juce::var id;
+                juce::var val;
+
+                //probably dont need to itt through all the params since moduleActive will be first.. 
+                for (int j = 0; j < 4; j++)                 
+                {
+                    stateTree = moduleTree.getChild(j);
+                    id = stateTree.getProperty("id");
+                    val = stateTree.getProperty("value");
+                    //DBG(id.toString() + " " + val.toString());
+                    if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) > 0)
+                    {
+                        moduleActive = true;
+                    }
+                    else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
+                    {
+                        midiChannel = int(val);
+                    }
+                }
+
+                if (moduleActive)
+                {
+                    auto newModule = new KrumModule(i, sampler, &valueTree, &parameters);
+                    sampler.addModule(newModule, newModule->getMidiTriggerNote() != 0);
+                    midiState.addListener(newModule);
+                    
+                }
+            }
+        }
+        else
+        {
+            DBG("ValueTree not Valid" + juce::String(i));
+        }
+
+    }
+
+    /*DBG("Module Display:");
+    for (int i = 0; i < editor->getModuleDisplayOrder().size(); i++)
+    {
+        DBG("Position " + juce::String(i) + " Module " + juce::String(editor->getModuleDisplayOrder().getUnchecked(i)));
+    }
+    DBG("Display Size: " + juce::String(editor->getModuleDisplayOrder().size()));*/
+
+}
+
+void KrumSamplerAudioProcessor::updateValueTreeState()
+{
+    auto modulesTree = valueTree.getChildWithName("KrumModules");
+
+    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    {
+        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
+        auto mod = sampler.getModule(i);
+        if (mod != nullptr)
+        {
+            for (int j = 0; j < moduleTree.getNumChildren(); j++)
+            {
+                auto stateTree = moduleTree.getChild(j);
+                auto id = stateTree.getProperty("id");
+
+                if (id.toString() == TreeIDs::paramModuleActive_ID)
+                {
+                    stateTree.setProperty("value", mod->isModuleActive() ? juce::var(1) : juce::var(0), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleFile_ID)
+                {
+                    stateTree.setProperty("value", juce::var(mod->getSampleFile().getFullPathName()), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
+                {
+                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerNote()), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
+                {
+                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerChannel()), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleColor_ID)
+                {
+                    stateTree.setProperty("value", juce::var(mod->getModuleColor().toDisplayString(true)), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
+                {
+                    stateTree.setProperty("value", juce::var(mod->getModuleDisplayIndex()), nullptr);
+                }
+            }
+        }
+        else //zero the state for this module
+        {
+
+            moduleTree.setProperty("name", juce::var(""), nullptr);
+
+            for (int j = 0; j < moduleTree.getNumChildren(); j++)
+            {
+                auto stateTree = moduleTree.getChild(j);
+                auto id = stateTree.getProperty("id");
+
+                if (id.toString() == TreeIDs::paramModuleActive_ID)
+                {
+                    stateTree.setProperty("value", juce::var(0), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleFile_ID)
+                {
+                    stateTree.setProperty("value", juce::var(""), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
+                {
+                    stateTree.setProperty("value", juce::var(0), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
+                {
+                    stateTree.setProperty("value", juce::var(0), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleColor_ID)
+                {
+                    stateTree.setProperty("value", juce::var(""), nullptr);
+                }
+                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
+                {
+                    stateTree.setProperty("value", juce::var(""), nullptr);
+                }
+            }
+        }
+    }
+
+    DBG("---Updated Tree State---");
+    auto state = valueTree.createCopy();
+    std::unique_ptr<juce::XmlElement> xml = state.createXml();
+    DBG(xml->toString());
+
+}
+
+
+int KrumSamplerAudioProcessor::findFreeModuleIndex()
+{
+    auto modulesTree = valueTree.getChildWithName("KrumModules");
+
+    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    {
+        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
+        
+        juce::ValueTree stateTree;
+        juce::var id;
+        juce::var val;
+        
+        stateTree = moduleTree.getChild(0);             //index of ModuleActive parameter in ValueTree.
+        id = stateTree.getProperty("id");
+        val = stateTree.getProperty("value");
+        if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) < 1)
+        {
+            return i;
+        }
+    }
+
+}
+
+
+//==============================================================================
+// This creates new instances of the plugin..
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
+    return new KrumSamplerAudioProcessor();
+}

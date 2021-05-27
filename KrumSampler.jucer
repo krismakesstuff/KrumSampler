@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="LUUtOP" name="KrumSampler" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              cppLanguageStandard="17" pluginManufacturer="Kris Crawford" pluginDesc="KrumSampler"
+              pluginVST3Category="Synth" pluginFormats="buildAAX,buildAU,buildStandalone,buildVST3"
+              pluginAAXCategory="0">
+  <MAINGROUP id="NTQyMJ" name="KrumSampler">
+    <GROUP id="{A7DF623D-386D-4581-D393-3853A4967ABB}" name="Fonts">
+      <FILE id="mHQyAK" name="MONOGLYCERIDE.TTF" compile="0" resource="1"
+            file="../../../APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/MONOGLYCERIDE.TTF"/>
+      <FILE id="aihF7t" name="AIRBORNE GP.ttf" compile="0" resource="1" file="../../../Downloads/airborne-gp/AIRBORNE GP.ttf"/>
+      <FILE id="HLsDzz" name="MONOGLYCERIDEEXTRABOLD.TTF" compile="0" resource="1"
+            file="../../../APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/MONOGLYCERIDEEXTRABOLD.TTF"/>
+      <FILE id="yfvYUp" name="MONOGLYCERIDEBOLD.TTF" compile="0" resource="1"
+            file="../../../APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/MONOGLYCERIDEBOLD.TTF"/>
+      <FILE id="EM8cdZ" name="MONOGLYCERIDEDEMIBOLD.TTF" compile="0" resource="1"
+            file="../../../APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/MONOGLYCERIDEDEMIBOLD.TTF"/>
+    </GROUP>
+    <GROUP id="{7467111A-3F07-D8FF-124A-27D753DAFADA}" name="Source">
+      <FILE id="hLUvRs" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="oHkjy0" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="kW17wa" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="eSKZkx" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+    <FILE id="QyFQzA" name="ColorPalette.cpp" compile="1" resource="0"
+          file="Source/ColorPalette.cpp"/>
+    <FILE id="ch29Pi" name="ColorPalette.h" compile="0" resource="0" file="Source/ColorPalette.h"/>
+    <FILE id="EXEHuy" name="KrumFileBrowser.cpp" compile="1" resource="0"
+          file="Source/KrumFileBrowser.cpp"/>
+    <FILE id="izCUXg" name="KrumFileBrowser.h" compile="0" resource="0"
+          file="Source/KrumFileBrowser.h"/>
+    <FILE id="XDGL1h" name="KrumFileDrop.cpp" compile="1" resource="0"
+          file="Source/KrumFileDrop.cpp"/>
+    <FILE id="Gkk3GK" name="KrumFileDrop.h" compile="0" resource="0" file="Source/KrumFileDrop.h"/>
+    <FILE id="tEUuGR" name="KrumKeyboard.cpp" compile="1" resource="0"
+          file="Source/KrumKeyboard.cpp"/>
+    <FILE id="QvQ8OH" name="KrumKeyboard.h" compile="0" resource="0" file="Source/KrumKeyboard.h"/>
+    <FILE id="hZWMvh" name="KrumLookAndFeel.h" compile="0" resource="0"
+          file="Source/KrumLookAndFeel.h"/>
+    <FILE id="JomK0Q" name="KrumModule.cpp" compile="1" resource="0" file="Source/KrumModule.cpp"/>
+    <FILE id="qVcOt2" name="KrumModule.h" compile="0" resource="0" file="Source/KrumModule.h"/>
+    <FILE id="MvDz5g" name="KrumModuleContainer.cpp" compile="1" resource="0"
+          file="Source/KrumModuleContainer.cpp"/>
+    <FILE id="SLTCmh" name="KrumModuleContainer.h" compile="0" resource="0"
+          file="Source/KrumModuleContainer.h"/>
+    <FILE id="zFVW6B" name="KrumModuleEditor.cpp" compile="1" resource="0"
+          file="Source/KrumModuleEditor.cpp"/>
+    <FILE id="fwhfOO" name="KrumModuleEditor.h" compile="0" resource="0"
+          file="Source/KrumModuleEditor.h"/>
+    <FILE id="vdusOj" name="KrumModuleProcessor.cpp" compile="1" resource="0"
+          file="Source/KrumModuleProcessor.cpp"/>
+    <FILE id="sYetGb" name="KrumModuleProcessor.h" compile="0" resource="0"
+          file="Source/KrumModuleProcessor.h"/>
+    <FILE id="rTSZdu" name="KrumSampler.cpp" compile="1" resource="0" file="Source/KrumSampler.cpp"/>
+    <FILE id="kQ4Iqw" name="KrumSampler.h" compile="0" resource="0" file="Source/KrumSampler.h"/>
+    <FILE id="ojx4e6" name="MidiState.h" compile="0" resource="0" file="Source/MidiState.h"/>
+    <FILE id="r6bf7y" name="ModuleSettingsOverlay.cpp" compile="1" resource="0"
+          file="Source/ModuleSettingsOverlay.cpp"/>
+    <FILE id="coe0wi" name="ModuleSettingsOverlay.h" compile="0" resource="0"
+          file="Source/ModuleSettingsOverlay.h"/>
+    <FILE id="YHxAbo" name="SimpleAudioPreviewer.cpp" compile="1" resource="0"
+          file="Source/SimpleAudioPreviewer.cpp"/>
+    <FILE id="Tefjj4" name="SimpleAudioPreviewer.h" compile="0" resource="0"
+          file="Source/SimpleAudioPreviewer.h"/>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <VS2019 targetFolder="Builds/VisualStudio2019">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="KrumSampler" enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="KrumSampler" enablePluginBinaryCopyStep="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2019>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <WINDOWS/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>

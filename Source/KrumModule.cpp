@@ -1,0 +1,463 @@
+/*
+  ==============================================================================
+
+    KrumModule.cpp
+    Created: 1 Mar 2021 11:15:42am
+    Author:  krisc
+
+  ==============================================================================
+*/
+
+#include "KrumModule.h"
+#include "PluginEditor.h"
+
+
+
+//creates a module with NO MIDI assigned, up to the module to get this from the user
+KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
+                        juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
+    : valueTree(valTree), parameters(apvts)
+{
+    moduleProcessor.reset(new KrumModuleProcessor(*this, km));
+
+    info.index = index;
+    info.audioFile = file;
+    info.name = moduleName;
+    info.moduleActive = true;
+    //for now..
+    info.displayIndex = info.index;
+
+    updateValuesInTree();
+}
+
+
+//creates a module from the ValueTree passed in
+KrumModule::KrumModule(int newIndex, KrumSampler& km, juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
+    : valueTree(valTree), parameters(apvts)
+{
+    moduleProcessor.reset(new KrumModuleProcessor(*this, km));
+    
+    info.index = newIndex;
+
+    getValuesFromTree();
+    
+    //for now..
+    info.displayIndex = info.index;
+
+    updateValuesInTree();
+}
+
+KrumModule::~KrumModule()
+{
+    
+}
+
+//use this only to capture midi assignments, to turn module "playing" on or off use the sampler... (for now).
+void KrumModule::handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
+{
+
+    if (moduleEditor == nullptr)
+    {
+        source->removeListener(this);
+        return;
+    }
+    else if (moduleEditor->doesEditorWantMidi())
+    {
+        moduleEditor->handleMidi(midiChannelNumber, midiNoteNumber);
+        return;
+    }
+    //else 
+    //{
+    //    setModulePlaying(source->isNoteOn(info.midiChannel, info.midiNote));
+    //}
+    //
+}
+void KrumModule::handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
+{
+    //
+    //if (moduleEditor == nullptr)
+    //{
+    //    return;
+    //}
+    //else if (midiChannelNumber == info.midiChannel && midiNoteNumber == info.midiNote)
+    //{
+    //    setModulePlaying(false);
+    //}
+
+}
+
+
+void KrumModule::setModuleSelected(bool isModuleSelected)
+{
+    if (moduleEditor != nullptr)
+    {
+        moduleEditor->setModuleSelected(isModuleSelected);
+    }
+}
+
+void KrumModule::removeSettingsOverlay(bool keepSettings)
+{
+    if (moduleEditor != nullptr)
+    {
+        moduleEditor->removeSettingsOverlay(keepSettings);
+    }
+}
+
+juce::File& KrumModule::getSampleFile()
+{
+    return info.audioFile;
+}
+
+void KrumModule::setSampleFile(juce::File& newFile)
+{
+    info.audioFile = newFile;
+    updateValuesInTree();
+}
+
+
+int KrumModule::getMidiTriggerNote()
+{
+    return info.midiNote;
+}
+
+void KrumModule::setMidiTriggerNote(int midiNoteNumber)
+{
+    info.midiNote = midiNoteNumber;
+    updateValuesInTree();
+
+}
+
+int KrumModule::getMidiTriggerChannel()
+{
+    return info.midiChannel;
+}
+
+void KrumModule::setMidiTriggerChannel(int newMidiChannel)
+{
+    info.midiChannel = newMidiChannel;
+    updateValuesInTree();
+}
+
+juce::String& KrumModule::getModuleName()
+{
+    return info.name;
+}
+
+void KrumModule::setModuleName(juce::String& newName)
+{
+    info.name = newName;
+    updateValuesInTree();
+}
+
+bool KrumModule::isModulePlaying()
+{
+    return info.modulePlaying;
+}
+
+void KrumModule::setModulePlaying(const bool isPlaying)
+{
+    //info.modulePlaying.store(isPlaying, std::memory_order::memory_order_relaxed);
+    info.modulePlaying = isPlaying;
+    //info.modulePlaying.isL
+    if (moduleEditor != nullptr)
+    {
+        juce::MessageManagerLock lock;
+        moduleEditor->repaint();
+    }
+}
+
+bool KrumModule::isModuleActive()
+{
+    return info.moduleActive;
+}
+
+void KrumModule::setModuleActive(bool isActive)
+{
+    info.moduleActive = isActive;
+    updateValuesInTree();
+}
+
+int KrumModule::getModuleIndex()
+{
+    return info.index;
+}
+
+//automatically sets display index for now.
+void KrumModule::setModuleIndex(int newIndex)
+{
+    info.index = newIndex;
+    setModuleDisplayIndex(newIndex);
+    updateValuesInTree();
+}
+
+int KrumModule::getModuleDisplayIndex()
+{
+    return info.displayIndex;
+}
+
+void KrumModule::setModuleDisplayIndex(int newIndex)
+{
+    info.displayIndex = newIndex; 
+    updateValuesInTree();
+}
+
+juce::Colour KrumModule::getModuleColor()
+{
+    return info.moduleColor;
+}
+void KrumModule::setModuleColor(juce::Colour newModuleColor, bool refreshChildren)
+{
+    info.moduleColor = newModuleColor;
+    updateValuesInTree();
+
+    if (moduleEditor != nullptr && refreshChildren)
+    {
+        //moduleEditor->buildModule();
+        moduleEditor->setKeyboardColor();
+    }
+}
+
+void KrumModule::triggerNoteOn()
+{
+    //not sure if this is the best way to do this
+    moduleProcessor->triggerNoteOn();
+}
+
+void KrumModule::triggerNoteOff() 
+{
+    moduleProcessor->triggerNoteOff();
+}
+
+void KrumModule::setModuleGain(float newGain)
+{
+    //volumeSlider.setValue(newGain);
+}
+
+std::atomic<float>* KrumModule::getModuleGain()
+{
+    return moduleProcessor->moduleGain;
+}
+
+
+void KrumModule::setModulePan(float newPan)
+{
+    //panSlider.setValue(newPan);
+}
+
+std::atomic<float>* KrumModule::getModulePan()
+{
+    return moduleProcessor->modulePan;
+}
+
+
+void KrumModule::getValuesFromTree()
+{
+    if (valueTree != nullptr)
+    {
+        auto modulesTree = valueTree->getChildWithName("KrumModules");
+        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(info.index));
+        juce::var nameValue = moduleTree.getProperty("name");
+        info.name = nameValue.toString();
+        
+        juce::ValueTree stateTree;
+        juce::var id;
+        juce::var val;
+
+        for (int j = 0; j < moduleTree.getNumChildren(); j++)              
+        {
+            stateTree = moduleTree.getChild(j);
+            id = stateTree.getProperty("id");
+            val = stateTree.getProperty("value");
+            DBG(id.toString() + " " + val.toString());
+            if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) > 0)
+            {
+                info.moduleActive = true;
+            }
+            else if (id.toString() == TreeIDs::paramModuleFile_ID && !val.isVoid())
+            {
+                info.audioFile = juce::File(val.toString()); 
+            }
+            else if (id.toString() == TreeIDs::paramModuleMidiNote_ID && !val.isVoid())
+            {
+                info.midiNote = int(val);
+            }
+            else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID && !val.isVoid())
+            {
+                info.midiChannel = int(val);
+            }
+            else if (id.toString() == TreeIDs::paramModuleColor_ID && !val.isVoid())
+            {
+                info.moduleColor = juce::Colour::fromString(val.toString());
+            }
+            else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID && !val.isVoid())
+            {
+                info.displayIndex = int(val);
+            }
+        }
+
+
+    }
+}
+
+
+void KrumModule::updateValuesInTree(bool printBefore)
+{
+    if (valueTree != nullptr)
+    {
+        if (printBefore)
+        {
+            DBG("Value Tree In Module " + info.name);
+            auto state = valueTree->createCopy();
+            std::unique_ptr<juce::XmlElement> xml(state.createXml());
+            DBG(xml->toString());
+        }
+
+        auto modulesTree = valueTree->getChildWithName("KrumModules");
+
+        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(info.index));
+
+        moduleTree.setProperty("name", juce::var(info.name), nullptr);
+
+        juce::ValueTree stateTree;
+        juce::var id;
+
+        for (int i = 0; i < moduleTree.getNumChildren(); i++)         
+        {
+            stateTree = moduleTree.getChild(i);
+            id = stateTree.getProperty("id");
+
+            if (id == TreeIDs::paramModuleActive_ID)
+            {
+                stateTree.setProperty("value", info.moduleActive ? juce::var(1) : juce::var(0), nullptr);
+            }
+            else if (id == TreeIDs::paramModuleFile_ID)
+            {
+                stateTree.setProperty("value", juce::var(info.audioFile.getFullPathName()), nullptr);
+            }
+            else if (id == TreeIDs::paramModuleMidiNote_ID)
+            {
+                stateTree.setProperty("value", juce::var(info.midiNote), nullptr);
+            }
+            else if (id == TreeIDs::paramModuleMidiChannel_ID)
+            {
+                stateTree.setProperty("value", juce::var(info.midiChannel), nullptr);
+            }
+            else if (id == TreeIDs::paramModuleColor_ID)
+            {
+                stateTree.setProperty("value", juce::var(info.moduleColor.toDisplayString(true)), nullptr);
+            }
+            else if(id == TreeIDs::paramModuleDisplayIndex_ID)
+            {
+                stateTree.setProperty("value", juce::var(info.displayIndex), nullptr);
+            }
+        }
+
+        /*DBG("Value Tree In Module " + name);
+        auto state = valueTree->createCopy();
+        std::unique_ptr<juce::XmlElement> xml(state.createXml());
+        DBG(xml->toString());*/
+    }
+}
+
+void KrumModule::clearModuleValueTree()
+{
+
+    int numModules = moduleProcessor->sampler.getNumModules();
+
+    if (numModules - 1 > info.index)
+    {
+
+    }
+
+    auto modulesTree = valueTree->getChildWithName("KrumModules");
+
+    auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(info.index));
+
+    moduleTree.setProperty("name", juce::var(""), nullptr);
+
+    juce::ValueTree stateTree;
+    juce::var id;
+
+    for (int i = 0; i < moduleTree.getNumChildren(); i++)
+    {
+        stateTree = moduleTree.getChild(i);
+        id = stateTree.getProperty("id");
+
+        if (id == TreeIDs::paramModuleActive_ID)
+        {
+            stateTree.setProperty("value", juce::var(0), nullptr);
+        }
+        else if (id == TreeIDs::paramModuleFile_ID)
+        {
+            stateTree.setProperty("value", juce::var(""), nullptr);
+        }
+        else if (id == TreeIDs::paramModuleMidiNote_ID)
+        {
+            stateTree.setProperty("value", juce::var(0), nullptr);
+        }
+        else if (id == TreeIDs::paramModuleMidiChannel_ID)
+        {
+            stateTree.setProperty("value", juce::var(0), nullptr);
+        }
+        else if (id == TreeIDs::paramModuleColor_ID)
+        {
+            stateTree.setProperty("value", juce::var(""), nullptr);
+        }
+        else if (id == TreeIDs::paramModuleDisplayIndex_ID)
+        {
+            stateTree.setProperty("value", juce::var(""), nullptr);
+        }
+    }
+}
+
+void KrumModule::reassignSliders()
+{
+    if (moduleEditor != nullptr)
+    {
+        moduleEditor->reassignSliderAttachments();
+    }
+}
+
+KrumModuleEditor* KrumModule::createModuleEditor(KrumSamplerAudioProcessorEditor& editor)
+{
+    if (moduleEditor == nullptr)
+    {
+        moduleEditor.reset(new KrumModuleEditor(*this, *moduleProcessor, editor));
+    }
+
+    setEditorVisibility(true);
+    return moduleEditor.get();
+}
+
+bool KrumModule::hasEditor()
+{
+    return moduleEditor != nullptr;
+}
+
+void KrumModule::setEditorVisibility(bool isVisible)
+{
+    if (moduleEditor)
+    {
+        moduleEditor->setVisible(isVisible);
+    }
+}
+
+
+KrumModuleEditor* KrumModule::getCurrentModuleEditor()
+{
+    return moduleEditor.get();
+}
+
+void KrumModule::deleteModuleEditor()
+{
+    moduleEditor->removeFromDisplay();
+    moduleEditor = nullptr;
+}
+
+int KrumModule::deleteEntireModule()
+{
+    clearModuleValueTree();
+    deleteModuleEditor();
+    moduleProcessor->sampler.removeModule(this);  
+    return 0;
+} 
