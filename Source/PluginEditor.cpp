@@ -38,8 +38,12 @@
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valueTree, juce::ValueTree& fileBrowserTree)
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(valueTree, fileBrowserTree, *audioProcessor.getFormatManager())
 {
-
-    auto titleImageFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\KrumSamplerTitle.png");
+    
+    //juce::String titleImageFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\KrumSamplerTitle.png";
+    auto seperatorString = juce::File::getSeparatorString();
+    juce::String titleImageFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"KrumSamplerTitle.png";
+    
+    auto titleImageFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory).getChildFile(titleImageFileString);
     //auto titleImageFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\KrumSamplerTitleAirborne.png");
     
 
@@ -77,8 +81,15 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
     addAndMakeVisible(fileBrowser);
 
-    juce::File collapseLeftImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\chevron_left_black_24dp.svg");
-    juce::File collapseRightImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\chevron_right_black_24dp.svg");
+    //juce::String imageFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\chevron_left_black_24dp.svg";
+    juce::String imageLeftFileString = "Code Projects/KrumSampler/Resources/chevron_left_black_24dp.svg";
+    
+    //juce::String imageRightFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\chevron_right_black_24dp.svg";
+    juce::String imageRightFileString = "Code Projects/KrumSampler/Resources/chevron_right_black_24dp.svg";
+    
+    juce::File collapseLeftImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageLeftFileString);
+    
+    juce::File collapseRightImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageRightFileString);
     
     auto collapseLeftIm = juce::Drawable::createFromSVGFile(collapseLeftImFile);
     auto collapseRightIm = juce::Drawable::createFromSVGFile(collapseRightImFile);

@@ -13,18 +13,19 @@
 #include "KrumModuleContainer.h"
 #include "KrumSampler.h"
 #include "PluginEditor.h"
-#include "KrumFileBrowser.cpp"
+//#include "KrumFileBrowser.cpp"
 
 //==============================================================================
 KrumFileDrop::KrumFileDrop(KrumSamplerAudioProcessorEditor& e, KrumModuleContainer& c, juce::AudioProcessorValueTreeState& a, KrumFileBrowser& browser)
     : editor(e), container(c), parameters(a), fileBrowser(browser)
 {
-    auto editor = container.getEditor();
+    //auto editor = container.getEditor();
     setTooltip("Drag and drop samples from anywhere");   
 }
 
 KrumFileDrop::~KrumFileDrop()
 {
+    
 }
 
 void KrumFileDrop::paint(juce::Graphics& g)
@@ -72,7 +73,7 @@ void KrumFileDrop::itemDropped(const juce::DragAndDropTarget::SourceDetails& dra
         if (krumItem != nullptr)
         {
             auto file = krumItem->getFile();
-            auto itemName = krumItem->getItemName();
+            auto itemName = krumItem->getItemName(); 
             if (!krumItem->mightContainSubItems())
             {
                 createNewModule(file, itemName);

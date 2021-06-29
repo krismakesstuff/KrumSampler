@@ -22,7 +22,7 @@ class KrumKeyboard  :   public juce::MidiKeyboardComponent
                         //public juce::SettableTooltipClient
 {
 public:
-    KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation or, KrumModuleContainer& container );
+    KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori, KrumModuleContainer& container );
     ~KrumKeyboard() override;
 
     //void paint (juce::Graphics&) override;

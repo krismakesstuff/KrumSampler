@@ -146,14 +146,17 @@ void ModuleSettingsOverlay::confirmMidi()
     }
     else if (!keepColorOnExit)
     {
-        color = *colorPalette.getRandomColor(colorPalette.getLastRandomColor());
+        //color = *colorPalette.getRandomColor(colorPalette.getLastRandomColor());
+        //color = *colorPalette.getRandomColor(nullptr);
+        color = colorPalette.getRandomColor();
         parentModule.setModuleColor(color, false);
     }
     
     
     parentModule.setMidiTriggerNote(midiNoteNum);
     parentModule.setMidiTriggerChannel(midiChanNum);
-    parentModule.setModuleName(titleBox.getText(true));
+    juce::String text = titleBox.getText(true);
+    parentModule.setModuleName(text);
     parentModule.removeSettingsOverlay();
 }
 
@@ -189,8 +192,9 @@ void ModuleSettingsOverlay::showButtons()
     int cancelButtonWidth = area.getWidth() / 2;
     int cancelButtonHeight = 30;
 
-    int midiTitleBoxWidth = area.reduced(10).getWidth();
-    int midiTitleBoxHeight = 100;
+    //unused
+    //int midiTitleBoxWidth = area.reduced(10).getWidth();
+    //int midiTitleBoxHeight = 100;
 
     
     /*midiTitleBox.setMultiLine(true, false);

@@ -13,11 +13,9 @@
 #include "KrumModuleContainer.h"
 #include "KrumModuleEditor.h"
 
-
-//TESTING GIT STUFF
 //==============================================================================
-KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation or , KrumModuleContainer& container)
-    : juce::MidiKeyboardComponent(midiState, or), moduleContainer(container)
+KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori , KrumModuleContainer& container)
+    : juce::MidiKeyboardComponent(midiState, ori), moduleContainer(container)
 {
     setScrollButtonsVisible(true);
     //midiState.addListener(this);
@@ -60,10 +58,13 @@ KrumKeyboard::~KrumKeyboard()
 
 bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
 {
-    juce::MessageManagerLock lock;
+    //juce::MessageManagerLock lock;
     if (isMidiNoteAssigned(midiNoteNumber))
     {
-        moduleContainer.getModuleFromMidiNote(midiNoteNumber)->setModulePlaying(true);
+        auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
+        mod->setModulePlaying(true);
+        //needs to trigger the sample
+        //mod->
     }
 
     return true;

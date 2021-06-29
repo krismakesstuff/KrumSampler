@@ -20,8 +20,7 @@ class DragHandle : public juce::DrawableButton
 public:
     DragHandle(KrumModule& owner, const juce::String& buttonName, juce::DrawableButton::ButtonStyle buttonStyle)
         : parentModule(owner), juce::DrawableButton(buttonName, buttonStyle)
-    {
-    }
+    {}
 
     ~DragHandle() override
     {}
@@ -58,7 +57,8 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumModuleProcessor& p, KrumSa
 
     if (parent.info.midiNote == 0 || parent.info.midiChannel == 0)
     {
-        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        //settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        settingsOverlay.setOwned(new ModuleSettingsOverlay(getLocalBounds(), parent));
         showSettingsOverlay();
     }
     else
@@ -212,8 +212,8 @@ void KrumModuleEditor::paintVolumeSliderLines(juce::Graphics& g, juce::Rectangle
 
 void KrumModuleEditor::paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds)
 {
-    int numLines = 11;
-    int spaceBetweenLines = bounds.getWidth() / numLines;
+    //int numLines = 11;
+    //int spaceBetweenLines = bounds.getWidth() / numLines;
 
 
     g.setColour(parent.info.moduleColor.withAlpha(0.5f));
@@ -258,8 +258,8 @@ void KrumModuleEditor::resized()
     int spacer = 5;
     int thumbnailH = 120;
 
-    int dragHandleH = 30;
-    int dragHandleW = area.getWidth() - spacer;
+    //int dragHandleH = 30;
+    //int dragHandleW = area.getWidth() - spacer;
 
     int panSliderH = 25;
     int panSliderW = area.getWidth();
@@ -268,8 +268,8 @@ void KrumModuleEditor::resized()
     int volumeSliderW = area.getWidth() / 2.5;
 
     int statusButtonH = 40;
-    int deleteButtonH = 30;
-    int comboBoxH = 40;
+    //int deleteButtonH = 30;
+    //int comboBoxH = 40;
 
     titleBox.setBounds(area.withBottom(titleHeight).reduced(spacer));
     thumbnailBG = area.withBottom(thumbnailH).withTop(titleBox.getBottom()).reduced(spacer);
@@ -306,11 +306,18 @@ void KrumModuleEditor::buildModule()
 {
 
     juce::String i = " " + juce::String(parent.info.index);
-
-    juce::File dragHandleFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\drag_handle-black-18dp.svg");
+    auto seperatorString = juce::File::getSeparatorString();
+    juce::File appDataFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);
+    
+    //juce::String dragHandleStringFile = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\drag_handle-black-18dp.svg";
+    
+    juce::String dragHandleStringFile = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"drag_handle-black-18dp.svg";
+    juce::File dragHandleFile = appDataFolder.getChildFile(dragHandleStringFile);
+    DBG("Drag Handle File Path: " + dragHandleFile.getFullPathName());
     auto dragHandelIm = juce::Drawable::createFromSVGFile(dragHandleFile);
 
-    dragHandle.reset(new DragHandle{ parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
+   // dragHandle.reset(new DragHandle{ parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
+    dragHandle.setOwned(new DragHandle{ parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
     dragHandle->setImages(dragHandelIm.get());
     addAndMakeVisible(dragHandle.get());
     dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");
@@ -322,7 +329,8 @@ void KrumModuleEditor::buildModule()
     titleBox.setJustificationType(juce::Justification::centred);
     titleBox.setEditable(false, true, false);
     titleBox.setTooltip("double-click to change name");
-    titleBox.onTextChange = [this] { parent.setModuleName(titleBox.getText()); };
+    
+    titleBox.onTextChange = [this] { updateName(); };
 
     thumbnail.setSource(new juce::FileInputSource(parent.info.audioFile));
 
@@ -353,17 +361,27 @@ void KrumModuleEditor::buildModule()
     panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + i, panSlider));
     moduleProcessor.modulePan = parent.parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + i);
 
-    addAndMakeVisible(playButton);
-    juce::File playButtonImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\play_arrow-black-18dp.svg");
+    //juce::String playButtonFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\play_arrow-black-18dp.svg";
+    
+    
+    
+    //juce::File playButtonImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(playButtonFileString);
+    juce::String playButtonFileString = "KrumSampler" + seperatorString + "Resources" + seperatorString + "play_arrow-black-18dp.svg";
+    juce::File playButtonImFile = appDataFolder.getChildFile(playButtonFileString);
     auto playButtonImage = juce::Drawable::createFromSVGFile(playButtonImFile);
-
+    //DBG("File Path: " + playButtonImFile.getFullPathName());
+    
+    addAndMakeVisible(playButton);
     playButton.setImages(playButtonImage.get());
     playButton.onClick = [this] { parent.triggerNoteOn(); };
     
+    //juce::String editButtonFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\settings-black-18dp.svg";
 
-    addAndMakeVisible(editButton);
-    juce::File editButtonImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\settings-black-18dp.svg");
+    juce::String editButtonFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"settings-black-18dp.svg";
+    juce::File editButtonImFile = appDataFolder.getChildFile(editButtonFileString);
     auto editButtonImage = juce::Drawable::createFromSVGFile(editButtonImFile);
+    
+    addAndMakeVisible(editButton);
     editButton.setImages(editButtonImage.get());
     editButton.onClick = [this] { showSettingsMenu(); };
     
@@ -443,7 +461,8 @@ void KrumModuleEditor::showSettingsMenu()
 
     if (result == KrumModule::moduleReConfig_Id)
     {
-        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        //settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        settingsOverlay.setOwned(new ModuleSettingsOverlay(getLocalBounds(), parent));
         settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
         settingsOverlay->keepCurrentColor(true);
         showSettingsOverlay(true);
@@ -479,7 +498,8 @@ void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
 void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 {
     editor.removeKeyboardListener(&parent);
-    settingsOverlay = nullptr;
+    //settingsOverlay = nullptr;
+    settingsOverlay.reset();
     cleanUpOverlay(keepSettings);
 }
 
@@ -497,6 +517,7 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
         }
         
         setModuleButtonsClickState(false);
+        grabKeyboardFocus();
     }
     else
     {
@@ -603,6 +624,12 @@ bool KrumModuleEditor::isModulePlaying()
     return parent.info.modulePlaying;
 }
 
+void KrumModuleEditor::updateName()
+{
+    juce::String name = titleBox.getText();
+    parent.setModuleName(name);
+}
+
 void KrumModuleEditor::reassignSliderAttachments()
 {
     juce::String i = " " + juce::String(parent.info.index);
@@ -675,7 +702,7 @@ bool KrumModuleEditor::doesEditorWantMidi()
 
 void KrumModuleEditor::handleMidi(int midiChannel, int midiNote)
 {
-    if(settingsOverlay != nullptr)
+    if (settingsOverlay != nullptr)
     {
         settingsOverlay->handleMidiInput(midiChannel, midiNote);
     }

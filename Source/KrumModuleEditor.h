@@ -14,15 +14,13 @@
 #include "ColorPalette.h"
 #include "KrumSlider.h"
 //==============================================================================
-/*
-*/
+
 
 class KrumModule;
 class KrumModuleProcessor;
 class KrumSamplerAudioProcessorEditor;
 class DragHandle;
 class ModuleSettingsOverlay;
-
 
 class KrumModuleEditor  : public juce::Component
 {
@@ -74,6 +72,8 @@ public:
     void setModulePlaying(bool isPlaying);
     bool isModulePlaying();
 
+    void updateName();
+    
     void reassignSliderAttachments();
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
 
@@ -121,13 +121,14 @@ private:
     juce::DrawableButton playButton{ "Play Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
     juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };;
     //put in settings menu
-    juce::DrawableButton deleteButton{ "Delete Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
+    //juce::DrawableButton deleteButton{ "Delete Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
 
     friend class ColorPalette;
     
-    std::unique_ptr<DragHandle> dragHandle = nullptr;
-    std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
-
+    //std::unique_ptr<DragHandle> dragHandle = nullptr;
+    //std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
+    juce::OptionalScopedPointer<DragHandle> dragHandle;
+    juce::OptionalScopedPointer<ModuleSettingsOverlay> settingsOverlay;
    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumModuleEditor)
 };

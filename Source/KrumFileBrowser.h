@@ -14,7 +14,7 @@
 
 class KrumTreeItem;
 class KrumTreeHeaderItem;
-//class KrumTreeView;
+class KrumTreeView;
 
 namespace FileBrowserValueTreeIds
 {
@@ -46,6 +46,190 @@ enum FileBrowserSortingIds
     alphanumeric_Id
 };
 
+
+//---------------------------------
+//---------------------------------
+
+class KrumTreeItem :    public juce::TreeViewItem,
+                        public juce::Component
+{
+public:
+    KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name = juce::String());
+   
+    bool mightContainSubItems() override;
+    
+    juce::Component* createItemComponent() override;
+    
+    void paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
+
+    void itemClicked(const juce::MouseEvent& e) override;
+    void itemDoubleClicked(const juce::MouseEvent& e) override;
+
+    void itemSelectionChanged(bool isNowSelected) override;
+    void closeLabelEditor(juce::Label* label);
+
+    juce::String getUniqueName() const override;
+    
+    juce::File& getFile();
+    juce::String getItemName();
+
+    void setItemName(juce::String newName);
+    bool isItemEditing();
+    void setItemEditing(bool isEditing);
+    void removeThisItem();
+
+    void tellParentToRemoveMe();
+    void setBGColor(juce::Colour newColor);
+    
+
+private:
+
+    juce::File file;
+    juce::String itemName;
+
+    bool editing = false;
+
+    //std::unique_ptr<juce::Label> editLabel = nullptr;
+    
+    juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
+    KrumTreeView* parentTree;
+    SimpleAudioPreviewer* previewer;
+
+    //============================================================================================================//
+
+    class EditableComp : public juce::Label
+    {
+    public:
+        EditableComp(KrumTreeItem& o, juce::String itemName, juce::Colour backColor = juce::Colour{});
+
+        void paint(juce::Graphics& g) override;
+
+        void textWasEdited() override;
+        void editorAboutToBeHidden(juce::TextEditor* editor) override;
+
+        void mouseDown(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
+        void mouseDoubleClick(const juce::MouseEvent& e) override;
+        
+
+    private:
+        KrumTreeItem& owner;
+        juce::Colour bgColor;
+
+        JUCE_LEAK_DETECTOR(EditableComp)
+
+    };
+
+    JUCE_LEAK_DETECTOR(KrumTreeItem)
+
+};
+
+//=================================================================================================================================//
+
+class KrumTreeHeaderItem :  public juce::TreeViewItem,
+                            public juce::Component
+{
+public:
+    KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name = juce::String(), int numFilesHidden = 0);
+
+    bool mightContainSubItems() override;
+
+    juce::Component* createItemComponent() override;
+
+    void paintOpenCloseButton(juce::Graphics&, const juce::Rectangle< float >& area, juce::Colour backgroundColour, bool isMouseOver) override;
+    void paintVerticalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
+    void paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
+
+    void itemClicked(const juce::MouseEvent& e) override;
+    void itemDoubleClicked(const juce::MouseEvent& e) override;
+
+    juce::File& getFile();
+    juce::String getItemHeaderName();
+    void setItemHeaderName(juce::String newName);
+
+    juce::String getUniqueName() const override;
+
+    void setBGColor(juce::Colour newColor);
+    
+    /*void tellParentIfEditing(bool isEditing)
+    {
+        parentTree->setItemEditing(getItemIdentifierString(), isEditing);
+    }*/
+    
+    bool isItemEditing(bool checkChildren);
+    
+    void setItemEditing(bool isEditing);
+
+    void setEditable(bool isEditable);
+
+    bool isEditable();
+    void removeThisHeaderItem();
+
+    void tellParentToRemoveMe();
+
+    void clearAllChildren();
+
+    void setNumFilesExcluded(int numFilesHidden);
+
+    int getNumFilesExcluded();
+
+private:
+
+    KrumTreeView* parentTree;
+
+    juce::File file;
+    juce::String headerName;
+
+    //juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
+    juce::Colour bgColor{ juce::Colours::darkgrey.darker(0.6f) };
+
+    bool editable = true;
+    bool editing = false;
+    int numFilesExcluded;
+
+//=================================================================================================================================//
+    
+    class EditableHeaderComp : public juce::Label
+    {
+    public:
+        EditableHeaderComp(KrumTreeHeaderItem& o, juce::String itemName, juce::Colour backColor = juce::Colour{});
+        void paint(juce::Graphics& g) override;
+
+        void textWasEdited() override;
+
+        void editorAboutToBeHidden(juce::TextEditor* editor) override;
+        void mouseDown(const juce::MouseEvent& e) override;
+
+        void mouseDoubleClick(const juce::MouseEvent& e) override;
+
+
+    private:
+        KrumTreeHeaderItem& owner;
+        juce::Colour bgColor;
+
+        JUCE_LEAK_DETECTOR(EditableHeaderComp)
+    };
+    
+    JUCE_LEAK_DETECTOR(KrumTreeHeaderItem)
+};
+
+//just so the connecting lines will draw to the bottom
+class DummyTreeItem : public juce::TreeViewItem
+{
+public:
+    DummyTreeItem()
+    {}
+
+    bool mightContainSubItems() override
+    {
+        return false;
+    }
+
+    JUCE_LEAK_DETECTOR(DummyTreeItem)
+};
+
+//---------------------------------
+//---------------------------------
 class FileBrowserSorter
 {
 public:
@@ -74,6 +258,8 @@ public:
 
             return 0;
         }
+        
+        return 0;
     }
 
     FileBrowserSortingIds sortingId;
@@ -147,7 +333,7 @@ public:
 
     void updateValueTree(juce::String idString);
     void removeValueTreeItem(juce::String fullPathName, FileBrowserSectionIds browserSection);
-    juce::ValueTree& findTreeItem(juce::ValueTree& parentTree, juce::String fullPathName);
+    juce::ValueTree findTreeItem(juce::ValueTree parentTree, juce::String fullPathName);
     void updateOpenness();
 
     void clearRecent();

@@ -62,20 +62,28 @@ public:
     {
         juce::Random random;
         int randIt = random.nextInt(juce::Range<int>(0, ColorPaletteColors::colorArray.size() - 1));
-        auto randColor = &ColorPaletteColors::colorArray[randIt];
+        auto randColor = ColorPaletteColors::colorArray[randIt];
 
-        if (randColor != lastRandom)
-        {
-            lastRandom = randColor;
-        }
-        else //avoids duplicates in succession
-        {
-            lastRandom = randIt == ColorPaletteColors::colorArray.size() - 1 ? &ColorPaletteColors::colorArray[0] : ++randColor;
-        }
-
+//        if (randColor != *lastRandom)
+//        {
+//            *lastRandom = randColor;
+//        }
+//        else //avoids duplicates in succession
+//        {
+//            *lastRandom = randIt == ColorPaletteColors::colorArray.size() - 1 ?     ColorPaletteColors::colorArray[0] :                                                                                                        ColorPaletteColors::colorArray[++randIt];
+//        }
+        *lastRandom = randColor;
+        
         return lastRandom;
     }
 
+    static juce::Colour getRandomColor()
+    {
+        juce::Random random;
+        int randIt = random.nextInt(juce::Range<int>(0, ColorPaletteColors::colorArray.size() - 1));
+        return ColorPaletteColors::colorArray[randIt];
+      
+    }
 private:
 
     //friend class KrumModuleEditor::ModuleSetupOverlay;

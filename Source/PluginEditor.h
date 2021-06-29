@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+
+
 #include "KrumModule.h"
 #include "KrumKeyboard.h"
 #include "KrumLookAndFeel.h"
@@ -190,12 +192,14 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(IncomingMessageCallback)
     };
   
-    static const juce::Font& getWackyFont()
-    {
-        static juce::Font wacky(juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::MONOGLYCERIDE_TTF,
-                                                                                    BinaryData::MONOGLYCERIDE_TTFSize)));
-        return wacky;
-    }
+    //Not Using this font anymore
+    
+//    static const juce::Font& getWackyFont()
+//    {
+//        static juce::Font wacky(juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::MONOGLYCERIDE_TTF,
+//                                                                    BinaryData::MONOGLYCERIDE_TTFSize)));
+//        return wacky;
+//    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessorEditor)
 };

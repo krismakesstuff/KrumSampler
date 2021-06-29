@@ -42,12 +42,13 @@ namespace TreeIDs
 static float panRangeTo0to1(juce::String text)
 {
     juce::NormalisableRange<float>range{ -100.0f, 100.0f, 0.01f };
-    if (text[0] == (wchar_t)"<")
+    //if (text[0] == (wchar_t)"<")
+    if(text.startsWithChar('<'))
     {
         text.removeCharacters("< ");
     }
 
-    if (text.endsWithChar((wchar_t)">"))
+    if (text.endsWithChar('>'))
     {
         text.dropLastCharacters(2);
     }
