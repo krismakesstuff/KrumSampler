@@ -63,8 +63,7 @@ bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
     {
         auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
         mod->setModulePlaying(true);
-        //needs to trigger the sample
-        //mod->
+        mod->triggerNoteOnInParent();
     }
 
     return true;
@@ -74,7 +73,9 @@ void KrumKeyboard::mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e)
 {
     if (isMidiNoteAssigned(midiNoteNumber))
     {
-        moduleContainer.getModuleFromMidiNote(midiNoteNumber)->setModulePlaying(false);
+        auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
+        mod->setModulePlaying(false);
+        mod->triggerNoteOffInParent();
     }
 }
 

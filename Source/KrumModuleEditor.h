@@ -86,6 +86,10 @@ public:
     void handleMidi(int midiChannel, int midiNote);
     
     void removeFromDisplay();
+
+    void triggerNoteOnInParent();
+    void triggerNoteOffInParent();
+
 private:
 
     //friend class KrumModuleProcessor;

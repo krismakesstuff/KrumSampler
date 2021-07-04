@@ -308,7 +308,7 @@ void KrumModuleEditor::buildModule()
     juce::String i = " " + juce::String(parent.info.index);
     auto seperatorString = juce::File::getSeparatorString();
     juce::File appDataFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);
-    
+    DBG("App Data Folder: " + appDataFolder.getFullPathName());
     //juce::String dragHandleStringFile = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\drag_handle-black-18dp.svg";
     
     juce::String dragHandleStringFile = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"drag_handle-black-18dp.svg";
@@ -373,7 +373,7 @@ void KrumModuleEditor::buildModule()
     
     addAndMakeVisible(playButton);
     playButton.setImages(playButtonImage.get());
-    playButton.onClick = [this] { parent.triggerNoteOn(); };
+    playButton.onClick = [this] { triggerNoteOnInParent(); };
     
     //juce::String editButtonFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\settings-black-18dp.svg";
 
@@ -714,4 +714,14 @@ void KrumModuleEditor::removeFromDisplay()
     editor.removeKeyboardListener(&parent);
     editor.keyboard.removeMidiNoteColorAssignment(parent.info.midiNote);
     editor.getModuleContainer().removeModuleEditor(this);
+}
+
+void KrumModuleEditor::triggerNoteOnInParent()
+{
+    parent.triggerNoteOn();
+}
+
+void KrumModuleEditor::triggerNoteOffInParent()
+{
+    parent.triggerNoteOff();
 }
