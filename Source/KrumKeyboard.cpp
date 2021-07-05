@@ -18,9 +18,6 @@ KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboar
     : juce::MidiKeyboardComponent(midiState, ori), moduleContainer(container)
 {
     setScrollButtonsVisible(true);
-    //midiState.addListener(this);
-  //  setTooltip("Hover over a note to see it's assigned sample");
-
     auto displayOrder = moduleContainer.getModuleDisplayOrder();
 
     for (int i = 0; i < displayOrder.size(); i++)
@@ -31,7 +28,6 @@ KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboar
             assignMidiNoteColor(modEd->getModuleIndex(), modEd->getModuleColor());
         }
     }
-
 }
 
 KrumKeyboard::~KrumKeyboard()
@@ -39,26 +35,8 @@ KrumKeyboard::~KrumKeyboard()
 }
 
 
-//juce::String KrumKeyboard::getTooltip()
-//{
-//    auto comp = getComponentAt(getMouseXYRelative());
-//
-//    return juce::String();
-//}
-
-//void KrumKeyboard::timerCallback()
-//{
-//}
-//
-//void KrumKeyboard::mouseEnter(const juce::MouseEvent& e)
-//{
-//    startTimer
-//
-//}
-
 bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
 {
-    //juce::MessageManagerLock lock;
     if (isMidiNoteAssigned(midiNoteNumber))
     {
         auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
@@ -211,47 +189,4 @@ void KrumKeyboard::setKeyDown(int midiNote, bool isKeyDown)
 {
     juce::MessageManagerLock lock;
     repaint();
-    
-
-    //static const juce::uint8 whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
-    //static const juce::uint8 blackNotes[] = { 1, 3, 6, 8, 10 };
-    //int rangeStart = 0, rangeEnd = 127;
-    //
-    //for (int octave = 0; octave < 128; octave += 12)
-    //{
-    //    for (int white = 0; white < 7; ++white)
-    //    {
-    //        //auto noteNum = octave + whiteNotes[white];
-    //        auto noteNum = octave + whiteNotes[white];
-
-    //        //if (noteNum >= rangeStart && noteNum <= rangeEnd)
-    //        if (noteNum == midiNote)
-    //        {
-    //            repaint();
-    //            //drawWhiteNote(noteNum, g, getRectangleForKey(noteNum), isKeyDown, false, juce::Colour{}, juce::Colour{});
-    //        }
-
-    //    }
-    //}
-
-
-
-    //for (int octave = 0; octave < 128; octave += 12)
-    //{
-    //    for (int black = 0; black < 5; ++black)
-    //    {
-    //        auto noteNum = octave + blackNotes[black];
-
-    //        //if (noteNum >= rangeStart && noteNum <= rangeEnd)
-    //        if (noteNum == midiNote)
-    //        {
-    //            
-    //            drawBlackNote(noteNum, g, getRectangleForKey(noteNum), isKeyDown, false, juce::Colour{});
-    //        }
-
-    //    }
-    //}
-
-    //
-
 }

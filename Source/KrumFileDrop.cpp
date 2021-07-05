@@ -19,7 +19,6 @@
 KrumFileDrop::KrumFileDrop(KrumSamplerAudioProcessorEditor& e, KrumModuleContainer& c, juce::AudioProcessorValueTreeState& a, KrumFileBrowser& browser)
     : editor(e), container(c), parameters(a), fileBrowser(browser)
 {
-    //auto editor = container.getEditor();
     setTooltip("Drag and drop samples from anywhere");   
 }
 
@@ -32,7 +31,6 @@ void KrumFileDrop::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
     
-    //Have this be a plus sign? Make tooltips to display options
     juce::Colour bgColor = isMouseOver() ? mouseOverColor : defBGColor;
 
 
@@ -64,7 +62,6 @@ bool KrumFileDrop::isInterestedInDragSource(const juce::DragAndDropTarget::Sourc
 //Drag and Drop Target
 void KrumFileDrop::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
 {
-   
     //doesn't accept folders!!
     
     for (int i = 0; i < fileBrowser.getNumSelectedItems(); i++)
@@ -92,8 +89,6 @@ void KrumFileDrop::itemDropped(const juce::DragAndDropTarget::SourceDetails& dra
         }
 
     }
-
-
     DBG("Dropped: " + dragSourceDetails.sourceComponent.get()->getName());
 
 }

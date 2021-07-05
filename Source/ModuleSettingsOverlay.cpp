@@ -16,8 +16,6 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModu
     : parentModule(parent), colorPalette(area.withTop(225), *this)
 {
     setSize(area.getWidth(), area.getHeight());
-    //parentModule.setInterceptsMouseClicks(false, true);
-   // setInterceptsMouseClicks(false, true);
     setRepaintsOnMouseActivity(true);
 
     addAndMakeVisible(titleBox);
@@ -27,7 +25,6 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModu
     titleBox.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
     titleBox.setJustificationType(juce::Justification::centred);
     titleBox.setEditable(false, true, false);
-
 
     addAndMakeVisible(midiNoteNumberLabel);
     midiNoteNumberLabel.setFont({ 50.0f });
@@ -192,18 +189,6 @@ void ModuleSettingsOverlay::showButtons()
     int cancelButtonWidth = area.getWidth() / 2;
     int cancelButtonHeight = 30;
 
-    //unused
-    //int midiTitleBoxWidth = area.reduced(10).getWidth();
-    //int midiTitleBoxHeight = 100;
-
-    
-    /*midiTitleBox.setMultiLine(true, false);
-    midiTitleBox.setEdi
-    midiTitleBox.setText("Midi Note: " + midiNoteString + juce::newLine +
-                         "Midi Channel: " + midiChanString);
-    midiTitleBox.setBounds(area.getCentreX() - midiTitleBoxWidth /2, area.getHeight() / 3, midiTitleBoxWidth, midiTitleBoxHeight);
-    midiTitleBox.setColour(juce::TextEditor::ColourIds::outlineColourId, getSelectedColor());*/
-
     cancelButton.setButtonText("Cancel");
     cancelButton.setBounds(area.getCentreX() - cancelButtonWidth / 2, area.getBottom() - cancelButtonHeight * 2 - 50, cancelButtonWidth, cancelButtonHeight);
     cancelButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
@@ -232,7 +217,6 @@ void ModuleSettingsOverlay::hideButtons()
     removeChildComponent(&colorPalette);
     removeChildComponent(&deleteButton);
     removeChildComponent(&cancelButton);
-    //removeChildComponent(&midiTitleBox);
 }
 
 juce::Colour ModuleSettingsOverlay::getSelectedColor()
@@ -280,7 +264,7 @@ void ModuleSettingsOverlay::setMidiLabels()
 
 bool ModuleSettingsOverlay::hasMidi()
 {
-    return midiNoteNum != 0;
+    return midiNoteNum > 0;
 }
 
 void ModuleSettingsOverlay::keepCurrentColor(bool keepColor)

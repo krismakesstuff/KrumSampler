@@ -11,7 +11,6 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-
 #include "KrumModule.h"
 #include "KrumKeyboard.h"
 #include "KrumLookAndFeel.h"
@@ -20,10 +19,12 @@
 #include "KrumFileBrowser.h"
 
 //==============================================================================
-/**
+/*
+* 
+* A JUCE generated class that represents the GUI. This is created and owned by the host app. 
+* This holds all of the Krum GUI elements.
+* 
 */
-
-//static struct EditorDimensions
 
 namespace EditorDimensions
 {
@@ -54,13 +55,6 @@ namespace EditorDimensions
     static float smallOutline = 1.0f;
     static float bigOutline = 2.0f;
 
-    //EditorDimensions() {}
-
-    //EditorDimensions(juce::Rectangle<int> area)
-    //{
-    //    //set these with the proper ratios. (calculate from current static size of app)
-
-    //}
     static int extraShrinkage(int extraMultplier = 2)
     {
         return shrinkage * extraMultplier;
@@ -106,10 +100,6 @@ public:
     void addKeyboardListener(juce::MidiKeyboardStateListener* listener);
     void removeKeyboardListener(juce::MidiKeyboardStateListener* listenerToRemove);
 
-    void postMessageToList(const juce::MidiMessage& message, const juce::String& source);
-    void addMessageToList(const juce::MidiMessage& message, const juce::String& source);
-    void setTextBox(juce::String);
-
     void cleanUpEmptyModuleTrees();
 
     juce::AudioFormatManager* getAudioFormatManager();
@@ -118,10 +108,7 @@ public:
     juce::AudioProcessorValueTreeState* getParameters();
     KrumFileBrowser* getFileBrowser();
 
-
-
     juce::SharedResourcePointer<juce::TooltipWindow> toolTipWindow;
-
 
 private:
 
@@ -133,8 +120,6 @@ private:
     KrumLookAndFeel kLaf{};
 
     juce::CriticalSection lock;
-
-    //int midiNoteNumber = 60;
     juce::Image titleImage;
 
     juce::DrawableButton collapseBrowserButton {"Collapse", juce::DrawableButton::ButtonStyle::ImageStretched};
@@ -171,28 +156,7 @@ private:
     KrumFileBrowser fileBrowser;
     KrumFileDrop fileDrop{ *this, moduleContainer, parameters, fileBrowser };
 
-
-    class IncomingMessageCallback : public juce::CallbackMessage
-    {
-    public:
-        IncomingMessageCallback(KrumSamplerAudioProcessorEditor* o, const juce::MidiMessage& m, const juce::String& s)
-            : owner(o), message(m), source(s)
-        {}
-
-        void messageCallback() override
-        {
-            if (owner != nullptr)
-                owner->addMessageToList(message, source);
-        }
-
-        KrumSamplerAudioProcessorEditor* owner;
-        juce::MidiMessage message;
-        juce::String source;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(IncomingMessageCallback)
-    };
-  
-    //Not Using this font anymore
+    //Not Using this font anymore, keeping this here incase I want to add a custom font later
     
 //    static const juce::Font& getWackyFont()
 //    {

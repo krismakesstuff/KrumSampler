@@ -22,6 +22,10 @@ class KrumTreeItem;
 class KrumFileBrowser;
 //==============================================================================
 /*
+* 
+* A File drop component. This can accept files from outside of the app as well as from the in app file browser. 
+* If valid files are dropped on it will automatically make a new module with that audio file. If there are multiple, it will make a new module for each file. 
+* 
 */
 class KrumFileDrop  :   public juce::Component,
                         public juce::DragAndDropTarget,
@@ -34,8 +38,6 @@ public:
     ~KrumFileDrop() override;
 
     void paint (juce::Graphics&) override;
-   // void resized() override;
-   // void mouseDown(const juce::MouseEvent& e) override;
     
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
@@ -47,13 +49,11 @@ public:
 
 private:
 
-    //friend class PluginEditor;
     friend class KrumModuleContainer;
 
     KrumSamplerAudioProcessorEditor& editor;
     juce::AudioProcessorValueTreeState& parameters;
     KrumFileBrowser& fileBrowser;
-    //KrumSamplerAudioProcessorEditor* editor;
     KrumModuleContainer& container;
     juce::StringArray droppedFiles;
 

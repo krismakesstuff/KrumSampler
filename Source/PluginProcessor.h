@@ -10,10 +10,18 @@
 
 #include <JuceHeader.h>
 #include "KrumSampler.h"
-#include "MidiState.h"
 
 //==============================================================================
-/**
+/*
+* 
+* A JUCE generated class that represents the audio engine of the app. This will handle all audio and midi calls to and from the DAW, as well as state changes on startup and exit. 
+* 
+* In PluginProcessoer.cpp, there function defined to create the AudioProcessorValueTreeState. This is defined by JUCE, and is reffered to as "APVTS". 
+* 
+* There is really only one large ValueTree that holds the state and settings of the app. That Tree then has other trees for specific sections of the app. 
+* When loading and saving the ValueTree, it peels the children trees on and off in their respective contexts. see getStateInformation() and setStateInformation() for implementation. 
+* 
+* 
 */
 
 namespace TreeIDs 
@@ -76,8 +84,6 @@ static juce::String panRangeFrom0To1(float value)
 }
 
 
-//class KrumSamplerAudioProcessorEditor;
-
 class KrumSamplerAudioProcessor  :  public juce::AudioProcessor/*,
                                     public juce::Thread*/
 {
@@ -99,10 +105,6 @@ public:
     void processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents);
     void addMidiKeyboardListener(juce::MidiKeyboardStateListener*);
     void removeMidiKeyboardListener(juce::MidiKeyboardStateListener*);
-
-
-    bool getPostMessage();
-    void setPostMessage(bool messageState);
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
@@ -140,11 +142,6 @@ public:
     {
         return sampler.getNumModules();
     }
-    //juce::AudioProcessorValueTreeState getParameterTree();
-    /*void addModuleGroupToTree(KrumModule& mod, int index);
-    void removeModuleGroupFromTree(juce::String name, int index);*/
-    
-    
 
 private:
 
@@ -155,13 +152,10 @@ private:
     juce::ValueTree fileBrowserValueTree{ "FileBrowserTree" }; 
 
     std::atomic<float>* outputGainParameter = nullptr;
-    //MidiState midiState;
     juce::MidiKeyboardState midiState;
 
     juce::AudioFormatManager formatManager;
     KrumSampler sampler{ formatManager, *this };
-    
-    //KrumModuleContainer* moduleContainer = nullptr;
 
 
     //==============================================================================

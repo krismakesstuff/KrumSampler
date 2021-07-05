@@ -14,6 +14,9 @@
 
 //==============================================================================
 /*
+* 
+* A class to hold and manage KrumModuleEditors. It holds the module-editors and not the actual modules. It defines the viewport in which they are seen. 
+* 
 */
 
 class KrumModuleEditor;
@@ -50,7 +53,7 @@ public:
 
     void addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd);
 
-    //Most likely you want to call removeModuleEditor() first, it will call this function
+    
     void removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove);
     KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
 
@@ -63,7 +66,8 @@ public:
 private:
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
-    //juce::Array<int> moduleDisplayOrder{};
+ 
+    //could probably use a linked list here..
     juce::Array<KrumModuleEditor*> moduleDisplayOrder{};
 
     bool moduleDragging = false;

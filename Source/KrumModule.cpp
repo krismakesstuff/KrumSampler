@@ -24,6 +24,7 @@ KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, Kru
     info.audioFile = file;
     info.name = moduleName;
     info.moduleActive = true;
+
     //for now..
     info.displayIndex = info.index;
 
@@ -52,10 +53,9 @@ KrumModule::~KrumModule()
     
 }
 
-//use this only to capture midi assignments, to turn module "playing" on or off use the sampler... (for now).
+//use this only to capture midi assignments, does not trigger any sound
 void KrumModule::handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
 {
-
     if (moduleEditor == nullptr)
     {
         source->removeListener(this);
@@ -66,24 +66,11 @@ void KrumModule::handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNu
         moduleEditor->handleMidi(midiChannelNumber, midiNoteNumber);
         return;
     }
-    //else 
-    //{
-    //    setModulePlaying(source->isNoteOn(info.midiChannel, info.midiNote));
-    //}
-    //
+   
 }
 void KrumModule::handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
 {
-    //
-    //if (moduleEditor == nullptr)
-    //{
-    //    return;
-    //}
-    //else if (midiChannelNumber == info.midiChannel && midiNoteNumber == info.midiNote)
-    //{
-    //    setModulePlaying(false);
-    //}
-
+    //nothing to do with note off messages in this context. It is a virtual function from inheriting from juce::MidiKeyboardStateListener, making it manditory. 
 }
 
 
@@ -156,9 +143,7 @@ bool KrumModule::isModulePlaying()
 
 void KrumModule::setModulePlaying(const bool isPlaying)
 {
-    //info.modulePlaying.store(isPlaying, std::memory_order::memory_order_relaxed);
     info.modulePlaying = isPlaying;
-    //info.modulePlaying.isL
     if (moduleEditor != nullptr)
     {
         juce::MessageManagerLock lock;
@@ -212,7 +197,6 @@ void KrumModule::setModuleColor(juce::Colour newModuleColor, bool refreshChildre
 
     if (moduleEditor != nullptr && refreshChildren)
     {
-        //moduleEditor->buildModule();
         moduleEditor->setKeyboardColor();
     }
 }
@@ -249,7 +233,7 @@ std::atomic<float>* KrumModule::getModulePan()
     return moduleProcessor->modulePan;
 }
 
-
+//loads the ModuleInfo with the values passed in from the ValueTree 
 void KrumModule::getValuesFromTree()
 {
     if (valueTree != nullptr)
@@ -294,12 +278,10 @@ void KrumModule::getValuesFromTree()
                 info.displayIndex = int(val);
             }
         }
-
-
     }
 }
 
-
+//uses the ModuleInfo struct to update the ValueTree
 void KrumModule::updateValuesInTree(bool printBefore)
 {
     if (valueTree != nullptr)
@@ -409,7 +391,7 @@ void KrumModule::clearModuleValueTree()
         }
     }
 }
-
+//this is needed when deleting modules and needing to reassign the slider listeners in the ValueTree
 void KrumModule::reassignSliders()
 {
     if (moduleEditor != nullptr)
@@ -442,7 +424,6 @@ void KrumModule::setEditorVisibility(bool isVisible)
     }
 }
 
-
 KrumModuleEditor* KrumModule::getCurrentModuleEditor()
 {
     return moduleEditor.get();
@@ -453,7 +434,7 @@ void KrumModule::deleteModuleEditor()
     moduleEditor->removeFromDisplay();
     moduleEditor = nullptr;
 }
-
+//returns an int for possible error codes, non exist at the moment
 int KrumModule::deleteEntireModule()
 {
     clearModuleValueTree();

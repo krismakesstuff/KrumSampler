@@ -14,6 +14,11 @@
 
 class KrumModule;
 
+/*
+* This class represents the overlay that lives on top of the modules. Midi and color can be changed from this overlay and is shown by default when a module is created. 
+* You can also access it from the settings menu on the module. 
+*/
+
 class ModuleSettingsOverlay : public juce::Component
 {
 public:

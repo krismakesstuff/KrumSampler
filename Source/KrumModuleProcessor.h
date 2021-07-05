@@ -12,24 +12,26 @@
 #include <JuceHeader.h>
 
 
-//class KrumModuleEditor;
+/*
+* 
+* The audio engine of KrumModule. This class interfaces with the sampler class for trigger notes and is Owned by the KrumModule parent.
+* 
+*/
+
+
 class KrumSampler;
 class KrumModule;
 
 class KrumModuleProcessor : public juce::Timer
 {
 public:
-    KrumModuleProcessor(KrumModule& p, KrumSampler& s/*, juce::File& audioFile*/);
-    //KrumModuleProcessor(KrumModule& p, KrumSampler& s);
+    KrumModuleProcessor(KrumModule& p, KrumSampler& s);
     
     void timerCallback() override;
-    
-
     
     void triggerNoteOn();
     void triggerNoteOff();
     
-
 private:
 
     friend class KrumModuleEditor;
@@ -38,7 +40,6 @@ private:
     KrumModule& parent;
     KrumSampler& sampler;
 
-    //juce::File audioFile;
     std::atomic<float>* moduleGain = nullptr;
     std::atomic<float>* modulePan = nullptr;
 

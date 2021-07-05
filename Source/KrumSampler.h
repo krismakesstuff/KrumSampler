@@ -12,6 +12,19 @@
 #include <JuceHeader.h>
 #include "KrumModule.h"
 
+/*
+* 
+* The Sampler is comprised of three classes: juce::SamplerSound, juce::SamplerVoice and juce::Synthesizer.
+* 
+* The KrumSound(juce::SamplerSound) is responsible for holding the audio file that is to be played back.
+* The KrumVoice(juce::SamplerVoice) is responsible for rendering the audio from the SamplerSound into the audio buffer. 
+* The KrumSampler(juce::Synthesizer) handles the incoming midi and triggers the rendering of the KrumVoice.
+* 
+* TODO:
+* - Come up with a voice stealing scheme. We want files to continue to play even if the same note is triggered again. So the sound overlap and don't create sudden endings and potentially a click
+* 
+*/
+
 class KrumSound : public juce::SamplerSound
 {
 public:
@@ -28,11 +41,6 @@ public:
     std::atomic<float>* getModulePan()const;
 
     void setModulePlaying(bool playing);
-
-    //int getMidiRootNote();
-    //double getSourceSampleRate();
-    //juce::ADSR::Parameters getADSRParams();
-    //juce::AudioBuffer<float>& getAudioData();
 
 private:
     friend class KrumVoice;
@@ -57,7 +65,7 @@ private:
 class KrumVoice : public juce::SamplerVoice
 {
 public:
-    KrumVoice(/*KrumModule* attachedModule*/);
+    KrumVoice();
     ~KrumVoice() override;
 
     bool canPlaySound(juce::SynthesiserSound* sound) override;
@@ -98,10 +106,7 @@ public:
                                             int midiNoteNumber,
                                             bool stealIfNoneAvailable) const override;
 
-    //juce::SynthesiserVoice* quickAddVoice(KrumVoice* newVoice);
-                                            
-    //void renderVoices(juce::AudioBuffer<float>& buffer, int startSample, int numSamples) override;
-
+    
     KrumModule* getModule(int index);
     void addModule(KrumModule* newModule, bool addVoice = false);
     void removeModule(KrumModule* moduleToDelete);
@@ -110,8 +115,6 @@ public:
     void clearModules();
 
     int getNumModules();
-
-    //void setModulePlaying(juce::String moduleName, bool isPlaying);
 
     juce::AudioFormatManager& getFormatManager();
 
@@ -125,9 +128,10 @@ private:
     double releaseTime = 0.01;
     double maxFileLengthInSeconds = 5;
 
-    juce::OwnedArray<KrumModule> modules;
     juce::AudioFormatManager& formatManager;
     KrumSamplerAudioProcessor& owner;
+
+    juce::OwnedArray<KrumModule> modules;
 
     JUCE_LEAK_DETECTOR(KrumSampler)
 

@@ -11,6 +11,13 @@
 #pragma once
 #include <JuceHeader.h>
 
+/*
+* 
+* Handles the drawing of many objects as defined by JUCE.
+* 
+*/
+
+
 class KrumLookAndFeel : public juce::LookAndFeel_V4
 {
 public:

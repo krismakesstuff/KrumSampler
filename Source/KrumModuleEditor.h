@@ -15,6 +15,19 @@
 #include "KrumSlider.h"
 //==============================================================================
 
+/*
+* 
+* The GUI side of a Module. 
+* 
+* To construct one, you must have a parent (KrumModule) and it's processor, as well as a reference to the PluginEditor (KrumSmpalerAudioProcessorEditor)
+* 
+* This class handles all GUI interaction and painting. 
+* The GUI can enter a ModuleSettingsOverlay state which allows the user to changed the midi assignment as well as change the color of the module (more settings to come maybe).
+* 
+* 
+*/
+
+
 
 class KrumModule;
 class KrumModuleProcessor;
@@ -92,15 +105,12 @@ public:
 
 private:
 
-    //friend class KrumModuleProcessor;
-
     KrumModule& parent;
     KrumModuleProcessor& moduleProcessor;
     KrumSamplerAudioProcessorEditor& editor;
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
-    //juce::Colour fontColor{ juce::Colours::lightgrey };
     juce::Colour fontColor{ juce::Colours::white.darker() };
     
     juce::Label titleBox;
@@ -112,25 +122,18 @@ private:
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
     juce::Slider volumeSlider, panSlider;
-    //KrumSlider volumeSlider{juce::Slider::SliderStyle::LinearVertical};
-    //KrumSlider panSlider{ juce::Slider::SliderStyle::LinearHorizontal };
 
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
 
     float buttonClickVelocity = 15.0f;
 
-    //COME BACK
-    //Make these image buttons!!
     juce::DrawableButton playButton{ "Play Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
     juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };;
-    //put in settings menu
-    //juce::DrawableButton deleteButton{ "Delete Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
+
 
     friend class ColorPalette;
     
-    //std::unique_ptr<DragHandle> dragHandle = nullptr;
-    //std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
     juce::OptionalScopedPointer<DragHandle> dragHandle;
     juce::OptionalScopedPointer<ModuleSettingsOverlay> settingsOverlay;
    

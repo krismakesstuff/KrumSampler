@@ -62,24 +62,14 @@ void KrumSound::setModulePlaying(bool isPlaying)
 }
 
 
-//KrumModule* KrumSound::getParentModule()
-//{
-//    return parentModule;
-//}
-
-
 //==================================================================================================//
 
-KrumVoice::KrumVoice(/*KrumModule* attachedModule*/)
-   // : parentModule(attachedModule)
+KrumVoice::KrumVoice()
 {
 }
 
 KrumVoice::~KrumVoice()
 {}
-
-
-
 
 bool KrumVoice::canPlaySound(juce::SynthesiserSound* sound)
 {
@@ -88,13 +78,6 @@ bool KrumVoice::canPlaySound(juce::SynthesiserSound* sound)
         return true;
     }
 
-    //if (auto krumSound = dynamic_cast<const KrumSound*>(sound))
-    //{
-    //    //doesn't account for different midi channels
-    //    return parentModule->getMidiTriggerNote() == krumSound->midiRootNote;
-    //}
-    //
-    //return false;
 }
 
 bool KrumVoice::isVoiceActive() const
@@ -162,7 +145,6 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 {
     if (auto* playingSound = static_cast</*juce::Sampler*/KrumSound*> (getCurrentlyPlayingSound().get()))
     {
-        //auto& data = *playingSound->data;
         auto& data = *playingSound->getAudioData();
         const float* const inL = data.getReadPointer(0);
         const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer(1) : nullptr;
@@ -182,6 +164,7 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 
             auto envelopeValue = adsr.getNextSample();
 
+            //lgain and rgain are set by our volume and panning sliders in KrumVoice::startNote()
             l *= lgain * envelopeValue;
             r *= rgain * envelopeValue;
 
@@ -197,8 +180,7 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 
             //sourceSamplePosition += pitchRatio;
 
-            //if (sourceSamplePosition > playingSound->length)
-            if (++sourceSamplePosition > /*data.getNumSamples()*/playingSound->length)
+            if (++sourceSamplePosition > playingSound->length)
             {
                 stopNote(0.0f, false);
                 break;
@@ -223,8 +205,6 @@ KrumSampler::~KrumSampler()
 }
 
 
-//May need to revisit this approach of telling the module it is playing. This is a GUI action and probably should NOT be in the audio processing.
-//It works for now but might be an issue in larger configs(?). 
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 
 {
     for (auto sound : sounds)
@@ -237,28 +217,6 @@ void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const 
             auto voice = findFreeVoice(sound, midiChannel, midiNoteNumber, true);
             startVoice(voice, sound, midiChannel, midiNoteNumber, velocity);
             
-            /*auto krumVoice = static_cast<KrumVoice*>(voice);
-            if (krumVoice->getParentModule()->hasEditor())
-            {
-                krumVoice->getParentModule()->setModulePlaying(true);
-            }*/
-           // auto voice = findFreeVoice(sound, midiChannel, midiNoteNumber, false);
-            /*if (auto krumVoice = static_cast<KrumVoice*>(voice))
-            {
-                DBG("Voice Name: " + krumVoice->getParentModule()->getModuleName());
-            }
-            else
-            {
-                DBG("KrumVoice NULL");
-            }*/
-
-            //startVoice(voice, sound, midiChannel, midiNoteNumber, velocity);
-
-            //getVoice(0)
-            /*auto samSound = static_cast<juce::SamplerSound*>(sound);
-            setModulePlaying(samSound->getName(), true);*/
-
-            //renderVoices();
         }
     }
 }
@@ -278,15 +236,7 @@ void KrumSampler::noteOff(const int midiChannel, const int midiNoteNumber, const
                         (voice->getCurrentlyPlayingSound() == sound)
                    )
                 {
-                    /*auto krumVoice = static_cast<KrumVoice*>(voice);
-                    if (krumVoice->getParentModule()->hasEditor())
-                    {
-                        krumVoice->getParentModule()->setModulePlaying(false);
-                    }*/
-
                     stopVoice(voice, 0.0f, true);
-                    /*auto samSound = static_cast<juce::SamplerSound*>(sound);
-                    setModulePlaying(samSound->getName(), false);*/
                 }
             }
         }
@@ -302,42 +252,20 @@ juce::SynthesiserVoice* KrumSampler::findFreeVoice  (juce::SynthesiserSound* sou
         auto voice = voices[i]; 
         if (voice->canPlaySound(soundToPlay) && !voice->isVoiceActive())
         {
-            
+           
             return voice; 
-            
-            
-            //return ++voice;
-
-            //YIKES this const cast feels wrong....
-            /*auto krumVoice = static_cast<KrumVoice*>(voice);
-            auto newVoice = new KrumVoice(krumVoice->getParentModule());
-            return const_cast<KrumSampler*>(this)->addVoice(newVoice);*/
             
         }
     }
 
     if (stealIfNoneAvailable)
     {
-
-        /*for (auto* voice : voices)
-        {
-            if (voice->canPlaySound(soundToPlay))
-            {
-                
-            }
-        }*/
-
-        //return new KrumVoice();
+        //TODO
     }
 
     return nullptr;
     
 }
-
-//juce::SynthesiserVoice* KrumSampler::quickAddVoice(KrumVoice* newVoice)
-//{
-//    return addVoice(newVoice);;
-//}
 
 
 KrumModule* KrumSampler::getModule(int index)
@@ -373,14 +301,9 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
         }
     }
 
-    //modules.removeObject(moduleToDelete);
-    
     removeVoice(index);
     removeSound(index);
-    //removeSound(++index);
     
-    
-
     //updating the module's knowledge of it's own index from the removal upwards
     for (int i = index; i < getNumModules(); i++)
     {
@@ -409,9 +332,7 @@ void KrumSampler::updateModule(KrumModule* updatedModule)
     {
         if (updatedModule == modules[i])
         {
-            //adding an extra voice for overlapping notes
             addVoice(new KrumVoice());
-            //addVoice(new KrumVoice(updatedModule));
             addSound(new KrumSound(updatedModule, updatedModule->getModuleName(), *reader , range, updatedModule->getMidiTriggerNote(), 
                                     attackTime, releaseTime, maxFileLengthInSeconds));
         }
@@ -435,7 +356,5 @@ int KrumSampler::getNumModules()
 
 juce::AudioFormatManager& KrumSampler::getFormatManager()
 {
-
     return formatManager;
-
 }

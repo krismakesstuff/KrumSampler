@@ -16,23 +16,19 @@ class KrumModuleContainer;
 
 //==============================================================================
 /*
+* 
+* This is the keyboard you see at the bottom of the app,
+* it draws a normal keyboard but also holds color assignments of choosen notes. 
+* This handles drawing the correct notes, but also can be clicked, and triggers the sample file, if any exists for that note. 
+* 
 */
+
 class KrumKeyboard  :   public juce::MidiKeyboardComponent
-                        //public juce::Timer,
-                        //public juce::SettableTooltipClient
 {
 public:
     KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori, KrumModuleContainer& container );
     ~KrumKeyboard() override;
 
-    //void paint (juce::Graphics&) override;
-    //void resized() override;
-
-    //juce::String getTooltip() override;
-
-    //void timerCallback() override;
-
-    //void mouseEnter(const juce::MouseEvent& e) override;
 
     bool mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
     void mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
@@ -45,7 +41,6 @@ public:
 
     void assignMidiNoteColor(int midiNote, juce::Colour moduleColor);
     void removeMidiNoteColorAssignment(int midiNote);
-    
     bool isMidiNoteAssigned(int midiNote);
 
     void setKeyDown(int midiNote, bool isKeyDown);

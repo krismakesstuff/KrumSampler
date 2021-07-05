@@ -13,11 +13,23 @@
 #include "KrumModuleProcessor.h"
 #include "KrumModuleEditor.h"
 
-//class KrumSampler;
 
-class KrumModule :  /*public juce::Component,*/
-                    /*public juce::Timer,*/
-                    public juce::MidiKeyboardStateListener,
+/*
+* 
+* KrumModule represents the module channel strip. It is split into two classes to handle audio and GUI separately. Much like PluginProcessor and PluginEditor.
+* 
+* KrumModuleProcessor(audio engine) and KrumModuleEditor(GUI) are defined in their own header files.
+* 
+* The KrumModuleEditor can be deleted and created at any time and thus the KrumModule and KrumModuleProcessor must be able to exist without it. 
+* The KrumModuleProcessor interfaces with the KrumSampler engine directly.
+* Both of these classes have access to this(KrumModule) class via reference, often reffered to as "parent". 
+* This "parent" object holds the ModuleInfo, which is all of the info needed to operate, save, and restore modules.
+* 
+* In the future, I will make the module drag and droppable. That is why there are two indexes tracked. Index and DisplayIndex. display index is unused for now. 
+* 
+*/
+
+class KrumModule :  public juce::MidiKeyboardStateListener,
                     public juce::DragAndDropContainer
 {
 public:
@@ -42,14 +54,6 @@ public:
         needMidi,
         needColor,
     };
-
-    //KrumModule(int index, KrumSamplerAudioProcessorEditor& editor, KrumSampler& sampler);
-   /* KrumModule( juce::String& moduleName,
-                int index, KrumSamplerAudioProcessorEditor& parent,
-                juce::File file, int midiNoteNumber,
-                int midiChannelNumber, juce::Colour color,
-                juce::AudioFormatManager& fm, KrumSampler& km,
-                juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);*/
 
     KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
         juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
@@ -117,7 +121,7 @@ public:
 
     int deleteEntireModule();
 
-
+    //provides easy acces for the processor and editor.
     struct ModuleInfo
     {
         juce::Colour moduleColor{ juce::Colours::blue };
@@ -140,8 +144,6 @@ public:
 
 private:
 
-    //KrumSampler& sampler;
-    //friend class KrumSamplerAudioProcessorEditor;
     friend class KrumModuleEditor;
     friend class KrumModuleProcessor;
 
@@ -150,7 +152,6 @@ private:
 
     juce::AudioProcessorValueTreeState* parameters = nullptr;
     juce::ValueTree* valueTree = nullptr;
-    //KrumModuleContainer* parent = nullptr;
 
     JUCE_LEAK_DETECTOR(KrumModule)
 

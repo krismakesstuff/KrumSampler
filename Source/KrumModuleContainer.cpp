@@ -11,7 +11,6 @@
 #include <JuceHeader.h>
 #include "KrumModuleContainer.h"
 #include "PluginEditor.h"
-//#include "KrumSampler.h"
 
 //==============================================================================
 KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner)
@@ -99,6 +98,7 @@ void KrumModuleContainer::refreshModuleLayout(bool makeVisible)
     }
 
     int newWidth = viewportWidth;
+
     //5 is the number of modules that will fit in the container and not need to scroll. Maybe make this a variable for easy resizing of module size
     if (numModules > 5)
     {
@@ -130,7 +130,6 @@ void KrumModuleContainer::refreshModuleLayout(bool makeVisible)
     }
 
 }
-
 
 
 void KrumModuleContainer::addMidiListener(juce::MidiKeyboardStateListener* newListener)
@@ -166,6 +165,7 @@ void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, boo
     }
 }
 
+
 void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout)
 {
     removeModuleFromDisplayOrder(moduleToRemove);
@@ -178,8 +178,7 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
 
 void KrumModuleContainer::moveModule(KrumModule* moduleToMove, int newDisplayIndex)
 {
-
-
+    //TODO
 }
 
 void KrumModuleContainer::setModuleSelected(KrumModule* moduleToMakeActive)
@@ -213,16 +212,14 @@ KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
             return modEd;
         }
     }
-
 }
-
 
 void KrumModuleContainer::addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd)
 {
     moduleDisplayOrder.insert(moduleToAdd->getModuleDisplayIndex(), moduleToAdd);
-
 }
 
+//Most likely you want to call removeModuleEditor() first, it will call this function
 void KrumModuleContainer::removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove)
 {
     moduleDisplayOrder.remove(moduleToRemove->getModuleDisplayIndex());
@@ -232,14 +229,11 @@ bool KrumModuleContainer::isInterestedInDragSource(const juce::DragAndDropTarget
 {
     if (dragSourceDetails.description.toString().compare("ModuleDragAndDrop") == 0)
     {
-        //DBG("True");
         moduleDragging = true;
         juce::MessageManagerLock lock;
         repaint();
         return true;
     }
-
-
     return false;
 }
 
@@ -263,6 +257,7 @@ int KrumModuleContainer::findDisplayIndexFromPoint(juce::Point<int> point)
 {
 
     //come back
+    //the idea was to locate the module under the mouse, but there might be a better way to do this
 
     return 0;
 }

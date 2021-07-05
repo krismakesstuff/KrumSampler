@@ -15,12 +15,8 @@
 SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::ValueTree& vt)
     : formatManager(fm), valueTree(vt)
 {
+    //Not working on MACOS
 
-    
-    /*setinterceptsmouseclicks(true, true);
-    settooltip("double-click files to preview, auto-play will preview as it's selected");*/
-
-    //DBG("GainTree: " + gainTree.toXmlString());
 
     addAndMakeVisible(autoPlayToggle);
     autoPlayToggle.setButtonText("Auto-Play");
@@ -68,7 +64,7 @@ SimpleAudioPreviewer::~SimpleAudioPreviewer()
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)
 {
-    auto area = getLocalBounds();
+    //auto area = getLocalBounds();
 
     //g.setColour(juce::Colours::darkgrey);
     //g.fillRoundedRectangle(area.toFloat(), 5.0f);
@@ -91,25 +87,6 @@ bool SimpleAudioPreviewer::isAutoPlayActive()
 
 void SimpleAudioPreviewer::playOrStop()
 {
-    //if (state == stopped)
-    //{
-    //    transportSource.setPosition(0);
-    //    transportSource.start();
-    //    state = playing;
-    //}
-    //else if (state == playing)
-    //{
-    //    //transportPos = transportSource.getCurrentPosition();
-    //    transportSource.stop();
-    //    state = stopped;
-    //}
-    //*else if (state == paused)
-    //{
-    //    transportSource.setPosition(transportPos);
-    //    transportSource.start();
-    //    state = playing;
-    //}*/
-
     if (transportSource.isPlaying())
     {
         transportSource.stop();
@@ -119,8 +96,6 @@ void SimpleAudioPreviewer::playOrStop()
         transportSource.setPosition(0);
         transportSource.start();
     }
-
-
 }
 
 void SimpleAudioPreviewer::setGain()
@@ -141,7 +116,7 @@ double SimpleAudioPreviewer::getGain()
 juce::String SimpleAudioPreviewer::toText(double value)
 {
     float db = juce::Decibels::gainToDecibels(value);
-    juce::String retString{};
+    juce::String retString;
     if (db > -0.05)
     {
         retString = "0 dB";
@@ -205,6 +180,7 @@ void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
     transportSource.stop();
     transportSource.setSource(nullptr);
     currentAudioFileSource.reset();
+
     juce::AudioFormatReader* reader = nullptr;
 
     if (fileToPreview.existsAsFile())
@@ -215,19 +191,13 @@ void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
     if (reader != nullptr)
     {
         currentAudioFileSource.reset(new juce::AudioFormatReaderSource(reader, true));
-        transportSource.setSource(currentAudioFileSource.get(), 32768, &previewThread, reader->sampleRate);
+        transportSource.setSource(currentAudioFileSource.get(), readAheadBufferSize, &previewThread, reader->sampleRate);
         currentAudioFile = fileToPreview;
     }
     else
     {
         DBG("reader is NULL");
     }
-
-
-   /* if (isAutoPlayActive())
-    {
-        playOrStop();
-    }*/
 
 }
 

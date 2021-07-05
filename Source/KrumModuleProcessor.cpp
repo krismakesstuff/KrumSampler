@@ -12,16 +12,11 @@
 #include "KrumModule.h"
 #include "KrumSampler.h"
 
-//#include "KrumModuleEditor.h"
-
-
 KrumModuleProcessor::KrumModuleProcessor(KrumModule& p, KrumSampler& s/*, juce::File& sampleFile*/)
     : parent(p), sampler(s)/*, audioFile(sampleFile)*/
-{
-    
-}
+{}
 
-
+//automatically triggers a note off after the length of the sample has passed.
 void KrumModuleProcessor::timerCallback()
 {
     triggerNoteOff();
@@ -37,5 +32,6 @@ void KrumModuleProcessor::triggerNoteOn()
 
 void KrumModuleProcessor::triggerNoteOff()
 {
+    stopTimer();
     sampler.noteOff(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity, false);
 }

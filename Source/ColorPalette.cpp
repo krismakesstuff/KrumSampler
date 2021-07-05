@@ -58,7 +58,6 @@ ColorPalette::ColorPalette(juce::Rectangle<int> bounds, ModuleSettingsOverlay& p
         button->setRadioGroupId(ColorRadio::colorRadioGroupId);
         
         button->onClick = [this, color, button] { colorClicked(color, button); };
-        //button->onStateChange = [this, color] { selectedColor = color; DBG("Color: " + selectedColor.toDisplayString(true)); };
         colorButtons.add(button);
         
     }

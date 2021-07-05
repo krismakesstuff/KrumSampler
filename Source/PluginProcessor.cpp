@@ -11,38 +11,6 @@
 
 //==============================================================================
 
-//juce::AudioProcessorParameterGroup makeModuleParameterGroup(int index, juce::String name)
-//{
-//    const float maxGain = juce::Decibels::decibelsToGain(2.0f);
-//
-//    
-//    auto gainParameter = std::make_unique<juce::AudioParameterFloat>("gain" + juce::String(index), name + "Gain",
-//                    juce::NormalisableRange<float> {0.0f, 2.0f, 0.01f}, 0.85f, 
-//                    "Module " +  name + " Gain",
-//                    juce::AudioProcessorParameter::genericParameter,
-//                    [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
-//                    [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
-//
-//   // auto panParameter = std::make_unique<juce::AudioParameterFloat>("pan");
-//
-//    //auto outputChannelParameter = std::make_unique<juce::AudioParameterChoice>("outputChannel");
-//
-//    
-//
-//    
-//    
-//    /*auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("module" + juce::String(index), name, "|",
-//        std::move(gainParameter)
-//
-//        );*/
-//
-//    //juce::AudioProcessorParameterGroup moduleGroup("module" + juce::String(index), name, "|",
-//                                                    //std::move(gainParameter),
-//                                                    //std::move(panParameter),
-//                                                    //std::move(outputChannelParameter));
-//
-//    return moduleGroup;
-//}
 
 float dBToGain(float gainValue)
 {
@@ -112,8 +80,6 @@ juce::ValueTree createFileBrowserTree()
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-    
-
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
     const juce::StringArray outputStrings {"1 & 2", "3 & 4", "5 & 6"};
 
@@ -129,8 +95,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             juce::AudioProcessorParameter::genericParameter,
                             [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
                             [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
-
-       // juce::NormalisableRange<float> panRange{ 0.0f, 100.0f, 0.01f };
 
         auto panParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePan_ID + index, "Module Pan" + index,
                             juce::NormalisableRange<float>{0.01f, 1.0f, 0.001f}, 0.5f,
@@ -189,7 +153,6 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 {
-
 }
 
 
@@ -201,7 +164,6 @@ void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 
 void KrumSamplerAudioProcessor::releaseResources()
 {
-    //currentBuffer = nullptr;
 }
 
 
@@ -210,8 +172,6 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     buffer.applyGain(*outputGainParameter);
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
-    //midiState.copyState(midiMessages, 0, buffer.getNumSamples(), true);
-    //processMidiKeyStateBlock(midiMessages, 0, buffer.getNumSamples(), true);
 }
 
 void KrumSamplerAudioProcessor::processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents)
@@ -376,15 +336,10 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
             //Remaining App/Modules Settings
             valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr); 
             makeModulesFromValueTree();
-            //if (sampler.getNumModules() == 0)
-            //{
-            //}
+           
             
-            //juce::ScopedLock scopedLock(critSection);
-            
-            //DBG("---SET STATE---");
-            //auto newValueTree = juce::ValueTree::fromXml(*xmlState);
-            //DBG(newValueTree.toXmlString());
+            DBG("---SET STATE---");
+            DBG(juce::ValueTree::fromXml(*xmlState).toXmlString());
             
         }
         else 
@@ -427,43 +382,39 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
         if (moduleTree.isValid())
         {
             juce::var nameValue = moduleTree.getProperty("name");
-            //if (!value.isVoid())
+            
+            
+            juce::ValueTree stateTree;
+            bool moduleActive = false;
+            int midiChannel = 0;
+            juce::var id;
+            juce::var val;
+
+            //probably dont need to itt through all the params since moduleActive will be first.. 
+            for (int j = 0; j < 4; j++)                 
             {
-                //DBG("ValueTree is valid");
-                //DBG(moduleTree.toXmlString());
-                //DBG("ModuleName " + nameValue.toString());
-
-                juce::ValueTree stateTree;
-                bool moduleActive = false;
-                int midiChannel = 0;
-                juce::var id;
-                juce::var val;
-
-                //probably dont need to itt through all the params since moduleActive will be first.. 
-                for (int j = 0; j < 4; j++)                 
+                stateTree = moduleTree.getChild(j);
+                id = stateTree.getProperty("id");
+                val = stateTree.getProperty("value");
+                //DBG(id.toString() + " " + val.toString());
+                if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) > 0)
                 {
-                    stateTree = moduleTree.getChild(j);
-                    id = stateTree.getProperty("id");
-                    val = stateTree.getProperty("value");
-                    //DBG(id.toString() + " " + val.toString());
-                    if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) > 0)
-                    {
-                        moduleActive = true;
-                    }
-                    else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
-                    {
-                        midiChannel = int(val);
-                    }
+                    moduleActive = true;
                 }
-
-                if (moduleActive)
+                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
                 {
-                    auto newModule = new KrumModule(i, sampler, &valueTree, &parameters);
-                    sampler.addModule(newModule, newModule->getMidiTriggerNote() != 0);
-                    midiState.addListener(newModule);
-                    
+                    midiChannel = int(val);
                 }
             }
+
+            if (moduleActive)
+            {
+                auto newModule = new KrumModule(i, sampler, &valueTree, &parameters);
+                sampler.addModule(newModule, newModule->getMidiTriggerNote() != 0);
+                midiState.addListener(newModule);
+                    
+            }
+            
         }
         else
         {

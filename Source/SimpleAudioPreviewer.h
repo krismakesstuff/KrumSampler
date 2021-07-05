@@ -14,6 +14,8 @@
 
 //==============================================================================
 /*
+* This Class actually plays the audio file that is selected in the file browser
+* 
 */
 class SimpleAudioPreviewer  :   public juce::Component,
                                 public juce::SettableTooltipClient
@@ -61,11 +63,9 @@ private:
 
     juce::ValueTree& valueTree;
 
-    //juce::DrawableButton playButton;
-
+    int readAheadBufferSize = 32768;
     PreviewerState state{ PreviewerState::stopped };
     
-    //double transportPos = 0;
 
     juce::File currentAudioFile;
     std::unique_ptr<juce::AudioFormatReaderSource> currentAudioFileSource;

@@ -15,6 +15,12 @@
 
 //==============================================================================
 /*
+* 
+* A class the represents the color buttons that show up with a ModuleSettingsOverlay. This is where the color scheme is set.
+* 
+* 
+* TODO: Fix getRandomColor() and make sure the color is not the same as the color before it. 
+* 
 */
 
 namespace ColorPaletteColors
@@ -58,6 +64,8 @@ public:
 
     juce::Colour* getLastRandomColor();
 
+
+    //need to fix this function
     static juce::Colour* getRandomColor(juce::Colour* lastRandom)
     {
         juce::Random random;
@@ -84,10 +92,8 @@ public:
         return ColorPaletteColors::colorArray[randIt];
       
     }
+
 private:
-
-    //friend class KrumModuleEditor::ModuleSetupOverlay;
-
     ModuleSettingsOverlay& parent;
 
     juce::Colour selectedColor{ juce::Colours::white };

@@ -12,6 +12,25 @@
 #include <JuceHeader.h>
 #include "SimpleAudioPreviewer.h"
 
+/*
+* 
+* The File Browser holds folders and files chosen by the user for quick access. These file paths will save with the plugin as well as any custom names that are given to them. 
+* This holds the file path of the file and has a separate display name which can be changed by the user, but doesnt' not rename any actual files. 
+* There are two sections, the "Recent" and "Favorites" sections. The Recent section gets automatically updated when a file is dropped on the FileDrop component. It will only hold files.
+* The Favorites section is user selected and can be chosen from the "AddFavoriteButton", which will pull up a browser to choose files from. 
+* 
+* This class is a bit confusing... The KrumFileBrowser holds a KrumTreeView. The KrumTreeView holds TreeViewItems. There are two types of TreeViewItems, KrumTreeHeaderItem and KrumTreeItem. 
+* The KrumTreeHeaderItem is for folders and KrumTreeItem is for files. Both also have custom component subclasses that give them some custom functionality.
+* The state of the tree will be saved with each use and must be restored as well. 
+* This browser alos connnects to the AudioPreviewer to preview files. 
+* 
+* NOTE: The AudioPreviewer is not working on MacOS.
+* 
+* 
+*/
+
+
+
 class KrumTreeItem;
 class KrumTreeHeaderItem;
 class KrumTreeView;
@@ -27,7 +46,6 @@ namespace FileBrowserValueTreeIds
     static const juce::String recentFolderId{ "Recent" };
     static const juce::String favoritesFolderId{ "Favorites" };
     static const juce::String opennessId{ "OpennessState" };
-
 }
 
 
@@ -89,7 +107,6 @@ private:
 
     bool editing = false;
 
-    //std::unique_ptr<juce::Label> editLabel = nullptr;
     
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     KrumTreeView* parentTree;
@@ -150,27 +167,18 @@ public:
     juce::String getUniqueName() const override;
 
     void setBGColor(juce::Colour newColor);
-    
-    /*void tellParentIfEditing(bool isEditing)
-    {
-        parentTree->setItemEditing(getItemIdentifierString(), isEditing);
-    }*/
-    
+
     bool isItemEditing(bool checkChildren);
-    
     void setItemEditing(bool isEditing);
 
     void setEditable(bool isEditable);
-
     bool isEditable();
+
     void removeThisHeaderItem();
-
     void tellParentToRemoveMe();
-
     void clearAllChildren();
 
     void setNumFilesExcluded(int numFilesHidden);
-
     int getNumFilesExcluded();
 
 private:
@@ -180,7 +188,6 @@ private:
     juce::File file;
     juce::String headerName;
 
-    //juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour bgColor{ juce::Colours::darkgrey.darker(0.6f) };
 
     bool editable = true;
@@ -213,7 +220,7 @@ private:
     JUCE_LEAK_DETECTOR(KrumTreeHeaderItem)
 };
 
-//just so the connecting lines will draw to the bottom
+//just so the connecting lines will draw to the bottom, purely for visual purposes
 class DummyTreeItem : public juce::TreeViewItem
 {
 public:
@@ -265,13 +272,13 @@ public:
     FileBrowserSortingIds sortingId;
 };
 
+//when draggin multiple files from the browser, this icon will show how many files you have selected. 
 class NumberBubble : public juce::Component
 {
 public:
     NumberBubble(int numberToDisplay, juce::Colour backgroundColor, juce::Rectangle<int> parentBounds)
         : number(numberToDisplay), bgColor(backgroundColor)
     {
-        //setSize(15, 15);
         setBounds(parentBounds.getRight() - 20, 3, 15, 15);
     }
 
@@ -308,7 +315,6 @@ public:
 
     void refreshChildren();
     void deselectAllItems();
-    //void setItemSelected(KrumTreeItem* itemToSet,bool isSelected, bool deselectOthers);
 
     bool isInterestedInFileDrag(const juce::StringArray& files) override;
     void filesDropped(const juce::StringArray& files, int x, int y) override;
@@ -378,8 +384,6 @@ public:
     void paint(juce::Graphics& g) override;
     void resized() override;
 
-    //void mouseDown(const juce::MouseEvent& event) override;
-
     int getNumSelectedItems();
     KrumTreeItem* getSelectedItem(int index);
 
@@ -397,14 +401,10 @@ private:
 
     SimpleAudioPreviewer audioPreviewer;
     juce::DrawableButton addFavoriteButton{ "Add Favorite", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
-   
-    //juce::Colour fontColor{ juce::Colours::darkgrey/*.darker()*/ };
-    juce::Colour fontColor{ juce::Colours::lightgrey/*.darker()*/ };
+
+    juce::Colour fontColor{ juce::Colours::lightgrey };
     
     int titleH = 30;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumFileBrowser)
-
 };
-
-
