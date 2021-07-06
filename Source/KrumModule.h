@@ -25,7 +25,7 @@
 * Both of these classes have access to this(KrumModule) class via reference, often reffered to as "parent". 
 * This "parent" object holds the ModuleInfo, which is all of the info needed to operate, save, and restore modules.
 * 
-* In the future, I will make the module drag and droppable. That is why there are two indexes tracked. Index and DisplayIndex. display index is unused for now. 
+* In the future, I will make the module drag and droppable. That is why there are two indexes tracked. "Index" and "displayIndex", displayIndex is unused for now. 
 * 
 */
 

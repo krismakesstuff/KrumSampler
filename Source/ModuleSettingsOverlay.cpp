@@ -12,6 +12,7 @@
 #include "KrumModule.h"
 
 
+
 ModuleSettingsOverlay::ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModule& parent)
     : parentModule(parent), colorPalette(area.withTop(225), *this)
 {
@@ -135,7 +136,9 @@ void ModuleSettingsOverlay::showConfirmButton()
 void ModuleSettingsOverlay::confirmMidi()
 {
     juce::Colour color;
+
     //default return color is white, but doesn't look good with the fonts.
+    //this logic works out the context of leaving the moduleSettingsOverlay
     if (colorChanged)
     {
         color = colorPalette.getSelectedColor();
@@ -143,8 +146,6 @@ void ModuleSettingsOverlay::confirmMidi()
     }
     else if (!keepColorOnExit)
     {
-        //color = *colorPalette.getRandomColor(colorPalette.getLastRandomColor());
-        //color = *colorPalette.getRandomColor(nullptr);
         color = colorPalette.getRandomColor();
         parentModule.setModuleColor(color, false);
     }

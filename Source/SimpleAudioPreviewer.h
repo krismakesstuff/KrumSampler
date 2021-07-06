@@ -15,7 +15,6 @@
 //==============================================================================
 /*
 * This Class actually plays the audio file that is selected in the file browser
-* 
 */
 class SimpleAudioPreviewer  :   public juce::Component,
                                 public juce::SettableTooltipClient

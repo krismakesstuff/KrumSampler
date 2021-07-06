@@ -20,11 +20,8 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         itemName = name;
         treeHasChanged();
 
-        //getIndexInParent();
-
         setLinesDrawnForSubItems(true);
         setDrawsInLeftMargin(true);
-
     } 
 
     bool KrumTreeItem::mightContainSubItems()
@@ -72,7 +69,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         if (previewer->isAutoPlayActive())
         {
             previewer->playOrStop();
-            //DBG("Play or Stop");
         }
 
     }
@@ -81,7 +77,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         previewer->loadFile(file);
         previewer->playOrStop();
-        //DBG(itemName + " Double-Clicked");
     }
 
     void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
@@ -101,13 +96,11 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         if (label->getText().isNotEmpty())
         {
             itemName = label->getText();
-            //label = nullptr;
         }
 
         setItemEditing(false);
         treeHasChanged();
         repaintItem();
-        //removeChildComponent(editLabel.get());
     }
 
     juce::String KrumTreeItem::getUniqueName() const
@@ -142,17 +135,10 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         editing = isEditing;
     }
 
-    /*void tellParentIfEditing(bool isEditing)
-    {
-        parentTree->setItemEditing(getItemIdentifierString(), isEditing);
-    }*/
 
     void KrumTreeItem::removeThisItem()
     {
-        //parentTree->removeItem()
         getParentItem()->removeSubItem(getIndexInParent());
-        //parentTree->updateValueTree(getItemIdentifierString());
-
     }
 
     void KrumTreeItem::tellParentToRemoveMe()
@@ -170,7 +156,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         setText(itemName, juce::dontSendNotification);
         setTooltip(owner.getFile().getFullPathName());
-
     }
 
     void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
@@ -195,12 +180,10 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         owner.setItemName(getText());
         setText(owner.getItemName(), juce::dontSendNotification);
         owner.setItemEditing(false);
-        //owner.tellParentIfEditing(false);
     }
 
     void KrumTreeItem::EditableComp::editorAboutToBeHidden(juce::TextEditor* editor)
     {
-        //owner.tellParentIfEditing(false);
         owner.setItemEditing(false);
     }
 
@@ -244,7 +227,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
                 if (numSelectedItems > 0)
                 {
                     owner.setSelected(true, false);
-
                 }
             }
         }
@@ -266,20 +248,15 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
             int result = menu.showAt(showPoint);
             if (result == 1)
             {
-
-
                 showEditor();
                 repaint();
                 owner.setItemEditing(true);
-               // owner.tellParentIfEditing(true);
             }
             else if (result == 2)
             {
                 owner.tellParentToRemoveMe();
             }
         }
-
-
     }
 
     void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)
@@ -305,24 +282,15 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
 //=================================================================================================================================//
 
-//class KrumTreeHeaderItem :  public juce::TreeViewItem,
-//                            public juce::Component
-//{
-//public:
+
     KrumTreeHeaderItem::KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name, int numFilesHidden)
         : parentTree(pTree), numFilesExcluded(numFilesHidden)
     {
         file = fullPathName;
         headerName = name;
-        //headerName = name.compare(file.getFullPathName()) == 0 ? file.getFileName() : name;
         treeHasChanged();
-        //repaintItem();
         setLinesDrawnForSubItems(true);
 
-        /*if (isLastOfSiblings())
-        {
-            parentTree->addDummyChild();
-        }*/
     }
 
     bool KrumTreeHeaderItem::mightContainSubItems()
@@ -395,10 +363,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         bgColor = newColor;
     }
     
-    /*void tellParentIfEditing(bool isEditing)
-    {
-        parentTree->setItemEditing(getItemIdentifierString(), isEditing);
-    }*/
     
     bool KrumTreeHeaderItem::isItemEditing(bool checkChildren)
     { 
@@ -521,7 +485,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         owner.setItemHeaderName(getText());
         setText(owner.getItemHeaderName(), juce::dontSendNotification);
         owner.setItemEditing(true);
-        //owner.tellParentIfEditing(false);
     }
 
     void KrumTreeHeaderItem::EditableHeaderComp::editorAboutToBeHidden(juce::TextEditor* editor)
@@ -575,32 +538,12 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
             }
         }
 
-        //owner.mouseDown(e);
-        //juce::Label::mouseDown(e);
     }
 
     void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
     {
         owner.itemDoubleClicked(e);
     }
-
-
-
-
-//just so the connecting lines will draw to the bottom
-//class DummyTreeItem : public juce::TreeViewItem
-//{
-//public:
-//    DummyTreeItem()
-//    {}
-//
-//    bool mightContainSubItems() override
-//    {
-//        return false;
-//    }
-//
-//    JUCE_LEAK_DETECTOR(DummyTreeItem)
-//};
 
 
 //=================================================================================================================================//
@@ -650,12 +593,6 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
 
 KrumTreeView::~KrumTreeView()
 {
-    /*auto currentOpennessTree = juce::ValueTree::fromXml(*getOpennessState(true));
-    if (currentOpennessTree.isValid())
-    {
-        auto openTree = fileBrowserValueTree.getChildWithName(FileBrowserValueTreeIds::opennessId);
-        openTree.appendChild(currentOpennessTree, nullptr);
-    }*/
     setRootItem(nullptr);
 }
 
@@ -665,12 +602,7 @@ void KrumTreeView::paint(juce::Graphics& g)
     auto area = getLocalBounds();
     g.setColour(juce::Colours::darkgrey.darker(0.7f));
 
-    //g.fillRect(area);
     g.fillRoundedRectangle(area.expanded(5).toFloat(), 5.0f);
-
-    /*int addFavButtonH = 50;
-    addFavoriteButton.setBounds(area.withTop(area.getBottom() - addFavButtonH).reduced(10));*/
-
 
     juce::TreeView::paint(g);
 
@@ -687,7 +619,6 @@ void KrumTreeView::refreshChildren()
     auto area = getLocalBounds();
 
     DBG("FileBrowser Area: " + area.toString());
-    //int addFavButtonH = 50;
 
 }
 
@@ -695,15 +626,6 @@ void KrumTreeView::deselectAllItems()
 {
     rootNode->setSelected(false, true);
 }
-
-//void KrumTreeView::setItemSelected(KrumTreeItem* itemToSet, bool isSelected, bool deselectOthers)
-//{
-//    auto faveNode = rootNode->getSubItem(FileBrowserSectionIds::favoritesFolders_Ids);
-//
-//    faveNode->getSubItem()
-//
-//    itemToSet->setSelected(isSelected, deselectOthers);
-//}
 
 bool KrumTreeView::isInterestedInFileDrag(const juce::StringArray& files) 
 {
@@ -738,7 +660,7 @@ void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y)
         {
             createNewFavoriteFolder(leadFile.getFullPathName());
         }
-        else /*if(wildcard.containsWholeWord(leadFile.getFileExtension()))*/
+        else
         {
             createNewFavoriteFile(leadFile.getFullPathName());
         }
@@ -1665,8 +1587,6 @@ void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
     oldTree = newTree;
     fileTree.reCreateFileBrowserFromTree();
 }
-
-
 
 SimpleAudioPreviewer* KrumFileBrowser::getAudioPreviewer()
 {

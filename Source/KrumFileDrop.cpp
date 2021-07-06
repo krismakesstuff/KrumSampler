@@ -19,7 +19,7 @@
 KrumFileDrop::KrumFileDrop(KrumSamplerAudioProcessorEditor& e, KrumModuleContainer& c, juce::AudioProcessorValueTreeState& a, KrumFileBrowser& browser)
     : editor(e), container(c), parameters(a), fileBrowser(browser)
 {
-    setTooltip("Drag and drop samples from anywhere");   
+    setTooltip("Drag and drop samples from anywhere!");   
 }
 
 KrumFileDrop::~KrumFileDrop()

@@ -10,53 +10,21 @@
 #include "PluginEditor.h"
 
 
-//juce::ValueTree& getFileBrowserTree(juce::ValueTree& valueTree)
-//{
-//    auto fileBrowserTree = valueTree.getChildWithName("FileBrowserTree");
-//    
-//    if (fileBrowserTree.isValid())
-//    {
-//        DBG(fileBrowserTree.toXmlString());
-//    }
-//    else
-//    {
-//        DBG("BrowserTree NOT valid");
-//    }
-//
-//    return fileBrowserTree;
-//}
-
-//juce::ValueTree& getPreviewerGainTree(juce::ValueTree& valueTree)
-//{
-//    auto globalTree = valueTree.getChildWithName("GlobalSettings");
-//    auto prevGainTree = globalTree.getChildWithName("PreviewerGain");
-//    DBG("Previewer Gain Tree: " + prevGainTree.toXmlString());
-//    return prevGainTree;
-//}
-
 //==============================================================================
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valueTree, juce::ValueTree& fileBrowserTree)
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(valueTree, fileBrowserTree, *audioProcessor.getFormatManager())
 {
     
-    //juce::String titleImageFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\KrumSamplerTitle.png";
     auto seperatorString = juce::File::getSeparatorString();
     juce::String titleImageFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"KrumSamplerTitle.png";
     
     auto titleImageFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory).getChildFile(titleImageFileString);
-    //auto titleImageFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\KrumSamplerTitleAirborne.png");
-    
-
     titleImage = juce::ImageFileFormat::loadFrom(titleImageFile);
 
     juce::String validString = (titleImage.isValid() ? "Valid" : "INValid");
     DBG("TitleImage: " + validString);
 
-
-
     getLookAndFeel().setDefaultLookAndFeel(&kLaf);
-    //getLookAndFeel().setDefaultSansSerifTypefaceName(defaultFont.getTypefaceName());
-    //getLookAndFeel().setDefaultSansSerifTypeface(getWackyFont().getTypeface());
     getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(1000);
 
@@ -80,15 +48,10 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     fileDrop.setRepaintsOnMouseActivity(true);
 
     addAndMakeVisible(fileBrowser);
-
-    //juce::String imageFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\chevron_left_black_24dp.svg";
     juce::String imageLeftFileString = "Code Projects/KrumSampler/Resources/chevron_left_black_24dp.svg";
-    
-    //juce::String imageRightFileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\chevron_right_black_24dp.svg";
     juce::String imageRightFileString = "Code Projects/KrumSampler/Resources/chevron_right_black_24dp.svg";
     
     juce::File collapseLeftImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageLeftFileString);
-    
     juce::File collapseRightImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageRightFileString);
     
     auto collapseLeftIm = juce::Drawable::createFromSVGFile(collapseLeftImFile);
@@ -104,11 +67,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::darkgrey);
     addAndMakeVisible(collapseBrowserButton);
 
-    
-    //this was used to print out midi messages as a log
-    //audioProcessor.addMidiKeyboardListener(this);
-
-    
     addAndMakeVisible(keyboard);
     
     addAndMakeVisible(modulesViewport);
@@ -116,26 +74,18 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     modulesViewport.setViewedComponent(&moduleContainer);
     modulesViewport.setSingleStepSizes(10, 10);
     modulesViewport.setInterceptsMouseClicks(true, true);
-    
-    //modulesViewport.setScrollOnDragEnabled(true);
     modulesViewport.setScrollBarsShown(false, true, false, false);
-    //modulesViewport.setViewPosition(200, 200);
     
     if (sampler.getNumModules() > 0)
     {
         createModuleEditors();
     }
 
-    //moduleContainer.refreshModuleLayout(true);
-   
     setPaintingIsUnclipped(true);
     setOpaque(true);
 
-    //modulesViewport.setRepaintsOnMouseActivity(true);
     setInterceptsMouseClicks(false, true);
-    //startTimerHz(10);
-   // setResizable(true, true);
-    //resized();
+
     if (collapseBrowserButton.getToggleState())
     {
         setSize(900, 700);
@@ -161,9 +111,6 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     
     auto titleRect = area.withHeight(EditorDimensions::topBar).withY(7).withX(10).toFloat();
 
-    //g.setColour(mainFontColor);
-    //g.setFont(20.f);
-    //g.drawFittedText("KRUM SAMPLER", area.withHeight(EditorDimensions::topBar), juce::Justification::centred, 1);
     g.drawImage(titleImage, titleRect, juce::RectanglePlacement::centred);
     //g.drawImageWithin(titleImage, area.getX(), area.getY(), area.getWidth(), EditorDimensions::topBar, juce::RectanglePlacement::fillDestination, true);
 
@@ -191,9 +138,6 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
 
     paintOutputVolumeLines(g, linesBounds.toFloat());
-
-    //moduleContainer.refreshModuleLayout(false);
-
 }
 
 void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, juce::Rectangle<float> bounds)
@@ -277,48 +221,16 @@ void KrumSamplerAudioProcessorEditor::resized()
 
 }
 
-//void KrumSamplerAudioProcessorEditor::mouseMove(const juce::MouseEvent& e)
-//{
-//    auto activeBounds = getLocalBounds().withRight(fileBrowser.getBounds().getRight());
-//    auto mousePos = e.getPosition();
-//
-//    if (activeBounds.contains(mousePos.getX(), mousePos.getY()))
-//    {
-//        collapseBrowserButton.setVisible(true);
-//    }
-//    else
-//    {
-//        collapseBrowserButton.setVisible(false);
-//    }
-//    
-//    juce::MessageManagerLock lock;
-//    repaint();
-//    
-//
-//
-//}
-//
-//
-//void KrumSamplerAudioProcessorEditor::mouseExit(const juce::MouseEvent& e)
-//{
-//    juce::MessageManagerLock lock;
-//    collapseBrowserButton.setVisible(false);
-//    repaint();
-//
-//}
-
-
-
 void KrumSamplerAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState* keyState, int midiChannel, int midiNote, float velocity)
 {
-    auto m = juce::MidiMessage::noteOn(midiChannel, midiNote, velocity);
-    postMessageToList(m, juce::String());
+    //auto m = juce::MidiMessage::noteOn(midiChannel, midiNote, velocity);
+    //postMessageToList(m, juce::String());
 }
 
 void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* keyState, int midiChannel, int midiNote, float velocity)
 {
-    auto m = juce::MidiMessage::noteOff(midiChannel, midiNote, velocity);
-    postMessageToList(m, juce::String());
+    //auto m = juce::MidiMessage::noteOff(midiChannel, midiNote, velocity);
+    //postMessageToList(m, juce::String());
 }
 
 void KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
@@ -355,67 +267,6 @@ KrumModuleContainer& KrumSamplerAudioProcessorEditor::getModuleContainer()
 {
     return moduleContainer;
 }
-
-//void KrumSamplerAudioProcessorEditor::addModuleToContainer(KrumModule* newModule, bool addVoice)
-//{
-//    //moduleContainer.addModule(newModule, addVoice);
-//}
-
-
-//void KrumSamplerAudioProcessorEditor::addModuleToDisplayOrder(int displayIndex, int moduleIndex)
-//{
-//   
-//    //moduleDisplayOrder.insert(displayIndex, moduleIndex);
-//
-//    //audioProcessor.updateValueTreeState();
-//    //printModuleDisplayOrder();
-//    //printModules();
-//
-//}
-
-//void KrumSamplerAudioProcessorEditor::removeModule(KrumModule* moduleToDelete)
-//{
-//
-//    int samplerIndex = moduleToDelete->getModuleIndex();
-//    int displayIndex = moduleToDelete->getModuleDisplayIndex();
-//
-//    audioProcessor.getMidiState().removeListener(moduleToDelete);
-//    keyboard.removeMidiNoteColorAssignment(moduleToDelete->getMidiTriggerNote());
-//    sampler.removeModule(moduleToDelete);
-//    container.moduleDisplayOrder.remove(displayIndex);
-//
-//    //updated the Modules knowledge of it's own display position
-//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
-//    {
-//        auto& currentdisplayIndex = moduleDisplayOrder.getReference(i);
-//        if (currentdisplayIndex >= samplerIndex)
-//        {
-//            --currentdisplayIndex;
-//            sampler.getModule(i)->setModuleDisplayIndex(currentdisplayIndex);
-//        }
-//    }
-//
-//    audioProcessor.updateValueTreeState();
-////    printModuleDisplayOrder();
-////    printModules();
-//}
-
-
-
-//juce::Array<int>& KrumSamplerAudioProcessorEditor::getModuleDisplayOrder()
-//{
-//    return moduleDisplayOrder;
-//}
-
-//void KrumSamplerAudioProcessorEditor::printModuleDisplayOrder()
-//{
-//    DBG("----Module Display Order----");
-//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
-//    {
-//        DBG("Module Display Position: " + juce::String(i) + " Module Index: " + juce::String(moduleDisplayOrder[i]));
-//        
-//    }
-//}
 
 
 void KrumSamplerAudioProcessorEditor::reconstructModuleDisplay(juce::ValueTree& moduleDisplayTree)
@@ -525,27 +376,22 @@ void KrumSamplerAudioProcessorEditor::removeKeyboardListener(juce::MidiKeyboardS
     audioProcessor.removeMidiKeyboardListener(listenerToRemove);
 }
 
-void KrumSamplerAudioProcessorEditor::postMessageToList(const juce::MidiMessage& message, const juce::String& source)
-{
-    (new IncomingMessageCallback(this, message, source))->post();
-}
-
-void KrumSamplerAudioProcessorEditor::addMessageToList(const juce::MidiMessage& message, const juce::String& source)
-{
-    auto description = getMidiInfo(message);
-    setTextBox(description);
-}
+//void KrumSamplerAudioProcessorEditor::postMessageToList(const juce::MidiMessage& message, const juce::String& source)
+//{
+//    (new IncomingMessageCallback(this, message, source))->post();
+//}
+//
+//void KrumSamplerAudioProcessorEditor::addMessageToList(const juce::MidiMessage& message, const juce::String& source)
+//{
+//    auto description = getMidiInfo(message);
+//    setTextBox(description);
+//}
 
 juce::String KrumSamplerAudioProcessorEditor::getMidiInfo(const juce::MidiMessage& midiMessage)
 {
     return midiMessage.getDescription() + " Note Number: " + juce::String(midiMessage.getNoteNumber());
 }
 
-void KrumSamplerAudioProcessorEditor::setTextBox(juce::String message)
-{
-    //textBox.moveCaretToEndOfLine(false);
-    //textBox.insertTextAtCaret(message + juce::NewLine::getDefault());
-}
 
 void KrumSamplerAudioProcessorEditor::cleanUpEmptyModuleTrees(/*int numModules*/)
 {
