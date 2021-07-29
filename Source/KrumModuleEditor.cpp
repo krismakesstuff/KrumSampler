@@ -433,7 +433,10 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
         }
         
         setModuleButtonsClickState(false);
-        grabKeyboardFocus();
+        /*if (isShowing())
+        {
+            grabKeyboardFocus();
+        }*/
     }
     else
     {
