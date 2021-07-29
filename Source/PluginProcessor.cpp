@@ -172,6 +172,9 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     buffer.applyGain(*outputGainParameter);
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    
+    //this does not output midi
+    midiMessages.clear();
 }
 
 void KrumSamplerAudioProcessor::processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents)

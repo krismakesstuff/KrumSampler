@@ -25,6 +25,9 @@
 * 
 */
 
+#define MAX_VOICES 8
+
+
 class KrumSound : public juce::SamplerSound
 {
 public:
@@ -98,15 +101,21 @@ public:
     KrumSampler(juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o);
     ~KrumSampler() override;
 
+    void initVoices();
+
     void noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) override;
     void noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) override;
     
-    juce::SynthesiserVoice* findFreeVoice(juce::SynthesiserSound* soundToPlay,
+    /*juce::SynthesiserVoice* findFreeVoice(juce::SynthesiserSound* soundToPlay,
                                             int midiChannel,
                                             int midiNoteNumber,
-                                            bool stealIfNoneAvailable) const override;
+                                            bool stealIfNoneAvailable) const override;*/
 
-    
+    //juce::SynthesiserVoice* findVoiceToSteal(juce::SynthesiserSound* sound, int midiChannel, int midiNoteNumber)const override;
+
+
+    //void handleMidiEvent(const juce::MidiMessage& midiMessage) override;
+
     KrumModule* getModule(int index);
     void addModule(KrumModule* newModule, bool addVoice = false);
     void removeModule(KrumModule* moduleToDelete);

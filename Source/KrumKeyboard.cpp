@@ -18,16 +18,7 @@ KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboar
     : juce::MidiKeyboardComponent(midiState, ori), moduleContainer(container)
 {
     setScrollButtonsVisible(true);
-    auto displayOrder = moduleContainer.getModuleDisplayOrder();
-
-    for (int i = 0; i < displayOrder.size(); i++)
-    {
-        auto modEd = displayOrder[i];
-        if (modEd->getModuleMidiNote() > 0)
-        {
-            assignMidiNoteColor(modEd->getModuleIndex(), modEd->getModuleColor());
-        }
-    }
+    updateKeysFromContainer();
 }
 
 KrumKeyboard::~KrumKeyboard()
@@ -189,4 +180,32 @@ void KrumKeyboard::setKeyDown(int midiNote, bool isKeyDown)
 {
     juce::MessageManagerLock lock;
     repaint();
+}
+
+void KrumKeyboard::updateKeysFromContainer()
+{
+    auto displayOrder = moduleContainer.getModuleDisplayOrder();
+    for (int i = 0; i < displayOrder.size(); i++)
+    {
+        auto modEd = displayOrder[i];
+        if (modEd->getModuleMidiNote() > 0)
+        {
+            assignMidiNoteColor(modEd->getModuleMidiNote(), modEd->getModuleColor());
+        }
+    }
+
+    printCurrentlyAssignedMidiNotes();
+
+    repaint();
+}
+
+void KrumKeyboard::printCurrentlyAssignedMidiNotes()
+{
+    for (auto it = currentlyAssignedMidiNotes.begin(); it != currentlyAssignedMidiNotes.end(); it++)
+    {
+        juce::String midiNote(it->first);
+        juce::String color(it->second.toDisplayString(true));
+
+        DBG("Assigned Note: " + midiNote + ", Color: " + color);
+    }
 }

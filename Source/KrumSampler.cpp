@@ -198,15 +198,29 @@ KrumSampler::KrumSampler(juce::AudioFormatManager& fm, KrumSamplerAudioProcessor
     :formatManager(fm), owner(o)
 {
     formatManager.registerBasicFormats();
+
+    
+
 }
 KrumSampler::~KrumSampler()
 {
     clearModules();
 }
 
+void KrumSampler::initVoices()
+{
+    for (int i = 0; i < MAX_VOICES; i++)
+    {
+        addVoice(new KrumVoice());
+    }
+
+    DBG("Voices: " + juce::String(voices.size()));
+}
+
 
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 
 {
+
     for (auto sound : sounds)
     {
         if (sound->appliesToNote(midiNoteNumber) && sound->appliesToChannel(midiChannel))
@@ -229,7 +243,9 @@ void KrumSampler::noteOff(const int midiChannel, const int midiNoteNumber, const
         {
             auto krumSound = static_cast<KrumSound*>(sound);
             krumSound->setModulePlaying(false);
-            for (auto* voice : voices) 
+
+            //one shot 
+            /*for (auto* voice : voices) 
             {
                 if (    (voice->getCurrentlyPlayingNote() == midiNoteNumber) &&
                          voice->isPlayingChannel(midiChannel) &&
@@ -238,35 +254,84 @@ void KrumSampler::noteOff(const int midiChannel, const int midiNoteNumber, const
                 {
                     stopVoice(voice, 0.0f, true);
                 }
-            }
+            }*/
         }
     }
 }
 
-juce::SynthesiserVoice* KrumSampler::findFreeVoice  (juce::SynthesiserSound* soundToPlay, int midiChannel, int midiNoteNumber, bool stealIfNoneAvailable) const
-{
-    const juce::ScopedLock sl(lock);
+//juce::SynthesiserVoice* KrumSampler::findFreeVoice  (juce::SynthesiserSound* soundToPlay, int midiChannel, int midiNoteNumber, bool stealIfNoneAvailable) const
+//{
+//    const juce::ScopedLock sl(lock);
+//
+//    for (int i = 0; i < voices.size(); i++)
+//    {
+//        auto voice = voices[i]; 
+//        if (voice->canPlaySound(soundToPlay) && !voice->isVoiceActive())
+//        {
+//           
+//            return voice; 
+//            
+//        }
+//    }
+//
+//    if (stealIfNoneAvailable)
+//    {
+//        findVoiceToSteal()
+//    }
+//
+//    return nullptr;
+//    
+//}
 
-    for (int i = 0; i < voices.size(); i++)
-    {
-        auto voice = voices[i]; 
-        if (voice->canPlaySound(soundToPlay) && !voice->isVoiceActive())
-        {
-           
-            return voice; 
-            
-        }
-    }
+//juce::SynthesiserVoice* KrumSampler::findVoiceToSteal(juce::SynthesiserSound* sound, int midiChannel, int midiNoteNumber) const
+//{
+//    
+//
+//
+//
+//    return nullptr;
+//}
 
-    if (stealIfNoneAvailable)
-    {
-        //TODO
-    }
-
-    return nullptr;
-    
-}
-
+//
+//void KrumSampler::handleMidiEvent(const juce::MidiMessage& m)
+//{
+//    const int channel = m.getChannel();
+//
+//    if (m.isNoteOn())
+//    {
+//        noteOn(channel, m.getNoteNumber(), m.getFloatVelocity());
+//    }
+//    else if (m.isNoteOff())
+//    {
+//        noteOff(channel, m.getNoteNumber(), m.getFloatVelocity(), true);
+//    }
+//    else if (m.isAllNotesOff() || m.isAllSoundOff())
+//    {
+//        allNotesOff(channel, true);
+//    }
+//    else if (m.isPitchWheel())
+//    {
+//        const int wheelPos = m.getPitchWheelValue();
+//        lastPitchWheelValues[channel - 1] = wheelPos;
+//        handlePitchWheel(channel, wheelPos);
+//    }
+//    else if (m.isAftertouch())
+//    {
+//        handleAftertouch(channel, m.getNoteNumber(), m.getAfterTouchValue());
+//    }
+//    else if (m.isChannelPressure())
+//    {
+//        handleChannelPressure(channel, m.getChannelPressureValue());
+//    }
+//    else if (m.isController())
+//    {
+//        handleController(channel, m.getControllerNumber(), m.getControllerValue());
+//    }
+//    else if (m.isProgramChange())
+//    {
+//        handleProgramChange(channel, m.getProgramChangeNumber());
+//    }
+//}
 
 KrumModule* KrumSampler::getModule(int index)
 {
@@ -275,6 +340,12 @@ KrumModule* KrumSampler::getModule(int index)
 
 void KrumSampler::addModule(KrumModule* newModule, bool addVoice)
 {
+
+    if (voices.size() == 0)
+    {
+        initVoices();
+    }
+
     modules.insert(newModule->getModuleIndex(), std::move(newModule));
 
     //in some cases you just want to add the module, but leave it not configured
@@ -301,7 +372,7 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
         }
     }
 
-    removeVoice(index);
+    //removeVoice(index);
     removeSound(index);
     
     //updating the module's knowledge of it's own index from the removal upwards
@@ -332,11 +403,13 @@ void KrumSampler::updateModule(KrumModule* updatedModule)
     {
         if (updatedModule == modules[i])
         {
-            addVoice(new KrumVoice());
+            //addVoice(new KrumVoice());
             addSound(new KrumSound(updatedModule, updatedModule->getModuleName(), *reader , range, updatedModule->getMidiTriggerNote(), 
                                     attackTime, releaseTime, maxFileLengthInSeconds));
         }
     }
+
+    DBG("Sounds: " + juce::String(sounds.size()));
 }
 
 void KrumSampler::clearModules()

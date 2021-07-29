@@ -28,6 +28,15 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(1000);
 
+    addAndMakeVisible(websiteButton);
+    websiteButton.setButtonText(websiteURL.getDomain());
+    websiteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    websiteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
+    websiteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    websiteButton.onClick = [this] { websiteURL.launchInDefaultBrowser(); };
+
     addAndMakeVisible(outputGainSlider);
     
     outputGainSlider.setScrollWheelEnabled(false);
@@ -79,12 +88,13 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     if (sampler.getNumModules() > 0)
     {
         createModuleEditors();
+        keyboard.updateKeysFromContainer();
     }
 
     setPaintingIsUnclipped(true);
-    setOpaque(true);
+    //setOpaque(true);
 
-    setInterceptsMouseClicks(false, true);
+    //setInterceptsMouseClicks(false, true);
 
     if (collapseBrowserButton.getToggleState())
     {
@@ -114,10 +124,12 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawImage(titleImage, titleRect, juce::RectanglePlacement::centred);
     //g.drawImageWithin(titleImage, area.getX(), area.getY(), area.getWidth(), EditorDimensions::topBar, juce::RectanglePlacement::fillDestination, true);
 
+
     g.setColour(modulesBGColor);
     g.fillRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize);
     
     g.setColour(outlineColor);
+    g.drawFittedText(madeByString, madeByArea.withX(area.getRight() - (madeByArea.getWidth() + 10)).withY(area.getY() + 5), juce::Justification::centred, 1);
     g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
 
     g.setColour(backOutlineColor);
@@ -180,6 +192,7 @@ void KrumSamplerAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
 
+    websiteButton.setBounds(madeByArea.withX(area.getRight() - (madeByArea.getWidth() + 10)).withY(area.getY() + (madeByArea.getHeight() / 2) + 10).withHeight(madeByArea.getHeight() / 2).withWidth(madeByArea.getWidth() + 10));
 
     if (!collapseBrowserButton.getToggleState())
     {
@@ -235,6 +248,13 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
 
 void KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
 {
+    if (sampler.getNumModules() >= TreeIDs::maxNumModules)
+    {
+        bool okPressed = juce::AlertWindow::showNativeDialogBox("Too many samples!",
+            "Right now this only supports " + juce::String(TreeIDs::maxNumModules) + " samples.", true);
+        return;
+    }
+
     auto mod = new KrumModule(moduleName, index, file, sampler, audioProcessor.getValueTree(), &parameters);
     auto modEd = mod->createModuleEditor(*this);
 
@@ -243,6 +263,8 @@ void KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int
         addKeyboardListener(mod);
         sampler.addModule(mod, false);
         moduleContainer.addModuleEditor(modEd);
+        modulesViewport.setViewPositionProportionately(1, 0);
+        modEd->setWantsKeyboardFocus(true);
     }
     else
     {
@@ -258,7 +280,7 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
         auto modEd = mod->createModuleEditor(*this);
         if (mod->hasEditor())
         {
-            moduleContainer.addModuleEditor(modEd, false);
+            moduleContainer.addModuleEditor(modEd, true);
         }
     }
 }

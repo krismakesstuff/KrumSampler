@@ -426,21 +426,23 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
 {
     if (settingsOverlay != nullptr)
     {
+        setModuleButtonsClickState(false);
         addAndMakeVisible(settingsOverlay.get());
+
         if (selectOverlay)
         {
-            settingsOverlay->setOverlaySelected(true);
+            //we have the container control selecting so we don't have multiple selections
+            editor.getModuleContainer().setModuleSelected(&parent);
         }
         
-        setModuleButtonsClickState(false);
-        /*if (isShowing())
+        /*if (settingsOverlay->isOnDesktop())
         {
             grabKeyboardFocus();
         }*/
     }
     else
     {
-        removeMouseListener(this);
+        //removeMouseListener(this);
     }
 
 }

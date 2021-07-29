@@ -45,6 +45,9 @@ public:
 
     void setKeyDown(int midiNote, bool isKeyDown);
 
+    void updateKeysFromContainer();
+
+    void printCurrentlyAssignedMidiNotes();
 
 private:
 

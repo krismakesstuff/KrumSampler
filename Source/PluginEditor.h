@@ -152,9 +152,14 @@ private:
     KrumSampler& sampler;
     
     KrumModuleContainer moduleContainer{this};
-    KrumKeyboard keyboard{ audioProcessor.getMidiState()/*.getMidiKeyboardState()*/, juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer };
+    KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer };
     KrumFileBrowser fileBrowser;
     KrumFileDrop fileDrop{ *this, moduleContainer, parameters, fileBrowser };
+
+    juce::String madeByString{ "Made by Kris Crawford" };
+    juce::URL websiteURL{ "https://www.krismakesmusic.com" };
+    juce::TextButton websiteButton;
+    juce::Rectangle<int> madeByArea{ 0, 0, 150, 50 };
 
     //Not Using this font anymore, keeping this here incase I want to add a custom font later
     

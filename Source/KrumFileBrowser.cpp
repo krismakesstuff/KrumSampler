@@ -1029,7 +1029,7 @@ bool KrumTreeView::hasAudioFormat(juce::String fileExtension)
 //Updates an item Name and Number of Hidden Files, if applicable
 void KrumTreeView::updateValueTree(juce::String idString)
 {
-    updateOpenness();
+    //updateOpenness();
 
     DBG("ValueTree ID: " + idString);
 
