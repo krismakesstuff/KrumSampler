@@ -14,7 +14,10 @@
 
 KrumModuleProcessor::KrumModuleProcessor(KrumModule& p, KrumSampler& s/*, juce::File& sampleFile*/)
     : parent(p), sampler(s)/*, audioFile(sampleFile)*/
-{}
+{
+    //parent.parameters->getParameterAsValue()
+
+}
 
 //automatically triggers a note off after the length of the sample has passed.
 void KrumModuleProcessor::timerCallback()

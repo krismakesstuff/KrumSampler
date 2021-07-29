@@ -19,6 +19,7 @@ KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, Kru
     : valueTree(valTree), parameters(apvts)
 {
     moduleProcessor.reset(new KrumModuleProcessor(*this, km));
+    //updateAudioParams();
 
     info.index = index;
     info.audioFile = file;
@@ -37,14 +38,13 @@ KrumModule::KrumModule(int newIndex, KrumSampler& km, juce::ValueTree* valTree, 
     : valueTree(valTree), parameters(apvts)
 {
     moduleProcessor.reset(new KrumModuleProcessor(*this, km));
-    
     info.index = newIndex;
-
     getValuesFromTree();
     
+    updateAudioParams();
+
     //for now..
     info.displayIndex = info.index;
-
     updateValuesInTree();
 }
 
@@ -217,6 +217,7 @@ void KrumModule::setModuleGain(float newGain)
     //volumeSlider.setValue(newGain);
 }
 
+//float KrumModule::getModuleGain()
 std::atomic<float>* KrumModule::getModuleGain()
 {
     return moduleProcessor->moduleGain;
@@ -228,6 +229,7 @@ void KrumModule::setModulePan(float newPan)
     //panSlider.setValue(newPan);
 }
 
+//float KrumModule::getModulePan()
 std::atomic<float>* KrumModule::getModulePan()
 {
     return moduleProcessor->modulePan;
@@ -390,6 +392,13 @@ void KrumModule::clearModuleValueTree()
             stateTree.setProperty("value", juce::var(""), nullptr);
         }
     }
+}
+void KrumModule::updateAudioParams()
+{
+    juce::String i = " " + juce::String(info.index);
+    moduleProcessor->moduleGain = parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + i);
+    moduleProcessor->modulePan = parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + i);
+
 }
 //this is needed when deleting modules and needing to reassign the slider listeners in the ValueTree
 void KrumModule::reassignSliders()

@@ -40,7 +40,9 @@ public:
                 double maxSampleLengthSeconds);
     ~KrumSound() override;
     
+    //float getModuleGain()const;
     std::atomic<float>* getModuleGain()const;
+    //float getModulePan()const;
     std::atomic<float>* getModulePan()const;
 
     void setModulePlaying(bool playing);
@@ -124,7 +126,7 @@ public:
     void clearModules();
     int getNumModules();
 
-    juce::AudioFormatReader* isFileAcceptable(const juce::File& file);
+    bool isFileAcceptable(const juce::File& file);
 
     juce::AudioFormatManager& getFormatManager();
 

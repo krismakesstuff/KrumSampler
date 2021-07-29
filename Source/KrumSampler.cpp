@@ -46,11 +46,13 @@ KrumSound::~KrumSound()
     //SamplerSound::~SamplerSound();
 }
 
+//float KrumSound::getModuleGain() const
 std::atomic<float>* KrumSound::getModuleGain() const
 {
     return parentModule->getModuleGain();
 }
 
+//float KrumSound::getModulePan() const
 std::atomic<float>* KrumSound::getModulePan() const
 {
     return parentModule->getModulePan();
@@ -96,23 +98,26 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
 
         sourceSamplePosition = 0.0;
 
-        std::atomic<float>* moduleGain = sound->getModuleGain();
-        std::atomic<float>* modulePan = sound->getModulePan();
+        //std::atomic<float>* moduleGain = sound->getModuleGain();
+        //std::atomic<float>* modulePan = sound->getModulePan();
+
+        float moduleGain = *sound->getModuleGain();
+        float modulePan = *sound->getModulePan();
 
         //module gain
-        lgain = velocity * (*moduleGain);
-        rgain = velocity * (*moduleGain);
+        lgain = velocity * (moduleGain);
+        rgain = velocity * (moduleGain);
 
         //panned right
-        if (*modulePan > 0.5f)
+        if (modulePan > 0.5f)
         {
-            lgain = lgain * (1 - *modulePan);
+            lgain = lgain * (1 - modulePan);
         }
 
         //panned left
-        if(*modulePan < 0.5f)
+        if(modulePan < 0.5f)
         {
-            rgain = rgain * (*modulePan);
+            rgain = rgain * (modulePan);
         }
 
         adsr.setSampleRate(sound->sourceSampleRate);
@@ -211,7 +216,8 @@ void KrumSampler::initVoices()
 {
     for (int i = 0; i < MAX_VOICES; i++)
     {
-        addVoice(new KrumVoice());
+        auto newVoice = addVoice(new KrumVoice());
+        newVoice->setCurrentPlaybackSampleRate(getSampleRate());
     }
 
     DBG("Voices: " + juce::String(voices.size()));
@@ -388,11 +394,13 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
  
 void KrumSampler::updateModule(KrumModule* updatedModule)
 {
-    juce::BigInteger range;
-    range.setBit(updatedModule->getMidiTriggerNote());
-
-    if (auto reader = isFileAcceptable(updatedModule->getSampleFile()))
+    if (isFileAcceptable(updatedModule->getSampleFile()))
     {
+        std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(updatedModule->getSampleFile()));
+        juce::BigInteger range;
+        range.setBit(updatedModule->getMidiTriggerNote());
+
+    
         for (int i = 0; i < getNumModules(); i++)
         {
             if (updatedModule == modules[i])
@@ -402,6 +410,7 @@ void KrumSampler::updateModule(KrumModule* updatedModule)
                                         attackTime, releaseTime, maxFileLengthInSeconds));
             }
         }
+    
     }
 
     DBG("Sounds: " + juce::String(sounds.size()));
@@ -422,21 +431,21 @@ int KrumSampler::getNumModules()
     return modules.size();
 }
 
-juce::AudioFormatReader* KrumSampler::isFileAcceptable(const juce::File& file)
+bool KrumSampler::isFileAcceptable(const juce::File& file)
 {
     std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(file));
     if (reader == nullptr)
     {
         auto alert = juce::AlertWindow::showNativeDialogBox("File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".", true);
-        return nullptr;
+        return false;
     }
     if (reader->lengthInSamples / reader->sampleRate >= MAX_FILE_LENGTH_SECS)
     {
         auto alert = juce::AlertWindow::showNativeDialogBox("File Too Long!", "The maximum file length is " + juce::String(MAX_FILE_LENGTH_SECS) + " seconds.", true);
-        return nullptr;
+        return false;
     }
 
-    return reader.get();
+    return true;
 }
 
 juce::AudioFormatManager& KrumSampler::getFormatManager()

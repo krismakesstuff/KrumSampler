@@ -101,27 +101,29 @@ public:
 
     void setModuleGain(float newGain);
     std::atomic<float>* getModuleGain();
+    //float getModuleGain();
 
     void setModulePan(float newPan);
     std::atomic<float>* getModulePan();
+    //float getModulePan();
 
     void getValuesFromTree();
     void updateValuesInTree(bool printBefore = false);
     void clearModuleValueTree();
+
+    void updateAudioParams();
 
     void reassignSliders();
 
     KrumModuleEditor* createModuleEditor(KrumSamplerAudioProcessorEditor& editor);
     KrumModuleEditor* getCurrentModuleEditor();
     bool hasEditor();
-
     void setEditorVisibility(bool isVisible);
-
     void deleteModuleEditor();
 
     int deleteEntireModule();
 
-    //provides easy acces for the processor and editor.
+    //provides easy access for the processor and editor.
     struct ModuleInfo
     {
         juce::Colour moduleColor{ juce::Colours::blue };
