@@ -47,7 +47,7 @@ private:
     //float modulePan;
     
 
-    float buttonClickVelocity = 5.0f;
+    float buttonClickVelocity = 0.5f;
 
 
 };

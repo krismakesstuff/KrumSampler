@@ -30,6 +30,7 @@ void KrumModuleProcessor::triggerNoteOn()
     //int timerLength = parent.moduleEditor->getAudioFileLengthInMs();
     
     sampler.noteOn(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity);
+    sampler.noteOff(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity, true);
     //startTimer(timerLength);
 }
 
