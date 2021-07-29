@@ -24,14 +24,14 @@ void KrumModuleProcessor::timerCallback()
 
 void KrumModuleProcessor::triggerNoteOn()
 {
-    int timerLength = parent.moduleEditor->getAudioFileLengthInMs();
+    //int timerLength = parent.moduleEditor->getAudioFileLengthInMs();
     
     sampler.noteOn(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity);
-    startTimer(timerLength);
+    //startTimer(timerLength);
 }
 
 void KrumModuleProcessor::triggerNoteOff()
 {
-    stopTimer();
-    sampler.noteOff(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity, false);
+    //stopTimer();
+    //sampler.noteOff(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity, false);
 }

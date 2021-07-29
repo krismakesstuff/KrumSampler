@@ -388,24 +388,19 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
  
 void KrumSampler::updateModule(KrumModule* updatedModule)
 {
-    std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(updatedModule->getSampleFile()));
     juce::BigInteger range;
     range.setBit(updatedModule->getMidiTriggerNote());
 
-    if (reader == nullptr)
+    if (auto reader = isFileAcceptable(updatedModule->getSampleFile()))
     {
-        //removeModule(updatedModule);
-        DBG("Format Not Supported");
-        return;
-    }
-
-    for (int i = 0; i < getNumModules(); i++)
-    {
-        if (updatedModule == modules[i])
+        for (int i = 0; i < getNumModules(); i++)
         {
-            //addVoice(new KrumVoice());
-            addSound(new KrumSound(updatedModule, updatedModule->getModuleName(), *reader , range, updatedModule->getMidiTriggerNote(), 
-                                    attackTime, releaseTime, maxFileLengthInSeconds));
+            if (updatedModule == modules[i])
+            {
+                //addVoice(new KrumVoice());
+                addSound(new KrumSound(updatedModule, updatedModule->getModuleName(), *reader , range, updatedModule->getMidiTriggerNote(), 
+                                        attackTime, releaseTime, maxFileLengthInSeconds));
+            }
         }
     }
 
@@ -425,6 +420,23 @@ void KrumSampler::clearModules()
 int KrumSampler::getNumModules()
 {
     return modules.size();
+}
+
+juce::AudioFormatReader* KrumSampler::isFileAcceptable(const juce::File& file)
+{
+    std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(file));
+    if (reader == nullptr)
+    {
+        auto alert = juce::AlertWindow::showNativeDialogBox("File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".", true);
+        return nullptr;
+    }
+    if (reader->lengthInSamples / reader->sampleRate >= MAX_FILE_LENGTH_SECS)
+    {
+        auto alert = juce::AlertWindow::showNativeDialogBox("File Too Long!", "The maximum file length is " + juce::String(MAX_FILE_LENGTH_SECS) + " seconds.", true);
+        return nullptr;
+    }
+
+    return reader.get();
 }
 
 juce::AudioFormatManager& KrumSampler::getFormatManager()

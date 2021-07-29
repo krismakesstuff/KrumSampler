@@ -246,29 +246,39 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
     //postMessageToList(m, juce::String());
 }
 
-void KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
+bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
 {
     if (sampler.getNumModules() >= TreeIDs::maxNumModules)
     {
         bool okPressed = juce::AlertWindow::showNativeDialogBox("Too many samples!",
             "Right now this only supports " + juce::String(TreeIDs::maxNumModules) + " samples.", true);
-        return;
+        return false;
     }
 
-    auto mod = new KrumModule(moduleName, index, file, sampler, audioProcessor.getValueTree(), &parameters);
-    auto modEd = mod->createModuleEditor(*this);
-
-    if (mod != nullptr && modEd != nullptr)
+    if (sampler.isFileAcceptable(file))
     {
-        addKeyboardListener(mod);
-        sampler.addModule(mod, false);
-        moduleContainer.addModuleEditor(modEd);
-        modulesViewport.setViewPositionProportionately(1, 0);
-        modEd->setWantsKeyboardFocus(true);
+        auto mod = new KrumModule(moduleName, index, file, sampler, audioProcessor.getValueTree(), &parameters);
+        auto modEd = mod->createModuleEditor(*this);
+
+        if (mod != nullptr && modEd != nullptr)
+        {
+            addKeyboardListener(mod);
+            sampler.addModule(mod, false);
+            moduleContainer.addModuleEditor(modEd);
+            modulesViewport.setViewPositionProportionately(1, 0);
+            modEd->setWantsKeyboardFocus(true);
+            return true;
+        }
+        else
+        {
+            DBG("Module Creation failed");
+            return false;
+        }
     }
     else
     {
-        //module creation failed
+        DBG("File is unacceptable");
+        return false;
     }
 }
 

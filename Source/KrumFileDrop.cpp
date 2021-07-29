@@ -73,9 +73,11 @@ void KrumFileDrop::itemDropped(const juce::DragAndDropTarget::SourceDetails& dra
             auto itemName = krumItem->getItemName(); 
             if (!krumItem->mightContainSubItems())
             {
-                createNewModule(file, itemName);
-                fileBrowser.addFileToRecent(file, itemName);
-                DBG("Item" + file.getFullPathName());
+                if (createNewModule(file, itemName))
+                {
+                    fileBrowser.addFileToRecent(file, itemName);
+                    DBG("Item" + file.getFullPathName());
+                }
             }
             else
             {
@@ -109,8 +111,10 @@ void KrumFileDrop::filesDropped(const juce::StringArray& files, int x, int y)
         juce::File audioFile{ file };
         if (fileBrowser.doesPreviewerSupport(audioFile.getFileExtension()))
         {
-            createNewModule(audioFile, audioFile.getFileName());
-            fileBrowser.addFileToRecent(audioFile, audioFile.getFileName());
+            if (createNewModule(audioFile, audioFile.getFileName()))
+            {
+               fileBrowser.addFileToRecent(audioFile, audioFile.getFileName());
+            }
         }
         else
         {
@@ -121,9 +125,9 @@ void KrumFileDrop::filesDropped(const juce::StringArray& files, int x, int y)
 }
 
 
-void KrumFileDrop::createNewModule(juce::File audioFile, juce::String name)
+bool KrumFileDrop::createNewModule(juce::File audioFile, juce::String name)
 {
     //int index = container.findFreeModuleIndex();
     int index = editor.getSampler().getNumModules();
-    editor.createModule(name, index, audioFile);
+    return editor.createModule(name, index, audioFile);
 }

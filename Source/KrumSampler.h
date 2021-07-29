@@ -26,7 +26,7 @@
 */
 
 #define MAX_VOICES 8
-
+#define MAX_FILE_LENGTH_SECS 5
 
 class KrumSound : public juce::SamplerSound
 {
@@ -122,8 +122,9 @@ public:
     void updateModule(KrumModule* updatedModule);
     
     void clearModules();
-
     int getNumModules();
+
+    juce::AudioFormatReader* isFileAcceptable(const juce::File& file);
 
     juce::AudioFormatManager& getFormatManager();
 

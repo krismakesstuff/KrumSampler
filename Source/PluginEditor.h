@@ -81,7 +81,7 @@ public:
     
     static juce::String getMidiInfo(const juce::MidiMessage&);
 
-    void createModule(juce::String& moduleName, int index, juce::File& file);
+    bool createModule(juce::String& moduleName, int index, juce::File& file);
     void createModuleEditors();
     KrumModuleContainer& getModuleContainer();
 

@@ -45,7 +45,7 @@ public:
     bool isInterestedInFileDrag(const juce::StringArray& files) override;
     void filesDropped(const juce::StringArray& files, int x, int y) override;
 
-    void createNewModule(juce::File audioFile, juce::String name = juce::String());
+    bool createNewModule(juce::File audioFile, juce::String name = juce::String());
 
 private:
 

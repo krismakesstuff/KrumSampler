@@ -434,7 +434,10 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
             //we have the container control selecting so we don't have multiple selections
             editor.getModuleContainer().setModuleSelected(&parent);
         }
-        
+        else
+        {
+            settingsOverlay->setOverlaySelected(false);
+        }
         /*if (settingsOverlay->isOnDesktop())
         {
             grabKeyboardFocus();
