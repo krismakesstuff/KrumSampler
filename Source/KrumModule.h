@@ -29,6 +29,9 @@
 * 
 */
 
+#define THUMBNAIL_RES 256
+
+
 class KrumModule :  public juce::MidiKeyboardStateListener,
                     public juce::DragAndDropContainer
 {
@@ -73,7 +76,7 @@ public:
     void setSampleFile(juce::File& newSample);
 
     int getMidiTriggerNote();
-    void setMidiTriggerNote(int midiNoteNumber);
+    void setMidiTriggerNote(int midiNoteNumber, bool removOld = false);
 
     int getMidiTriggerChannel();
     void setMidiTriggerChannel(int newMidiChannel);
@@ -107,11 +110,13 @@ public:
     std::atomic<float>* getModulePan();
     //float getModulePan();
 
+    bool doesModuleNeedToUpdateTree();
+
     void getValuesFromTree();
     void updateValuesInTree(bool printBefore = false);
     void clearModuleValueTree();
 
-    void updateAudioParams();
+    void updateAudioAtomics();
 
     void reassignSliders();
 
@@ -145,6 +150,10 @@ public:
     ModuleInfo info;
 
 private:
+
+    bool needsToUpdateTree = false;
+
+    juce::CriticalSection lock;
 
     friend class KrumModuleEditor;
     friend class KrumModuleProcessor;

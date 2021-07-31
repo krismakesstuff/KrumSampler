@@ -149,25 +149,30 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     }
 }
 
-void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor)
+void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote)
 {
-    if (isMidiNoteAssigned(midiNote))
+    int testNote = oldNote > 0 ? oldNote : midiNote;
+    if (isMidiNoteAssigned(testNote))
     {
-        removeMidiNoteColorAssignment(midiNote);
+        removeMidiNoteColorAssignment(testNote);
     }
     currentlyAssignedMidiNotes.emplace(std::make_pair(midiNote, moduleColor));
     juce::MessageManagerLock lock;
     repaint();
 }
 
-void KrumKeyboard::removeMidiNoteColorAssignment(int midiNote)
+void KrumKeyboard::removeMidiNoteColorAssignment(int midiNote, bool shouldRepaint)
 {
     auto search = currentlyAssignedMidiNotes.find(midiNote);
     if (search != currentlyAssignedMidiNotes.end())
     {
         currentlyAssignedMidiNotes.erase(midiNote);
-        juce::MessageManagerLock lock;
-        repaint();
+        if (shouldRepaint)
+        {
+            juce::MessageManagerLock lock;
+            repaint();
+
+        }
     }
 }
 

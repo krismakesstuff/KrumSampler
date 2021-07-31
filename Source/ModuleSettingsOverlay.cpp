@@ -150,19 +150,20 @@ void ModuleSettingsOverlay::confirmMidi()
         parentModule.setModuleColor(color, false);
     }
     
-    
-    parentModule.setMidiTriggerNote(midiNoteNum);
-    parentModule.setMidiTriggerChannel(midiChanNum);
+    bool removeOld = parentModule.info.midiNote > 0;
     juce::String text = titleBox.getText(true);
+
+    parentModule.setMidiTriggerNote(midiNoteNum, removeOld);
+    parentModule.setMidiTriggerChannel(midiChanNum);
     parentModule.setModuleName(text);
     parentModule.removeSettingsOverlay();
 }
 
 void ModuleSettingsOverlay::setOverlaySelected(bool isSelected)
 {
-    moduleOverlaySelected = isSelected;
-    if (moduleOverlaySelected && isVisible())
+    if (isSelected && isVisible())
     {
+        moduleOverlaySelected = isSelected;
         showButtons();
         //grabKeyboardFocus();
     }

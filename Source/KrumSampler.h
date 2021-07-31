@@ -46,6 +46,8 @@ public:
     std::atomic<float>* getModulePan()const;
 
     void setModulePlaying(bool playing);
+    //void setMidi(int newMidiNote, int newMidiChannel);
+    bool isParent(KrumModule* moduleToTest);
 
 private:
     friend class KrumVoice;
@@ -84,6 +86,8 @@ private:
 
     friend class juce::SamplerSound;
 
+   // juce::CriticalSection voiceLock;
+
     double pitchRatio = 0;
     double sourceSamplePosition = 0;
     std::atomic<float> lgain = 0, rgain = 0;
@@ -121,7 +125,9 @@ public:
     KrumModule* getModule(int index);
     void addModule(KrumModule* newModule, bool addVoice = false);
     void removeModule(KrumModule* moduleToDelete);
-    void updateModule(KrumModule* updatedModule);
+    void updateModuleSample(KrumModule* updatedModule);
+    
+    void addSample(KrumModule* moduleToAddSound);
     
     void clearModules();
     int getNumModules();

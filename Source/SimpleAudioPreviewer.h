@@ -55,7 +55,11 @@ public:
     void savePreviewerGainState();
     float getSavedPreviewerGainState();
 
+    void refreshSettings();
+
 private:
+
+    juce::CriticalSection lock;
 
     juce::ToggleButton autoPlayToggle;
     juce::Slider volumeSlider;

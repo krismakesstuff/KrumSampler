@@ -12,9 +12,11 @@
 
 //==============================================================================
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valueTree, juce::ValueTree& fileBrowserTree)
-    : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(valueTree, fileBrowserTree, *audioProcessor.getFormatManager())
+    : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(audioProcessor.getFileBrowser())
 {
     
+    needsToUpdateThumbs = true;
+
     auto seperatorString = juce::File::getSeparatorString();
     juce::String titleImageFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"KrumSamplerTitle.png";
     
@@ -191,7 +193,6 @@ void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, 
 void KrumSamplerAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
-
     websiteButton.setBounds(madeByArea.withX(area.getRight() - (madeByArea.getWidth() + 10)).withY(area.getY() + (madeByArea.getHeight() / 2) + 10).withHeight(madeByArea.getHeight() / 2).withWidth(madeByArea.getWidth() + 10));
 
     if (!collapseBrowserButton.getToggleState())
@@ -234,6 +235,15 @@ void KrumSamplerAudioProcessorEditor::resized()
 
 }
 
+void KrumSamplerAudioProcessorEditor::visibilityChanged()
+{
+    if (needsToUpdateThumbs)
+    {
+        updateThumbnails();
+    }
+    juce::Component::visibilityChanged();
+}
+
 void KrumSamplerAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState* keyState, int midiChannel, int midiNote, float velocity)
 {
     //auto m = juce::MidiMessage::noteOn(midiChannel, midiNote, velocity);
@@ -248,10 +258,10 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
 
 bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
 {
-    if (sampler.getNumModules() >= TreeIDs::maxNumModules)
+    if (sampler.getNumModules() >= MAX_NUM_MODULES)
     {
         bool okPressed = juce::AlertWindow::showNativeDialogBox("Too many samples!",
-            "Right now this only supports " + juce::String(TreeIDs::maxNumModules) + " samples.", true);
+            "Right now this only supports " + juce::String(MAX_NUM_MODULES) + " samples.", true);
         return false;
     }
 
@@ -393,9 +403,14 @@ void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component
 }
 
 
-void KrumSamplerAudioProcessorEditor::setKeyboardNoteColor(int midiNoteNumber, juce::Colour color)
+void KrumSamplerAudioProcessorEditor::setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote)
 {
-    keyboard.assignMidiNoteColor(midiNoteNumber, color);
+    keyboard.assignMidiNoteColor(midiNoteNumber, color, oldNote);
+}
+
+void KrumSamplerAudioProcessorEditor::removeKeyboardNoteColor(int midiNoteNumber)
+{
+    keyboard.removeMidiNoteColorAssignment(midiNoteNumber);
 }
 
 void KrumSamplerAudioProcessorEditor::addKeyboardListener(juce::MidiKeyboardStateListener* listener)
@@ -430,11 +445,11 @@ void KrumSamplerAudioProcessorEditor::cleanUpEmptyModuleTrees(/*int numModules*/
     int numModules = audioProcessor.getNumModulesInSampler();
     auto valueTree = getValueTree();
 
-    if (numModules < TreeIDs::maxNumModules)
+    if (numModules < MAX_NUM_MODULES)
     {
         auto modulesTree = valueTree->getChildWithName("KrumModules");
 
-        for (int i = numModules; i < TreeIDs::maxNumModules; i++)
+        for (int i = numModules; i < MAX_NUM_MODULES; i++)
         {
             auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
 
@@ -484,6 +499,11 @@ juce::AudioFormatManager* KrumSamplerAudioProcessorEditor::getAudioFormatManager
     return audioProcessor.getFormatManager();
 }
 
+juce::AudioThumbnailCache& KrumSamplerAudioProcessorEditor::getThumbnailCache()
+{
+    return audioProcessor.getThumbnailCache();
+}
+
 juce::ValueTree* KrumSamplerAudioProcessorEditor::getValueTree()
 {
     return audioProcessor.getValueTree();
@@ -498,3 +518,15 @@ KrumFileBrowser* KrumSamplerAudioProcessorEditor::getFileBrowser()
 {
     return &fileBrowser;
 }
+
+void KrumSamplerAudioProcessorEditor::updateThumbnails()
+{
+    for (int i = 0; i < moduleContainer.getModuleDisplayOrder().size(); i++)
+    {
+        auto modEd = moduleContainer.getEditorFromModule(sampler.getModule(i));
+        modEd->setAndDrawThumbnail();
+    }
+    needsToUpdateThumbs = true;
+}
+
+

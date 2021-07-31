@@ -17,7 +17,6 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::V
 {
     //Not working on MACOS
 
-
     addAndMakeVisible(autoPlayToggle);
     autoPlayToggle.setButtonText("Auto-Play");
     autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
@@ -45,9 +44,7 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::V
 
 
     previewThread.startThread(3);
- 
     audioDeviceManager.initialise(0, 2, nullptr, true);
-
     audioDeviceManager.addAudioCallback(&audioSourcePlayer);
     audioSourcePlayer.setSource(&transportSource);
 
@@ -56,10 +53,8 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::V
 
 SimpleAudioPreviewer::~SimpleAudioPreviewer()
 {
-
     transportSource.setSource(nullptr);
     audioSourcePlayer.setSource(nullptr);
-
 }
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)
@@ -237,4 +232,10 @@ float SimpleAudioPreviewer::getSavedPreviewerGainState()
     auto prevTree = globalTree.getChildWithName("PreviewerGain");
 
     return (float)prevTree.getProperty("value");
+}
+
+void SimpleAudioPreviewer::refreshSettings()
+{
+    volumeSlider.setValue(getSavedPreviewerGainState(), juce::dontSendNotification);
+    autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
 }

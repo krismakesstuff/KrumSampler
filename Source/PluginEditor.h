@@ -16,7 +16,6 @@
 #include "KrumLookAndFeel.h"
 #include "KrumFileDrop.h"
 #include "KrumModuleContainer.h"
-#include "KrumFileBrowser.h"
 
 //==============================================================================
 /*
@@ -76,6 +75,8 @@ public:
     void paintOutputVolumeLines(juce::Graphics& g, juce::Rectangle<float> bounds);
     void resized() override;
 
+    void visibilityChanged() override;
+
     void handleNoteOn(juce::MidiKeyboardState*, int midiChannel, int midiNote, float velocity) override;
     void handleNoteOff(juce::MidiKeyboardState*, int midiChannel, int midiNote, float velocity) override;
     
@@ -96,13 +97,17 @@ public:
 
     void updateOutputGainBubbleComp(juce::Component*);
 
-    void setKeyboardNoteColor(int midiNoteNumber, juce::Colour color);
+    void setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote = 0);
+    void removeKeyboardNoteColor(int midiNoteNumber);
+
     void addKeyboardListener(juce::MidiKeyboardStateListener* listener);
     void removeKeyboardListener(juce::MidiKeyboardStateListener* listenerToRemove);
 
     void cleanUpEmptyModuleTrees();
 
     juce::AudioFormatManager* getAudioFormatManager();
+    juce::AudioThumbnailCache& getThumbnailCache();
+
     KrumSampler& getSampler();
     juce::ValueTree* getValueTree();
     juce::AudioProcessorValueTreeState* getParameters();
@@ -110,7 +115,12 @@ public:
 
     juce::SharedResourcePointer<juce::TooltipWindow> toolTipWindow;
 
+    void updateThumbnails();
+
 private:
+
+
+    bool needsToUpdateThumbs = false;
 
     //unsure if these are the right approach for access...
     friend class KrumModule;
@@ -119,7 +129,7 @@ private:
 
     KrumLookAndFeel kLaf{};
 
-    juce::CriticalSection lock;
+    //juce::CriticalSection lock;
     juce::Image titleImage;
 
     juce::DrawableButton collapseBrowserButton {"Collapse", juce::DrawableButton::ButtonStyle::ImageStretched};
@@ -150,16 +160,18 @@ private:
  
     KrumSamplerAudioProcessor& audioProcessor;
     KrumSampler& sampler;
-    
+    KrumFileBrowser& fileBrowser;
+
     KrumModuleContainer moduleContainer{this};
     KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer };
-    KrumFileBrowser fileBrowser;
     KrumFileDrop fileDrop{ *this, moduleContainer, parameters, fileBrowser };
 
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
     juce::TextButton websiteButton;
     juce::Rectangle<int> madeByArea{ 0, 0, 150, 50 };
+
+
 
     //Not Using this font anymore, keeping this here incase I want to add a custom font later
     

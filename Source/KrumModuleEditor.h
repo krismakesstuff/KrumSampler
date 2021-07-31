@@ -103,11 +103,18 @@ public:
     void triggerNoteOnInParent();
     void triggerNoteOffInParent();
 
+    void setAndDrawThumbnail();
+
+    void setOldMidiNote(int midiNote);
 private:
+
+    bool needsToDrawThumbnail = false;
 
     KrumModule& parent;
     KrumModuleProcessor& moduleProcessor;
     KrumSamplerAudioProcessorEditor& editor;
+
+    int oldMidiNote = 0;
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
@@ -115,7 +122,6 @@ private:
     
     juce::Label titleBox;
 
-    juce::AudioThumbnailCache thumbnailCache;
     juce::AudioThumbnail thumbnail;
     juce::Rectangle<int> thumbnailBG;
 

@@ -51,7 +51,7 @@ public:
 
 KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumModuleProcessor& p, KrumSamplerAudioProcessorEditor& e)
     :   parent(o), moduleProcessor(p), editor(e),
-        thumbnailCache(5), thumbnail(512, moduleProcessor.sampler.getFormatManager(), thumbnailCache)
+        thumbnail(THUMBNAIL_RES, moduleProcessor.sampler.getFormatManager(), e.getThumbnailCache())
 {
     setSize(EditorDimensions::moduleW, EditorDimensions::moduleH);
     setVisible(true);
@@ -66,6 +66,7 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumModuleProcessor& p, KrumSa
     else
     {
         buildModule();
+        needsToDrawThumbnail = true;
     }
 
 }
@@ -281,8 +282,6 @@ void KrumModuleEditor::buildModule()
     
     titleBox.onTextChange = [this] { updateName(); };
 
-    thumbnail.setSource(new juce::FileInputSource(parent.info.audioFile));
-
     addAndMakeVisible(volumeSlider);
     volumeSlider.setScrollWheelEnabled(false);
     volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
@@ -294,13 +293,12 @@ void KrumModuleEditor::buildModule()
     volumeSlider.onValueChange = [this] { updateBubbleComp(&volumeSlider, volumeSlider.getCurrentPopupDisplay()); };
     
     volumeSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleGain_ID + i, volumeSlider));
-    moduleProcessor.moduleGain = parent.parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + i);
 
     addAndMakeVisible(panSlider);
     panSlider.setScrollWheelEnabled(false);
     panSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     panSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-    panSlider.setNumDecimalPlacesToDisplay(2);
+    panSlider.setNumDecimalPlacesToDisplay(2); 
     panSlider.setDoubleClickReturnValue(true, 1.0f);
     panSlider.setPopupDisplayEnabled(true, false, this);
     panSlider.setTooltip(panSlider.getTextFromValue(panSlider.getValue()));
@@ -308,7 +306,10 @@ void KrumModuleEditor::buildModule()
     panSlider.onValueChange = [this] { updateBubbleComp(&panSlider, panSlider.getCurrentPopupDisplay()); };
 
     panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + i, panSlider));
-    moduleProcessor.modulePan = parent.parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + i);
+    //a moduleProcessor.moduleGain = parent.parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + i);
+    //moduleProcessor.modulePan = parent.parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + i);
+
+    parent.updateAudioAtomics();
 
     juce::String playButtonFileString = "KrumSampler" + seperatorString + "Resources" + seperatorString + "play_arrow-black-18dp.svg";
     juce::File playButtonImFile = appDataFolder.getChildFile(playButtonFileString);
@@ -359,7 +360,6 @@ void KrumModuleEditor::setChildCompColors()
     editButton.setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.7f));
     editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.2f));
 
-
     titleBox.setColour(juce::TextEditor::ColourIds::backgroundColourId, juce::Colours::black);
     titleBox.setColour(juce::TextEditor::ColourIds::outlineColourId, juce::Colours::black);
     titleBox.setColour(juce::TextEditor::ColourIds::textColourId, moduleColor.contrasting());
@@ -375,6 +375,7 @@ void KrumModuleEditor::setChildCompColors()
 
 void KrumModuleEditor::showSettingsMenu()
 {
+    juce::MessageManagerLock lock;
     juce::PopupMenu settingsMenu;
 
     settingsMenu.addItem(KrumModule::moduleReConfig_Id, "Re-Config");
@@ -453,12 +454,22 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
 
 void KrumModuleEditor::cleanUpOverlay(bool keepSettings)
 {
-    buildModule();
-    
+    if (!parent.isModuleActive())
+    {
+        buildModule();
+    }
+
     if (keepSettings)
     {
-        editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor);
-        moduleProcessor.sampler.updateModule(&parent);
+        if (oldMidiNote > 0)
+        {
+            editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor, oldMidiNote);
+        }
+        else
+        {
+            editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor);
+        }
+        moduleProcessor.sampler.updateModuleSample(&parent);
     }
 
     setModuleButtonsClickState(true);
@@ -649,4 +660,16 @@ void KrumModuleEditor::triggerNoteOnInParent()
 void KrumModuleEditor::triggerNoteOffInParent()
 {
     parent.triggerNoteOff();
+}
+
+void KrumModuleEditor::setAndDrawThumbnail()
+{
+    thumbnail.setSource(new juce::FileInputSource(parent.info.audioFile)); 
+    repaint();
+    needsToDrawThumbnail = false;
+}
+
+void KrumModuleEditor::setOldMidiNote(int midiNote)
+{
+    oldMidiNote = midiNote;
 }

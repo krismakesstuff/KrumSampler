@@ -39,9 +39,11 @@ public:
     void drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
                         bool isDown, bool isOver, juce::Colour noteFillColour) override;
 
-    void assignMidiNoteColor(int midiNote, juce::Colour moduleColor);
-    void removeMidiNoteColorAssignment(int midiNote);
+    void assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote = 0);
+    void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
     bool isMidiNoteAssigned(int midiNote);
+
+    
 
     void setKeyDown(int midiNote, bool isKeyDown);
 

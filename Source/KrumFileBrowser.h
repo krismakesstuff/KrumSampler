@@ -378,7 +378,7 @@ class KrumFileBrowser : public juce::Component
 {
 public:
 
-    KrumFileBrowser(juce::ValueTree& previewerGainTree, juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager);
+    KrumFileBrowser(juce::ValueTree& valueTree, juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager);
     ~KrumFileBrowser();
 
     void paint(juce::Graphics& g) override;

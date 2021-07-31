@@ -1586,6 +1586,8 @@ void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
     auto oldTree = fileTree.getFileBrowserValueTree();
     oldTree = newTree;
     fileTree.reCreateFileBrowserFromTree();
+    repaint();
+
 }
 
 SimpleAudioPreviewer* KrumFileBrowser::getAudioPreviewer()

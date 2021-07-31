@@ -40,7 +40,7 @@ juce::ValueTree createValueTree()
 
     juce::ValueTree krumModulesTree{ "KrumModules" };
     
-    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         juce::String index = juce::String(i);
         juce::ValueTree newModule =
@@ -83,7 +83,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
     const juce::StringArray outputStrings {"1 & 2", "3 & 4", "5 & 6"};
 
-    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         juce::String index = " " + juce::String(i);
         juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
@@ -176,7 +176,7 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
     }
     
-    //this does not output midi
+    //this app does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
     midiMessages.clear();
 }
 
@@ -224,10 +224,23 @@ bool KrumSamplerAudioProcessor::hasEditor() const
     return true; 
 }
 
+//void KrumSamplerAudioProcessor::updateEditor()
+//{
+//    if (hasEditor())
+//    {
+//        auto editor = static_cast<KrumSamplerAudioProcessorEditor*>(getActiveEditor());
+//        if (editor)
+//        {
+//            editor->updateEditor();
+//            editorWantsToUpdate = false;
+//        }
+//    }
+//}
+
 juce::AudioProcessorEditor* KrumSamplerAudioProcessor::createEditor()
 {
-    auto editor = new KrumSamplerAudioProcessorEditor(*this, sampler, parameters, valueTree, fileBrowserValueTree);
-    return editor;
+    //editorWantsToUpdate = true;
+    return new KrumSamplerAudioProcessorEditor(*this, sampler, parameters, valueTree, fileBrowserValueTree);
 }
 
 //=======================================================================================//
@@ -328,21 +341,13 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
             {
                 fileBrowserValueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlFileBrowserTree), nullptr);
                 xmlState->removeChildElement(xmlFileBrowserTree, true);
-                auto editor = getActiveEditor();
-                if (editor != nullptr)
-                {
-                    auto krumEditor = static_cast<KrumSamplerAudioProcessorEditor*>(editor);
-                    if (krumEditor != nullptr)
-                    {
-                        krumEditor->getFileBrowser()->rebuildBrowser(fileBrowserValueTree);
-                    }
-                }
+                fileBrowser.rebuildBrowser(fileBrowserValueTree);
             }
             
             //Remaining App/Modules Settings
             valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr); 
             makeModulesFromValueTree();
-           
+            fileBrowser.getAudioPreviewer()->refreshSettings();
             
             DBG("---SET STATE---");
             DBG(juce::ValueTree::fromXml(*xmlState).toXmlString());
@@ -382,7 +387,7 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
     sampler.clearModules();
     auto modulesTree = valueTree.getChildWithName("KrumModules");
     
-    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
         if (moduleTree.isValid())
@@ -442,7 +447,7 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
 {
     auto modulesTree = valueTree.getChildWithName("KrumModules");
 
-    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
         auto mod = sampler.getModule(i);
@@ -529,7 +534,7 @@ int KrumSamplerAudioProcessor::findFreeModuleIndex()
 {
     auto modulesTree = valueTree.getChildWithName("KrumModules");
 
-    for (int i = 0; i < TreeIDs::maxNumModules; i++)
+    for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
         
@@ -547,6 +552,24 @@ int KrumSamplerAudioProcessor::findFreeModuleIndex()
     }
 
 }
+
+juce::AudioThumbnailCache& KrumSamplerAudioProcessor::getThumbnailCache()
+{
+    return thumbnailCache.get();
+}
+
+KrumFileBrowser& KrumSamplerAudioProcessor::getFileBrowser()
+{
+    return fileBrowser;
+}
+
+//bool KrumSamplerAudioProcessor::resetFileBrowser()
+//{
+//
+//    fileBrowser.reset(new )
+//
+//    return false;
+//}
 
 
 //==============================================================================

@@ -63,6 +63,20 @@ void KrumSound::setModulePlaying(bool isPlaying)
     parentModule->setModulePlaying(isPlaying);
 }
 
+//void KrumSound::setMidi(int newMidiNote, int newMidiChannel)
+//{
+//    midiRootNote = newMidiNote;
+//    midiChannel = newMidiChannel;
+//    midiNotes.setBit(midiRootNote);
+//
+//
+//}
+
+bool KrumSound::isParent(KrumModule* moduleToTest)
+{
+    return parentModule == moduleToTest;
+}
+
 
 //==================================================================================================//
 
@@ -90,6 +104,7 @@ bool KrumVoice::isVoiceActive() const
 
 void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* s, int pitchWheel)
 {
+
     
     if (auto* sound = static_cast<const KrumSound*> (s))
     {
@@ -100,7 +115,9 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
 
         //std::atomic<float>* moduleGain = sound->getModuleGain();
         //std::atomic<float>* modulePan = sound->getModulePan();
-
+        
+       // const juce::ScopedLock sl(voiceLock);
+        
         float moduleGain = *sound->getModuleGain();
         float modulePan = *sound->getModulePan();
 
@@ -344,9 +361,8 @@ KrumModule* KrumSampler::getModule(int index)
     return modules[index];
 }
 
-void KrumSampler::addModule(KrumModule* newModule, bool addVoice)
+void KrumSampler::addModule(KrumModule* newModule, bool hasSample)
 {
-
     if (voices.size() == 0)
     {
         initVoices();
@@ -354,15 +370,12 @@ void KrumSampler::addModule(KrumModule* newModule, bool addVoice)
 
     modules.insert(newModule->getModuleIndex(), std::move(newModule));
 
-    //in some cases you just want to add the module, but leave it not configured
-    if (addVoice)
+    //in some cases you just want to add the module, but leave it with no sample
+    if (hasSample)
     {
-        updateModule(newModule);
+        addSample(newModule);
     }
 
-    /*DBG("Sampler---");
-    DBG("Num Voices: " + juce::String(getNumVoices()));
-    DBG("Num Sounds: " + juce::String(getNumSounds()));*/
 }
 
 void KrumSampler::removeModule(KrumModule* moduleToDelete)
@@ -392,25 +405,46 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
     owner.updateValueTreeState();
 }
  
-void KrumSampler::updateModule(KrumModule* updatedModule)
+void KrumSampler::updateModuleSample(KrumModule* updatedModule)
 {
-    if (isFileAcceptable(updatedModule->getSampleFile()))
+    int indexToRemove = -1;
+    for (int i = 0; i < sounds.size(); i++)
     {
-        std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(updatedModule->getSampleFile()));
-        juce::BigInteger range;
-        range.setBit(updatedModule->getMidiTriggerNote());
-
-    
-        for (int i = 0; i < getNumModules(); i++)
+        if (auto krumSound = static_cast<KrumSound*>(sounds[i].get()))
         {
-            if (updatedModule == modules[i])
+            if (krumSound->isParent(updatedModule))
             {
-                //addVoice(new KrumVoice());
-                addSound(new KrumSound(updatedModule, updatedModule->getModuleName(), *reader , range, updatedModule->getMidiTriggerNote(), 
-                                        attackTime, releaseTime, maxFileLengthInSeconds));
+                indexToRemove = i;
+                //krumSound->setMidi(updatedModule->getMidiTriggerNote(), updatedModule->getMidiTriggerChannel());
             }
         }
-    
+    }
+
+    if (indexToRemove >= 0)
+    {
+        sounds.remove(indexToRemove);
+        addSample(updatedModule);
+    }
+
+}
+
+void KrumSampler::addSample(KrumModule* moduleToAddSound)
+{
+    if (isFileAcceptable(moduleToAddSound->getSampleFile()))
+    {
+        std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(moduleToAddSound->getSampleFile()));
+        juce::BigInteger range;
+        range.setBit(moduleToAddSound->getMidiTriggerNote());
+
+        for (int i = 0; i < getNumModules(); i++)
+        {
+            if (moduleToAddSound == modules[i])
+            {
+                addSound(new KrumSound(moduleToAddSound, moduleToAddSound->getModuleName(), *reader, range, moduleToAddSound->getMidiTriggerNote(),
+                        attackTime, releaseTime, maxFileLengthInSeconds));
+            }
+        }
+
     }
 
     DBG("Sounds: " + juce::String(sounds.size()));

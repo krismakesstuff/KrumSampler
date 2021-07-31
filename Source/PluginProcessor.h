@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 #include "KrumSampler.h"
+#include "KrumFileBrowser.h"
+
 
 //==============================================================================
 /*
@@ -24,10 +26,13 @@
 * 
 */
 
+#define MAX_NUM_MODULES 30
+
+
 namespace TreeIDs 
 {
     //Globals
-    static const int maxNumModules = {30};
+    //static const int maxNumModules = {30};
     static const float defaultGain = 0.85f;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
@@ -109,7 +114,7 @@ public:
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
-
+    void updateEditor();
     //==============================================================================
     const juce::String getName() const override;
 
@@ -143,9 +148,15 @@ public:
         return sampler.getNumModules();
     }
 
+    juce::AudioThumbnailCache& getThumbnailCache();
+
+    KrumFileBrowser& getFileBrowser();
+
 private:
 
-    juce::CriticalSection critSection;
+    juce::CriticalSection plock;
+
+    //bool editorWantsToUpdate = false;
 
     juce::ValueTree valueTree{"AppState"};
     juce::AudioProcessorValueTreeState parameters; 
@@ -156,7 +167,20 @@ private:
 
     juce::AudioFormatManager formatManager;
     KrumSampler sampler{ formatManager, *this };
+    
+    KrumFileBrowser fileBrowser{valueTree, fileBrowserValueTree, formatManager};
 
+    class ThumbnailCache : public juce::AudioThumbnailCache
+    {
+    public:
+        ThumbnailCache()
+            :juce::AudioThumbnailCache(MAX_NUM_MODULES)
+        {}
+        ~ThumbnailCache() override {}
+    };
+
+
+    juce::SharedResourcePointer<ThumbnailCache> thumbnailCache;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessor)

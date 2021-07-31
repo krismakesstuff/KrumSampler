@@ -12,8 +12,8 @@
 #include "PluginEditor.h"
 
 
-
 //creates a module with NO MIDI assigned, up to the module to get this from the user
+//This ctor is used when creating a new module from the GUI, okay to update Value Tree
 KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
                         juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
     : valueTree(valTree), parameters(apvts)
@@ -40,12 +40,14 @@ KrumModule::KrumModule(int newIndex, KrumSampler& km, juce::ValueTree* valTree, 
     moduleProcessor.reset(new KrumModuleProcessor(*this, km));
     info.index = newIndex;
     getValuesFromTree();
+    updateAudioAtomics();
     
-    updateAudioParams();
+
+    needsToUpdateTree = true;
 
     //for now..
-    info.displayIndex = info.index;
-    updateValuesInTree();
+    /*info.displayIndex = info.index;
+    updateValuesInTree();*/
 }
 
 KrumModule::~KrumModule()
@@ -107,11 +109,15 @@ int KrumModule::getMidiTriggerNote()
     return info.midiNote;
 }
 
-void KrumModule::setMidiTriggerNote(int midiNoteNumber)
+void KrumModule::setMidiTriggerNote(int midiNoteNumber, bool removeOld)
 {
+    if (removeOld)
+    {
+        moduleEditor->setOldMidiNote(info.midiNote);
+    }
+
     info.midiNote = midiNoteNumber;
     updateValuesInTree();
-
 }
 
 int KrumModule::getMidiTriggerChannel()
@@ -121,6 +127,7 @@ int KrumModule::getMidiTriggerChannel()
 
 void KrumModule::setMidiTriggerChannel(int newMidiChannel)
 {
+    
     info.midiChannel = newMidiChannel;
     updateValuesInTree();
 }
@@ -235,6 +242,11 @@ std::atomic<float>* KrumModule::getModulePan()
     return moduleProcessor->modulePan;
 }
 
+bool KrumModule::doesModuleNeedToUpdateTree()
+{
+    return needsToUpdateTree;
+}
+
 //loads the ModuleInfo with the values passed in from the ValueTree 
 void KrumModule::getValuesFromTree()
 {
@@ -341,6 +353,8 @@ void KrumModule::updateValuesInTree(bool printBefore)
         std::unique_ptr<juce::XmlElement> xml(state.createXml());
         DBG(xml->toString());*/
     }
+
+    needsToUpdateTree = false;
 }
 
 void KrumModule::clearModuleValueTree()
@@ -393,9 +407,12 @@ void KrumModule::clearModuleValueTree()
         }
     }
 }
-void KrumModule::updateAudioParams()
+void KrumModule::updateAudioAtomics()
 {
     juce::String i = " " + juce::String(info.index);
+
+    //juce::ScopedLock sl(lock);
+
     moduleProcessor->moduleGain = parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + i);
     moduleProcessor->modulePan = parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + i);
 
@@ -413,6 +430,7 @@ KrumModuleEditor* KrumModule::createModuleEditor(KrumSamplerAudioProcessorEditor
 {
     if (moduleEditor == nullptr)
     {
+        //const juce::ScopedLock sl(lock);
         moduleEditor.reset(new KrumModuleEditor(*this, *moduleProcessor, editor));
     }
 

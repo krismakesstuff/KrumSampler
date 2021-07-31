@@ -25,6 +25,7 @@ class KrumModule;
 class KrumModuleProcessor : public juce::Timer
 {
 public:
+
     KrumModuleProcessor(KrumModule& p, KrumSampler& s);
     
     void timerCallback() override;
@@ -32,7 +33,13 @@ public:
     void triggerNoteOn();
     void triggerNoteOff();
     
+    
+
+
 private:
+    
+
+    //typedef std::atomic<std::shared_ptr<float>>* SharedAtomicPtr;
 
     friend class KrumModuleEditor;
     friend class KrumModule;
@@ -42,6 +49,13 @@ private:
 
     std::atomic<float>* moduleGain = nullptr;
     std::atomic<float>* modulePan = nullptr;
+    
+
+    //SharedAtomicPtr moduleGain = nullptr;
+    //SharedAtomicPtr modulePan = nullptr;
+
+    //std::atomic<std::shared_ptr<float>>* moduleGain = nullptr;
+    //std::atomic<std::shared_ptr<float>>* modulePan = nullptr;
 
     //float moduleGain;
     //float modulePan;
