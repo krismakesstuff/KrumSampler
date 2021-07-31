@@ -272,6 +272,11 @@ juce::Array<KrumModuleEditor*>& KrumModuleContainer::getModuleDisplayOrder()
     return moduleDisplayOrder;
 }
 
+int KrumModuleContainer::getNumModuleEditors()
+{
+    return moduleDisplayOrder.size();
+}
+
 
 KrumModuleEditor* KrumModuleContainer::getEditorFromModule(KrumModule* krumModule)
 {

@@ -62,6 +62,7 @@ public:
     int findDisplayIndexFromPoint(juce::Point<int> point);
     KrumSamplerAudioProcessorEditor* getEditor();
     juce::Array<KrumModuleEditor*>& getModuleDisplayOrder();
+    int getNumModuleEditors();
 
 private:
     friend class KrumSamplerAudioProcessorEditor;

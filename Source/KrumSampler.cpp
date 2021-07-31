@@ -423,8 +423,9 @@ void KrumSampler::updateModuleSample(KrumModule* updatedModule)
     if (indexToRemove >= 0)
     {
         sounds.remove(indexToRemove);
-        addSample(updatedModule);
     }
+    
+    addSample(updatedModule);
 
 }
 

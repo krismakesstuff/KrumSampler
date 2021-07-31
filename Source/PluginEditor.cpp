@@ -15,7 +15,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(audioProcessor.getFileBrowser())
 {
     
-    needsToUpdateThumbs = true;
 
     auto seperatorString = juce::File::getSeparatorString();
     juce::String titleImageFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"KrumSamplerTitle.png";
@@ -256,6 +255,7 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
     //postMessageToList(m, juce::String());
 }
 
+//called when we create a new module from the editor
 bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
 {
     if (sampler.getNumModules() >= MAX_NUM_MODULES)
@@ -292,6 +292,7 @@ bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int
     }
 }
 
+//This gets called when we open the GUI and need to rebuild all of the moduleEditors
 void KrumSamplerAudioProcessorEditor::createModuleEditors()
 {
     for (int i = 0; i < sampler.getNumModules(); i++)
@@ -303,6 +304,12 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
             moduleContainer.addModuleEditor(modEd, true);
         }
     }
+
+    if (moduleContainer.getNumModuleEditors() > 0)
+    {
+        needsToUpdateThumbs = true;
+    }
+
 }
 
 KrumModuleContainer& KrumSamplerAudioProcessorEditor::getModuleContainer()
@@ -526,7 +533,7 @@ void KrumSamplerAudioProcessorEditor::updateThumbnails()
         auto modEd = moduleContainer.getEditorFromModule(sampler.getModule(i));
         modEd->setAndDrawThumbnail();
     }
-    needsToUpdateThumbs = true;
+    needsToUpdateThumbs = false;
 }
 
 

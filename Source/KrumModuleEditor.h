@@ -109,7 +109,7 @@ public:
 private:
 
     bool needsToDrawThumbnail = false;
-
+    bool needsToBuildModuleEditor = false;
     KrumModule& parent;
     KrumModuleProcessor& moduleProcessor;
     KrumSamplerAudioProcessorEditor& editor;

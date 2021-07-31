@@ -60,6 +60,7 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumModuleProcessor& p, KrumSa
     //this decides if this is a brand new module with no information or an exisiting one. If it's new, we create a settings overlay by default. Otherwise we just build out as normal
     if (parent.info.midiNote == 0 || parent.info.midiChannel == 0)
     {
+        needsToBuildModuleEditor = true;
         settingsOverlay.setOwned(new ModuleSettingsOverlay(getLocalBounds(), parent));
         showSettingsOverlay();
     }
@@ -329,12 +330,13 @@ void KrumModuleEditor::buildModule()
     
     parent.setModuleActive(true);
 
-
     setChildCompColors();
     editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor);
 
-    resized();
+    needsToBuildModuleEditor = false;
 
+    resized();
+    repaint();
 }
 
 
@@ -454,7 +456,7 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
 
 void KrumModuleEditor::cleanUpOverlay(bool keepSettings)
 {
-    if (!parent.isModuleActive())
+    if (needsToBuildModuleEditor)
     {
         buildModule();
     }
@@ -470,6 +472,8 @@ void KrumModuleEditor::cleanUpOverlay(bool keepSettings)
             editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor);
         }
         moduleProcessor.sampler.updateModuleSample(&parent);
+        setAndDrawThumbnail();
+        setChildCompColors();
     }
 
     setModuleButtonsClickState(true);
@@ -483,7 +487,6 @@ void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
     {
         getChildComponent(i)->setInterceptsMouseClicks(isClickable, isClickable);
     }
-
 }
 
 int KrumModuleEditor::getModuleIndex()
@@ -495,7 +498,6 @@ void KrumModuleEditor::setModuleIndex(int newIndex)
 {
     parent.setModuleIndex(newIndex);
 }
-
 
 int KrumModuleEditor::getModuleDisplayIndex()
 {
