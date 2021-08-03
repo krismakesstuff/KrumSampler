@@ -243,7 +243,6 @@ void KrumSampler::initVoices()
 
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 
 {
-
     for (auto sound : sounds)
     {
         if (sound->appliesToNote(midiNoteNumber) && sound->appliesToChannel(midiChannel))
@@ -267,7 +266,7 @@ void KrumSampler::noteOff(const int midiChannel, const int midiNoteNumber, const
             auto krumSound = static_cast<KrumSound*>(sound);
             krumSound->setModulePlaying(false);
 
-            //one shot 
+            //one shot so we don't need this loop.
             /*for (auto* voice : voices) 
             {
                 if (    (voice->getCurrentlyPlayingNote() == midiNoteNumber) &&
