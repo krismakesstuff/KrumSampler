@@ -9,8 +9,8 @@
 */
 
 #pragma once
-#include <JuceHeader.h>
 #include "SimpleAudioPreviewer.h"
+#include <JuceHeader.h>
 
 /*
 * 

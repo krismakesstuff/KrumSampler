@@ -259,14 +259,18 @@ void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 void KrumModuleEditor::buildModule()
 {
     juce::String i = " " + juce::String(parent.info.index);
+    /*
     auto seperatorString = juce::File::getSeparatorString();
-    juce::File appDataFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);
-    DBG("App Data Folder: " + appDataFolder.getFullPathName());
+    juce::File appDataFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);*/
+    //DBG("App Data Folder: " + appDataFolder.getFullPathName());
     
-    juce::String dragHandleStringFile = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"drag_handle-black-18dp.svg";
+    /*juce::String dragHandleStringFile = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"drag_handle-black-18dp.svg";
     juce::File dragHandleFile = appDataFolder.getChildFile(dragHandleStringFile);
-    DBG("Drag Handle File Path: " + dragHandleFile.getFullPathName());
-    auto dragHandelIm = juce::Drawable::createFromSVGFile(dragHandleFile);
+    DBG("Drag Handle File Path: " + dragHandleFile.getFullPathName());*/
+    //auto dragHandelIm = juce::Drawable::createFromSVGFile(dragHandleFile);
+    int dragHandleSize;
+    auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
+    auto dragHandelIm = juce::Drawable::createFromImageData(dragHandleData, dragHandleSize);
 
     dragHandle.setOwned(new DragHandle{ parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
     dragHandle->setImages(dragHandelIm.get());
@@ -312,17 +316,23 @@ void KrumModuleEditor::buildModule()
 
     parent.updateAudioAtomics();
 
-    juce::String playButtonFileString = "KrumSampler" + seperatorString + "Resources" + seperatorString + "play_arrow-black-18dp.svg";
+    /*juce::String playButtonFileString = "KrumSampler" + seperatorString + "Resources" + seperatorString + "play_arrow-black-18dp.svg";
     juce::File playButtonImFile = appDataFolder.getChildFile(playButtonFileString);
-    auto playButtonImage = juce::Drawable::createFromSVGFile(playButtonImFile);
+    auto playButtonImage = juce::Drawable::createFromSVGFile(playButtonImFile);*/
+    int playButtonImSize;
+    auto playButtonData = BinaryData::getNamedResource("play_arrowblack18dp_svg", playButtonImSize);
+    auto playButtonImage = juce::Drawable::createFromImageData(playButtonData, playButtonImSize);
     
     addAndMakeVisible(playButton);
     playButton.setImages(playButtonImage.get());
     playButton.onClick = [this] { triggerNoteOnInParent(); };
     
-    juce::String editButtonFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"settings-black-18dp.svg";
+    /*juce::String editButtonFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"settings-black-18dp.svg";
     juce::File editButtonImFile = appDataFolder.getChildFile(editButtonFileString);
-    auto editButtonImage = juce::Drawable::createFromSVGFile(editButtonImFile);
+    auto editButtonImage = juce::Drawable::createFromSVGFile(editButtonImFile);*/
+    int editButtonImSize;
+    auto editButtonData = BinaryData::getNamedResource("settingsblack18dp_svg", editButtonImSize);
+    auto editButtonImage = juce::Drawable::createFromImageData(editButtonData, editButtonImSize);
     
     addAndMakeVisible(editButton);
     editButton.setImages(editButtonImage.get());

@@ -7,6 +7,28 @@
               pluginVST3Category="Synth" pluginFormats="buildAAX,buildAU,buildStandalone,buildVST3"
               pluginAAXCategory="0">
   <MAINGROUP id="NTQyMJ" name="KrumSampler">
+    <GROUP id="{EB4A4C0D-C950-9DF2-E178-9C3B37C020B8}" name="Resources">
+      <FILE id="M6o51Y" name="add-black-18dp.svg" compile="0" resource="1"
+            file="Resources/add-black-18dp.svg"/>
+      <FILE id="DC2gc0" name="add_white_24dp.svg" compile="0" resource="1"
+            file="Resources/add_white_24dp.svg"/>
+      <FILE id="u62HI7" name="chevron_left_black_24dp.svg" compile="0" resource="1"
+            file="Resources/chevron_left_black_24dp.svg"/>
+      <FILE id="mWTAkK" name="chevron_right_black_24dp.svg" compile="0" resource="1"
+            file="Resources/chevron_right_black_24dp.svg"/>
+      <FILE id="HD6vwE" name="clear-black-18dp.svg" compile="0" resource="1"
+            file="Resources/clear-black-18dp.svg"/>
+      <FILE id="uny5hK" name="drag_handle-black-18dp.svg" compile="0" resource="1"
+            file="Resources/drag_handle-black-18dp.svg"/>
+      <FILE id="wNaalz" name="KrumSamplerTitle.png" compile="0" resource="1"
+            file="Resources/KrumSamplerTitle.png"/>
+      <FILE id="UGQ1fn" name="KrumSamplerTitleAirborne.png" compile="0" resource="1"
+            file="Resources/KrumSamplerTitleAirborne.png"/>
+      <FILE id="i8dZIN" name="play_arrow-black-18dp.svg" compile="0" resource="1"
+            file="Resources/play_arrow-black-18dp.svg"/>
+      <FILE id="gwMiIK" name="settings-black-18dp.svg" compile="0" resource="1"
+            file="Resources/settings-black-18dp.svg"/>
+    </GROUP>
     <GROUP id="{7467111A-3F07-D8FF-124A-27D753DAFADA}" name="Source">
       <FILE id="hLUvRs" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
@@ -47,7 +69,6 @@
           file="Source/KrumModuleProcessor.h"/>
     <FILE id="rTSZdu" name="KrumSampler.cpp" compile="1" resource="0" file="Source/KrumSampler.cpp"/>
     <FILE id="kQ4Iqw" name="KrumSampler.h" compile="0" resource="0" file="Source/KrumSampler.h"/>
-    <FILE id="ojx4e6" name="MidiState.h" compile="0" resource="0" file="Source/MidiState.h"/>
     <FILE id="r6bf7y" name="ModuleSettingsOverlay.cpp" compile="1" resource="0"
           file="Source/ModuleSettingsOverlay.cpp"/>
     <FILE id="coe0wi" name="ModuleSettingsOverlay.h" compile="0" resource="0"

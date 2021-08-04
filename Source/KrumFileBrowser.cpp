@@ -1478,7 +1478,7 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& previewerGainTree, juce::Value
     addAndMakeVisible(addFavoriteButton);
 
     //juce::String fileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\add_white_24dp.svg";
-    juce::String fileString = "Code Projects/KrumSampler/Resources/add_white_24dp.svg";
+    //juce::String fileString = "Code Projects/KrumSampler/Resources/add_white_24dp.svg";
     
 //#if JUCE_MACOS
 //    fileString.clear();
@@ -1486,16 +1486,12 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& previewerGainTree, juce::Value
 //#endif
 
     
-    juce::File favButtonImFile =                     juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(fileString);
+   // juce::File favButtonImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(fileString);
     
-    auto favButtonImage = juce::Drawable::createFromSVGFile(favButtonImFile);
+    int favButtonSize;
+    auto favButtonData = BinaryData::getNamedResource("add_white_24dp_svg", favButtonSize);    
+    auto favButtonImage = juce::Drawable::createFromImageData(favButtonData, favButtonSize);
 
-    if (favButtonImage == nullptr)
-    {
-        DBG("Fav Button File: " + juce::String (favButtonImFile.getFullPathName()));
-        DBG("Fav Button Null");
-    }
-    
     addFavoriteButton.setImages(favButtonImage.get());
     addFavoriteButton.setButtonText("Add New Favorite Folder");
     addFavoriteButton.onClick = [this] { fileTree.pickNewFavorite(); };

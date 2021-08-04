@@ -15,12 +15,9 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(audioProcessor.getFileBrowser())
 {
     
-
-    auto seperatorString = juce::File::getSeparatorString();
-    juce::String titleImageFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"KrumSamplerTitle.png";
-    
-    auto titleImageFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory).getChildFile(titleImageFileString);
-    titleImage = juce::ImageFileFormat::loadFrom(titleImageFile);
+    int titleImageSize;
+    auto titleImageData = BinaryData::getNamedResource("KrumSamplerTitle_png", titleImageSize);
+    titleImage = juce::ImageFileFormat::loadFrom(titleImageData, titleImageSize);
 
     juce::String validString = (titleImage.isValid() ? "Valid" : "INValid");
     DBG("TitleImage: " + validString);
@@ -58,14 +55,20 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     fileDrop.setRepaintsOnMouseActivity(true);
 
     addAndMakeVisible(fileBrowser);
-    juce::String imageLeftFileString = "Code Projects/KrumSampler/Resources/chevron_left_black_24dp.svg";
+    /*juce::String imageLeftFileString = "Code Projects/KrumSampler/Resources/chevron_left_black_24dp.svg";
     juce::String imageRightFileString = "Code Projects/KrumSampler/Resources/chevron_right_black_24dp.svg";
     
     juce::File collapseLeftImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageLeftFileString);
     juce::File collapseRightImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageRightFileString);
-    
-    auto collapseLeftIm = juce::Drawable::createFromSVGFile(collapseLeftImFile);
-    auto collapseRightIm = juce::Drawable::createFromSVGFile(collapseRightImFile);
+    */
+
+    int leftChevSize, rightChevSize;
+
+    auto leftChevData = BinaryData::getNamedResource("chevron_left_black_24dp_svg", leftChevSize);
+    auto rightChevData = BinaryData::getNamedResource("chevron_right_black_24dp_svg", rightChevSize);
+
+    auto collapseLeftIm = juce::Drawable::createFromImageData(leftChevData, leftChevSize);
+    auto collapseRightIm = juce::Drawable::createFromImageData(rightChevData, rightChevSize);
 
     collapseBrowserButton.setImages(collapseRightIm.get(), collapseRightIm.get(), collapseRightIm.get(), collapseRightIm.get(),
                                     collapseLeftIm.get());
