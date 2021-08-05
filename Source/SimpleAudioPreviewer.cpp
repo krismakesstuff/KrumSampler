@@ -9,6 +9,7 @@
 */
 
 #include <JuceHeader.h>
+#include "PluginProcessor.h"
 #include "SimpleAudioPreviewer.h"
 
 //==============================================================================
@@ -43,18 +44,18 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::V
     volumeSlider.textFromValueFunction = [this](double value) { return toText(value); };
 
 
-    previewThread.startThread(3);
+    /*previewThread.startThread(3);
     audioDeviceManager.initialise(0, 2, nullptr, true);
     audioDeviceManager.addAudioCallback(&audioSourcePlayer);
-    audioSourcePlayer.setSource(&transportSource);
+    audioSourcePlayer.setSource(&transportSource);*/
 
     setPaintingIsUnclipped(true);
 }
 
 SimpleAudioPreviewer::~SimpleAudioPreviewer()
 {
-    transportSource.setSource(nullptr);
-    audioSourcePlayer.setSource(nullptr);
+    /*transportSource.setSource(nullptr);
+    audioSourcePlayer.setSource(nullptr);*/
 }
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)
@@ -80,23 +81,33 @@ bool SimpleAudioPreviewer::isAutoPlayActive()
     return autoPlayToggle.getToggleState();
 }
 
-void SimpleAudioPreviewer::playOrStop()
+
+void SimpleAudioPreviewer::renderPreviewer(juce::AudioBuffer<float>& outputBuffer)
 {
-    if (transportSource.isPlaying())
+    if (currentAudioFileSource)
     {
-        transportSource.stop();
-    }
-    else
-    {
-        transportSource.setPosition(0);
-        transportSource.start();
+        juce::AudioBuffer<float> tempBuffer{ outputBuffer.getNumChannels(), outputBuffer.getNumSamples() };
+        const juce::AudioSourceChannelInfo tempChannelInfo{ tempBuffer };
+
+        currentAudioFileSource->getNextAudioBlock(tempChannelInfo);
+
+        const juce::AudioSourceChannelInfo channelInfo{ outputBuffer };
+        for (int i = 0; i < outputBuffer.getNumChannels(); i++)
+        {
+            channelInfo.buffer->addFrom(i, 0, tempBuffer, i, 0, tempBuffer.getNumSamples(), getGain());
+        }
+
+        if (currentAudioFileSource->getNextReadPosition() >= currentAudioFileSource->getTotalLength())
+        {
+            readyToPlayFile = false;
+        }
     }
 }
 
 void SimpleAudioPreviewer::setGain()
 {
     double newGain = volumeSlider.getValue();
-    transportSource.setGain(newGain);
+    
     savePreviewerGainState();
     
     DBG("Previewer Gain: " + juce::String(newGain));
@@ -172,28 +183,20 @@ void SimpleAudioPreviewer::updateBubbleComp(juce::Slider* slider, juce::Componen
 void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
 {
 
-    transportSource.stop();
-    transportSource.setSource(nullptr);
-    currentAudioFileSource.reset();
-
-    juce::AudioFormatReader* reader = nullptr;
-
     if (fileToPreview.existsAsFile())
     {
-        reader = formatManager.createReaderFor(fileToPreview);
+        currentFormatReader.reset(formatManager.createReaderFor(fileToPreview));
     }
 
-    if (reader != nullptr)
+    if (currentFormatReader)
     {
-        currentAudioFileSource.reset(new juce::AudioFormatReaderSource(reader, true));
-        transportSource.setSource(currentAudioFileSource.get(), readAheadBufferSize, &previewThread, reader->sampleRate);
+        currentAudioFileSource.reset(new juce::AudioFormatReaderSource(currentFormatReader.get(), false));
         currentAudioFile = fileToPreview;
     }
     else
     {
         DBG("reader is NULL");
     }
-
 }
 
 
@@ -238,4 +241,14 @@ void SimpleAudioPreviewer::refreshSettings()
 {
     volumeSlider.setValue(getSavedPreviewerGainState(), juce::dontSendNotification);
     autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
+}
+
+bool SimpleAudioPreviewer::wantsToPlayFile()
+{
+    return readyToPlayFile;
+}
+
+void SimpleAudioPreviewer::setWantsToPlayFile(bool wantsToPlay)
+{
+    readyToPlayFile = wantsToPlay;
 }

@@ -19,9 +19,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     auto titleImageData = BinaryData::getNamedResource("KrumSamplerTitle_png", titleImageSize);
     titleImage = juce::ImageFileFormat::loadFrom(titleImageData, titleImageSize);
 
-    juce::String validString = (titleImage.isValid() ? "Valid" : "INValid");
-    DBG("TitleImage: " + validString);
-
     getLookAndFeel().setDefaultLookAndFeel(&kLaf);
     getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(1000);
@@ -55,12 +52,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     fileDrop.setRepaintsOnMouseActivity(true);
 
     addAndMakeVisible(fileBrowser);
-    /*juce::String imageLeftFileString = "Code Projects/KrumSampler/Resources/chevron_left_black_24dp.svg";
-    juce::String imageRightFileString = "Code Projects/KrumSampler/Resources/chevron_right_black_24dp.svg";
-    
-    juce::File collapseLeftImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageLeftFileString);
-    juce::File collapseRightImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(imageRightFileString);
-    */
+
 
     int leftChevSize, rightChevSize;
 

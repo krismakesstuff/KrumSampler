@@ -9,22 +9,21 @@
 */
 
 #pragma once
-#include "SimpleAudioPreviewer.h"
 #include <JuceHeader.h>
 
 /*
 * 
 * The File Browser holds folders and files chosen by the user for quick access. These file paths will save with the plugin as well as any custom names that are given to them. 
-* This holds the file path of the file and has a separate display name which can be changed by the user, but doesnt' not rename any actual files. 
+* This holds the file path of the file and has a separate display name which can be changed by the user, but does not rename any actual files. 
 * There are two sections, the "Recent" and "Favorites" sections. The Recent section gets automatically updated when a file is dropped on the FileDrop component. It will only hold files.
 * The Favorites section is user selected and can be chosen from the "AddFavoriteButton", which will pull up a browser to choose files from. 
 * 
 * This class is a bit confusing... The KrumFileBrowser holds a KrumTreeView. The KrumTreeView holds TreeViewItems. There are two types of TreeViewItems, KrumTreeHeaderItem and KrumTreeItem. 
 * The KrumTreeHeaderItem is for folders and KrumTreeItem is for files. Both also have custom component subclasses that give them some custom functionality.
 * The state of the tree will be saved with each use and must be restored as well. 
-* This browser alos connnects to the AudioPreviewer to preview files. 
+* This browser also connnects to the AudioPreviewer to preview files. 
 * 
-* NOTE: The AudioPreviewer is not working on MacOS.
+* NOTE: The AudioPreviewer is not working on MacOS. yet..
 * 
 * 
 */
@@ -34,7 +33,9 @@
 class KrumTreeItem;
 class KrumTreeHeaderItem;
 class KrumTreeView;
+class SimpleAudioPreviewer;
 
+//strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
 namespace FileBrowserValueTreeIds
 {
     static const juce::String folderId{ "Folder" };
@@ -48,7 +49,7 @@ namespace FileBrowserValueTreeIds
     static const juce::String opennessId{ "OpennessState" };
 }
 
-
+//Ids for navigating the TreeView
 enum FileBrowserSectionIds
 {
     //userFolders_Ids,
@@ -57,6 +58,7 @@ enum FileBrowserSectionIds
     openness_Ids
 };
 
+//Ids for sorting
 enum FileBrowserSortingIds
 {
     folders_Id,
@@ -68,6 +70,8 @@ enum FileBrowserSortingIds
 //---------------------------------
 //---------------------------------
 
+
+//Represents a file in the File Browser. Contains a private subclass that responds to mouse clicks
 class KrumTreeItem :    public juce::TreeViewItem,
                         public juce::Component
 {
@@ -142,7 +146,7 @@ private:
 };
 
 //=================================================================================================================================//
-
+//Similar to the KrumTreeItem, except this is meant to represent folders. So it has some different logic, but has similar structure. Also has a subclass. 
 class KrumTreeHeaderItem :  public juce::TreeViewItem,
                             public juce::Component
 {
@@ -237,6 +241,7 @@ public:
 
 //---------------------------------
 //---------------------------------
+//Sorting class, doesn't seem to be working correctly at the moment. Only sorting (trying) folders first, but could do alpa
 class FileBrowserSorter
 {
 public:
@@ -282,8 +287,7 @@ public:
         setBounds(parentBounds.getRight() - 20, 3, 15, 15);
     }
 
-    ~NumberBubble() override
-    {}
+    ~NumberBubble() override {}
 
     void paint(juce::Graphics& g) override
     {
@@ -294,13 +298,11 @@ public:
         g.drawFittedText(juce::String(number), getBounds(), juce::Justification::centred, 1);
 
     }
-
     int number;
     juce::Colour bgColor;
-
 };
 
-
+//This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
 class KrumTreeView :    public juce::TreeView,
                         public juce::DragAndDropContainer
 {
@@ -378,7 +380,7 @@ class KrumFileBrowser : public juce::Component
 {
 public:
 
-    KrumFileBrowser(juce::ValueTree& valueTree, juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager);
+    KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTree& fileBroswerValueTree/*, juce::AudioFormatManager& formatManager*/);
     ~KrumFileBrowser();
 
     void paint(juce::Graphics& g) override;
@@ -399,7 +401,7 @@ private:
 
     KrumTreeView fileTree;
 
-    SimpleAudioPreviewer audioPreviewer;
+    SimpleAudioPreviewer& audioPreviewer;
     juce::DrawableButton addFavoriteButton{ "Add Favorite", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
 
     juce::Colour fontColor{ juce::Colours::lightgrey };

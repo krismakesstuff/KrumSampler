@@ -8,6 +8,7 @@
   ==============================================================================
 */
 
+#include "SimpleAudioPreviewer.h"
 #include "KrumFileBrowser.h"
 
 class KrumTreeHeaderItem;
@@ -64,31 +65,28 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
     void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
     {
-       
-        previewer->loadFile(file);
-        if (previewer->isAutoPlayActive())
+        if (previewer->isAutoPlayActive() && !previewer->wantsToPlayFile())
         {
-            previewer->playOrStop();
+            previewer->setWantsToPlayFile(true);
         }
+        else if (!previewer->isAutoPlayActive())
+        {
+            previewer->setWantsToPlayFile(false);
+        }
+
+        previewer->loadFile(file);
 
     }
 
     void KrumTreeItem::itemDoubleClicked(const juce::MouseEvent& e)
     {
+        previewer->setWantsToPlayFile(true);
         previewer->loadFile(file);
-        previewer->playOrStop();
     }
 
     void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
     {
-        if (isNowSelected)
-        {
-            previewer->loadFile(file);
-            if (previewer->isAutoPlayActive())
-            {
-                previewer->playOrStop();
-            }
-        }
+
     }
 
     void KrumTreeItem::closeLabelEditor(juce::Label* label)
@@ -195,6 +193,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         int thisIndex = owner.getIndexInParent();
         int numSelectedItems = owner.parentTree->getNumSelectedItems();
 
+        //works out if your mouse click is selecting multpile items by holding the shift or cntrl modifiers
         if (!itemSelected && (cntrl || shift))
         {
             if (shift)
@@ -232,11 +231,13 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         }
         else if(!itemSelected) //with no mods
         {
+            owner.itemClicked(e);
             owner.setSelected(true, true);
             DBG("Index in parent: " + juce::String(owner.getIndexInParent()));
 
         }
 
+        //right click menu
         if (e.mods.isPopupMenu())
         {
             juce::PopupMenu menu;
@@ -272,12 +273,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         owner.itemDoubleClicked(e);
     }
-
-
-   
-
-
-
 
 
 //=================================================================================================================================//
@@ -632,21 +627,6 @@ bool KrumTreeView::isInterestedInFileDrag(const juce::StringArray& files)
     
     auto wildcard = previewer->getFormatManager().getWildcardForAllFormats();
     
-   /* for (auto fileString : files)
-    {
-        juce::File file(fileString);
-        if (file.isDirectory() || wildcard.containsWholeWord(file.getFileExtension()))
-        {
-            return true;
-        }
-        else
-        {
-            DBG("File not supported: " + fileString);
-        }
-    }
-    
-    return false;*/
-
     return true;
 }
 
@@ -919,25 +899,6 @@ void KrumTreeView::reCreateFavoriteFolder(juce::ValueTree& tree, juce::String na
 
             reCreateFavoriteSubFolder(newFavFolderNode, childTree);
 
-            
-            /*for (int j = 0; j < childTree.getNumChildren(); j++)
-            {
-                auto subChildTree = childTree.getChild(j);
-                if (subChildTree.getType().toString().compare(FileBrowserValueTreeIds::fileId) == 0)
-                {
-                    auto fileNameVar = childTree.getProperty(FileBrowserValueTreeIds::itemNameId);
-                    auto filePathVar = childTree.getProperty(FileBrowserValueTreeIds::pathId);
-
-                    auto childFileNode = new KrumTreeItem(this, previewer, juce::File(filePathVar.toString()), fileNameVar.toString());
-                    childFileNode->setLinesDrawnForSubItems(true);
-                    newFavFolderNode->addSubItem(childFileNode);
-                }
-                else if (subChildTree.getType().toString().compare(FileBrowserValueTreeIds::folderId) == 0)
-                {
-                    reCreateFavoriteSubFolder(newFavFolderNode, subChildTree);
-                }
-
-            }*/
         }
     }
 
@@ -1143,29 +1104,7 @@ void KrumTreeView::removeValueTreeItem(juce::String fullPathName, FileBrowserSec
         }
     }
 
-    
 
-    /*for(int i = 0; i < sectionTree.getNumChildren(); i++)
-    {
-        const juce::ValueTree& childTree = sectionTree.getChild(i);
-
-        if (childTree.getType().toString().compare(FileBrowserValueTreeIds::folderId) == 0)
-        {
-            for (int j = 0; j < childTree.getNumChildren(); j++)
-            {
-                auto& childFileTree = childTree.getChild(j);
-                auto childFileTreePath = childFileTree.getProperty(FileBrowserValueTreeIds::pathId);
-
-                if (childFileTreePath.toString().compare(fullPathName) == 0)
-                {
-                    childFileTree.removeChild(childFileTree, nullptr);
-                    break;
-                }
-            }
-        }
-        
-
-    }*/
 
 }
 juce::ValueTree KrumTreeView::findTreeItem(juce::ValueTree parentTree, juce::String fullPathName)
@@ -1466,8 +1405,8 @@ KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* it
 //=================================================================================================================================//
 //=================================================================================================================================//
 
-KrumFileBrowser::KrumFileBrowser(juce::ValueTree& previewerGainTree, juce::ValueTree& fileBrowserValueTree, juce::AudioFormatManager& formatManager)
-    : audioPreviewer(formatManager, previewerGainTree), fileTree(fileBrowserValueTree, &audioPreviewer)
+KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTree& fileBrowserValueTree/*, juce::AudioFormatManager& formatManager*/)
+    : audioPreviewer(previewer), fileTree(fileBrowserValueTree, &previewer)
 {
 
     addAndMakeVisible(audioPreviewer);
@@ -1477,17 +1416,6 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& previewerGainTree, juce::Value
 
     addAndMakeVisible(addFavoriteButton);
 
-    //juce::String fileString = "C:\\Users\\krisc\\Documents\\Code Projects\\KrumSampler\\Resources\\add_white_24dp.svg";
-    //juce::String fileString = "Code Projects/KrumSampler/Resources/add_white_24dp.svg";
-    
-//#if JUCE_MACOS
-//    fileString.clear();
-//    fileString = "Users/kriscrawford/Documents/CodeProjects/KrumSampler/Resources/add_white_24dp.svg";
-//#endif
-
-    
-   // juce::File favButtonImFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile(fileString);
-    
     int favButtonSize;
     auto favButtonData = BinaryData::getNamedResource("add_white_24dp_svg", favButtonSize);    
     auto favButtonImage = juce::Drawable::createFromImageData(favButtonData, favButtonSize);
@@ -1501,9 +1429,7 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& previewerGainTree, juce::Value
     addFavoriteButton.setColour(juce::TextButton::buttonOnColourId, fontColor.contrasting(0.2f));
 
     addFavoriteButton.setTooltip("Add Files or Folders that will stay with this preset");
-    
-    //setOpaque(true);
-
+   
 }
 
 

@@ -36,7 +36,8 @@ public:
     void resized() override;
     bool isAutoPlayActive();
 
-    void playOrStop();
+    void renderPreviewer(juce::AudioBuffer<float>& outputBuffer);
+
 
     void setGain();
     double getGain();
@@ -57,28 +58,41 @@ public:
 
     void refreshSettings();
 
+    bool wantsToPlayFile();
+    void setWantsToPlayFile(bool wantsToPlay);
+
+
 private:
+
+    bool readyToPlayFile = false;
+
+    int playBackSampleRate;
 
     juce::CriticalSection lock;
 
+    //Does auto toggle need to be here? 
     juce::ToggleButton autoPlayToggle;
     juce::Slider volumeSlider;
 
     juce::ValueTree& valueTree;
 
-    int readAheadBufferSize = 32768;
+    //int readAheadBufferSize = 32768;
     PreviewerState state{ PreviewerState::stopped };
     
 
     juce::File currentAudioFile;
-    std::unique_ptr<juce::AudioFormatReaderSource> currentAudioFileSource;
+    std::unique_ptr<juce::AudioFormatReader> currentFormatReader = nullptr;
+    std::unique_ptr<juce::AudioFormatReaderSource> currentAudioFileSource = nullptr;
+    //std::unique_ptr<juce::AudioBuffer<float>> audioData = nullptr;
 
     juce::AudioFormatManager& formatManager;
-    juce::AudioSourcePlayer audioSourcePlayer;
-    juce::AudioTransportSource transportSource;
-    juce::AudioDeviceManager audioDeviceManager;
+    
+    
+    //juce::AudioSourcePlayer audioSourcePlayer;
+    //juce::AudioTransportSource transportSource;
+    //juce::AudioDeviceManager audioDeviceManager;
 
-    juce::TimeSliceThread previewThread{"AudioPreviewThread"};
+    //::TimeSliceThread previewThread{"AudioPreviewThread"};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleAudioPreviewer)
 };

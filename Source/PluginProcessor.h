@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "KrumSampler.h"
 #include "KrumFileBrowser.h"
+#include "SimpleAudioPreviewer.h"
+
 
 
 //==============================================================================
@@ -27,10 +29,12 @@
 */
 
 #define MAX_NUM_MODULES 30
-
+#define MAX_VOICES 8
+#define MAX_FILE_LENGTH_SECS 5
 
 namespace TreeIDs 
 {
+    //Should I make these all macros instead? 
     //Globals
     //static const int maxNumModules = {30};
     static const float defaultGain = 0.85f;
@@ -152,11 +156,10 @@ public:
 
     KrumFileBrowser& getFileBrowser();
 
+
 private:
 
-    juce::CriticalSection plock;
-
-    //bool editorWantsToUpdate = false;
+    void registerFormats();
 
     juce::ValueTree valueTree{"AppState"};
     juce::AudioProcessorValueTreeState parameters; 
@@ -165,10 +168,21 @@ private:
     std::atomic<float>* outputGainParameter = nullptr;
     juce::MidiKeyboardState midiState;
 
-    juce::AudioFormatManager formatManager;
-    KrumSampler sampler{ formatManager, *this };
     
-    KrumFileBrowser fileBrowser{valueTree, fileBrowserValueTree, formatManager};
+    class FormatManager : public juce::AudioFormatManager
+    {
+    public:
+        FormatManager()
+        {
+            registerBasicFormats();
+        }
+        ~FormatManager() {}
+    };
+
+    juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
+    KrumSampler sampler{ formatManager.get(), *this };
+    SimpleAudioPreviewer previewer{formatManager.get(), valueTree};
+    KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree/*, formatManager*/};
 
     class ThumbnailCache : public juce::AudioThumbnailCache
     {
@@ -178,7 +192,6 @@ private:
         {}
         ~ThumbnailCache() override {}
     };
-
 
     juce::SharedResourcePointer<ThumbnailCache> thumbnailCache;
 

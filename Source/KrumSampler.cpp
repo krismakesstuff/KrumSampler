@@ -219,7 +219,7 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 KrumSampler::KrumSampler(juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o)
     :formatManager(fm), owner(o)
 {
-    formatManager.registerBasicFormats();
+    //formatManager.registerBasicFormats();
 
     
 

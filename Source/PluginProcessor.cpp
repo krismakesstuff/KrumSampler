@@ -135,6 +135,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     return { paramsGroup.begin(), paramsGroup.end() };
 }
 
+//===================================================================================================================================
+//===================================================================================================================================
+
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor(  BusesProperties()
@@ -149,6 +152,7 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
 {
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
+    registerFormats();
 }
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
@@ -160,6 +164,7 @@ void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam_ID);
     sampler.setCurrentPlaybackSampleRate(sampleRate);
+    
 }
 
 void KrumSamplerAudioProcessor::releaseResources()
@@ -170,11 +175,14 @@ void KrumSamplerAudioProcessor::releaseResources()
 void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-    buffer.applyGain(*outputGainParameter);
-    if (hasEditor())
+    if (previewer.wantsToPlayFile())
     {
-        midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+        previewer.renderPreviewer(buffer);
     }
+    
+    buffer.applyGain(*outputGainParameter);
+    midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    
     
     //this app does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
     midiMessages.clear();
@@ -368,7 +376,7 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
 
 juce::AudioFormatManager* KrumSamplerAudioProcessor::getFormatManager()
 {
-    return &formatManager;
+    return formatManager;
 }
 
 
@@ -561,6 +569,11 @@ juce::AudioThumbnailCache& KrumSamplerAudioProcessor::getThumbnailCache()
 KrumFileBrowser& KrumSamplerAudioProcessor::getFileBrowser()
 {
     return fileBrowser;
+}
+
+void KrumSamplerAudioProcessor::registerFormats()
+{
+    formatManager->registerBasicFormats();
 }
 
 //bool KrumSamplerAudioProcessor::resetFileBrowser()

@@ -259,15 +259,7 @@ void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 void KrumModuleEditor::buildModule()
 {
     juce::String i = " " + juce::String(parent.info.index);
-    /*
-    auto seperatorString = juce::File::getSeparatorString();
-    juce::File appDataFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);*/
-    //DBG("App Data Folder: " + appDataFolder.getFullPathName());
-    
-    /*juce::String dragHandleStringFile = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"drag_handle-black-18dp.svg";
-    juce::File dragHandleFile = appDataFolder.getChildFile(dragHandleStringFile);
-    DBG("Drag Handle File Path: " + dragHandleFile.getFullPathName());*/
-    //auto dragHandelIm = juce::Drawable::createFromSVGFile(dragHandleFile);
+
     int dragHandleSize;
     auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
     auto dragHandelIm = juce::Drawable::createFromImageData(dragHandleData, dragHandleSize);
