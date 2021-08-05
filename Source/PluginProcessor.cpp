@@ -319,6 +319,7 @@ void KrumSamplerAudioProcessor::changeProgramName(int index, const juce::String&
 //==============================================================================
 void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
+
     valueTree.appendChild(parameters.state, nullptr);
     valueTree.appendChild(fileBrowserValueTree, nullptr);
     

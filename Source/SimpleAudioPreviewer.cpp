@@ -174,15 +174,14 @@ void SimpleAudioPreviewer::updateBubbleComp(juce::Slider* slider, juce::Componen
         bubbleComp->setPosition(pos, 0);
         bubbleComp->setPaintingIsUnclipped(true);
        // bubbleComp->toFront(false);
+        
 
     }
     slider->setTooltip(slider->getTextFromValue(slider->getValue()));
-
 }
 
 void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
 {
-
     if (fileToPreview.existsAsFile())
     {
         currentFormatReader.reset(formatManager.createReaderFor(fileToPreview));

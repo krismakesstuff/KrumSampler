@@ -573,6 +573,7 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
     rootNode->addSubItem(favNode, FileBrowserSectionIds::favoritesFolders_Ids);
     addDummyChild();
 
+
     if (fileBrowserValueTree.getChildWithName(favNode->getItemHeaderName()).getNumChildren() > 0)
     {
         reCreateFileBrowserFromTree();
@@ -827,7 +828,6 @@ void KrumTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFil
     
 }
 
-
 void KrumTreeView::reCreateFileBrowserFromTree()
 {
     auto recTreeNode = fileBrowserValueTree.getChildWithName(FileBrowserValueTreeIds::recentFolderId);
@@ -957,11 +957,9 @@ void KrumTreeView::reCreateRecentFile(juce::String name, juce::String fullPath)
 
 void KrumTreeView::sortFiles(FileBrowserSortingIds sortingId)
 {
-
     FileBrowserSorter sorter;
     rootNode->sortSubItems<FileBrowserSorter>(sorter);
     rootNode->treeHasChanged();
-
 }
 
 
@@ -982,10 +980,6 @@ bool KrumTreeView::hasAudioFormat(juce::String fileExtension)
     auto audioFormat = previewer->getFormatManager().findFormatForFileExtension(fileExtension);
     return audioFormat != nullptr;
 }
-
-
-
-
 
 //Updates an item Name and Number of Hidden Files, if applicable
 void KrumTreeView::updateValueTree(juce::String idString)
@@ -1161,7 +1155,6 @@ void KrumTreeView::clearFavorites()
 
 void KrumTreeView::removeItem(juce::String idString)
 {
-    
     auto item = findItemFromIdentifierString(idString);
     
     if (item->mightContainSubItems())
@@ -1200,7 +1193,6 @@ void KrumTreeView::removeItem(juce::String idString)
 
 void KrumTreeView::mouseDrag(const juce::MouseEvent& event) 
 {
-   
     if (!areAnyItemsBeingEdited() && event.mouseWasDraggedSinceMouseDown())
     {
         juce::var description{ "FileBrowser-Drag" };
@@ -1261,7 +1253,6 @@ void KrumTreeView::setItemEditing(juce::String idString, bool isEditing)
 
 bool KrumTreeView::areAnyItemsBeingEdited()
 {
-
     auto faveNode = rootNode->getSubItem(FileBrowserSectionIds::favoritesFolders_Ids);
 
     for (int i = 0; i < faveNode->getNumSubItems(); i++)
@@ -1299,10 +1290,6 @@ KrumTreeHeaderItem* KrumTreeView::getRootNode()
 {
     return rootNode.get();
 }
-
-
-
-
 
 KrumTreeHeaderItem* KrumTreeView::makeHeaderItem(juce::TreeViewItem* item)
 {
@@ -1343,15 +1330,12 @@ KrumTreeItem* KrumTreeView::makeTreeItem(juce::Component* item)
     {
         return nullptr;
     }
-
-
 }
 
 
 
 KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName)
 {
-    
     if (item->mightContainSubItems())
     {
         auto headerItem = static_cast<KrumTreeHeaderItem*>(item);
@@ -1400,8 +1384,6 @@ KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* it
 }
 
 
-
-//=================================================================================================================================//
 //=================================================================================================================================//
 //=================================================================================================================================//
 
@@ -1509,7 +1491,6 @@ void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
     oldTree = newTree;
     fileTree.reCreateFileBrowserFromTree();
     repaint();
-
 }
 
 SimpleAudioPreviewer* KrumFileBrowser::getAudioPreviewer()
