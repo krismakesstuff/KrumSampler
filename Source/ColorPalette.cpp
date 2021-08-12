@@ -14,7 +14,7 @@
 
 
 //==============================================================================
-ColorPalette::ColorPalette(juce::Rectangle<int> bounds, ModuleSettingsOverlay& pm)
+ColorPalette::ColorPalette(juce::Rectangle<int> bounds, ModuleSettingsOverlay& pm, bool isColorOnly)
     : parent(pm)
 {
     setInterceptsMouseClicks(false, true);
@@ -31,8 +31,8 @@ ColorPalette::ColorPalette(juce::Rectangle<int> bounds, ModuleSettingsOverlay& p
         auto button = new juce::ShapeButton(color.toDisplayString(true), color.darker(0.5f), color.withAlpha(0.8f), color.brighter());
         
         auto area = getLocalBounds();
-        int buttonW = 15;
-        int buttonH = 15;
+        int buttonW = isColorOnly ? 30 : 15;
+        int buttonH = isColorOnly ? 30 : 15;
         int space = 5;
         int bx = (buttonW + space) * (i + 1) - space;
         int by = buttonH + space;
@@ -88,6 +88,8 @@ bool ColorPalette::isColorSelected()
 {
     return selectedColor != juce::Colours::white;
 }
+
+
 
 juce::Colour* ColorPalette::getLastRandomColor()
 {

@@ -54,13 +54,14 @@ public:
     };
 
 
-    ColorPalette(juce::Rectangle<int> bounds, ModuleSettingsOverlay& parentOverlay);
+    ColorPalette(juce::Rectangle<int> bounds, ModuleSettingsOverlay& parentOverlay, bool isColorOnly);
     ~ColorPalette() override;
 
     void colorClicked(juce::Colour clickedColor, juce::ShapeButton* button);
 
     juce::Colour getSelectedColor();
     bool isColorSelected();
+
 
     juce::Colour* getLastRandomColor();
 

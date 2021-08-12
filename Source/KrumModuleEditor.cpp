@@ -61,7 +61,7 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumModuleProcessor& p, KrumSa
     if (parent.info.midiNote == 0 || parent.info.midiChannel == 0)
     {
         needsToBuildModuleEditor = true;
-        settingsOverlay.setOwned(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
         showSettingsOverlay();
     }
     else
@@ -237,10 +237,10 @@ void KrumModuleEditor::resized()
     playButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(statusButtonH).withWidth(area.getWidth() / 2).reduced(spacer));
     editButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(statusButtonH).withLeft(playButton.getRight() + spacer).withWidth(area.getWidth() / 2).reduced(spacer));
 
-    if (dragHandle != nullptr)
+    /*if (dragHandle != nullptr)
     {
         dragHandle->setBounds(area.withTop(editButton.getBottom()));
-    }
+    }*/
 
 }
 
@@ -260,14 +260,14 @@ void KrumModuleEditor::buildModule()
 {
     juce::String i = " " + juce::String(parent.info.index);
 
-    int dragHandleSize;
+    /*int dragHandleSize;
     auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
     auto dragHandelIm = juce::Drawable::createFromImageData(dragHandleData, dragHandleSize);
 
-    dragHandle.setOwned(new DragHandle{ parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
+    dragHandle.reset(new DragHandle{ parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
     dragHandle->setImages(dragHandelIm.get());
     addAndMakeVisible(dragHandle.get());
-    dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");
+    dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");*/
 
     addAndMakeVisible(titleBox);
     titleBox.setText(parent.info.name, juce::NotificationType::dontSendNotification);
@@ -308,9 +308,7 @@ void KrumModuleEditor::buildModule()
 
     parent.updateAudioAtomics();
 
-    /*juce::String playButtonFileString = "KrumSampler" + seperatorString + "Resources" + seperatorString + "play_arrow-black-18dp.svg";
-    juce::File playButtonImFile = appDataFolder.getChildFile(playButtonFileString);
-    auto playButtonImage = juce::Drawable::createFromSVGFile(playButtonImFile);*/
+    
     int playButtonImSize;
     auto playButtonData = BinaryData::getNamedResource("play_arrowblack18dp_svg", playButtonImSize);
     auto playButtonImage = juce::Drawable::createFromImageData(playButtonData, playButtonImSize);
@@ -319,9 +317,7 @@ void KrumModuleEditor::buildModule()
     playButton.setImages(playButtonImage.get());
     playButton.onClick = [this] { triggerNoteOnInParent(); };
     
-    /*juce::String editButtonFileString = "KrumSampler"+ seperatorString +"Resources"+ seperatorString +"settings-black-18dp.svg";
-    juce::File editButtonImFile = appDataFolder.getChildFile(editButtonFileString);
-    auto editButtonImage = juce::Drawable::createFromSVGFile(editButtonImFile);*/
+    
     int editButtonImSize;
     auto editButtonData = BinaryData::getNamedResource("settingsblack18dp_svg", editButtonImSize);
     auto editButtonImage = juce::Drawable::createFromImageData(editButtonData, editButtonImSize);
@@ -347,9 +343,9 @@ void KrumModuleEditor::setChildCompColors()
 {
     auto moduleColor = parent.info.moduleColor;
 
-    dragHandle->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::transparentBlack);
+    /*dragHandle->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::transparentBlack);
     dragHandle->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::transparentBlack);
-    dragHandle->setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    dragHandle->setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);*/
 
     panSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
     panSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
@@ -369,11 +365,10 @@ void KrumModuleEditor::setChildCompColors()
     titleBox.setColour(juce::TextEditor::ColourIds::textColourId, moduleColor.contrasting());
 
     titleBox.setColour(juce::Label::ColourIds::backgroundColourId, moduleColor.darker(0.7f));
-    //titleBox.setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::black);
 
 
-    const juce::MessageManagerLock lock;
-    repaint();
+    /*const juce::MessageManagerLock lock;
+    repaint();*/
 }
 
 
@@ -382,16 +377,32 @@ void KrumModuleEditor::showSettingsMenu()
     juce::MessageManagerLock lock;
     juce::PopupMenu settingsMenu;
 
-    settingsMenu.addItem(KrumModule::moduleReConfig_Id, "Re-Config");
+    //settingsMenu.addItem(KrumModule::moduleReConfig_Id, "Re-Config");
+    settingsMenu.addItem(KrumModule::ModuleSettingIDs::moduleMidiNote_Id, "Change Midi");
+    settingsMenu.addItem(KrumModule::ModuleSettingIDs::moduleColor_Id, "Change Color");
     settingsMenu.addItem(KrumModule::moduleDelete_Id, "Delete Module");
 
     auto result = settingsMenu.showAt(&editButton);
 
     if (result == KrumModule::moduleReConfig_Id)
     {
-        settingsOverlay.setOwned(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
         settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
         settingsOverlay->keepCurrentColor(true);
+        showSettingsOverlay(true);
+    }
+    else if (result == KrumModule::ModuleSettingIDs::moduleMidiNote_Id)
+    {
+        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
+        settingsOverlay->keepCurrentColor(true);
+        showSettingsOverlay(true);
+    }
+    else if (result == KrumModule::ModuleSettingIDs::moduleColor_Id)
+    {
+        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
+        settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
+        settingsOverlay->showColorsOnly();
         showSettingsOverlay(true);
     }
     else if (result == KrumModule::moduleDelete_Id)

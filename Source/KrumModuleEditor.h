@@ -140,8 +140,9 @@ private:
 
     friend class ColorPalette;
     
-    juce::OptionalScopedPointer<DragHandle> dragHandle;
-    juce::OptionalScopedPointer<ModuleSettingsOverlay> settingsOverlay;
-   
+    //juce::OptionalScopedPointer<DragHandle> dragHandle;
+    //juce::OptionalScopedPointer<ModuleSettingsOverlay> settingsOverlay;
+    std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumModuleEditor)
 };

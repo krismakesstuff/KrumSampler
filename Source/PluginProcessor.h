@@ -169,21 +169,6 @@ private:
     std::atomic<float>* outputGainParameter = nullptr;
     juce::MidiKeyboardState midiState;
 
-    
-    class FormatManager : public juce::AudioFormatManager
-    {
-    public:
-        FormatManager()
-        {
-            registerBasicFormats();
-        }
-        ~FormatManager() {}
-    };
-
-    juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
-    KrumSampler sampler{ formatManager.get(), *this };
-    SimpleAudioPreviewer previewer{formatManager.get(), valueTree};
-    KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree/*, formatManager*/};
 
     class ThumbnailCache : public juce::AudioThumbnailCache
     {
@@ -193,8 +178,13 @@ private:
         {}
         ~ThumbnailCache() override {}
     };
-
     juce::SharedResourcePointer<ThumbnailCache> thumbnailCache;
+
+    juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
+  
+    KrumSampler sampler{ formatManager.get(), *this };
+    SimpleAudioPreviewer previewer{formatManager.get(), valueTree};
+    KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree};
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessor)

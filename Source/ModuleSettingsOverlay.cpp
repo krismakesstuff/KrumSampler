@@ -13,15 +13,15 @@
 
 
 
-ModuleSettingsOverlay::ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModule& parent)
-    : parentModule(parent), colorPalette(area.withTop(225), *this)
+ModuleSettingsOverlay::ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModule& parent, bool colorOnly)
+    : parentModule(parent), colorPalette(area.withTop(225), *this, colorOnly), isColorOnly(colorOnly)
 {
     setSize(area.getWidth(), area.getHeight());
     setRepaintsOnMouseActivity(true);
 
     addAndMakeVisible(titleBox);
     titleBox.setText(parentModule.getModuleName(), juce::dontSendNotification);
-    titleBox.setFont({ 20.0f });
+    titleBox.setFont(20.0f);
     titleBox.setBounds(getLocalBounds().withBottom(50));
     titleBox.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
     titleBox.setJustificationType(juce::Justification::centred);
@@ -68,19 +68,8 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
 
 
     moduleSelectedColor = colorPalette.getSelectedColor();
-    //moduleSelectedColor == juce::Colours::darkgrey
 
     g.setColour(moduleSelectedColor);
-
-    if (midiChanNum != 0)
-    {
-        //g.drawFittedText("Midi Note: " + juce::MidiMessage::getMidiNoteName(midiNoteNum, true, true, 3), area.reduced(10), juce::Justification::centred, 2);
-        //g.drawFittedText("Midi Channel: " + juce::String(midiChanNum), area.withTrimmedTop(25).reduced(10), juce::Justification::centred, 2);
-    }
-    else
-    {
-        //g.drawFittedText("NO MIDI NOTE ASSIGNED", area.reduced(10), juce::Justification::centred, 2);
-    }
 
     if (!moduleOverlaySelected)
     {
@@ -90,15 +79,18 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
         g.drawFittedText("Click to Select", area.withTop(area.getBottom() - 75), juce::Justification::centred, 1);
         g.setColour(juce::Colours::darkgrey.darker());
     }
+    else if (isColorOnly)
+    {
+        g.setFont(18.0f);
+        g.drawFittedText("Select A New Color", area.withTop(area.getBottom() - 75), juce::Justification::centred, 1);
+    }
     else
     {
         g.setFont(18.0f);
-
         g.drawFittedText("Select Midi Note", area.withTop(area.getBottom() - 75), juce::Justification::centred, 1);
     }
 
     g.drawRoundedRectangle(area.toFloat(), cornerSize, outlineSize);
-
 
 }
 
@@ -111,7 +103,7 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
 
 void ModuleSettingsOverlay::handleMidiInput(int midiChannelNumber, int midiNoteNumber)
 {
-    if (moduleOverlaySelected)
+    if (moduleOverlaySelected && !isColorOnly)
     {
         setMidi(midiNoteNumber, midiChannelNumber);
         showConfirmButton();
@@ -163,17 +155,21 @@ void ModuleSettingsOverlay::setOverlaySelected(bool isSelected)
 {
     if (isSelected && isVisible())
     {
-        moduleOverlaySelected = isSelected;
         showButtons();
-        //grabKeyboardFocus();
+        /*if (isColorOnly && colorPalette.isColorSelected())
+        {
+            showConfirmButton();    
+        }*/
+        
     }
     else
     {
         hideButtons();
     }
+    moduleOverlaySelected = isSelected;
 
-    const juce::MessageManagerLock lock;
-    repaint();
+    /*const juce::MessageManagerLock lock;
+    repaint();*/
 }
 
 bool ModuleSettingsOverlay::isOverlaySelected()
@@ -219,6 +215,7 @@ void ModuleSettingsOverlay::hideButtons()
     removeChildComponent(&colorPalette);
     removeChildComponent(&deleteButton);
     removeChildComponent(&cancelButton);
+    //removeChildComponent(&confirmButton);
 }
 
 juce::Colour ModuleSettingsOverlay::getSelectedColor()
@@ -241,7 +238,7 @@ void ModuleSettingsOverlay::setMidi(int midiNote, int midiChannel)
 
 void ModuleSettingsOverlay::setMidiLabels()
 {
-    juce::MessageManagerLock lock;
+    //juce::MessageManagerLock lock;
 
     juce::String midiNoteString; 
     juce::String midiChanString; 
@@ -279,6 +276,12 @@ void ModuleSettingsOverlay::colorWasChanged(bool colorWasChanged)
     colorChanged = colorWasChanged;
     midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
     midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
-    juce::MessageManagerLock lock;
-    repaint();
+    /*juce::MessageManagerLock lock;
+    repaint();*/
+}
+
+void ModuleSettingsOverlay::showColorsOnly()
+{
+    addAndMakeVisible(colorPalette);
+    isColorOnly = true;
 }

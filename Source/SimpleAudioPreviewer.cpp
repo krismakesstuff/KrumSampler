@@ -16,8 +16,6 @@
 SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::ValueTree& vt)
     : formatManager(fm), valueTree(vt)
 {
-    //Not working on MACOS
-
     addAndMakeVisible(autoPlayToggle);
     autoPlayToggle.setButtonText("Auto-Play");
     autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
@@ -44,18 +42,12 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::V
     volumeSlider.textFromValueFunction = [this](double value) { return toText(value); };
 
 
-    /*previewThread.startThread(3);
-    audioDeviceManager.initialise(0, 2, nullptr, true);
-    audioDeviceManager.addAudioCallback(&audioSourcePlayer);
-    audioSourcePlayer.setSource(&transportSource);*/
-
     setPaintingIsUnclipped(true);
 }
 
 SimpleAudioPreviewer::~SimpleAudioPreviewer()
 {
-    /*transportSource.setSource(nullptr);
-    audioSourcePlayer.setSource(nullptr);*/
+    
 }
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)

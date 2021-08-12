@@ -23,7 +23,7 @@ class ModuleSettingsOverlay : public juce::Component
 {
 public:
 
-    ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModule& parent);
+    ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModule& parent, bool isColorOnly = false);
     ~ModuleSettingsOverlay() override;
     
     void paint(juce::Graphics& g) override;
@@ -51,6 +51,8 @@ public:
 
     void keepCurrentColor(bool keepColor);
     void colorWasChanged(bool colorWasChanged);
+    void showColorsOnly();
+
 private:
 
     juce::TextButton confirmButton;
@@ -63,6 +65,8 @@ private:
     juce::Label midiNoteTitleLabel{ "Midi Note", "Midi Note" };
     juce::Label midiChannelNumberLabel;
     juce::Label midiChannelTitleLabel{ "Midi Channel", "Midi Channel" };
+
+    bool isColorOnly = false;
 
     ColorPalette colorPalette;
     KrumModule& parentModule;
