@@ -221,7 +221,12 @@ void KrumModule::triggerNoteOff()
 
 void KrumModule::setModuleGain(float newGain)
 {
-    //volumeSlider.setValue(newGain);
+    auto param = parameters->getParameter(TreeIDs::paramModuleGain_ID + getIndexString());
+    auto newGainParam = param->getNormalisableRange().convertTo0to1(newGain);
+    param->setValueNotifyingHost(newGainParam);
+
+    //param->setValueNotifyingHost(newGain);
+    //moduleProcessor->moduleGain = std::move(newGain);
 }
 
 //float KrumModule::getModuleGain()
@@ -233,7 +238,9 @@ std::atomic<float>* KrumModule::getModuleGain()
 
 void KrumModule::setModulePan(float newPan)
 {
-    //panSlider.setValue(newPan);
+    auto param = parameters->getParameter(TreeIDs::paramModulePan_ID + getIndexString());
+    param->setValueNotifyingHost(newPan); 
+    //moduleProcessor->modulePan = std::move(newPan);
 }
 
 //float KrumModule::getModulePan()
@@ -253,7 +260,7 @@ void KrumModule::getValuesFromTree()
     if (valueTree != nullptr)
     {
         auto modulesTree = valueTree->getChildWithName("KrumModules");
-        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(info.index));
+        auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
         juce::var nameValue = moduleTree.getProperty("name");
         info.name = nameValue.toString();
         
@@ -310,7 +317,7 @@ void KrumModule::updateValuesInTree(bool printBefore)
 
         auto modulesTree = valueTree->getChildWithName("KrumModules");
 
-        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(info.index));
+        auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
 
         moduleTree.setProperty("name", juce::var(info.name), nullptr);
 
@@ -368,8 +375,7 @@ void KrumModule::clearModuleValueTree()
     }
 
     auto modulesTree = valueTree->getChildWithName("KrumModules");
-
-    auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(info.index));
+    auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
 
     moduleTree.setProperty("name", juce::var(""), nullptr);
 
@@ -379,43 +385,20 @@ void KrumModule::clearModuleValueTree()
     for (int i = 0; i < moduleTree.getNumChildren(); i++)
     {
         stateTree = moduleTree.getChild(i);
-        id = stateTree.getProperty("id");
-
-        if (id == TreeIDs::paramModuleActive_ID)
-        {
-            stateTree.setProperty("value", juce::var(0), nullptr);
-        }
-        else if (id == TreeIDs::paramModuleFile_ID)
-        {
-            stateTree.setProperty("value", juce::var(""), nullptr);
-        }
-        else if (id == TreeIDs::paramModuleMidiNote_ID)
-        {
-            stateTree.setProperty("value", juce::var(0), nullptr);
-        }
-        else if (id == TreeIDs::paramModuleMidiChannel_ID)
-        {
-            stateTree.setProperty("value", juce::var(0), nullptr);
-        }
-        else if (id == TreeIDs::paramModuleColor_ID)
-        {
-            stateTree.setProperty("value", juce::var(""), nullptr);
-        }
-        else if (id == TreeIDs::paramModuleDisplayIndex_ID)
-        {
-            stateTree.setProperty("value", juce::var(""), nullptr);
-        }
+        stateTree.setProperty("value", juce::var(""), nullptr);
+        
     }
 }
+
 void KrumModule::updateAudioAtomics()
 {
-    juce::String i = " " + juce::String(info.index);
 
-    //juce::ScopedLock sl(lock);
 
-    moduleProcessor->moduleGain = parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + i);
-    moduleProcessor->modulePan = parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + i);
-
+    moduleProcessor->moduleGain = parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + getIndexString());
+    moduleProcessor->modulePan = parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + getIndexString());
+    DBG("Raw Value: " + juce::String(*moduleProcessor->moduleGain));
+    //*moduleProcessor->moduleGain = parameters->getParameterRange(TreeIDs::paramModuleGain_ID + getIndexString()).convertTo0to1(*parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + getIndexString()));
+    //*moduleProcessor->modulePan = parameters->getParameterRange(TreeIDs::paramModulePan_ID + getIndexString()).convertTo0to1(*parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + getIndexString()));
 }
 //this is needed when deleting modules and needing to reassign the slider listeners in the ValueTree
 void KrumModule::reassignSliders()
@@ -423,6 +406,7 @@ void KrumModule::reassignSliders()
     if (moduleEditor != nullptr)
     {
         moduleEditor->reassignSliderAttachments();
+        updateAudioAtomics();
     }
 }
 
@@ -461,11 +445,16 @@ void KrumModule::deleteModuleEditor()
     moduleEditor->removeFromDisplay();
     moduleEditor = nullptr;
 }
-//returns an int for possible error codes, non exist at the moment
+
+//returns an int for possible error codes, none exist at the moment
 int KrumModule::deleteEntireModule()
 {
     clearModuleValueTree();
     deleteModuleEditor();
     moduleProcessor->sampler.removeModule(this);  
     return 0;
-} 
+}
+juce::String KrumModule::getIndexString()
+{
+    return juce::String(info.index);
+}

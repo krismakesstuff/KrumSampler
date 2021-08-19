@@ -103,10 +103,12 @@ public:
     void triggerNoteOff();
 
     void setModuleGain(float newGain);
+    //void setModuleGain(std::atomic<float>* newGain);
     std::atomic<float>* getModuleGain();
     //float getModuleGain();
 
     void setModulePan(float newPan);
+    //void setModulePan(std::atomic<float>* newPan);
     std::atomic<float>* getModulePan();
     //float getModulePan();
 
@@ -163,6 +165,8 @@ private:
 
     juce::AudioProcessorValueTreeState* parameters = nullptr;
     juce::ValueTree* valueTree = nullptr;
+
+    juce::String getIndexString();
 
     JUCE_LEAK_DETECTOR(KrumModule)
 

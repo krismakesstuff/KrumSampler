@@ -85,8 +85,6 @@ private:
 
     friend class juce::SamplerSound;
 
-   // juce::CriticalSection voiceLock;
-
     double pitchRatio = 0;
     double sourceSamplePosition = 0;
     std::atomic<float> lgain = 0, rgain = 0;
@@ -122,7 +120,7 @@ public:
     //void handleMidiEvent(const juce::MidiMessage& midiMessage) override;
 
     KrumModule* getModule(int index);
-    void addModule(KrumModule* newModule, bool addVoice = false);
+    void addModule(KrumModule* newModule, bool hasSample = false);
     void removeModule(KrumModule* moduleToDelete);
     void updateModuleSample(KrumModule* updatedModule);
     

@@ -258,7 +258,7 @@ void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 
 void KrumModuleEditor::buildModule()
 {
-    juce::String i = " " + juce::String(parent.info.index);
+    juce::String i = juce::String(parent.info.index);
 
     /*int dragHandleSize;
     auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
@@ -407,7 +407,7 @@ void KrumModuleEditor::showSettingsMenu()
     }
     else if (result == KrumModule::moduleDelete_Id)
     {
-        removeFromDisplay();
+        //removeFromDisplay();
         parent.deleteEntireModule();
     }
 }
@@ -584,10 +584,8 @@ void KrumModuleEditor::updateName()
 //called when the index of the module has changed so now we need to change the slider attachment assignments as well. Might need to approach this differently for cases of automation within the DAW
 void KrumModuleEditor::reassignSliderAttachments()
 {
-    juce::String i = " " + juce::String(parent.info.index);
-
-    volumeSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleGain_ID + i, volumeSlider));
-    panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + i, panSlider));
+    volumeSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleGain_ID + parent.getIndexString(), volumeSlider));
+    panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + parent.getIndexString(), panSlider));
 }
 
 //updates the postion of the "dB" readout of the sliders

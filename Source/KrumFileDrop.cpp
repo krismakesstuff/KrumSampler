@@ -127,7 +127,6 @@ void KrumFileDrop::filesDropped(const juce::StringArray& files, int x, int y)
 
 bool KrumFileDrop::createNewModule(juce::File audioFile, juce::String name)
 {
-    //int index = container.findFreeModuleIndex();
-    int index = editor.getSampler().getNumModules();
+    int index = container.findFreeModuleIndex();
     return editor.createModule(name, index, audioFile);
 }

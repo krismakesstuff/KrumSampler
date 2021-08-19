@@ -238,11 +238,12 @@ void ModuleSettingsOverlay::setMidi(int midiNote, int midiChannel)
 
 void ModuleSettingsOverlay::setMidiLabels()
 {
-    //juce::MessageManagerLock lock;
 
     juce::String midiNoteString; 
     juce::String midiChanString; 
 
+    juce::MessageManagerLock lock;
+    
     if (midiNoteNum == 0)
     {
         midiNoteString = "None Selected";

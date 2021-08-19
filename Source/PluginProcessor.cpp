@@ -80,12 +80,13 @@ juce::ValueTree createFileBrowserTree()
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
+    //Not currently using aux outputs but would like to add those next
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
     const juce::StringArray outputStrings {"1 & 2", "3 & 4", "5 & 6"};
 
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
-        juce::String index = " " + juce::String(i);
+        juce::String index = juce::String(i);
         juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
         gainRange.setSkewForCentre(dBToGain(0.0f));
         gainRange.symmetricSkew = true;
@@ -108,7 +109,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             outputStrings, 1);
 
         auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
-                            "Module " + juce::String(i),
+                            "Module" + juce::String(i),
                             "|",
                             std::move(gainParam),
                             std::move(panParam),
@@ -403,14 +404,12 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
         {
             juce::var nameValue = moduleTree.getProperty("name");
             
-            
             juce::ValueTree stateTree;
             bool moduleActive = false;
             int midiChannel = 0;
             juce::var id;
             juce::var val;
 
-            //probably dont need to itt through all the params since moduleActive will be first.. 
             for (int j = 0; j < 4; j++)                 
             {
                 stateTree = moduleTree.getChild(j);
@@ -432,9 +431,7 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
                 auto newModule = new KrumModule(i, sampler, &valueTree, &parameters);
                 sampler.addModule(newModule, newModule->getMidiTriggerNote() != 0);
                 midiState.addListener(newModule);
-                    
             }
-            
         }
         else
         {
@@ -495,6 +492,14 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
         }
         else //zero the state for this module
         {
+            
+
+            auto gainParam = parameters.getParameter(TreeIDs::paramModuleGain_ID + juce::String(i));
+            auto panParam = parameters.getParameter(TreeIDs::paramModulePan_ID + juce::String(i));
+
+            auto zeroGain = gainParam->getNormalisableRange().convertTo0to1(dBToGain(0.0f));
+            gainParam->setValueNotifyingHost(zeroGain);
+            panParam->setValueNotifyingHost(0.5f);
 
             moduleTree.setProperty("name", juce::var(""), nullptr);
 
@@ -554,7 +559,7 @@ int KrumSamplerAudioProcessor::findFreeModuleIndex()
         stateTree = moduleTree.getChild(0);             //index of ModuleActive parameter in ValueTree.
         id = stateTree.getProperty("id");
         val = stateTree.getProperty("value");
-        if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) < 1)
+        if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) == 0)
         {
             return i;
         }
