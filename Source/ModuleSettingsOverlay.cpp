@@ -112,7 +112,7 @@ void ModuleSettingsOverlay::handleMidiInput(int midiChannelNumber, int midiNoteN
 
 void ModuleSettingsOverlay::showConfirmButton()
 {
-    const juce::MessageManagerLock mmLock;
+    //const juce::MessageManagerLock mmLock;
 
     addAndMakeVisible(confirmButton);
     auto area = getLocalBounds();
@@ -242,7 +242,7 @@ void ModuleSettingsOverlay::setMidiLabels()
     juce::String midiNoteString; 
     juce::String midiChanString; 
 
-    juce::MessageManagerLock lock;
+    //juce::MessageManagerLock lock;
     
     if (midiNoteNum == 0)
     {

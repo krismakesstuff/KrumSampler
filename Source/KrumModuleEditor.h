@@ -132,9 +132,23 @@ private:
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
 
-    float buttonClickVelocity = 15.0f;
 
-    juce::DrawableButton playButton{ "Play Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
+    class OneShotButton : public juce::DrawableButton
+    {
+    public:
+        OneShotButton();
+        ~OneShotButton() override;
+
+        void mouseDown(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
+
+        std::function<void()> onMouseUp;
+        std::function<void()> onMouseDown;
+    };
+
+
+    //juce::DrawableButton playButton{ "Play Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
+    OneShotButton playButton;
     juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };;
 
 

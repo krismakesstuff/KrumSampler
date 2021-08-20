@@ -44,7 +44,7 @@ void KrumKeyboard::mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e)
     {
         auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
         mod->setModulePlaying(false);
-        mod->triggerNoteOffInParent();
+        //mod->triggerNoteOffInParent();
     }
 }
 
@@ -157,7 +157,7 @@ void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, i
         removeMidiNoteColorAssignment(testNote);
     }
     currentlyAssignedMidiNotes.emplace(std::make_pair(midiNote, moduleColor));
-    juce::MessageManagerLock lock;
+    //juce::MessageManagerLock lock;
     repaint();
 }
 
@@ -169,11 +169,14 @@ void KrumKeyboard::removeMidiNoteColorAssignment(int midiNote, bool shouldRepain
         currentlyAssignedMidiNotes.erase(midiNote);
         if (shouldRepaint)
         {
-            juce::MessageManagerLock lock;
+      //      juce::MessageManagerLock lock;
             repaint();
 
         }
     }
+
+
+    
 }
 
 bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
@@ -181,11 +184,6 @@ bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
     return currentlyAssignedMidiNotes.find(midiNote) != currentlyAssignedMidiNotes.end();
 }
 
-void KrumKeyboard::setKeyDown(int midiNote, bool isKeyDown)
-{
-    juce::MessageManagerLock lock;
-    repaint();
-}
 
 void KrumKeyboard::updateKeysFromContainer()
 {

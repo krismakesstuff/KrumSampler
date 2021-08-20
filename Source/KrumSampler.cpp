@@ -308,14 +308,6 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
         mod->setModuleGain(modGain);
         mod->setModulePan(modPan);
         mod->updateAudioAtomics();
-
-        DBG("It: " + juce::String(i));
-        DBG("Module: " + juce::String(mod->getModuleIndex()));
-
-        DBG("NewGain: " + juce::String(*mod->getModuleGain()));
-        DBG("NewPan: " + juce::String(*mod->getModulePan()));
-        DBG("OldGain: " + juce::String(modGain));
-        DBG("OldPan: " + juce::String(modPan));
     }
 
     owner.updateValueTreeState();
@@ -348,7 +340,7 @@ void KrumSampler::addSample(KrumModule* moduleToAddSound)
             if (moduleToAddSound == modules[i])
             {
                 sounds.insert(moduleToAddSound->getModuleIndex(), new KrumSound(moduleToAddSound, moduleToAddSound->getModuleName(), *reader, range, moduleToAddSound->getMidiTriggerNote(),
-                    attackTime, releaseTime, maxFileLengthInSeconds));
+                    attackTime, releaseTime, MAX_FILE_LENGTH_SECS));
             }
         }
 

@@ -28,9 +28,9 @@
 * 
 */
 
-#define MAX_NUM_MODULES 30
+#define MAX_NUM_MODULES 20
 #define MAX_VOICES 8
-#define MAX_FILE_LENGTH_SECS 5
+#define MAX_FILE_LENGTH_SECS 3
 
 
 namespace TreeIDs 

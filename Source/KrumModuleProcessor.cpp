@@ -15,27 +15,20 @@
 KrumModuleProcessor::KrumModuleProcessor(KrumModule& p, KrumSampler& s/*, juce::File& sampleFile*/)
     : parent(p), sampler(s)/*, audioFile(sampleFile)*/
 {
-    //parent.parameters->getParameterAsValue()
-
 }
 
 //automatically triggers a note off after the length of the sample has passed.
 void KrumModuleProcessor::timerCallback()
 {
-    triggerNoteOff();
+    //went with a different approach, kept in case who knows what... i know, i know..
 }
 
 void KrumModuleProcessor::triggerNoteOn()
 {
-    //int timerLength = parent.moduleEditor->getAudioFileLengthInMs();
-    
     sampler.noteOn(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity);
-    sampler.noteOff(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity, true);
-    //startTimer(timerLength);
 }
 
 void KrumModuleProcessor::triggerNoteOff()
 {
-    //stopTimer();
-    //sampler.noteOff(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity, false);
+    sampler.noteOff(parent.getMidiTriggerChannel(), parent.getMidiTriggerNote(), buttonClickVelocity, false);
 }

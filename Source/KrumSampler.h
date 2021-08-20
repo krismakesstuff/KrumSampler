@@ -135,13 +135,8 @@ public:
 
 private:
 
-    juce::CriticalSection lock;
-
-    bool treeNeedsCleaning = false;
-
     double attackTime = 0.01;
     double releaseTime = 0.01;
-    double maxFileLengthInSeconds = 5;
 
     juce::AudioFormatManager& formatManager;
     KrumSamplerAudioProcessor& owner;

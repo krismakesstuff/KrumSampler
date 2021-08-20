@@ -248,7 +248,6 @@ bool KrumSamplerAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* KrumSamplerAudioProcessor::createEditor()
 {
-    //editorWantsToUpdate = true;
     return new KrumSamplerAudioProcessorEditor(*this, sampler, parameters, valueTree, fileBrowserValueTree);
 }
 

@@ -19,6 +19,7 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner)
     refreshModuleLayout(true);
     setInterceptsMouseClicks(true, true);
     setRepaintsOnMouseActivity(true);
+    startTimerHz(30);
 }
 
 KrumModuleContainer::~KrumModuleContainer()
@@ -277,8 +278,17 @@ int KrumModuleContainer::getNumModuleEditors()
     return moduleDisplayOrder.size();
 }
 
-
 KrumModuleEditor* KrumModuleContainer::getEditorFromModule(KrumModule* krumModule)
 {
     return krumModule->getCurrentModuleEditor();
 }
+
+void KrumModuleContainer::timerCallback()
+{
+    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    {
+        moduleDisplayOrder[i]->repaint();
+    }
+
+}
+

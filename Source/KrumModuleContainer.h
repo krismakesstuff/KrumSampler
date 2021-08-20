@@ -24,7 +24,8 @@ class KrumModule;
 class KrumSamplerAudioProcessorEditor;
 
 class KrumModuleContainer : public juce::Component,
-                            public juce::DragAndDropTarget
+                            public juce::DragAndDropTarget,
+                            public juce::Timer
 {
 public:
     KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner);
@@ -65,6 +66,9 @@ public:
     int getNumModuleEditors();
 
 private:
+
+    void timerCallback() override;
+
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
  

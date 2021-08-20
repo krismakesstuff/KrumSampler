@@ -315,7 +315,9 @@ void KrumModuleEditor::buildModule()
     
     addAndMakeVisible(playButton);
     playButton.setImages(playButtonImage.get());
-    playButton.onClick = [this] { triggerNoteOnInParent(); };
+
+    playButton.onMouseDown = [this] { triggerNoteOnInParent(); };
+    playButton.onMouseUp = [this] { triggerNoteOffInParent(); };
     
     
     int editButtonImSize;
@@ -374,7 +376,7 @@ void KrumModuleEditor::setChildCompColors()
 
 void KrumModuleEditor::showSettingsMenu()
 {
-    juce::MessageManagerLock lock;
+    //::MessageManagerLock lock;
     juce::PopupMenu settingsMenu;
 
     //settingsMenu.addItem(KrumModule::moduleReConfig_Id, "Re-Config");
@@ -667,12 +669,31 @@ void KrumModuleEditor::removeFromDisplay()
 
 void KrumModuleEditor::triggerNoteOnInParent()
 {
+    //was trying to use this to turn the keys "on" and "off", but didn't work well and is messy
+    /*auto processor = static_cast<KrumSamplerAudioProcessor*>(&editor.processor);
+    if (processor)
+    {
+        processor->getMidiState().noteOn(parent.info.midiChannel, parent.info.midiNote, moduleProcessor.buttonClickVelocity);
+        editor.keyboard.handleNoteOn(nullptr, parent.info.midiChannel, parent.info.midiNote, moduleProcessor.buttonClickVelocity);
+    }*/
+    
     parent.triggerNoteOn();
 }
 
 void KrumModuleEditor::triggerNoteOffInParent()
 {
+    //was trying to use this to turn the keys "on" and "off", but didn't work well and is messy
+    /*auto processor = static_cast<KrumSamplerAudioProcessor*>(&editor.processor);
+    if (processor)
+    {
+        processor->getMidiState().noteOff(parent.info.midiChannel, parent.info.midiNote, moduleProcessor.buttonClickVelocity);
+        editor.keyboard.handleNoteOff(nullptr, 0, 0, 0);
+    }*/
+
+    //parent.setModulePlaying(false);
     parent.triggerNoteOff();
+
+
 }
 
 void KrumModuleEditor::setAndDrawThumbnail()
@@ -685,4 +706,34 @@ void KrumModuleEditor::setAndDrawThumbnail()
 void KrumModuleEditor::setOldMidiNote(int midiNote)
 {
     oldMidiNote = midiNote;
+}
+
+KrumModuleEditor::OneShotButton::OneShotButton()
+    :DrawableButton("PlayButton", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground)
+{
+}
+
+KrumModuleEditor::OneShotButton::~OneShotButton()
+{
+}
+
+void KrumModuleEditor::OneShotButton::mouseDown(const juce::MouseEvent& e)
+{
+    Button::mouseDown(e);
+    if (onMouseDown)
+    {
+        onMouseDown();
+    }
+
+}
+
+void KrumModuleEditor::OneShotButton::mouseUp(const juce::MouseEvent& e)
+{
+    Button::mouseUp(e);
+    
+    if (onMouseUp)
+    {
+        onMouseUp();
+    }
+
 }

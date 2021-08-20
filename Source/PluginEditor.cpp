@@ -351,7 +351,7 @@ void KrumSamplerAudioProcessorEditor::printModules()
 
 void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 {
-    juce::MessageManagerLock lock;
+   //juce::MessageManagerLock lock;
 
     fileDrop.setVisible(false);
     fileBrowser.setVisible(false);
@@ -363,7 +363,7 @@ void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 
 void KrumSamplerAudioProcessorEditor::showFileBrowser()
 {
-    juce::MessageManagerLock lock;
+    //juce::MessageManagerLock lock;
 
     fileDrop.setVisible(true);
     fileBrowser.setVisible(true);

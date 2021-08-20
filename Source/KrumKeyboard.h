@@ -43,10 +43,6 @@ public:
     void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
     bool isMidiNoteAssigned(int midiNote);
 
-    
-
-    void setKeyDown(int midiNote, bool isKeyDown);
-
     void updateKeysFromContainer();
 
     void printCurrentlyAssignedMidiNotes();

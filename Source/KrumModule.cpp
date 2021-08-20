@@ -151,11 +151,6 @@ bool KrumModule::isModulePlaying()
 void KrumModule::setModulePlaying(const bool isPlaying)
 {
     info.modulePlaying = isPlaying;
-    if (moduleEditor != nullptr)
-    {
-        juce::MessageManagerLock lock;
-        moduleEditor->repaint();
-    }
 }
 
 bool KrumModule::isModuleActive()
@@ -182,7 +177,7 @@ void KrumModule::setModuleIndex(int newIndex)
     updateValuesInTree();
 }
 
-int KrumModule::getModuleDisplayIndex()
+int KrumModule::getModuleDisplayIndex() 
 {
     return info.displayIndex;
 }
@@ -193,7 +188,7 @@ void KrumModule::setModuleDisplayIndex(int newIndex)
     updateValuesInTree();
 }
 
-juce::Colour KrumModule::getModuleColor()
+juce::Colour KrumModule::getModuleColor() 
 {
     return info.moduleColor;
 }
@@ -216,6 +211,7 @@ void KrumModule::triggerNoteOn()
 
 void KrumModule::triggerNoteOff() 
 {
+    //setModulePlaying(false);
     moduleProcessor->triggerNoteOff();
 }
 
@@ -224,9 +220,6 @@ void KrumModule::setModuleGain(float newGain)
     auto param = parameters->getParameter(TreeIDs::paramModuleGain_ID + getIndexString());
     auto newGainParam = param->getNormalisableRange().convertTo0to1(newGain);
     param->setValueNotifyingHost(newGainParam);
-
-    //param->setValueNotifyingHost(newGain);
-    //moduleProcessor->moduleGain = std::move(newGain);
 }
 
 //float KrumModule::getModuleGain()
@@ -240,7 +233,6 @@ void KrumModule::setModulePan(float newPan)
 {
     auto param = parameters->getParameter(TreeIDs::paramModulePan_ID + getIndexString());
     param->setValueNotifyingHost(newPan); 
-    //moduleProcessor->modulePan = std::move(newPan);
 }
 
 //float KrumModule::getModulePan()
