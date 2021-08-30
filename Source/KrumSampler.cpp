@@ -368,12 +368,13 @@ bool KrumSampler::isFileAcceptable(const juce::File& file)
     std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(file));
     if (reader == nullptr)
     {
-        auto alert = juce::AlertWindow::showNativeDialogBox("File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".", true);
+        //auto alert = juce::AlertWindow::showNativeDialogBox("File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".", true);
+        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".");
         return false;
     }
     if (reader->lengthInSamples / reader->sampleRate >= MAX_FILE_LENGTH_SECS)
     {
-        auto alert = juce::AlertWindow::showNativeDialogBox("File Too Long!", "The maximum file length is " + juce::String(MAX_FILE_LENGTH_SECS) + " seconds.", true);
+        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"File Too Long!", "The maximum file length is " + juce::String(MAX_FILE_LENGTH_SECS) + " seconds.");
         return false;
     }
 

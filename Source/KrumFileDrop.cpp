@@ -82,7 +82,7 @@ void KrumFileDrop::itemDropped(const juce::DragAndDropTarget::SourceDetails& dra
             else
             {
                 DBG("Folders Not Supported");
-                juce::AlertWindow::showMessageBox(juce::AlertWindow::AlertIconType::InfoIcon, "Folders Not Supported Yet", "I might support folder dropping in the future. For now, drop the folder into favorites to keep it locally.");
+                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Folders Not Supported Yet", "I might support folder dropping in the future. For now, drop the folder into favorites to keep it locally.");
             }
         }
         else

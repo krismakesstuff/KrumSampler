@@ -255,8 +255,8 @@ bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int
 {
     if (sampler.getNumModules() >= MAX_NUM_MODULES)
     {
-        bool okPressed = juce::AlertWindow::showNativeDialogBox("Too many samples!",
-            "Right now this only supports " + juce::String(MAX_NUM_MODULES) + " samples.", true);
+        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"Too many samples!",
+            "Right now this only supports " + juce::String(MAX_NUM_MODULES) + " samples.");
         return false;
     }
 

@@ -30,11 +30,14 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         return false;
     }
     
-    juce::Component* KrumTreeItem::createItemComponent()
+    std::unique_ptr<juce::Component> KrumTreeItem::createItemComponent()
     {
-        auto newLabel = new EditableComp(*this, itemName, bgColor);
-        
-        return newLabel;
+        auto newKrumItem = new EditableComp(*this, itemName, bgColor);
+
+        auto label = static_cast<juce::Label*>(newKrumItem);
+        auto comp = static_cast<juce::Component*>(label);
+        //auto newItem = std::make_unique<Component>(comp);
+        return std::move(std::unique_ptr<juce::Component>(comp));
     }
 
     /*void paintItem(juce::Graphics& g, int width, int height) override
@@ -147,7 +150,9 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     void KrumTreeItem::setBGColor(juce::Colour newColor)
     {
         bgColor = newColor;
-    } 
+    }
+   
+
 
     KrumTreeItem::EditableComp::EditableComp (KrumTreeItem& o, juce::String itemName, juce::Colour backColor)
         : owner(o), bgColor(backColor)
@@ -241,22 +246,14 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         if (e.mods.isPopupMenu())
         {
             juce::PopupMenu menu;
+            juce::Rectangle<int> showPoint{ e.getMouseDownScreenX(), e.getMouseDownScreenY(), 0, 0 };
+            juce::PopupMenu::Options menuOptions;
 
             menu.addItem(1, "Rename");
             menu.addItem(2, "Remove");
 
-            juce::Rectangle<int> showPoint{ e.getMouseDownScreenX(), e.getMouseDownScreenY(), 0, 0 };
-            int result = menu.showAt(showPoint);
-            if (result == 1)
-            {
-                showEditor();
-                repaint();
-                owner.setItemEditing(true);
-            }
-            else if (result == 2)
-            {
-                owner.tellParentToRemoveMe();
-            }
+            menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
+            
         }
     }
 
@@ -272,6 +269,21 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
     {
         owner.itemDoubleClicked(e);
+    }
+
+
+    void KrumTreeItem::EditableComp::handleResult(int result, EditableComp* comp)
+    {
+        if (result == 1)
+        {
+            comp->showEditor();
+            comp->repaint();
+            comp->owner.setItemEditing(true);
+        }
+        else if (result == 2)
+        {
+            comp->owner.tellParentToRemoveMe();
+        }
     }
 
 
@@ -294,14 +306,20 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         return true;
     }
 
-    juce::Component* KrumTreeHeaderItem::createItemComponent()
+    std::unique_ptr<juce::Component> KrumTreeHeaderItem::createItemComponent()
     {
-        auto newHeader = new EditableHeaderComp(*this, headerName, bgColor);
+
+        auto newHeaderComp = new EditableHeaderComp(*this, headerName, bgColor);
+
         if (numFilesExcluded > 0)
         {
-            newHeader->setTooltip(newHeader->getTooltip() + " (" + juce::String(numFilesExcluded) + " files excluded)");
+            newHeaderComp->setTooltip(newHeaderComp->getTooltip() + " (" + juce::String(numFilesExcluded) + " files excluded)");
         }
-        return newHeader;
+
+        auto label = static_cast<juce::Label*>(newHeaderComp);
+        auto comp = static_cast<juce::Component*>(label);
+        //auto newHeader = std::make_unique<Component>(comp);
+        return std::move(std::unique_ptr<juce::Component>(comp));
     }
 
     void KrumTreeHeaderItem::paintOpenCloseButton(juce::Graphics&, const juce::Rectangle< float >& area, juce::Colour backgroundColour, bool isMouseOver)
@@ -491,6 +509,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
     void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e)
     {
+        
 
         bool deselect = ! e.mods.isShiftDown();
 
@@ -502,35 +521,24 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         if (e.mods.isPopupMenu() && owner.isEditable())
         {
             juce::PopupMenu menu;
+            juce::PopupMenu::Options menuOptions;
 
             menu.addItem(1, "Rename");
             menu.addItem(2, "Remove");
 
-            int result = menu.showAt(showPoint);
-            if (result == 1)
-            {
+            menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
 
-                //need to update Value Tree
-                showEditor();
-                repaint();
-                owner.setItemEditing(true);
-                //owner.tellParentIfEditing(true);
-            }
-            else if (result == 2)
-            {
-                owner.tellParentToRemoveMe();
-            }
+            
         }
         else if(e.mods.isPopupMenu() && !owner.isEditable())
         {
             juce::PopupMenu menu;
-            menu.addItem(1, "Clear (like, forever)");
+            juce::PopupMenu::Options menuOptions;
+            menu.addItem(3, "Clear (like, forever)");
 
-            int result = menu.showAt(showPoint);
-            if (result)
-            {
-                owner.clearAllChildren();
-            }
+            menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
+
+            
         }
 
     }
@@ -540,6 +548,25 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         owner.itemDoubleClicked(e);
     }
 
+    void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
+    {
+        if (result == 1)
+        {
+            comp->showEditor();
+            comp->repaint();
+            comp->owner.setItemEditing(true);
+        }
+        else if (result == 2)
+        {
+            comp->owner.tellParentToRemoveMe();
+        }
+        if (result == 3)
+        {
+            comp->owner.clearAllChildren();
+        }
+
+    }
+
 
 //=================================================================================================================================//
 //=================================================================================================================================//
@@ -547,7 +574,8 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev)
     : fileBrowserValueTree(fileBrowserTree), previewer(prev)
 {
-    
+ 
+
     setMultiSelectEnabled(true);
     addMouseListener(this, true);
     
@@ -652,34 +680,13 @@ void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y)
 void KrumTreeView::pickNewFavorite()
 {
     const juce::String title{ "Choose A Folder(s) or File(s) to Add to Favorites, you can also drag and drop from external apps!" };
-
-    juce::FileChooser fileChooser(title, juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
-                                    previewer->getFormatManager().getWildcardForAllFormats(), true);
-
+    currentFileChooser.reset(new CustomFileChooser(title, juce::File::getSpecialLocation(juce::File::userDesktopDirectory), previewer->getFormatManager().getWildcardForAllFormats(), this));
     
-    if (fileChooser.browseForMultipleFilesOrDirectories())
-    {
-        juce::Array<juce::File> resultFiles = fileChooser.getResults();
-
-        for (int i = 0; i < resultFiles.size(); i++)
-        {
-            auto itFile = resultFiles[i];
-            if (itFile.isDirectory())
-            {
-                createNewFavoriteFolder(itFile.getFullPathName());
-            }
-            else
-            {
-                createNewFavoriteFile(itFile.getFullPathName());
-            }
-        }
-
-        auto favNode = rootNode->getSubItem(FileBrowserSectionIds::favoritesFolders_Ids);
-        FileBrowserSorter sorter;
-        favNode->sortSubItems(sorter);
-        favNode->treeHasChanged();
-
-    }
+    //Must set the callback lambda before showing
+    currentFileChooser->fileChooserCallback = handleChosenFiles;
+    int fileBrowserFlag = juce::FileBrowserComponent::FileChooserFlags::canSelectMultipleItems | juce::FileBrowserComponent::FileChooserFlags::openMode
+                        | juce::FileBrowserComponent::FileChooserFlags::canSelectDirectories | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+    currentFileChooser->showFileChooser(fileBrowserFlag);
 
 }
 
@@ -1330,6 +1337,31 @@ KrumTreeItem* KrumTreeView::makeTreeItem(juce::Component* item)
     {
         return nullptr;
     }
+}
+
+void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
+{
+    auto cFileChooser = static_cast<const CustomFileChooser*>(&fileChooser);
+    juce::Array<juce::File> resultFiles = fileChooser.getResults();
+
+    for (int i = 0; i < resultFiles.size(); i++)
+    {
+        auto itFile = resultFiles[i];
+        if (itFile.isDirectory())
+        {
+            cFileChooser->owner->createNewFavoriteFolder(itFile.getFullPathName());
+        }
+        else
+        {
+            cFileChooser->owner->createNewFavoriteFile(itFile.getFullPathName());
+        }
+    }
+
+    auto favNode = cFileChooser->owner->rootNode->getSubItem(FileBrowserSectionIds::favoritesFolders_Ids);
+    FileBrowserSorter sorter;
+    favNode->sortSubItems(sorter);
+    favNode->treeHasChanged();
+
 }
 
 

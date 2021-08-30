@@ -108,6 +108,9 @@ public:
     void setOldMidiNote(int midiNote);
 private:
 
+    static void handleSettingsMenuResult(int result, KrumModuleEditor* parentEditor);
+
+
     bool needsToDrawThumbnail = false;
     bool needsToBuildModuleEditor = false;
     KrumModule& parent;

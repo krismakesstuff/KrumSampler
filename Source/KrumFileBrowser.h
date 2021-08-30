@@ -80,7 +80,7 @@ public:
    
     bool mightContainSubItems() override;
     
-    juce::Component* createItemComponent() override;
+    std::unique_ptr<juce::Component> createItemComponent() override;
     
     void paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
 
@@ -102,6 +102,7 @@ public:
 
     void tellParentToRemoveMe();
     void setBGColor(juce::Colour newColor);
+    
     
 
 private:
@@ -132,6 +133,9 @@ private:
         void mouseUp(const juce::MouseEvent& e) override;
         void mouseDoubleClick(const juce::MouseEvent& e) override;
         
+        
+
+        static void handleResult(int result, EditableComp* comp);
 
     private:
         KrumTreeItem& owner;
@@ -155,7 +159,7 @@ public:
 
     bool mightContainSubItems() override;
 
-    juce::Component* createItemComponent() override;
+    std::unique_ptr<juce::Component> createItemComponent() override;
 
     void paintOpenCloseButton(juce::Graphics&, const juce::Rectangle< float >& area, juce::Colour backgroundColour, bool isMouseOver) override;
     void paintVerticalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
@@ -213,6 +217,7 @@ private:
 
         void mouseDoubleClick(const juce::MouseEvent& e) override;
 
+        static void handleResult(int result, EditableHeaderComp* comp);
 
     private:
         KrumTreeHeaderItem& owner;
@@ -323,7 +328,7 @@ public:
 
     void pickNewFavorite();
     void addFileToRecent(juce::File file, juce::String name);
-    void createNewFavoriteFile(const juce::String& fullPathName);
+    void createNewFavoriteFile(const juce::String& fullPathName); 
     void createNewFavoriteFolder(const juce::String& fullPathName);
     void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
 
@@ -361,8 +366,43 @@ public:
     KrumTreeItem* makeTreeItem(juce::TreeViewItem* item);
     KrumTreeItem* makeTreeItem(juce::Component* item);
 
+
 private:
 
+    class CustomFileChooser : public juce::FileChooser
+    {
+    public:
+        CustomFileChooser(juce::String title, juce::File locationToShow, juce::String formats, KrumTreeView* ownerTree)
+            : juce::FileChooser(title, locationToShow, formats, false), owner(ownerTree)
+        {
+        }
+
+        ~CustomFileChooser()
+        {
+            owner = nullptr;
+        }
+
+        void showFileChooser(int flags)
+        {
+            if (fileChooserCallback)
+            {
+                launchAsync(flags, fileChooserCallback);
+            }
+            else
+            {
+                DBG("Callback OR FileChooser is Null");
+            }
+        }
+
+        std::function<void(const juce::FileChooser&)> fileChooserCallback;
+
+        KrumTreeView* owner = nullptr;
+    };
+
+    std::unique_ptr<CustomFileChooser> currentFileChooser = nullptr;
+
+    static void handleChosenFiles(const juce::FileChooser& fileChooser);
+    
     juce::ValueTree& fileBrowserValueTree;
 
     std::unique_ptr<KrumTreeHeaderItem> rootNode;

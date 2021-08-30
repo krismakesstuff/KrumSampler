@@ -45,10 +45,10 @@ void KrumModuleContainer::paint (juce::Graphics& g)
         g.drawFittedText("Drop a Sample up there", area.reduced(20), juce::Justification::centred, 1);
     }
 
-    if (moduleDragging)
+   /* if (moduleDragging)
     {
         paintLineUnderMouseDrag(g, getMouseXYRelative());
-    }
+    }*/
 }
 
 void KrumModuleContainer::paintLineUnderMouseDrag(juce::Graphics& g, juce::Point<int> mousePosition)
@@ -180,6 +180,7 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
 void KrumModuleContainer::moveModule(KrumModule* moduleToMove, int newDisplayIndex)
 {
     //TODO
+    //this would be the drag and drop functionality, to rearrange the order of the modules
 }
 
 void KrumModuleContainer::setModuleSelected(KrumModule* moduleToMakeActive)
@@ -193,7 +194,7 @@ void KrumModuleContainer::setModuleSelected(KrumModule* moduleToMakeActive)
 
     moduleToMakeActive->setModuleSelected(true);
 
-    juce::MessageManagerLock lock;
+    //juce::MessageManagerLock lock;
     repaint();
 
 }

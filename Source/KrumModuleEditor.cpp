@@ -376,42 +376,20 @@ void KrumModuleEditor::setChildCompColors()
 
 void KrumModuleEditor::showSettingsMenu()
 {
-    //::MessageManagerLock lock;
     juce::PopupMenu settingsMenu;
-
+    juce::PopupMenu::Options options;
+   
+    //juce::Rectangle<int> showPoint{ editButton.getScreenBounds().getX(), editButton.getScreenBounds().getY(), 0, 0 };
+    
     //settingsMenu.addItem(KrumModule::moduleReConfig_Id, "Re-Config");
     settingsMenu.addItem(KrumModule::ModuleSettingIDs::moduleMidiNote_Id, "Change Midi");
     settingsMenu.addItem(KrumModule::ModuleSettingIDs::moduleColor_Id, "Change Color");
     settingsMenu.addItem(KrumModule::moduleDelete_Id, "Delete Module");
 
-    auto result = settingsMenu.showAt(&editButton);
+    settingsMenu.showMenuAsync(options.withTargetScreenArea(editButton.getScreenBounds()), juce::ModalCallbackFunction::create(handleSettingsMenuResult, this));
 
-    if (result == KrumModule::moduleReConfig_Id)
-    {
-        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
-        settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
-        settingsOverlay->keepCurrentColor(true);
-        showSettingsOverlay(true);
-    }
-    else if (result == KrumModule::ModuleSettingIDs::moduleMidiNote_Id)
-    {
-        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
-        settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
-        settingsOverlay->keepCurrentColor(true);
-        showSettingsOverlay(true);
-    }
-    else if (result == KrumModule::ModuleSettingIDs::moduleColor_Id)
-    {
-        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
-        settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
-        settingsOverlay->showColorsOnly();
-        showSettingsOverlay(true);
-    }
-    else if (result == KrumModule::moduleDelete_Id)
-    {
-        //removeFromDisplay();
-        parent.deleteEntireModule();
-    }
+
+    
 }
 
 
@@ -706,6 +684,40 @@ void KrumModuleEditor::setAndDrawThumbnail()
 void KrumModuleEditor::setOldMidiNote(int midiNote)
 {
     oldMidiNote = midiNote;
+}
+
+void KrumModuleEditor::handleSettingsMenuResult(int result, KrumModuleEditor* parentEditor)
+{
+    auto& parent = parentEditor->parent;
+    auto localBounds = parentEditor->getLocalBounds();
+    if (result == KrumModule::moduleReConfig_Id)
+    {
+
+        parentEditor->settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+        parentEditor->settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
+        parentEditor->settingsOverlay->keepCurrentColor(true);
+        parentEditor->showSettingsOverlay(true);
+    }
+    else if (result == KrumModule::ModuleSettingIDs::moduleMidiNote_Id)
+    {
+        parentEditor->settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+        parentEditor->settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
+        parentEditor->settingsOverlay->keepCurrentColor(true);
+        parentEditor->showSettingsOverlay(true);
+    }
+    else if (result == KrumModule::ModuleSettingIDs::moduleColor_Id)
+    {
+        parentEditor->settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+        parentEditor->settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
+        parentEditor->settingsOverlay->showColorsOnly();
+        parentEditor->showSettingsOverlay(true);
+    }
+    else if (result == KrumModule::moduleDelete_Id)
+    {
+        //removeFromDisplay();
+        parentEditor->parent.deleteEntireModule();
+    }
+
 }
 
 KrumModuleEditor::OneShotButton::OneShotButton()
