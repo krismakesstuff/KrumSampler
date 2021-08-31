@@ -611,7 +611,9 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
 
     setPaintingIsUnclipped(true);
 
-   
+#if JucePlugin_Build_Standalone
+    buildDemoKit();
+#endif
 
 }
 
@@ -1337,6 +1339,71 @@ KrumTreeItem* KrumTreeView::makeTreeItem(juce::Component* item)
     {
         return nullptr;
     }
+}
+
+void KrumTreeView::buildDemoKit()
+{
+    //Building the DemoKit folder from the files saved in BinaryData
+    juce::File specialLocation = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
+    DBG("Location: " + specialLocation.getParentDirectory().getFullPathName());
+    juce::String separator = juce::File::getSeparatorString();
+    juce::File demoKitFolder{ specialLocation.getParentDirectory().getFullPathName() + separator + "DemoKit" };
+    auto result = demoKitFolder.createDirectory();
+    if (result.wasOk())
+    {
+        juce::String demoKitPath = demoKitFolder.getFullPathName();
+        DBG("DemoKit Made");
+        DBG("DemoKit Location: " + demoKitPath);
+
+        juce::File wannaKik{ demoKitPath + separator + "WannaKik.wav" };
+        wannaKik.create();
+        int wannaKikSize;
+        auto wannaKikData = BinaryData::getNamedResource("WANNA_KIK____48K_wav", wannaKikSize);
+        wannaKik.replaceWithData(wannaKikData, wannaKikSize);
+
+
+        juce::File twentyOneKick{ demoKitPath + separator + "TwentyOneKick.wav" };
+        twentyOneKick.create();
+        int twentyOneKickSize;
+        auto twentyOneKickData = BinaryData::getNamedResource("_21_Pilots_Kick_Sample_wav", twentyOneKickSize);
+        twentyOneKick.replaceWithData(twentyOneKickData, twentyOneKickSize);
+
+        juce::File eightOhEight{ demoKitPath + separator + "EightOhEight.wav" };
+        eightOhEight.create();
+        int eightOhEightSize;
+        auto eightOhEightData = BinaryData::getNamedResource("_808_and_House_Kick_blend_wav", eightOhEightSize);
+        eightOhEight.replaceWithData(eightOhEightData, eightOhEightSize);
+
+        juce::File monsterClap{ demoKitPath + separator + "MonsterClap.wav" };
+        monsterClap.create();
+        int monsterClapSize;
+        auto monsterClapData = BinaryData::getNamedResource("GW_Monster_clap_snare_wav", monsterClapSize);
+        monsterClap.replaceWithData(monsterClapData, monsterClapSize);
+
+        juce::File hiHatsV4{ demoKitPath + "\\HiHatsV4.wav" };
+        hiHatsV4.create();
+        int hhv4Size;
+        auto hhv4Data = BinaryData::getNamedResource("HI_HATS_V4__A_wav", hhv4Size);
+        hiHatsV4.replaceWithData(hhv4Data, hhv4Size);
+
+        juce::File hiHatsV10{ demoKitPath + separator + "HiHatsV10.wav" };
+        hiHatsV10.create();
+        int hhv10Size;
+        auto hhv10Data = BinaryData::getNamedResource("HI_HATS_V10__A_wav", hhv10Size);
+        hiHatsV10.replaceWithData(hhv10Data, hhv10Size);
+
+        juce::File marvinSnap{ demoKitPath + separator + "MarvinSnap.wav" };
+        marvinSnap.create();
+        int mSnapSize;
+        auto mSnapData = BinaryData::getNamedResource("Marvin_Snap_wav", mSnapSize);
+        marvinSnap.replaceWithData(mSnapData, mSnapSize);
+
+        demoKit = demoKitFolder;
+
+        DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
+
+    }
+
 }
 
 void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)

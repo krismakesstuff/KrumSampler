@@ -366,6 +366,8 @@ public:
     KrumTreeItem* makeTreeItem(juce::TreeViewItem* item);
     KrumTreeItem* makeTreeItem(juce::Component* item);
 
+    void buildDemoKit();
+
 
 private:
 
@@ -411,6 +413,10 @@ private:
     juce::Colour bgColor{ juce::Colours::black };
 
     SimpleAudioPreviewer* previewer;
+
+#if JucePlugin_Build_Standalone
+    juce::File demoKit;
+#endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumTreeView)
 };
