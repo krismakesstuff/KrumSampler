@@ -88,9 +88,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     }
 
     setPaintingIsUnclipped(true);
-    //setOpaque(true);
 
-    //setInterceptsMouseClicks(false, true);
+
 
     if (collapseBrowserButton.getToggleState())
     {

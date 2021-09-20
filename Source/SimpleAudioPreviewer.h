@@ -21,15 +21,15 @@ class SimpleAudioPreviewer  :   public juce::Component,
 {
 public:
 
-    enum PreviewerState
-    {
-        stopped,
-        playing,
-        //paused
-    };
+    //enum PreviewerState
+    //{
+    //    stopped,
+    //    playing,
+    //    //paused
+    //};
 
 
-    SimpleAudioPreviewer(juce::AudioFormatManager& formatManager, juce::ValueTree& valueTree);
+    SimpleAudioPreviewer(juce::AudioFormatManager* formatManager, juce::ValueTree& valueTree);
     ~SimpleAudioPreviewer() override;
 
     void paint (juce::Graphics&) override;
@@ -48,7 +48,7 @@ public:
     void updateBubbleComp(juce::Slider* slider, juce::Component* bubble);
 
     void loadFile(juce::File& fileToPreview);
-    juce::AudioFormatManager& getFormatManager();
+    juce::AudioFormatManager* getFormatManager();
 
     void saveToggleState();
     bool getSavedToggleState();
@@ -68,7 +68,7 @@ private:
 
     int playBackSampleRate;
 
-    juce::CriticalSection lock;
+    //juce::CriticalSection lock;
 
     //Does auto toggle need to be here? 
     juce::ToggleButton autoPlayToggle;
@@ -76,8 +76,7 @@ private:
 
     juce::ValueTree& valueTree;
 
-    //int readAheadBufferSize = 32768;
-    PreviewerState state{ PreviewerState::stopped };
+    //PreviewerState state{ PreviewerState::stopped };
     
 
     juce::File currentAudioFile;
@@ -85,7 +84,7 @@ private:
     std::unique_ptr<juce::AudioFormatReaderSource> currentAudioFileSource = nullptr;
     //std::unique_ptr<juce::AudioBuffer<float>> audioData = nullptr;
 
-    juce::AudioFormatManager& formatManager;
+    juce::AudioFormatManager* formatManager = nullptr;
     
     
     //juce::AudioSourcePlayer audioSourcePlayer;

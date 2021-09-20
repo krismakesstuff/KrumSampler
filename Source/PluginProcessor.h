@@ -60,7 +60,6 @@ namespace TreeIDs
 static float panRangeTo0to1(juce::String text)
 {
     juce::NormalisableRange<float>range{ -100.0f, 100.0f, 0.01f };
-    //if (text[0] == (wchar_t)"<")
     if(text.startsWithChar('<'))
     {
         text.removeCharacters("< ");
@@ -179,11 +178,11 @@ private:
         ~ThumbnailCache() override {}
     };
     juce::SharedResourcePointer<ThumbnailCache> thumbnailCache;
-
+    
     juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
   
     KrumSampler sampler{ formatManager.get(), *this };
-    SimpleAudioPreviewer previewer{formatManager.get(), valueTree};
+    SimpleAudioPreviewer previewer{formatManager, valueTree};
     KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree};
 
     //==============================================================================

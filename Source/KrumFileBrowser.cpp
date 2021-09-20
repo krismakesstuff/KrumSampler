@@ -23,6 +23,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
         setLinesDrawnForSubItems(true);
         setDrawsInLeftMargin(true);
+        setInterceptsMouseClicks(false, true);
     } 
 
     bool KrumTreeItem::mightContainSubItems()
@@ -83,8 +84,11 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
     void KrumTreeItem::itemDoubleClicked(const juce::MouseEvent& e)
     {
-        previewer->setWantsToPlayFile(true);
-        previewer->loadFile(file);
+        if (!previewer->isAutoPlayActive())
+        {
+            previewer->setWantsToPlayFile(true);
+            previewer->loadFile(file);
+        }
     }
 
     void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
@@ -159,6 +163,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         setText(itemName, juce::dontSendNotification);
         setTooltip(owner.getFile().getFullPathName());
+        setInterceptsMouseClicks(true, true);
     }
 
     void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
@@ -297,6 +302,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         headerName = name;
         treeHasChanged();
         setLinesDrawnForSubItems(true);
+        setInterceptsMouseClicks(false, true);
 
     }
 
@@ -355,6 +361,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     void KrumTreeHeaderItem::itemDoubleClicked(const juce::MouseEvent& e)
     {
         setOpen(!isOpen());
+        DBG("HeaderItem Double Clicked:" + juce::String(isOpen() ? "is Open" : "is NOT Open"));
     }
 
     juce::File& KrumTreeHeaderItem::getFile() { return file; }
@@ -465,6 +472,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         setText(itemName, juce::dontSendNotification);
         setTooltip(owner.getFile().getFullPathName());
+        setInterceptsMouseClicks(true, true);
     }
 
     void KrumTreeHeaderItem::EditableHeaderComp::paint(juce::Graphics& g)
@@ -477,13 +485,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         {
             g.setColour(juce::Colours::lightgrey);
             g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
-
-            /*if (owner.getNumFilesExcluded() > 0)
-            {
-                g.setFont(g.getCurrentFont().getHeightInPoints() - 6.0f);
-                int leftStart = g.getCurrentFont().getStringWidth(getText());
-                g.drawFittedText(juce::String(owner.getNumFilesExcluded()) + " excluded.", area.withTrimmedLeft(leftStart), juce::Justification::centredLeft, 1);
-            }*/
 
             if (owner.isEditable())
             {
@@ -509,8 +510,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
     void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e)
     {
-        
-
         bool deselect = ! e.mods.isShiftDown();
 
         owner.setSelected(true, deselect);
@@ -537,16 +536,13 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
             menu.addItem(3, "Clear (like, forever)");
 
             menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
-
-            
         }
-
     }
 
-    void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
+  /*  void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
     {
         owner.itemDoubleClicked(e);
-    }
+    }*/
 
     void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
     {
@@ -574,11 +570,9 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev)
     : fileBrowserValueTree(fileBrowserTree), previewer(prev)
 {
- 
 
     setMultiSelectEnabled(true);
     addMouseListener(this, true);
-    
 
     rootNode.reset(new KrumTreeHeaderItem(this, juce::File(), "User Folders"));
     rootNode->setLinesDrawnForSubItems(true);
@@ -611,9 +605,7 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
 
     setPaintingIsUnclipped(true);
 
-#if JucePlugin_Build_Standalone
-    buildDemoKit();
-#endif
+
 
 }
 
@@ -656,7 +648,7 @@ void KrumTreeView::deselectAllItems()
 bool KrumTreeView::isInterestedInFileDrag(const juce::StringArray& files) 
 {
     
-    auto wildcard = previewer->getFormatManager().getWildcardForAllFormats();
+    auto wildcard = previewer->getFormatManager()->getWildcardForAllFormats();
     
     return true;
 }
@@ -682,18 +674,18 @@ void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y)
 void KrumTreeView::pickNewFavorite()
 {
     const juce::String title{ "Choose A Folder(s) or File(s) to Add to Favorites, you can also drag and drop from external apps!" };
-    currentFileChooser.reset(new CustomFileChooser(title, juce::File::getSpecialLocation(juce::File::userDesktopDirectory), previewer->getFormatManager().getWildcardForAllFormats(), this));
-    
+    currentFileChooser.reset(new CustomFileChooser(title, juce::File::getSpecialLocation(juce::File::userDesktopDirectory), previewer->getFormatManager()->getWildcardForAllFormats(), this));
+
     //Must set the callback lambda before showing
     currentFileChooser->fileChooserCallback = handleChosenFiles;
     int fileBrowserFlag = juce::FileBrowserComponent::FileChooserFlags::canSelectMultipleItems | juce::FileBrowserComponent::FileChooserFlags::openMode
-                        | juce::FileBrowserComponent::FileChooserFlags::canSelectDirectories | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+        | juce::FileBrowserComponent::FileChooserFlags::canSelectDirectories | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
     currentFileChooser->showFileChooser(fileBrowserFlag);
 
 }
 
 //This does NOT check file type, so make sure to you check for formatting before adding it here.
-void KrumTreeView::addFileToRecent(juce::File file, juce::String name) 
+void KrumTreeView::addFileToRecent(juce::File file, juce::String name)
 {
     auto recentNode = rootNode->getSubItem(recentFolders_Ids);
 
@@ -704,11 +696,11 @@ void KrumTreeView::addFileToRecent(juce::File file, juce::String name)
         if (krumItem != nullptr && krumItem->getFile().getFullPathName().compare(file.getFullPathName()) == 0)
         {
             //if the recent file is already in the recent folder, we don't want to add it again
-            return; 
+            return;
         }
     }
 
-    recentNode->addSubItem(new KrumTreeItem(this ,previewer, file, name));
+    recentNode->addSubItem(new KrumTreeItem(this, previewer, file, name));
 
     auto recentTree = fileBrowserValueTree.getChildWithName("Recent");
     recentTree.addChild({ "File", {{"name", name}, {"path", file.getFullPathName()}} }, recentTree.getNumChildren() + 1, nullptr);
@@ -745,24 +737,24 @@ void KrumTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
 
         auto favTree = fileBrowserValueTree.getChildWithName("Favorites");
         juce::ValueTree newFolderTree{ "Folder", {{ "name", folder.getFileName() }, {"path", fullPathName}, {"hiddenFiles", juce::String(0)}} };
-        
+
         juce::Array<juce::File> childFiles = folder.findChildFiles(juce::File::findFilesAndDirectories + juce::File::ignoreHiddenFiles, false);
         int numHiddenFiles = 0;
-        
+
         for (int j = 0; j < childFiles.size(); j++)
         {
             auto childFile = childFiles[j];
-            
+            auto childExt = childFile.getFileExtension();
             if (childFile.isDirectory())
             {
                 addNewFavoriteSubFolder(childFile, numHiddenFiles, newFavFolderNode, newFolderTree);
             }
-            else if(hasAudioFormat(childFile.getFileExtension()))
+            else if (hasAudioFormat(childExt))
             {
                 auto childFilePath = childFile.getFullPathName();
                 auto childFileName = childFile.getFileName();
                 auto childFileNode = new KrumTreeItem(this, previewer, childFile, childFileName);
-                
+
                 newFavFolderNode->addSubItem(childFileNode);
                 newFolderTree.addChild({ "File", {{"name", childFileName}, {"path", childFilePath}} }, j, nullptr);
             }
@@ -773,8 +765,15 @@ void KrumTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
             }
 
         }
-        
-        favTree.addChild(newFolderTree, favTree.getNumChildren() + 1, nullptr);
+
+        if (newFolderTree.getNumChildren() > 0)
+        {
+            favTree.addChild(newFolderTree, favTree.getNumChildren() + 1, nullptr);
+        }
+        else
+        {
+            DBG("No Files were added! They were all excluded, maybe..");
+        }
         
         if (numHiddenFiles > 0)
         {
@@ -786,8 +785,6 @@ void KrumTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
     }
 
     sortFiles();
-
-
 }
 
 void KrumTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree)
@@ -881,13 +878,10 @@ void KrumTreeView::reCreateFileBrowserFromTree()
 
 void KrumTreeView::reCreateFavoriteFolder(juce::ValueTree& tree, juce::String name, juce::String fullPath, int numHiddenFiles)
 {
-    //should break these out into seperate functions??
-
     juce::File folder(fullPath);
     auto favNode = rootNode->getSubItem(favoritesFolders_Ids);
     auto newFavFolderNode = new KrumTreeHeaderItem(this, folder, name, numHiddenFiles);
     newFavFolderNode->setLinesDrawnForSubItems(true);
-
 
     for (int i = 0; i < tree.getNumChildren(); i++)
     {
@@ -901,13 +895,11 @@ void KrumTreeView::reCreateFavoriteFolder(juce::ValueTree& tree, juce::String na
             auto childFileNode = new KrumTreeItem(this, previewer, juce::File(filePathVar.toString()), fileNameVar.toString());
             childFileNode->setLinesDrawnForSubItems(true);
             newFavFolderNode->addSubItem(childFileNode);
-
         }
         else if (childTree.getType().toString().compare(FileBrowserValueTreeIds::folderId) == 0)
         {
 
             reCreateFavoriteSubFolder(newFavFolderNode, childTree);
-
         }
     }
 
@@ -986,7 +978,7 @@ void KrumTreeView::addDummyChild(juce::TreeViewItem* nodeToAddTo)
 
 bool KrumTreeView::hasAudioFormat(juce::String fileExtension)
 {
-    auto audioFormat = previewer->getFormatManager().findFormatForFileExtension(fileExtension);
+    auto audioFormat = previewer->getFormatManager()->findFormatForFileExtension(fileExtension);
     return audioFormat != nullptr;
 }
 
@@ -1047,7 +1039,6 @@ void KrumTreeView::updateValueTree(juce::String idString)
                     }
                 }
             }
-
             
             //Finds files in a folder in favorites
             for (int i = 0; i < numChildren; i++)
@@ -1341,70 +1332,29 @@ KrumTreeItem* KrumTreeView::makeTreeItem(juce::Component* item)
     }
 }
 
-void KrumTreeView::buildDemoKit()
+bool KrumTreeView::doesFolderExistInBrowser(juce::String fullPathName)
 {
-    //Building the DemoKit folder from the files saved in BinaryData
-    juce::File specialLocation = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
-    DBG("Location: " + specialLocation.getParentDirectory().getFullPathName());
-    juce::String separator = juce::File::getSeparatorString();
-    juce::File demoKitFolder{ specialLocation.getParentDirectory().getFullPathName() + separator + "DemoKit" };
-    auto result = demoKitFolder.createDirectory();
-    if (result.wasOk())
+
+    auto favTree = fileBrowserValueTree.getChildWithName("Favorites");
+
+    for (int i = 0; i < favTree.getNumChildren(); i++)
     {
-        juce::String demoKitPath = demoKitFolder.getFullPathName();
-        DBG("DemoKit Made");
-        DBG("DemoKit Location: " + demoKitPath);
+        auto childTree = favTree.getChild(i);
 
-        juce::File wannaKik{ demoKitPath + separator + "WannaKik.wav" };
-        wannaKik.create();
-        int wannaKikSize;
-        auto wannaKikData = BinaryData::getNamedResource("WANNA_KIK____48K_wav", wannaKikSize);
-        wannaKik.replaceWithData(wannaKikData, wannaKikSize);
-
-
-        juce::File twentyOneKick{ demoKitPath + separator + "TwentyOneKick.wav" };
-        twentyOneKick.create();
-        int twentyOneKickSize;
-        auto twentyOneKickData = BinaryData::getNamedResource("_21_Pilots_Kick_Sample_wav", twentyOneKickSize);
-        twentyOneKick.replaceWithData(twentyOneKickData, twentyOneKickSize);
-
-        juce::File eightOhEight{ demoKitPath + separator + "EightOhEight.wav" };
-        eightOhEight.create();
-        int eightOhEightSize;
-        auto eightOhEightData = BinaryData::getNamedResource("_808_and_House_Kick_blend_wav", eightOhEightSize);
-        eightOhEight.replaceWithData(eightOhEightData, eightOhEightSize);
-
-        juce::File monsterClap{ demoKitPath + separator + "MonsterClap.wav" };
-        monsterClap.create();
-        int monsterClapSize;
-        auto monsterClapData = BinaryData::getNamedResource("GW_Monster_clap_snare_wav", monsterClapSize);
-        monsterClap.replaceWithData(monsterClapData, monsterClapSize);
-
-        juce::File hiHatsV4{ demoKitPath + "\\HiHatsV4.wav" };
-        hiHatsV4.create();
-        int hhv4Size;
-        auto hhv4Data = BinaryData::getNamedResource("HI_HATS_V4__A_wav", hhv4Size);
-        hiHatsV4.replaceWithData(hhv4Data, hhv4Size);
-
-        juce::File hiHatsV10{ demoKitPath + separator + "HiHatsV10.wav" };
-        hiHatsV10.create();
-        int hhv10Size;
-        auto hhv10Data = BinaryData::getNamedResource("HI_HATS_V10__A_wav", hhv10Size);
-        hiHatsV10.replaceWithData(hhv10Data, hhv10Size);
-
-        juce::File marvinSnap{ demoKitPath + separator + "MarvinSnap.wav" };
-        marvinSnap.create();
-        int mSnapSize;
-        auto mSnapData = BinaryData::getNamedResource("Marvin_Snap_wav", mSnapSize);
-        marvinSnap.replaceWithData(mSnapData, mSnapSize);
-
-        demoKit = demoKitFolder;
-
-        DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
-
+        if (childTree.getType().toString().compare(FileBrowserValueTreeIds::folderId) == 0)
+        {
+            auto folderPathVar = childTree.getProperty(FileBrowserValueTreeIds::pathId);
+            if (folderPathVar.toString().compare(fullPathName))
+            {
+                return true;
+            }
+        }
     }
 
+    return false;
 }
+
+
 
 void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
 {
@@ -1510,7 +1460,20 @@ KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTre
     addFavoriteButton.setColour(juce::TextButton::buttonOnColourId, fontColor.contrasting(0.2f));
 
     addFavoriteButton.setTooltip("Add Files or Folders that will stay with this preset");
-   
+//   
+//#if JucePlugin_Build_Standalone
+//    buildDemoKit();
+//
+//    auto demoChildren = demoKit.findChildFiles(juce::File::findFiles, false);
+//    for (int i = 0; i < demoChildren.size(); i++)
+//    {
+//        DBG(demoChildren[i].getFullPathName());
+//    }
+//
+//    fileTree.createNewFavoriteFolder(demoKit.getFullPathName());
+//#endif
+
+
 }
 
 
@@ -1595,4 +1558,78 @@ void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
 SimpleAudioPreviewer* KrumFileBrowser::getAudioPreviewer()
 {
     return &audioPreviewer;
+}
+
+void KrumFileBrowser::buildDemoKit()
+{
+    juce::File specialLocation = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
+    DBG("Location: " + specialLocation.getParentDirectory().getFullPathName());
+    juce::String separator = juce::File::getSeparatorString();
+    juce::File demoKitFolder{ specialLocation.getParentDirectory().getFullPathName() + separator + "DemoKit" };
+
+    //if this folder doesn't exist OR does exist but has no files in it, we add the binary audio files
+    if (!demoKitFolder.isDirectory() || demoKitFolder.getNumberOfChildFiles(juce::File::TypesOfFileToFind::findFiles) == 0)
+    {
+        auto result = demoKitFolder.createDirectory();
+        if (result.wasOk())
+        {
+            juce::String demoKitPath = demoKitFolder.getFullPathName();
+            DBG("DemoKit Made");
+            DBG("DemoKit Location: " + demoKitPath);
+
+            juce::File wannaKik{ demoKitPath + separator + "WannaKik.wav" };
+            wannaKik.create();
+            int wannaKikSize;
+            auto wannaKikData = BinaryData::getNamedResource("WANNA_KIK____48K_wav", wannaKikSize);
+            wannaKik.replaceWithData(wannaKikData, wannaKikSize);
+
+            juce::File twentyOneKick{ demoKitPath + separator + "TwentyOneKick.wav" };
+            twentyOneKick.create();
+            int twentyOneKickSize;
+            auto twentyOneKickData = BinaryData::getNamedResource("_21_Pilots_Kick_Sample_wav", twentyOneKickSize);
+            twentyOneKick.replaceWithData(twentyOneKickData, twentyOneKickSize);
+
+            juce::File eightOhEight{ demoKitPath + separator + "EightOhEight.wav" };
+            eightOhEight.create();
+            int eightOhEightSize;
+            auto eightOhEightData = BinaryData::getNamedResource("_808_and_House_Kick_blend_wav", eightOhEightSize);
+            eightOhEight.replaceWithData(eightOhEightData, eightOhEightSize);
+
+            juce::File monsterClap{ demoKitPath + separator + "MonsterClap.wav" };
+            monsterClap.create();
+            int monsterClapSize;
+            auto monsterClapData = BinaryData::getNamedResource("GW_Monster_clap_snare_wav", monsterClapSize);
+            monsterClap.replaceWithData(monsterClapData, monsterClapSize);
+
+            juce::File hiHatsV4{ demoKitPath + "\\HiHatsV4.wav" };
+            hiHatsV4.create();
+            int hhv4Size;
+            auto hhv4Data = BinaryData::getNamedResource("HI_HATS_V4__A_wav", hhv4Size);
+            hiHatsV4.replaceWithData(hhv4Data, hhv4Size);
+
+            juce::File hiHatsV10{ demoKitPath + separator + "HiHatsV10.wav" };
+            hiHatsV10.create();
+            int hhv10Size;
+            auto hhv10Data = BinaryData::getNamedResource("HI_HATS_V10__A_wav", hhv10Size);
+            hiHatsV10.replaceWithData(hhv10Data, hhv10Size);
+
+            juce::File marvinSnap{ demoKitPath + separator + "MarvinSnap.wav" };
+            marvinSnap.create();
+            int mSnapSize;
+            auto mSnapData = BinaryData::getNamedResource("Marvin_Snap_wav", mSnapSize);
+            marvinSnap.replaceWithData(mSnapData, mSnapSize);
+
+
+        }
+    }
+    else if(fileTree.doesFolderExistInBrowser(demoKit.getFullPathName())) //if true, then the demoKit folder has already been successfully added
+    {
+        return;
+    }
+
+    demoKit = demoKitFolder;
+
+    DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
+    fileTree.createNewFavoriteFolder(demoKit.getFullPathName());
+
 }

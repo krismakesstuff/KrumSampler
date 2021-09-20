@@ -215,7 +215,7 @@ private:
         void editorAboutToBeHidden(juce::TextEditor* editor) override;
         void mouseDown(const juce::MouseEvent& e) override;
 
-        void mouseDoubleClick(const juce::MouseEvent& e) override;
+        //void mouseDoubleClick(const juce::MouseEvent& e) override;
 
         static void handleResult(int result, EditableHeaderComp* comp);
 
@@ -366,8 +366,7 @@ public:
     KrumTreeItem* makeTreeItem(juce::TreeViewItem* item);
     KrumTreeItem* makeTreeItem(juce::Component* item);
 
-    void buildDemoKit();
-
+    bool doesFolderExistInBrowser(juce::String fullPathName);
 
 private:
 
@@ -414,9 +413,7 @@ private:
 
     SimpleAudioPreviewer* previewer;
 
-#if JucePlugin_Build_Standalone
-    juce::File demoKit;
-#endif
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumTreeView)
 };
@@ -442,6 +439,7 @@ public:
     
     void rebuildBrowser(juce::ValueTree& newTree);
 
+    void buildDemoKit();
 
 private:
 
@@ -453,6 +451,11 @@ private:
     juce::Colour fontColor{ juce::Colours::lightgrey };
     
     int titleH = 30;
+
+#if JucePlugin_Build_Standalone
+    juce::File demoKit;
+#endif
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumFileBrowser)
 };

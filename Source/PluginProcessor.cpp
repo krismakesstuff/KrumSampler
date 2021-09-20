@@ -154,6 +154,10 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
+
+#if JucePlugin_Build_Standalone
+    fileBrowser.buildDemoKit();
+#endif
 }
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()

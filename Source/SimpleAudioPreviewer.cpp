@@ -13,7 +13,7 @@
 #include "SimpleAudioPreviewer.h"
 
 //==============================================================================
-SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager& fm, juce::ValueTree& vt)
+SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::ValueTree& vt)
     : formatManager(fm), valueTree(vt)
 {
     addAndMakeVisible(autoPlayToggle);
@@ -176,7 +176,7 @@ void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
 {
     if (fileToPreview.existsAsFile())
     {
-        currentFormatReader.reset(formatManager.createReaderFor(fileToPreview));
+        currentFormatReader.reset(formatManager->createReaderFor(fileToPreview));
     }
 
     if (currentFormatReader)
@@ -191,7 +191,7 @@ void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
 }
 
 
-juce::AudioFormatManager& SimpleAudioPreviewer::getFormatManager()
+juce::AudioFormatManager* SimpleAudioPreviewer::getFormatManager()
 {
     return formatManager;
 }
