@@ -9,19 +9,19 @@
   <MAINGROUP id="NTQyMJ" name="KrumSampler">
     <GROUP id="{EB4A4C0D-C950-9DF2-E178-9C3B37C020B8}" name="Resources">
       <GROUP id="{743F7E78-4475-25FE-A20F-6371AAABE9A3}" name="DemoKit">
-        <FILE id="rRJZvw" name="&#61473;&#61473;&#61473;WANNA KIK __ 48K.wav"
-              compile="0" resource="1" file="../../../Desktop/DemoKit/&#61473;&#61473;&#61473;WANNA KIK __ 48K.wav"/>
-        <FILE id="rpy4Up" name="21 Pilots Kick Sample.wav" compile="0" resource="1"
-              file="../../../Desktop/DemoKit/21 Pilots Kick Sample.wav"/>
-        <FILE id="XTLfIN" name="808 and House Kick blend.wav" compile="0" resource="1"
-              file="../../../Desktop/DemoKit/808 and House Kick blend.wav"/>
-        <FILE id="b1htaG" name="GW Monster clap_snare.wav" compile="0" resource="1"
-              file="../../../Desktop/DemoKit/GW Monster clap_snare.wav"/>
-        <FILE id="FAgbw0" name="HI HATS V4 - A.wav" compile="0" resource="1"
-              file="../../../Desktop/DemoKit/HI HATS V4 - A.wav"/>
-        <FILE id="Z1AM76" name="HI HATS V10 - A.wav" compile="0" resource="1"
-              file="../../../Desktop/DemoKit/HI HATS V10 - A.wav"/>
-        <FILE id="nr9iGp" name="Marvin Snap.wav" compile="0" resource="1" file="../../../Desktop/DemoKit/Marvin Snap.wav"/>
+        <FILE id="vrWR9M" name="&#61473;&#61473;&#61473;WANNA KIK __ 48K.wav"
+              compile="0" resource="1" file="Resources/DemoKit/&#61473;&#61473;&#61473;WANNA KIK __ 48K.wav"/>
+        <FILE id="wLmJz6" name="21 Pilots Kick Sample.wav" compile="0" resource="1"
+              file="Resources/DemoKit/21 Pilots Kick Sample.wav"/>
+        <FILE id="hoMa1W" name="808 and House Kick blend.wav" compile="0" resource="1"
+              file="Resources/DemoKit/808 and House Kick blend.wav"/>
+        <FILE id="B3EWXk" name="GW Monster clap_snare.wav" compile="0" resource="1"
+              file="Resources/DemoKit/GW Monster clap_snare.wav"/>
+        <FILE id="WdfgyR" name="HI HATS V4 - A.wav" compile="0" resource="1"
+              file="Resources/DemoKit/HI HATS V4 - A.wav"/>
+        <FILE id="hii2YW" name="HI HATS V10 - A.wav" compile="0" resource="1"
+              file="Resources/DemoKit/HI HATS V10 - A.wav"/>
+        <FILE id="pHr5nd" name="Marvin Snap.wav" compile="0" resource="1" file="Resources/DemoKit/Marvin Snap.wav"/>
       </GROUP>
       <FILE id="M6o51Y" name="add-black-18dp.svg" compile="0" resource="1"
             file="Resources/add-black-18dp.svg"/>
@@ -156,5 +156,6 @@
   </MODULES>
   <LIVE_SETTINGS>
     <WINDOWS/>
+    <OSX/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>

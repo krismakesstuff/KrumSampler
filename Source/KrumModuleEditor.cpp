@@ -13,7 +13,7 @@
 #include "KrumModuleProcessor.h"
 #include "KrumModule.h"
 #include "PluginEditor.h"
-#include "ModuleSettingsOverlay.h"
+
 
 
 //For now this class doesn't actuall do anything. It will one day drag and drop the module to re-arrange the order
@@ -850,7 +850,9 @@ void KrumModuleEditor::DragAndDropThumbnail::moveDroppedFileToParent()
     parent.moduleProcessor->sampler.updateModuleSample(&parent);
     parentEditor.setAndDrawThumbnail();
 
-    parent.setModuleName(droppedFile.getFileName());
+    juce::String fileName = droppedFile.getFileName();
+    
+    parent.setModuleName(fileName);
     parentEditor.titleBox.setText(parent.info.name, juce::sendNotification);
 
     clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + juce::String(parent.getModuleIndex()), clipGainSlider));

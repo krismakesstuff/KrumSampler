@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "ColorPalette.h"
 #include "KrumSlider.h"
+#include "ModuleSettingsOverlay.h"
 //==============================================================================
 
 /*
