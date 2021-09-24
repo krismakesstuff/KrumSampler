@@ -26,37 +26,17 @@ public:
 
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
-        //if (slider.isBar())
-        //{
-        //    g.setColour(slider.findColour(juce::Slider::trackColourId));
-        //    g.fillRect(slider.isHorizontal() ? juce::Rectangle<float>(static_cast<float> (x), (float)y + 0.5f, sliderPos - (float)x, (float)height - 1.0f)
-        //        : juce::Rectangle<float>((float)x + 0.5f, sliderPos, (float)width - 1.0f, (float)y + ((float)height - sliderPos)));
-        //}
-        //else
-        //{
-        //    auto isTwoVal = (style == juce::Slider::SliderStyle::TwoValueVertical || style == juce::Slider::SliderStyle::TwoValueHorizontal);
-        //    auto isThreeVal = (style == juce::Slider::SliderStyle::ThreeValueVertical || style == juce::Slider::SliderStyle::ThreeValueHorizontal);
-
-        //    auto trackWidth = juce::jmin(6.0f, slider.isHorizontal() ? (float)height * 0.25f : (float)width * 0.25f);
-
-        //    juce::Point<float> startPoint(slider.isHorizontal() ? (float)x : (float)x + (float)width * 0.5f,
-        //        slider.isHorizontal() ? (float)y + (float)height * 0.5f : (float)(height + y));
-
-        //    juce::Point<float> endPoint(slider.isHorizontal() ? (float)(width + x) : startPoint.x,
-        //        slider.isHorizontal() ? startPoint.y : (float)y);
-
-        //    juce::Path backgroundTrack;
-        //    backgroundTrack.startNewSubPath(startPoint);
-        //    backgroundTrack.lineTo(endPoint);
-        //    g.setColour(slider.findColour(juce::Slider::backgroundColourId));
-        //    //g.setColour(juce::Colours::black);
-        //    g.strokePath(backgroundTrack, { trackWidth, juce::PathStrokeType::curved, juce::PathStrokeType::rounded });
-
-        //}
-
-        drawLinearSliderBackground(g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
-        drawLinearSliderThumb(g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
-
+        if (slider.isBar())
+        {
+            g.setColour(slider.findColour(juce::Slider::trackColourId));
+            g.fillRect(slider.isHorizontal() ? juce::Rectangle<float>(static_cast<float> (x), (float)y + 0.5f, sliderPos - (float)x, (float)height - 1.0f)
+                : juce::Rectangle<float>((float)x + 0.5f, sliderPos, (float)width - 1.0f, (float)y + ((float)height - sliderPos)));
+        }
+        else
+        {
+            drawLinearSliderBackground(g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+            drawLinearSliderThumb(g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+        }
     }
 
     void drawLinearSliderBackground(juce::Graphics& g, int x, int y, int width, int height,
@@ -67,21 +47,15 @@ public:
     {
         const float sliderThumbRadius = (float)(getSliderThumbRadius(slider) - 2);
 
-        /*juce::Rectangle<int> areaRect(x, y, width, height);
-        g.setColour(juce::Colours::white);
-        g.fillRect(areaRect);*/
 
         float sliderPorp;
         if (slider.isHorizontal())
         {
             sliderPorp = sliderPos / (width);
-            //sliderPorp -= 0.1;
         }
         else
         {
            sliderPorp = sliderPos / (maxSliderPos - y);
-           //sliderPorp -= 0.1;
-
         }
 
         if (sliderPorp < 0.0f)
@@ -94,18 +68,14 @@ public:
         }
 
         const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
-        //const juce::Colour trackColour(juce::Colours::white);
-        //const juce::Colour gradCol1(trackColour.overlaidWith(juce::Colour(slider.isEnabled() ? 0x13000000 : 0x09000000)));
         juce::Colour gradCol1(juce::Colours::black);
         juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
         juce::Path indent;
-        
 
         float cornerSize = 2.0f;
 
         if (slider.isHorizontal())
         {
-            //auto iy = (float)y + (float)height * 0.5f - sliderThumbRadius * 0.5f;
             auto iy = height * 0.25f;
             juce::Rectangle<float> trackRect ((float)x - 2, iy, (float)width , height * 0.50f);
 
@@ -115,21 +85,14 @@ public:
             indent.addRoundedRectangle(trackRect, cornerSize);
             g.setColour(gradCol1);
             g.fillPath(indent);
-            //sliderPorp = sliderPorp / 2;
 
             horzRGrade.addColour(sliderPorp, gradCol1);
             g.setGradientFill(horzRGrade);
             g.fillRoundedRectangle(trackRect.withLeft(trackRect.getCentreX()), cornerSize);
-            //g.fillPath(indent);
 
             horzLGrade.addColour(sliderPorp, gradCol1);
             g.setGradientFill(horzLGrade);
             g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);
-
-            /*horzGrade.addColour(0.5, gradCol1);
-            horzGrade.addColour(1 - sliderPorp, gradCol2);*/
-            /*g.setColour(juce::Colours::red);
-            g.drawRect(trackRect);*/
             
         }
         else
@@ -146,12 +109,9 @@ public:
 
         }
 
-        //g.fillPath(indent);
         g.setColour(trackColour.contrasting(0.6f));
         g.strokePath(indent, juce::PathStrokeType(0.5f));
 
-        /*juce::DropShadow ds{};
-        ds.drawForPath(g, indent);*/
     }
 
 
@@ -209,10 +169,6 @@ public:
         g.setColour(thumbColor.darker());
         g.drawLine(line);
 
-
-
-        /*g.setColour(juce::Colours::red);
-        g.drawRect(thumb.withBottom(thumb.getBottom() + 3));*/
     }
 
     int getSliderThumbRadius(juce::Slider& slider) override

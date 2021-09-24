@@ -66,11 +66,20 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
     g.setColour(juce::Colours::black.withAlpha(0.75f));
     g.fillRoundedRectangle(area.toFloat(), cornerSize);
 
+    //probably shouldn't be doing this in the paint function.. 
+    if (updateMidiLabels)
+    {
+        setMidiLabels();
+        updateMidiLabels = false;
+        if (!confirmButton.isVisible())
+        {
+            showConfirmButton();
+        }
+    }
 
     moduleSelectedColor = colorPalette.getSelectedColor();
 
     g.setColour(moduleSelectedColor);
-
     if (!moduleOverlaySelected)
     {
         //g.setColour(moduleSelectedColor);
@@ -92,6 +101,7 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
 
     g.drawRoundedRectangle(area.toFloat(), cornerSize, outlineSize);
 
+
 }
 
 
@@ -106,7 +116,7 @@ void ModuleSettingsOverlay::handleMidiInput(int midiChannelNumber, int midiNoteN
     if (moduleOverlaySelected && !isColorOnly)
     {
         setMidi(midiNoteNumber, midiChannelNumber);
-        showConfirmButton();
+        //showConfirmButton();
     }
 }
 
@@ -232,8 +242,8 @@ void ModuleSettingsOverlay::setMidi(int midiNote, int midiChannel)
 {
     midiNoteNum = midiNote;
     midiChanNum = midiChannel;
+    updateMidiLabels = true;
 
-    setMidiLabels();
 }
 
 void ModuleSettingsOverlay::setMidiLabels()

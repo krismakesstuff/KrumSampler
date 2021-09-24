@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "KrumFileBrowser.h"
 
 
 //==============================================================================
@@ -19,8 +20,9 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     auto titleImageData = BinaryData::getNamedResource("KrumSamplerTitle_png", titleImageSize);
     titleImage = juce::ImageFileFormat::loadFrom(titleImageData, titleImageSize);
 
-    getLookAndFeel().setDefaultLookAndFeel(&kLaf);
-    getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
+    auto& laf = getLookAndFeel();
+    laf.setDefaultLookAndFeel(&kLaf);
+    laf.setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(1000);
 
     addAndMakeVisible(websiteButton);
@@ -52,7 +54,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     fileDrop.setRepaintsOnMouseActivity(true);
 
     addAndMakeVisible(fileBrowser);
-
+    fileBrowser.assignModuleContainer(&moduleContainer);
 
     int leftChevSize, rightChevSize;
 
@@ -88,7 +90,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     }
 
     setPaintingIsUnclipped(true);
-
 
 
     if (collapseBrowserButton.getToggleState())

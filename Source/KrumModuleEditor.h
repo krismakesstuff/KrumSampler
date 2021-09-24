@@ -43,8 +43,6 @@ public:
 
     void paint (juce::Graphics&) override;
 
-    void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
-    void paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
     void paintVolumeSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds);
     void paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds);
 
@@ -71,6 +69,10 @@ public:
 
     int getModuleDisplayIndex();
     void setModuleDisplayIndex(int newDisplayIndex);
+
+   // void setNewAudioFile(juce::File& newFile);
+    //void setNewModuleName(juce::String& newName);
+
 
     void setModuleColor(juce::Colour newColor);
     juce::Colour getModuleColor();
@@ -104,12 +106,23 @@ public:
     void triggerNoteOffInParent();
 
     void setAndDrawThumbnail();
-
+    
+    bool shouldCheckDroppedFile();
+    void handleLastDroppedFile();
     void setOldMidiNote(int midiNote);
+
+    bool isMouseOverThumbnail();
+    bool thumbnailHitTest(const juce::MouseEvent& mouseEvent);
+    void setClipGainSliderVisibility(bool sliderShouldBeVisible);
+
+    bool canThumbnailAcceptFile();
+    void setThumbnailCanAcceptFile(bool shouldAcceptFile);
+
 private:
 
     static void handleSettingsMenuResult(int result, KrumModuleEditor* parentEditor);
 
+    friend class DragAndDropThumbnail;
 
     bool needsToDrawThumbnail = false;
     bool needsToBuildModuleEditor = false;
@@ -125,8 +138,6 @@ private:
     
     juce::Label titleBox;
 
-    juce::AudioThumbnail thumbnail;
-    juce::Rectangle<int> thumbnailBG;
 
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
@@ -135,6 +146,55 @@ private:
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
 
+    class DragAndDropThumbnail : public juce::Component,
+                                 public juce::AudioThumbnail,
+                                 public juce::DragAndDropTarget,
+                                 public juce::FileDragAndDropTarget
+                                 
+    {
+    public:
+        DragAndDropThumbnail(KrumModuleEditor& parentEditor, int sourceSamplesPerThumbnailSample,
+            juce::AudioFormatManager& formatManagerToUse,
+            juce::AudioThumbnailCache& cacheToUse);
+
+        ~DragAndDropThumbnail() override;
+
+        bool isInterestedInFileDrag(const juce::StringArray& files) override;
+        void filesDropped(const juce::StringArray& files, int x, int y) override;
+        
+        bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;
+        void itemDropped(const SourceDetails& dragSourceDetails) override;
+
+        void paint(juce::Graphics& g) override;
+        void resized() override;
+
+        void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
+        void paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
+
+        void mouseEnter(const juce::MouseEvent& e) override;
+        void mouseExit(const juce::MouseEvent& e) override;
+
+        void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override;
+
+        void addDroppedFile(juce::File& newFile);
+        void moveDroppedFileToParent();
+
+        void updateThumbnailClipGain(float newVerticalZoom);
+
+
+        float verticalZoom = 1.0f;
+        juce::File droppedFile;
+        bool checkDroppedFile = false;
+        bool canAcceptFile = false;
+
+        //attach SliderAttachment, might need to just apply this in the sampler, ideally would want to store in this object and redraw thumbnail, then fee the modified sample to the sampler(sound?)
+        juce::Slider clipGainSlider;
+        std::unique_ptr<SliderAttachment> clipGainSliderAttachment;
+
+        KrumModuleEditor& parentEditor;
+    };
+
+    DragAndDropThumbnail thumbnail;
 
     class OneShotButton : public juce::DrawableButton
     {

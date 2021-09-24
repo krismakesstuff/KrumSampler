@@ -84,6 +84,22 @@ void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
 
 }
 
+//void KrumModuleContainer::mouseMove(const juce::MouseEvent& event)
+//{
+//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+//    {
+//        auto modEd = moduleDisplayOrder[i];
+//        if (modEd->isMouseOverThumbnail())
+//        {
+//            modEd->setClipGainSliderVisibility(true);
+//        }
+//        else
+//        {
+//            modEd->setClipGainSliderVisibility(false);
+//        }
+//    }
+//}
+
 void KrumModuleContainer::refreshModuleLayout(bool makeVisible)
 {
     int numModules = moduleDisplayOrder.size();
@@ -194,7 +210,6 @@ void KrumModuleContainer::setModuleSelected(KrumModule* moduleToMakeActive)
 
     moduleToMakeActive->setModuleSelected(true);
 
-    //juce::MessageManagerLock lock;
     repaint();
 
 }
@@ -278,6 +293,45 @@ int KrumModuleContainer::getNumModuleEditors()
 {
     return moduleDisplayOrder.size();
 }
+
+void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEditor)
+{
+    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    {
+        if (moduleDisplayOrder[i] != moduleEditor)
+        {
+            moduleDisplayOrder[i]->setClipGainSliderVisibility(false);
+        }
+    }
+
+    moduleEditor->setClipGainSliderVisibility(true);
+}
+
+void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
+{
+    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    {
+        auto modEd = moduleDisplayOrder[i];
+        if (modEd->canThumbnailAcceptFile() && modEd != moduleEditor)
+        {
+            modEd->setThumbnailCanAcceptFile(false);
+        }
+    }
+
+    moduleEditor->setThumbnailCanAcceptFile(true);
+
+}
+
+void KrumModuleContainer::hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
+{
+    moduleEditor->setThumbnailCanAcceptFile(false);
+}
+
+//void KrumModuleContainer::hideModuleClipGainSlider(KrumModuleEditor* moduleEditor)
+//{
+//
+//
+//}
 
 KrumModuleEditor* KrumModuleContainer::getEditorFromModule(KrumModule* krumModule)
 {

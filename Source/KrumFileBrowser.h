@@ -34,6 +34,7 @@ class KrumTreeItem;
 class KrumTreeHeaderItem;
 class KrumTreeView;
 class SimpleAudioPreviewer;
+class KrumModuleContainer;
 
 //strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
 namespace FileBrowserValueTreeIds
@@ -74,6 +75,7 @@ enum FileBrowserSortingIds
 //Represents a file in the File Browser. Contains a private subclass that responds to mouse clicks
 class KrumTreeItem :    public juce::TreeViewItem,
                         public juce::Component
+    
 {
 public:
     KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name = juce::String());
@@ -355,6 +357,8 @@ public:
     void removeItem(juce::String idString);
     void mouseDrag(const juce::MouseEvent& event) override;
 
+    void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details) override;
+
     void setItemEditing(juce::String idString, bool isEditing);
     bool areAnyItemsBeingEdited();
 
@@ -367,6 +371,9 @@ public:
     KrumTreeItem* makeTreeItem(juce::Component* item);
 
     bool doesFolderExistInBrowser(juce::String fullPathName);
+
+    //give the browser an address for the modulecontainer so we can tell it where the mouse is and it can tell the modules what to do 
+    void assignModuleContainer(KrumModuleContainer* newContainer);
 
 private:
 
@@ -413,7 +420,7 @@ private:
 
     SimpleAudioPreviewer* previewer;
 
-
+    KrumModuleContainer* moduleContainer = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumTreeView)
 };
@@ -436,9 +443,9 @@ public:
 
     bool doesPreviewerSupport(juce::String fileExtension);
     SimpleAudioPreviewer* getAudioPreviewer();
-    
-    void rebuildBrowser(juce::ValueTree& newTree);
+    void assignModuleContainer(KrumModuleContainer* container);
 
+    void rebuildBrowser(juce::ValueTree& newTree);
     void buildDemoKit();
 
 private:

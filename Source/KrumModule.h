@@ -105,7 +105,7 @@ public:
     void setModuleGain(float newGain);
     //void setModuleGain(std::atomic<float>* newGain);
     std::atomic<float>* getModuleGain();
-    //float getModuleGain();
+    std::atomic<float>* getModuleClipGain();
 
     void setModulePan(float newPan);
     //void setModulePan(std::atomic<float>* newPan);
@@ -131,6 +131,7 @@ public:
     int deleteEntireModule();
 
     //provides easy access for the processor and editor.
+    //prefer to access these via setters and getters!!
     struct ModuleInfo
     {
         juce::Colour moduleColor{ juce::Colours::blue };

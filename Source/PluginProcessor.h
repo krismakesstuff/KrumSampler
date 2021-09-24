@@ -47,6 +47,7 @@ namespace TreeIDs
     static juce::String paramModuleGain_ID{"moduleGain"};
     static juce::String paramModulePan_ID{"modulePan"};
     static juce::String paramModuleOutputChannels_ID{"moduleOutputChannel"};
+    static juce::String paramModuleClipGain_ID{ "moduleClipGain" };
 
     //ValueTree
     static juce::String paramModuleFile_ID{"moduleFilePath"};
@@ -118,7 +119,7 @@ public:
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
-    void updateEditor();
+    //void updateEditor();
     //==============================================================================
     const juce::String getName() const override;
 

@@ -58,6 +58,11 @@ std::atomic<float>* KrumSound::getModulePan() const
     return parentModule->getModulePan();
 }
 
+std::atomic<float>* KrumSound::getModuleClipGain() const
+{
+    return parentModule->getModuleClipGain();
+}
+
 void KrumSound::setModulePlaying(bool isPlaying)
 {
     parentModule->setModulePlaying(isPlaying);
@@ -117,7 +122,9 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
         //std::atomic<float>* modulePan = sound->getModulePan();
         
        // const juce::ScopedLock sl(voiceLock);
-        
+
+        clipGain = sound->getModuleClipGain()->load();
+
         float moduleGain = *sound->getModuleGain();
         float modulePan = *sound->getModulePan();
 
@@ -183,6 +190,9 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
             // just using a very simple linear interpolation here..
             float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
             float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha) : l;
+
+            l = clipGain * l;
+            r = clipGain * r;
 
             auto envelopeValue = adsr.getNextSample();
 

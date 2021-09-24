@@ -39,6 +39,8 @@ public:
     
     void mouseDown(const juce::MouseEvent& event) override;
 
+    //void mouseMove(const juce::MouseEvent& event) override;
+
     void addMidiListener(juce::MidiKeyboardStateListener* newListener);
     void removeMidiListener(juce::MidiKeyboardStateListener* listenerToDelete);
 
@@ -64,6 +66,11 @@ public:
     KrumSamplerAudioProcessorEditor* getEditor();
     juce::Array<KrumModuleEditor*>& getModuleDisplayOrder();
     int getNumModuleEditors();
+
+    void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
+    //void hideModuleClipGainSlider(KrumModuleEditor* moduleEditor);
+    void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
+    void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
 
 private:
 

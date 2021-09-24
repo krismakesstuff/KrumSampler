@@ -9,7 +9,9 @@
 */
 
 #include "SimpleAudioPreviewer.h"
+#include "KrumModuleContainer.h"
 #include "KrumFileBrowser.h"
+#include "KrumModuleEditor.h"
 
 class KrumTreeHeaderItem;
 
@@ -648,7 +650,7 @@ void KrumTreeView::deselectAllItems()
 bool KrumTreeView::isInterestedInFileDrag(const juce::StringArray& files) 
 {
     
-    auto wildcard = previewer->getFormatManager()->getWildcardForAllFormats();
+    //auto wildcard = previewer->getFormatManager()->getWildcardForAllFormats();
     
     return true;
 }
@@ -656,6 +658,7 @@ bool KrumTreeView::isInterestedInFileDrag(const juce::StringArray& files)
 void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y) 
 {
    
+    //Maybe do some checks on file type? 
     for (auto fileName : files)
     {
         juce::File leadFile(fileName);
@@ -663,9 +666,13 @@ void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y)
         {
             createNewFavoriteFolder(leadFile.getFullPathName());
         }
-        else
+        else if (hasAudioFormat(leadFile.getFileExtension()))
         {
             createNewFavoriteFile(leadFile.getFullPathName());
+        }
+        else
+        {
+            DBG("File could not be added, no audio format found");
         }
     }
 
@@ -1195,31 +1202,77 @@ void KrumTreeView::mouseDrag(const juce::MouseEvent& event)
 {
     if (!areAnyItemsBeingEdited() && event.mouseWasDraggedSinceMouseDown())
     {
-        juce::var description{ "FileBrowser-Drag" };
-        juce::Image itemImage;
-        std::unique_ptr<NumberBubble> numBub;
-
-        auto treeItem = static_cast<KrumTreeItem*>(getSelectedItem(0)); 
-        auto pos = treeItem->getItemPosition(true);
-
-        if (treeItem)
+        if (!isDragAndDropActive())
         {
-            itemImage = juce::Component::createComponentSnapshot(pos).convertedToFormat(juce::Image::ARGB);
-            itemImage.multiplyAllAlphas(0.6f);
-        }
+            juce::Image itemImage;
+            std::unique_ptr<NumberBubble> numBub;
 
-        if (getNumSelectedItems() > 1)
-        {
-            juce::Graphics g (itemImage);
+            auto treeItem = static_cast<KrumTreeItem*>(getSelectedItem(0)); 
+            if (treeItem)
+            {
+                juce::var description { "FileBrowserDrag-" + treeItem->getFile().getFullPathName() };
+                auto pos = treeItem->getItemPosition(true);
+
+                if (treeItem)
+                {
+                    itemImage = juce::Component::createComponentSnapshot(pos).convertedToFormat(juce::Image::ARGB);
+                    itemImage.multiplyAllAlphas(0.6f);
+                }
+
+                if (getNumSelectedItems() > 1)
+                {
+                    juce::Graphics g (itemImage);
             
-            numBub.reset(new NumberBubble(getNumSelectedItems(), juce::Colours::red.withAlpha(0.5f), itemImage.getBounds()));
+                    numBub.reset(new NumberBubble(getNumSelectedItems(), juce::Colours::red.withAlpha(0.5f), itemImage.getBounds()));
 
-            g.beginTransparencyLayer(0.6f);
-            numBub->paintEntireComponent(g, false);
-            g.endTransparencyLayer();
+                    g.beginTransparencyLayer(0.6f);
+                    numBub->paintEntireComponent(g, false);
+                    g.endTransparencyLayer();
+                }
+
+                startDragging(description, this, itemImage, true);
+            }
         }
+        else
+        {
+            if (moduleContainer)
+            {
+                //auto containerPoint = event.getEventRelativeTo(moduleContainer);
+                if (moduleContainer->contains(event.getEventRelativeTo(moduleContainer).getPosition()))
+                {
+                    auto modules = moduleContainer->getModuleDisplayOrder();
+                    for (int i = 0; i < modules.size(); i++)
+                    {
+                        auto modEd = modules[i];
+                        auto relPoint = event.getEventRelativeTo(modEd);
+                        if (modEd->contains(event.getEventRelativeTo(modEd).getPosition()))
+                        {
+                            if (modEd->thumbnailHitTest(event) /*&& modEd->canThumbnailAcceptFile()*/)
+                            {
+                                moduleContainer->showModuleCanAcceptFile(modEd);
+                            }
+                            else
+                            {
+                                moduleContainer->hideModuleCanAcceptFile(modEd);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
-        startDragging(description, this, itemImage, true);
+void KrumTreeView::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details)
+{
+    if (moduleContainer)
+    {
+        auto moduleEditors = moduleContainer->getModuleDisplayOrder();
+        for (int i = 0; i < moduleEditors.size(); i++)
+        {
+            auto modEd = moduleEditors[i];
+            moduleContainer->hideModuleCanAcceptFile(modEd);
+        }
     }
 }
 
@@ -1354,7 +1407,10 @@ bool KrumTreeView::doesFolderExistInBrowser(juce::String fullPathName)
     return false;
 }
 
-
+void KrumTreeView::assignModuleContainer(KrumModuleContainer* newContainer)
+{
+    moduleContainer = newContainer;
+}
 
 void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
 {
@@ -1558,6 +1614,11 @@ void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
 SimpleAudioPreviewer* KrumFileBrowser::getAudioPreviewer()
 {
     return &audioPreviewer;
+}
+
+void KrumFileBrowser::assignModuleContainer(KrumModuleContainer* container)
+{
+    fileTree.assignModuleContainer(container);
 }
 
 void KrumFileBrowser::buildDemoKit()

@@ -87,12 +87,25 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         juce::String index = juce::String(i);
+
         juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
         gainRange.setSkewForCentre(dBToGain(0.0f));
         gainRange.symmetricSkew = true;
+
+        juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(20.0f), 0.01f };
+        clipGainRange.setSkewForCentre(dBToGain(0.0f));
+        //clipGainRange.symmetricSkew = true;
+
         auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain_ID + index, "Module Gain" + index,
                             gainRange, dBToGain(0.0f),
                             "Module" + index + " Gain",
+                            juce::AudioProcessorParameter::genericParameter,
+                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
+                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+        
+        auto clipGainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleClipGain_ID + index, "Module ClipGain" + index,
+                            clipGainRange, dBToGain(0.0f),
+                            "Module" + index + " ClipGain",
                             juce::AudioProcessorParameter::genericParameter,
                             [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
                             [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
@@ -112,6 +125,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             "Module" + juce::String(i),
                             "|",
                             std::move(gainParam),
+                            std::move(clipGainParam),
                             std::move(panParam),
                             std::move(outputParam));
 
@@ -496,12 +510,13 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
         else //zero the state for this module
         {
             
-
             auto gainParam = parameters.getParameter(TreeIDs::paramModuleGain_ID + juce::String(i));
+            auto clipGainParam = parameters.getParameter(TreeIDs::paramModuleClipGain_ID + juce::String(i));
             auto panParam = parameters.getParameter(TreeIDs::paramModulePan_ID + juce::String(i));
 
             auto zeroGain = gainParam->getNormalisableRange().convertTo0to1(dBToGain(0.0f));
             gainParam->setValueNotifyingHost(zeroGain);
+            clipGainParam->setValueNotifyingHost(zeroGain);
             panParam->setValueNotifyingHost(0.5f);
 
             moduleTree.setProperty("name", juce::var(""), nullptr);

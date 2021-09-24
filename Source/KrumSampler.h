@@ -39,10 +39,9 @@ public:
                 double maxSampleLengthSeconds);
     ~KrumSound() override;
     
-    //float getModuleGain()const;
     std::atomic<float>* getModuleGain()const;
-    //float getModulePan()const;
     std::atomic<float>* getModulePan()const;
+    std::atomic<float>* getModuleClipGain()const;
 
     void setModulePlaying(bool playing);
     //void setMidi(int newMidiNote, int newMidiChannel);
@@ -87,8 +86,8 @@ private:
 
     double pitchRatio = 0;
     double sourceSamplePosition = 0;
-    std::atomic<float> lgain = 0, rgain = 0;
-
+    std::atomic<float> lgain = 0, rgain = 0, clipGain = 0;
+    
     juce::ADSR adsr;
 
 

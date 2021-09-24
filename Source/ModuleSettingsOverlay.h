@@ -59,7 +59,6 @@ private:
     juce::TextButton deleteButton;
     juce::TextButton cancelButton;
     juce::Label titleBox;
-    //juce::TextEditor midiTitleBox;
 
     juce::Label midiNoteNumberLabel;
     juce::Label midiNoteTitleLabel{ "Midi Note", "Midi Note" };
@@ -73,6 +72,7 @@ private:
 
     int midiNoteNum = 0;
     int midiChanNum = 0;
+    bool updateMidiLabels = false;
 
     bool moduleOverlaySelected = false;
     bool keepColorOnExit = false;

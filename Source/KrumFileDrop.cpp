@@ -48,15 +48,9 @@ void KrumFileDrop::paint(juce::Graphics& g)
 //Drag and Drop Target
 bool KrumFileDrop::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
 {
-    DBG("Checking Interest");
+    //DBG("Checking Interest");
     auto desc = dragSourceDetails.description.toString();
-
-    if (desc.compare("FileBrowser-Drag") == 0)
-    {
-        return true;
-    }
-
-    return false;
+    return desc.contains("FileBrowserDrag");
 }
 
 //Drag and Drop Target

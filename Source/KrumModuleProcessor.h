@@ -42,7 +42,7 @@ private:
 
     std::atomic<float>* moduleGain = nullptr;
     std::atomic<float>* modulePan = nullptr;
-    
+    std::atomic<float>* moduleClipGain = nullptr;
 
     float buttonClickVelocity = 0.5f;
 };
