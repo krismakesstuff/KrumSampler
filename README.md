@@ -2,7 +2,7 @@
 
 ### A simple to use Drum Sampler Plug-in
 
-![image](https://user-images.githubusercontent.com/72877800/124509705-6392c100-dda0-11eb-8a0c-586356cce868.png)
+![image](https://github.com/krismakesstuff/KrumSampler/blob/master/KrumSamplerScreenshot%2009292021.PNG)
 
 ## How to use KrumSampler
 - Drag and drop files into the drop area at the top left to create a new module.
