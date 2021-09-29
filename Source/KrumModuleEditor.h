@@ -14,6 +14,8 @@
 #include "ColorPalette.h"
 #include "KrumSlider.h"
 #include "ModuleSettingsOverlay.h"
+#include "DragAndDropThumbnail.h"
+
 //==============================================================================
 
 /*
@@ -23,12 +25,16 @@
 * To construct one, you must have a parent (KrumModule) and it's processor, as well as a reference to the PluginEditor (KrumSmpalerAudioProcessorEditor)
 * 
 * This class handles all GUI interaction and painting. 
-* The GUI can enter a ModuleSettingsOverlay state which allows the user to changed the midi assignment as well as change the color of the module (more settings to come maybe).
+* The GUI can enter a ModuleSettingsOverlay state which allows the user to change the midi assignment as well as change the color of the module (redesigned settings menu to come).
+* 
+* TODO:
+* - Redisgn the ModuleSettingsOverlay GUI
+*   - Better Color Pallette
+*   - Maybe even have seperate ModuleSettingsOverlays for each settings change
+*   - Should be simple and quick to use
 * 
 * 
 */
-
-
 
 class KrumModule;
 class KrumModuleProcessor;
@@ -51,7 +57,6 @@ public:
 
     void mouseDown(const juce::MouseEvent& e) override;
     
-
     void buildModule();
 
     void setChildCompColors();
@@ -70,10 +75,6 @@ public:
 
     int getModuleDisplayIndex();
     void setModuleDisplayIndex(int newDisplayIndex);
-
-   // void setNewAudioFile(juce::File& newFile);
-    //void setNewModuleName(juce::String& newName);
-
 
     void setModuleColor(juce::Colour newColor);
     juce::Colour getModuleColor();
@@ -139,7 +140,6 @@ private:
     
     juce::Label titleBox;
 
-
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
     juce::Slider volumeSlider, panSlider;
@@ -147,55 +147,10 @@ private:
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
 
-    class DragAndDropThumbnail : public juce::Component,
-                                 public juce::AudioThumbnail,
-                                 public juce::DragAndDropTarget,
-                                 public juce::FileDragAndDropTarget
-                                 
-    {
-    public:
-        DragAndDropThumbnail(KrumModuleEditor& parentEditor, int sourceSamplesPerThumbnailSample,
-            juce::AudioFormatManager& formatManagerToUse,
-            juce::AudioThumbnailCache& cacheToUse);
-
-        ~DragAndDropThumbnail() override;
-
-        bool isInterestedInFileDrag(const juce::StringArray& files) override;
-        void filesDropped(const juce::StringArray& files, int x, int y) override;
-        
-        bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;
-        void itemDropped(const SourceDetails& dragSourceDetails) override;
-
-        void paint(juce::Graphics& g) override;
-        void resized() override;
-
-        void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
-        void paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
-
-        void mouseEnter(const juce::MouseEvent& e) override;
-        void mouseExit(const juce::MouseEvent& e) override;
-
-        void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override;
-
-        void addDroppedFile(juce::File& newFile);
-        void moveDroppedFileToParent();
-
-        void updateThumbnailClipGain(float newVerticalZoom);
-
-
-        float verticalZoom = 1.0f;
-        juce::File droppedFile;
-        bool checkDroppedFile = false;
-        bool canAcceptFile = false;
-
-        //attach SliderAttachment, might need to just apply this in the sampler, ideally would want to store in this object and redraw thumbnail, then fee the modified sample to the sampler(sound?)
-        juce::Slider clipGainSlider;
-        std::unique_ptr<SliderAttachment> clipGainSliderAttachment;
-
-        KrumModuleEditor& parentEditor;
-    };
+   
 
     DragAndDropThumbnail thumbnail;
+
 
     class OneShotButton : public juce::DrawableButton
     {
@@ -211,16 +166,15 @@ private:
     };
 
 
-    //juce::DrawableButton playButton{ "Play Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
     OneShotButton playButton;
     juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };;
 
-
     friend class ColorPalette;
     
-    //juce::OptionalScopedPointer<DragHandle> dragHandle;
-    //juce::OptionalScopedPointer<ModuleSettingsOverlay> settingsOverlay;
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
+    
+    //For Later..
+    //std::unique_ptr<DragHandle> dragHandle;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumModuleEditor)
 };

@@ -15,8 +15,14 @@
 class KrumModule;
 
 /*
-* This class represents the overlay that lives on top of the modules. Midi and color can be changed from this overlay and is shown by default when a module is created. 
+* This class represents the overlay that lives on top of the modules when settings are being changed. 
+* Midi and color can be changed from this overlay and it is shown by default when a module is created. 
 * You can also access it from the settings menu on the module. 
+* 
+* TODO:
+* - Redeisgn GUI
+* - Maybe even reconsider the KrumModule's settings menu, and it's interactions with this class
+* 
 */
 
 class ModuleSettingsOverlay : public juce::Component
@@ -27,8 +33,6 @@ public:
     ~ModuleSettingsOverlay() override;
     
     void paint(juce::Graphics& g) override;
-
-    //void mouseDown(const juce::MouseEvent& e) override;
 
     void handleMidiInput(int midiChannelNumber, int midiNoteNumber);
     void showConfirmButton();
@@ -65,22 +69,25 @@ private:
     juce::Label midiChannelNumberLabel;
     juce::Label midiChannelTitleLabel{ "Midi Channel", "Midi Channel" };
 
-    bool isColorOnly = false;
-
     ColorPalette colorPalette;
     KrumModule& parentModule;
+    
+    //Needs to be initialized white
+    juce::Colour moduleSelectedColor{ juce::Colours::white };
 
     int midiNoteNum = 0;
     int midiChanNum = 0;
-    bool updateMidiLabels = false;
-
-    bool moduleOverlaySelected = false;
-    bool keepColorOnExit = false;
-    bool colorChanged = false;
+    
     float cornerSize = 5.0f;
     float outlineSize = 1.0f;
 
-    juce::Colour moduleSelectedColor{ juce::Colours::white };
+    bool moduleOverlaySelected = false;
+    bool updateMidiLabels = false;
+
+    //Flags to set in different cases while using the overlay.. Needs a redesign
+    bool isColorOnly = false;
+    bool keepColorOnExit = false;
+    bool colorChanged = false;
 
     JUCE_LEAK_DETECTOR(ModuleSettingsOverlay)
 };

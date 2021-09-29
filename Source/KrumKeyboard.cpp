@@ -25,7 +25,6 @@ KrumKeyboard::~KrumKeyboard()
 {
 }
 
-
 bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
 {
     if (isMidiNoteAssigned(midiNoteNumber))
@@ -34,7 +33,7 @@ bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
         mod->setModulePlaying(true);
         mod->triggerNoteOnInParent();
     }
-
+    
     return true;
 }
 
@@ -44,12 +43,12 @@ void KrumKeyboard::mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e)
     {
         auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
         mod->setModulePlaying(false);
-        //mod->triggerNoteOffInParent();
     }
 }
 
+//Both the black and white note drawing functions are largely copy pasted from Juce, if the note is assigned then we change the color to the assigned color
 void KrumKeyboard::drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
-    bool isDown, bool isOver, juce::Colour lineColour, juce::Colour textColour)
+                                bool isDown, bool isOver, juce::Colour lineColour, juce::Colour textColour)
 {
     auto c = juce::Colours::transparentWhite;
     if (isDown)  c = findColour(keyDownOverlayColourId);
@@ -109,7 +108,7 @@ void KrumKeyboard::drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 }
 
 void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
-    bool isDown, bool isOver, juce::Colour noteFillColour)
+                                bool isDown, bool isOver, juce::Colour noteFillColour)
 {
     auto c = noteFillColour;
     if (isDown)  c = c.overlaidWith(findColour(keyDownOverlayColourId));
@@ -121,7 +120,6 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
         if (isDown)  c = c.darker(0.2f);
         if (isOver)  c = c.darker();
     }
-
 
     g.setColour(c);
     g.fillRect(area);
@@ -148,7 +146,7 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
         }
     }
 }
-
+//oldNote is default 0;
 void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote)
 {
     int testNote = oldNote > 0 ? oldNote : midiNote;
@@ -156,8 +154,8 @@ void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, i
     {
         removeMidiNoteColorAssignment(testNote);
     }
+
     currentlyAssignedMidiNotes.emplace(std::make_pair(midiNote, moduleColor));
-    //juce::MessageManagerLock lock;
     repaint();
 }
 
@@ -169,21 +167,15 @@ void KrumKeyboard::removeMidiNoteColorAssignment(int midiNote, bool shouldRepain
         currentlyAssignedMidiNotes.erase(midiNote);
         if (shouldRepaint)
         {
-      //      juce::MessageManagerLock lock;
             repaint();
-
         }
     }
-
-
-    
 }
 
 bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
 {
     return currentlyAssignedMidiNotes.find(midiNote) != currentlyAssignedMidiNotes.end();
 }
-
 
 void KrumKeyboard::updateKeysFromContainer()
 {
@@ -198,7 +190,6 @@ void KrumKeyboard::updateKeysFromContainer()
     }
 
     printCurrentlyAssignedMidiNotes();
-
     repaint();
 }
 

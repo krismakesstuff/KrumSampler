@@ -80,9 +80,10 @@ juce::ValueTree createFileBrowserTree()
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-    //Not currently using aux outputs but would like to add those next
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
-    const juce::StringArray outputStrings {"1 & 2", "3 & 4", "5 & 6"};
+    
+    //Not currently using aux outputs but would like to add these soon
+    //const juce::StringArray outputStrings {"1 & 2", "3 & 4", "5 & 6"};
 
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
@@ -117,17 +118,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             [](float value, int) {return panRangeFrom0To1(value); },
                             [](juce::String text) {return panRangeTo0to1(text); });
 
-        auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannels_ID + index,
+        /*auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannels_ID + index,
                             "Module Ouput" + index,
-                            outputStrings, 1);
+                            outputStrings, 1);*/
 
         auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
                             "Module" + juce::String(i),
                             "|",
                             std::move(gainParam),
                             std::move(clipGainParam),
-                            std::move(panParam),
-                            std::move(outputParam));
+                            std::move(panParam)
+                          /*, std::move(outputParam)*/);
 
         paramsGroup.push_back(std::move(moduleGroup));
     }
@@ -183,17 +184,16 @@ void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam_ID);
     sampler.setCurrentPlaybackSampleRate(sampleRate);
-    
 }
 
 void KrumSamplerAudioProcessor::releaseResources()
 {
 }
 
-
 void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+
     if (previewer.wantsToPlayFile())
     {
         previewer.renderPreviewer(buffer);
@@ -201,7 +201,6 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     
     buffer.applyGain(*outputGainParameter);
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
-    
     
     //this app does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
     midiMessages.clear();
@@ -585,6 +584,11 @@ int KrumSamplerAudioProcessor::findFreeModuleIndex()
 
 }
 
+int KrumSamplerAudioProcessor::getNumModulesInSampler()
+{
+    return sampler.getNumModules();
+}
+
 juce::AudioThumbnailCache& KrumSamplerAudioProcessor::getThumbnailCache()
 {
     return thumbnailCache.get();
@@ -599,15 +603,6 @@ void KrumSamplerAudioProcessor::registerFormats()
 {
     formatManager->registerBasicFormats();
 }
-
-//bool KrumSamplerAudioProcessor::resetFileBrowser()
-//{
-//
-//    fileBrowser.reset(new )
-//
-//    return false;
-//}
-
 
 //==============================================================================
 // This creates new instances of the plugin..

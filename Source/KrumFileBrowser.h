@@ -23,12 +23,11 @@
 * The state of the tree will be saved with each use and must be restored as well. 
 * This browser also connnects to the AudioPreviewer to preview files. 
 * 
-* NOTE: The AudioPreviewer is not working on MacOS. yet..
+* TODO:
+* - Add "Drives" section, that would make it a little bit easier to add favorite folders. It would just always have your drives shown.
 * 
 * 
 */
-
-
 
 class KrumTreeItem;
 class KrumTreeHeaderItem;
@@ -67,10 +66,15 @@ enum FileBrowserSortingIds
     alphanumeric_Id
 };
 
+enum RightClickMenuIds
+{
+    rename_Id = 1,
+    remove_Id,
+    clear_Id,
+};
 
 //---------------------------------
 //---------------------------------
-
 
 //Represents a file in the File Browser. Contains a private subclass that responds to mouse clicks
 class KrumTreeItem :    public juce::TreeViewItem,
@@ -89,7 +93,7 @@ public:
     void itemClicked(const juce::MouseEvent& e) override;
     void itemDoubleClicked(const juce::MouseEvent& e) override;
 
-    void itemSelectionChanged(bool isNowSelected) override;
+    //void itemSelectionChanged(bool isNowSelected) override;
     void closeLabelEditor(juce::Label* label);
 
     juce::String getUniqueName() const override;
@@ -104,8 +108,6 @@ public:
 
     void tellParentToRemoveMe();
     void setBGColor(juce::Colour newColor);
-    
-    
 
 private:
 
@@ -113,7 +115,6 @@ private:
     juce::String itemName;
 
     bool editing = false;
-
     
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     KrumTreeView* parentTree;
@@ -135,20 +136,18 @@ private:
         void mouseUp(const juce::MouseEvent& e) override;
         void mouseDoubleClick(const juce::MouseEvent& e) override;
         
-        
-
         static void handleResult(int result, EditableComp* comp);
 
     private:
+
         KrumTreeItem& owner;
         juce::Colour bgColor;
 
         JUCE_LEAK_DETECTOR(EditableComp)
 
     };
-
+    
     JUCE_LEAK_DETECTOR(KrumTreeItem)
-
 };
 
 //=================================================================================================================================//
@@ -217,8 +216,6 @@ private:
         void editorAboutToBeHidden(juce::TextEditor* editor) override;
         void mouseDown(const juce::MouseEvent& e) override;
 
-        //void mouseDoubleClick(const juce::MouseEvent& e) override;
-
         static void handleResult(int result, EditableHeaderComp* comp);
 
     private:
@@ -235,20 +232,15 @@ private:
 class DummyTreeItem : public juce::TreeViewItem
 {
 public:
-    DummyTreeItem()
-    {}
+    DummyTreeItem() {}
 
-    bool mightContainSubItems() override
-    {
-        return false;
-    }
+    bool mightContainSubItems() override { return false;}
 
     JUCE_LEAK_DETECTOR(DummyTreeItem)
 };
 
 //---------------------------------
-//---------------------------------
-//Sorting class, doesn't seem to be working correctly at the moment. Only sorting (trying) folders first, but could do alpa
+//Sorting class, doesn't seem to be working correctly at the moment. Only sorting (trying) folders first, but could do alpha
 class FileBrowserSorter
 {
 public:
@@ -284,27 +276,15 @@ public:
     FileBrowserSortingIds sortingId;
 };
 
-//when draggin multiple files from the browser, this icon will show how many files you have selected. 
+//when dragging multiple files from the browser, this icon will show how many files you have selected. 
 class NumberBubble : public juce::Component
 {
 public:
-    NumberBubble(int numberToDisplay, juce::Colour backgroundColor, juce::Rectangle<int> parentBounds)
-        : number(numberToDisplay), bgColor(backgroundColor)
-    {
-        setBounds(parentBounds.getRight() - 20, 3, 15, 15);
-    }
+    NumberBubble(int numberToDisplay, juce::Colour backgroundColor, juce::Rectangle<int> parentBounds);
+    ~NumberBubble() override;
 
-    ~NumberBubble() override {}
+    void paint(juce::Graphics& g) override;
 
-    void paint(juce::Graphics& g) override
-    {
-        g.setColour(bgColor);
-        g.fillEllipse(getBounds().toFloat());
-        
-        g.setColour(juce::Colours::white);
-        g.drawFittedText(juce::String(number), getBounds(), juce::Justification::centred, 1);
-
-    }
     int number;
     juce::Colour bgColor;
 };
@@ -372,7 +352,7 @@ public:
 
     bool doesFolderExistInBrowser(juce::String fullPathName);
 
-    //give the browser an address for the modulecontainer so we can tell it where the mouse is and it can tell the modules what to do 
+    //give the browser an address for the modulecontainer so we can tell it where the mouse is, specifically when dragging,  and it can tell the modules what to do 
     void assignModuleContainer(KrumModuleContainer* newContainer);
 
 private:
@@ -382,13 +362,9 @@ private:
     public:
         CustomFileChooser(juce::String title, juce::File locationToShow, juce::String formats, KrumTreeView* ownerTree)
             : juce::FileChooser(title, locationToShow, formats, false), owner(ownerTree)
-        {
-        }
+        {}
 
-        ~CustomFileChooser()
-        {
-            owner = nullptr;
-        }
+        ~CustomFileChooser() { owner = nullptr;}
 
         void showFileChooser(int flags)
         {

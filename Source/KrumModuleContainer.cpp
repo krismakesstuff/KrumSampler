@@ -33,7 +33,6 @@ KrumModuleContainer::~KrumModuleContainer()
 
 void KrumModuleContainer::paint (juce::Graphics& g)
 {
-    //g.fillAll(bgColor);
     auto area = getLocalBounds();
     
     g.setColour(bgColor);
@@ -44,11 +43,6 @@ void KrumModuleContainer::paint (juce::Graphics& g)
         g.setColour(juce::Colours::darkgrey.darker());
         g.drawFittedText("Drop a Sample up there", area.reduced(20), juce::Justification::centred, 1);
     }
-
-   /* if (moduleDragging)
-    {
-        paintLineUnderMouseDrag(g, getMouseXYRelative());
-    }*/
 }
 
 void KrumModuleContainer::paintLineUnderMouseDrag(juce::Graphics& g, juce::Point<int> mousePosition)
@@ -72,6 +66,7 @@ void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
             auto modEditor = mod->getCurrentModuleEditor();
             modBounds = modEditor->getBoundsInParent();
         }
+        //Controlling the mouseDown from here so we can "click-off" and it will unselect all modules.
         if (modBounds.contains(mousePos))
         {
             setModuleSelected(mod);
@@ -81,24 +76,7 @@ void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
             setModuleUnselected(mod);
         } 
     }
-
 }
-
-//void KrumModuleContainer::mouseMove(const juce::MouseEvent& event)
-//{
-//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
-//    {
-//        auto modEd = moduleDisplayOrder[i];
-//        if (modEd->isMouseOverThumbnail())
-//        {
-//            modEd->setClipGainSliderVisibility(true);
-//        }
-//        else
-//        {
-//            modEd->setClipGainSliderVisibility(false);
-//        }
-//    }
-//}
 
 void KrumModuleContainer::refreshModuleLayout(bool makeVisible)
 {
@@ -145,9 +123,7 @@ void KrumModuleContainer::refreshModuleLayout(bool makeVisible)
 
         modEd->setTopLeftPosition(prevModEd->getRight() + EditorDimensions::extraShrinkage(), area.getY() + EditorDimensions::extraShrinkage());
     }
-
 }
-
 
 void KrumModuleContainer::addMidiListener(juce::MidiKeyboardStateListener* newListener)
 {
@@ -174,14 +150,12 @@ void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, boo
         {
             refreshModuleLayout(false);
         }
-
     }
     else
     {
         DBG("New Editor is NULL");
     }
 }
-
 
 void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout)
 {
@@ -211,7 +185,6 @@ void KrumModuleContainer::setModuleSelected(KrumModule* moduleToMakeActive)
     moduleToMakeActive->setModuleSelected(true);
 
     repaint();
-
 }
 
 void KrumModuleContainer::setModuleUnselected(KrumModule* moduleToDeselect)
@@ -242,42 +215,35 @@ void KrumModuleContainer::removeModuleFromDisplayOrder(KrumModuleEditor* moduleT
     moduleDisplayOrder.remove(moduleToRemove->getModuleDisplayIndex());
 }
 
-bool KrumModuleContainer::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
-{
-    if (dragSourceDetails.description.toString().compare("ModuleDragAndDrop") == 0)
-    {
-        moduleDragging = true;
-        juce::MessageManagerLock lock;
-        repaint();
-        return true;
-    }
-    return false;
-}
-
-void KrumModuleContainer::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
-{
-    moduleDragging = false;
-
-    auto krumModule = static_cast<KrumModuleEditor*>(dragSourceDetails.sourceComponent.get());
-    if (krumModule)
-    {
-        int displayIndex = findDisplayIndexFromPoint(dragSourceDetails.localPosition);
-        //moveModule(krumModule, displayIndex);
-    }
-    else
-    {
-        DBG("Module "+ krumModule->getName() + " is NULL");
-    }
-}
-
-int KrumModuleContainer::findDisplayIndexFromPoint(juce::Point<int> point)
-{
-
-    //come back
-    //the idea was to locate the module under the mouse, but there might be a better way to do this
-
-    return 0;
-}
+//For Module Dragging, To Be Implemented
+// 
+//bool KrumModuleContainer::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
+//{
+//    if (dragSourceDetails.description.toString().compare("ModuleDragAndDrop") == 0)
+//    {
+//        moduleDragging = true;
+//        juce::MessageManagerLock lock;
+//        repaint();
+//        return true;
+//    }
+//    return false;
+//}
+//
+//void KrumModuleContainer::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
+//{
+//    moduleDragging = false;
+//
+//    auto krumModule = static_cast<KrumModuleEditor*>(dragSourceDetails.sourceComponent.get());
+//    if (krumModule)
+//    {
+//        int displayIndex = findDisplayIndexFromPoint(dragSourceDetails.localPosition);
+//        //moveModule(krumModule, displayIndex);
+//    }
+//    else
+//    {
+//        DBG("Module "+ krumModule->getName() + " is NULL");
+//    }
+//}
 
 KrumSamplerAudioProcessorEditor* KrumModuleContainer::getEditor()
 {
@@ -319,19 +285,12 @@ void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor
     }
 
     moduleEditor->setThumbnailCanAcceptFile(true);
-
 }
 
 void KrumModuleContainer::hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
 {
     moduleEditor->setThumbnailCanAcceptFile(false);
 }
-
-//void KrumModuleContainer::hideModuleClipGainSlider(KrumModuleEditor* moduleEditor)
-//{
-//
-//
-//}
 
 KrumModuleEditor* KrumModuleContainer::getEditorFromModule(KrumModule* krumModule)
 {
@@ -344,6 +303,5 @@ void KrumModuleContainer::timerCallback()
     {
         moduleDisplayOrder[i]->repaint();
     }
-
 }
 

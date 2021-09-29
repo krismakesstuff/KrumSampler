@@ -21,11 +21,9 @@
 * The KrumSampler(juce::Synthesizer) handles the incoming midi and triggers the rendering of the KrumVoice.
 * 
 * TODO:
-* - Come up with a voice stealing scheme. We want files to continue to play even if the same note is triggered again. So the sound overlap and don't create sudden endings and potentially a click
-* 
+* - Need a solution to reliably delete modules and not have it affect other modules sliderattachments
+*    - Reassigning slider attachments makes automation tricky/impossible. 
 */
-
-
 
 class KrumSound : public juce::SamplerSound
 {
@@ -44,28 +42,22 @@ public:
     std::atomic<float>* getModuleClipGain()const;
 
     void setModulePlaying(bool playing);
-    //void setMidi(int newMidiNote, int newMidiChannel);
     bool isParent(KrumModule* moduleToTest);
 
 private:
     friend class KrumVoice;
-
 
     juce::String name;
     std::unique_ptr<juce::AudioBuffer<float>> data;
     double sourceSampleRate;
     juce::BigInteger midiNotes;
     int length = 0, midiRootNote = 0, midiChannel = 0;
-    
 
     juce::ADSR::Parameters params;
     KrumModule* parentModule = nullptr;
 
     JUCE_LEAK_DETECTOR(KrumSound)
 };
-
-
-
 
 class KrumVoice : public juce::SamplerVoice
 {
@@ -90,10 +82,8 @@ private:
     
     juce::ADSR adsr;
 
-
     JUCE_LEAK_DETECTOR(KrumVoice)
 };
-
 
 class KrumSamplerAudioProcessor;
 
@@ -107,29 +97,18 @@ public:
 
     void noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) override;
     void noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) override;
-    
-    /*juce::SynthesiserVoice* findFreeVoice(juce::SynthesiserSound* soundToPlay,
-                                            int midiChannel,
-                                            int midiNoteNumber,
-                                            bool stealIfNoneAvailable) const override;*/
-
-    //juce::SynthesiserVoice* findVoiceToSteal(juce::SynthesiserSound* sound, int midiChannel, int midiNoteNumber)const override;
-
-
-    //void handleMidiEvent(const juce::MidiMessage& midiMessage) override;
 
     KrumModule* getModule(int index);
     void addModule(KrumModule* newModule, bool hasSample = false);
     void removeModule(KrumModule* moduleToDelete);
-    void updateModuleSample(KrumModule* updatedModule);
     
+    void updateModuleSample(KrumModule* updatedModule);
     void addSample(KrumModule* moduleToAddSound);
     
     void clearModules();
     int getNumModules();
 
     bool isFileAcceptable(const juce::File& file);
-
     juce::AudioFormatManager& getFormatManager();
 
 private:
@@ -143,5 +122,4 @@ private:
     juce::OwnedArray<KrumModule> modules;
 
     JUCE_LEAK_DETECTOR(KrumSampler)
-
 };

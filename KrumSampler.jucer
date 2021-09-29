@@ -56,6 +56,10 @@
     <FILE id="QyFQzA" name="ColorPalette.cpp" compile="1" resource="0"
           file="Source/ColorPalette.cpp"/>
     <FILE id="ch29Pi" name="ColorPalette.h" compile="0" resource="0" file="Source/ColorPalette.h"/>
+    <FILE id="n9rJYQ" name="DragAndDropThumbnail.cpp" compile="1" resource="0"
+          file="Source/DragAndDropThumbnail.cpp"/>
+    <FILE id="w0hCiW" name="DragAndDropThumbnail.h" compile="0" resource="0"
+          file="Source/DragAndDropThumbnail.h"/>
     <FILE id="EXEHuy" name="KrumFileBrowser.cpp" compile="1" resource="0"
           file="Source/KrumFileBrowser.cpp"/>
     <FILE id="izCUXg" name="KrumFileBrowser.h" compile="0" resource="0"

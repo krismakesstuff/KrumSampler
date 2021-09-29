@@ -12,15 +12,9 @@
 #include "KrumModule.h"
 #include "KrumSampler.h"
 
-KrumModuleProcessor::KrumModuleProcessor(KrumModule& p, KrumSampler& s/*, juce::File& sampleFile*/)
-    : parent(p), sampler(s)/*, audioFile(sampleFile)*/
+KrumModuleProcessor::KrumModuleProcessor(KrumModule& p, KrumSampler& s)
+    : parent(p), sampler(s)
 {
-}
-
-//automatically triggers a note off after the length of the sample has passed.
-void KrumModuleProcessor::timerCallback()
-{
-    //went with a different approach, kept in case who knows what... i know, i know..
 }
 
 void KrumModuleProcessor::triggerNoteOn()

@@ -12,8 +12,6 @@
 
 #include <JuceHeader.h>
 
-
-
 class KrumSampler;
 class KrumModuleContainer;
 class KrumSamplerAudioProcessorEditor;
@@ -24,7 +22,7 @@ class KrumFileBrowser;
 /*
 * 
 * A File drop component. This can accept files from outside of the app as well as from the in app file browser. 
-* If valid files are dropped on it will automatically make a new module with that audio file. If there are multiple, it will make a new module for each file. 
+* If valid files are dropped on it, it will automatically make a new module with that audio file. If there are multiple, it will make a new module for each file. 
 * 
 */
 class KrumFileDrop  :   public juce::Component,
@@ -32,7 +30,6 @@ class KrumFileDrop  :   public juce::Component,
                         public juce::FileDragAndDropTarget,
                         public juce::SettableTooltipClient
 {
-
 public:
     KrumFileDrop(KrumSamplerAudioProcessorEditor& e, KrumModuleContainer& container, juce::AudioProcessorValueTreeState& a, KrumFileBrowser& browser);
     ~KrumFileDrop() override;

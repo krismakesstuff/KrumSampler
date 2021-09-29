@@ -12,14 +12,13 @@
 #include "PluginEditor.h"
 
 
-//creates a module with NO MIDI assigned, up to the module to get this from the user
+//Creates a module with NO MIDI assigned, up to the module to get this from the user.
 //This ctor is used when creating a new module from the GUI, okay to update Value Tree
 KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
                         juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
     : valueTree(valTree), parameters(apvts)
 {
     moduleProcessor.reset(new KrumModuleProcessor(*this, km));
-    //updateAudioParams();
 
     info.index = index;
     info.audioFile = file;
@@ -42,17 +41,12 @@ KrumModule::KrumModule(int newIndex, KrumSampler& km, juce::ValueTree* valTree, 
     getValuesFromTree();
     updateAudioAtomics();
     
-
     needsToUpdateTree = true;
 
-    //for now..
-    /*info.displayIndex = info.index;
-    updateValuesInTree();*/
 }
 
 KrumModule::~KrumModule()
 {
-    
 }
 
 //use this only to capture midi assignments, does not trigger any sound
@@ -369,27 +363,18 @@ void KrumModule::updateValuesInTree(bool printBefore)
 
 void KrumModule::clearModuleValueTree()
 {
-
-    int numModules = moduleProcessor->sampler.getNumModules();
-
-    if (numModules - 1 > info.index)
-    {
-
-    }
-
     auto modulesTree = valueTree->getChildWithName("KrumModules");
     auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
 
     moduleTree.setProperty("name", juce::var(""), nullptr);
 
     juce::ValueTree stateTree;
-    juce::var id;
+    //juce::var id;
 
     for (int i = 0; i < moduleTree.getNumChildren(); i++)
     {
         stateTree = moduleTree.getChild(i);
         stateTree.setProperty("value", juce::var(""), nullptr);
-        
     }
 }
 
@@ -415,7 +400,6 @@ KrumModuleEditor* KrumModule::createModuleEditor(KrumSamplerAudioProcessorEditor
 {
     if (moduleEditor == nullptr)
     {
-        //const juce::ScopedLock sl(lock);
         moduleEditor.reset(new KrumModuleEditor(*this, *moduleProcessor, editor));
     }
 

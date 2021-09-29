@@ -43,16 +43,13 @@ KrumSound::KrumSound    (KrumModule* pModule,
 KrumSound::~KrumSound()
 {
     DBG("I'm DEAD: " + name);
-    //SamplerSound::~SamplerSound();
 }
 
-//float KrumSound::getModuleGain() const
 std::atomic<float>* KrumSound::getModuleGain() const
 {
     return parentModule->getModuleGain();
 }
 
-//float KrumSound::getModulePan() const
 std::atomic<float>* KrumSound::getModulePan() const
 {
     return parentModule->getModulePan();
@@ -68,20 +65,10 @@ void KrumSound::setModulePlaying(bool isPlaying)
     parentModule->setModulePlaying(isPlaying);
 }
 
-//void KrumSound::setMidi(int newMidiNote, int newMidiChannel)
-//{
-//    midiRootNote = newMidiNote;
-//    midiChannel = newMidiChannel;
-//    midiNotes.setBit(midiRootNote);
-//
-//
-//}
-
 bool KrumSound::isParent(KrumModule* moduleToTest)
 {
     return parentModule == moduleToTest;
 }
-
 
 //==================================================================================================//
 
@@ -98,7 +85,6 @@ bool KrumVoice::canPlaySound(juce::SynthesiserSound* sound)
     {
         return true;
     }
-
 }
 
 bool KrumVoice::isVoiceActive() const
@@ -109,20 +95,15 @@ bool KrumVoice::isVoiceActive() const
 
 void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* s, int pitchWheel)
 {
-
-    
     if (auto* sound = static_cast<const KrumSound*> (s))
     {
+        //Pitchshifting will be a thing at some point.
         /*pitchRatio = std::pow(2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
             * sound->sourceSampleRate / getSampleRate();*/
 
         sourceSamplePosition = 0.0;
 
-        //std::atomic<float>* moduleGain = sound->getModuleGain();
-        //std::atomic<float>* modulePan = sound->getModulePan();
-        
-       // const juce::ScopedLock sl(voiceLock);
-
+        //only storing this, will be applied in the render block
         clipGain = sound->getModuleClipGain()->load();
 
         float moduleGain = *sound->getModuleGain();
@@ -149,8 +130,6 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
 
         adsr.noteOn();
     }
-        
-
 }
 
 void KrumVoice::stopNote(float velocity, bool allowTailOff)
@@ -164,7 +143,6 @@ void KrumVoice::stopNote(float velocity, bool allowTailOff)
         clearCurrentNote();
         adsr.reset();
     }
-
 }
 
 
@@ -221,9 +199,6 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
     }
 }
 
-
-
-
 //====================================================================================//
 
 KrumSampler::KrumSampler(juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o)
@@ -247,7 +222,6 @@ void KrumSampler::initVoices()
     DBG("Voices: " + juce::String(voices.size()));
 }
 
-
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 
 {
     for (auto sound : sounds)
@@ -259,7 +233,6 @@ void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const 
 
             auto voice = findFreeVoice(sound, midiChannel, midiNoteNumber, true);
             startVoice(voice, sound, midiChannel, midiNoteNumber, velocity);
-            
         }
     }
 }
@@ -272,7 +245,7 @@ void KrumSampler::noteOff(const int midiChannel, const int midiNoteNumber, const
         {
             auto krumSound = static_cast<KrumSound*>(sound);
             krumSound->setModulePlaying(false);
-            //the sampler only plays one shots, so no need to turn anything off here.
+            //the sampler only plays one shots, so no need to turn any voices off here.
         }
     }
 }
@@ -315,13 +288,14 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
         //reassign the module with it's new index, which the slider attachments use, then give it back it's old values.
         mod->setModuleIndex(i);
         mod->reassignSliders();
+
+        //this is my hacky way to easily delete modules and just reassign them on the next slider attachment. Will be making this better to have a realiable automation workflow.
         mod->setModuleGain(modGain);
         mod->setModulePan(modPan);
         mod->updateAudioAtomics();
     }
 
     owner.updateValueTreeState();
-    
 }
  
 void KrumSampler::updateModuleSample(KrumModule* updatedModule)
@@ -334,7 +308,6 @@ void KrumSampler::updateModuleSample(KrumModule* updatedModule)
     }
 
     addSample(updatedModule);
-
 }
 
 void KrumSampler::addSample(KrumModule* moduleToAddSound)
@@ -378,10 +351,10 @@ bool KrumSampler::isFileAcceptable(const juce::File& file)
     std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(file));
     if (reader == nullptr)
     {
-        //auto alert = juce::AlertWindow::showNativeDialogBox("File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".", true);
         juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".");
         return false;
     }
+
     if (reader->lengthInSamples / reader->sampleRate >= MAX_FILE_LENGTH_SECS)
     {
         juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"File Too Long!", "The maximum file length is " + juce::String(MAX_FILE_LENGTH_SECS) + " seconds.");

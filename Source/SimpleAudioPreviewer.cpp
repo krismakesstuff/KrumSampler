@@ -41,22 +41,15 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::V
     volumeSlider.valueFromTextFunction = [this](juce::String(text)) { return fromText(text); };
     volumeSlider.textFromValueFunction = [this](double value) { return toText(value); };
 
-
     setPaintingIsUnclipped(true);
 }
 
 SimpleAudioPreviewer::~SimpleAudioPreviewer()
 {
-    
 }
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)
 {
-    //auto area = getLocalBounds();
-
-    //g.setColour(juce::Colours::darkgrey);
-    //g.fillRoundedRectangle(area.toFloat(), 5.0f);
-
 }
 
 void SimpleAudioPreviewer::resized()
@@ -65,14 +58,12 @@ void SimpleAudioPreviewer::resized()
 
     autoPlayToggle.setBounds(area.withRight(area.getWidth() / 3));
     volumeSlider.setBounds(area.withLeft(area.getWidth() / 3).withY(area.getHeight()/3).withHeight(area.getHeight()/2));
-
 }
 
 bool SimpleAudioPreviewer::isAutoPlayActive()
 {
     return autoPlayToggle.getToggleState();
 }
-
 
 void SimpleAudioPreviewer::renderPreviewer(juce::AudioBuffer<float>& outputBuffer)
 {
@@ -84,9 +75,12 @@ void SimpleAudioPreviewer::renderPreviewer(juce::AudioBuffer<float>& outputBuffe
         currentAudioFileSource->getNextAudioBlock(tempChannelInfo);
 
         const juce::AudioSourceChannelInfo channelInfo{ outputBuffer };
+
+        auto gain = getGain();
+
         for (int i = 0; i < outputBuffer.getNumChannels(); i++)
         {
-            channelInfo.buffer->addFrom(i, 0, tempBuffer, i, 0, tempBuffer.getNumSamples(), getGain());
+            channelInfo.buffer->addFrom(i, 0, tempBuffer, i, 0, tempBuffer.getNumSamples(), gain);
         }
 
         if (currentAudioFileSource->getNextReadPosition() >= currentAudioFileSource->getTotalLength())
@@ -103,7 +97,6 @@ void SimpleAudioPreviewer::setGain()
     savePreviewerGainState();
     
     DBG("Previewer Gain: " + juce::String(newGain));
-
 }
 
 double SimpleAudioPreviewer::getGain()
@@ -143,19 +136,18 @@ float SimpleAudioPreviewer::fromText(juce::String text)
 
 void SimpleAudioPreviewer::updateBubbleComp(juce::Slider* slider, juce::Component* comp)
 {
-    
     auto bubbleComp = static_cast<juce::BubbleComponent*>(comp);
     if (bubbleComp != nullptr)
     {
         juce::Point<int> pos;
         juce::BubbleComponent::BubblePlacement bubblePlacement = juce::BubbleComponent::above;
+        auto sliderStyle = slider->getSliderStyle();
 
-        if (slider->getSliderStyle() == juce::Slider::LinearVertical)
+        if (sliderStyle == juce::Slider::LinearVertical)
         {
             pos = { getLocalBounds().getCentreX() /*+ 6*/, getMouseXYRelative().getY() - 5 };
-            //bubblePlacement = juce::BubbleComponent::right;
         }
-        else if (slider->getSliderStyle() == juce::Slider::LinearHorizontal)
+        else if (sliderStyle == juce::Slider::LinearHorizontal)
         {
             int mouseX = getMouseXYRelative().getX();
             pos = {  mouseX, slider->getBounds().getCentreY() - 10 };
@@ -165,10 +157,8 @@ void SimpleAudioPreviewer::updateBubbleComp(juce::Slider* slider, juce::Componen
         bubbleComp->setAllowedPlacement(bubblePlacement);
         bubbleComp->setPosition(pos, 0);
         bubbleComp->setPaintingIsUnclipped(true);
-       // bubbleComp->toFront(false);
-        
-
     }
+
     slider->setTooltip(slider->getTextFromValue(slider->getValue()));
 }
 
@@ -189,7 +179,6 @@ void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
         DBG("reader is NULL");
     }
 }
-
 
 juce::AudioFormatManager* SimpleAudioPreviewer::getFormatManager()
 {

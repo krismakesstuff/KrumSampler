@@ -24,19 +24,15 @@ KrumFileDrop::KrumFileDrop(KrumSamplerAudioProcessorEditor& e, KrumModuleContain
 
 KrumFileDrop::~KrumFileDrop()
 {
-    
 }
 
 void KrumFileDrop::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
-    
     juce::Colour bgColor = isMouseOver() ? mouseOverColor : defBGColor;
-
 
     g.setColour(mouseOverColor);
     g.drawRoundedRectangle(area.toFloat(), /*container.getEditor().getEditorDimensions().*/EditorDimensions::cornerSize,/* container->editor->dimensions.*/EditorDimensions::bigOutline);
-
 
     g.setColour(bgColor);
     g.fillRoundedRectangle(area.toFloat().reduced(EditorDimensions::bigOutline), EditorDimensions::cornerSize);
@@ -45,19 +41,16 @@ void KrumFileDrop::paint(juce::Graphics& g)
     g.drawFittedText("Drop Samples Here", area.reduced(10), juce::Justification::centred, 3, 0.50f);
 }
 
-//Drag and Drop Target
+//Drag and Drop Target From KrumFileBrowser
 bool KrumFileDrop::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
 {
-    //DBG("Checking Interest");
     auto desc = dragSourceDetails.description.toString();
     return desc.contains("FileBrowserDrag");
 }
 
-//Drag and Drop Target
+//Drag and Drop Target KrumFileBrowser
 void KrumFileDrop::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
-{
-    //doesn't accept folders!!
-    
+{   
     for (int i = 0; i < fileBrowser.getNumSelectedItems(); i++)
     {
         auto krumItem = fileBrowser.getSelectedItem(i);
@@ -83,10 +76,8 @@ void KrumFileDrop::itemDropped(const juce::DragAndDropTarget::SourceDetails& dra
         {
             DBG("Krum Item NULL");
         }
-
     }
     DBG("Dropped: " + dragSourceDetails.sourceComponent.get()->getName());
-
 }
 
 //EXTERNAL File Drag and Drop Target
@@ -98,7 +89,6 @@ bool KrumFileDrop::isInterestedInFileDrag(const juce::StringArray& files)
 //EXTERNAL File Drag and Drop Target
 void KrumFileDrop::filesDropped(const juce::StringArray& files, int x, int y)
 {
-    
     droppedFiles = files;
     for (auto file : files)
     {
@@ -114,10 +104,8 @@ void KrumFileDrop::filesDropped(const juce::StringArray& files, int x, int y)
         {
             DBG("Audio Format Not Supported");
         }
-
     }
 }
-
 
 bool KrumFileDrop::createNewModule(juce::File audioFile, juce::String name)
 {

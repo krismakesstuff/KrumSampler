@@ -21,13 +21,11 @@
 class KrumSampler;
 class KrumModule;
 
-class KrumModuleProcessor : public juce::Timer
+class KrumModuleProcessor 
 {
 public:
 
     KrumModuleProcessor(KrumModule& p, KrumSampler& s);
-    
-    void timerCallback() override;
     
     void triggerNoteOn();
     void triggerNoteOff();
@@ -36,7 +34,7 @@ private:
 
     friend class KrumModuleEditor;
     friend class KrumModule;
-
+    friend class DragAndDropThumbnail;
     KrumModule& parent;
     KrumSampler& sampler;
 

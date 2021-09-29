@@ -11,7 +11,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-//#include "KrumModuleEditor.h"
 
 //==============================================================================
 /*
@@ -19,8 +18,9 @@
 * A class the represents the color buttons that show up with a ModuleSettingsOverlay. This is where the color scheme is set.
 * 
 * 
-* TODO: Fix getRandomColor() and make sure the color is not the same as the color before it. 
-* 
+* TODO: 
+* - Fix getRandomColor() and make sure the color is not the same as the color before it. 
+* - Redesign with ModuleSettingsOverlay, bigger color buttons? 
 */
 
 namespace ColorPaletteColors
@@ -81,6 +81,7 @@ public:
 //        {
 //            *lastRandom = randIt == ColorPaletteColors::colorArray.size() - 1 ?     ColorPaletteColors::colorArray[0] :                                                                                                        ColorPaletteColors::colorArray[++randIt];
 //        }
+
         *lastRandom = randColor;
         
         return lastRandom;
@@ -91,7 +92,6 @@ public:
         juce::Random random;
         int randIt = random.nextInt(juce::Range<int>(0, ColorPaletteColors::colorArray.size() - 1));
         return ColorPaletteColors::colorArray[randIt];
-      
     }
 
 private:

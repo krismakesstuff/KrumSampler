@@ -14,20 +14,12 @@
 
 //==============================================================================
 /*
-* This Class actually plays the audio file that is selected in the file browser
+* This Class plays the audio file that is selected in the file browser
 */
 class SimpleAudioPreviewer  :   public juce::Component,
                                 public juce::SettableTooltipClient
 {
 public:
-
-    //enum PreviewerState
-    //{
-    //    stopped,
-    //    playing,
-    //    //paused
-    //};
-
 
     SimpleAudioPreviewer(juce::AudioFormatManager* formatManager, juce::ValueTree& valueTree);
     ~SimpleAudioPreviewer() override;
@@ -37,7 +29,6 @@ public:
     bool isAutoPlayActive();
 
     void renderPreviewer(juce::AudioBuffer<float>& outputBuffer);
-
 
     void setGain();
     double getGain();
@@ -61,37 +52,21 @@ public:
     bool wantsToPlayFile();
     void setWantsToPlayFile(bool wantsToPlay);
 
-
 private:
 
     bool readyToPlayFile = false;
 
     int playBackSampleRate;
 
-    //juce::CriticalSection lock;
-
-    //Does auto toggle need to be here? 
     juce::ToggleButton autoPlayToggle;
     juce::Slider volumeSlider;
 
     juce::ValueTree& valueTree;
-
-    //PreviewerState state{ PreviewerState::stopped };
-    
-
     juce::File currentAudioFile;
+
     std::unique_ptr<juce::AudioFormatReader> currentFormatReader = nullptr;
     std::unique_ptr<juce::AudioFormatReaderSource> currentAudioFileSource = nullptr;
-    //std::unique_ptr<juce::AudioBuffer<float>> audioData = nullptr;
-
     juce::AudioFormatManager* formatManager = nullptr;
-    
-    
-    //juce::AudioSourcePlayer audioSourcePlayer;
-    //juce::AudioTransportSource transportSource;
-    //juce::AudioDeviceManager audioDeviceManager;
-
-    //::TimeSliceThread previewThread{"AudioPreviewThread"};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleAudioPreviewer)
 };

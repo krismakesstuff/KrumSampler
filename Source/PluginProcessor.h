@@ -44,18 +44,18 @@ namespace TreeIDs
     static juce::String outputGainParam_ID{"outputGain"};
 
     //APVTS
-    static juce::String paramModuleGain_ID{"moduleGain"};
-    static juce::String paramModulePan_ID{"modulePan"};
-    static juce::String paramModuleOutputChannels_ID{"moduleOutputChannel"};
-    static juce::String paramModuleClipGain_ID{ "moduleClipGain" };
+    const static juce::String paramModuleGain_ID{"moduleGain"};
+    const static juce::String paramModulePan_ID{"modulePan"};
+    const static juce::String paramModuleOutputChannels_ID{"moduleOutputChannel"};
+    const static juce::String paramModuleClipGain_ID{ "moduleClipGain" };
 
     //ValueTree
-    static juce::String paramModuleFile_ID{"moduleFilePath"};
-    static juce::String paramModuleMidiNote_ID{"moduleMidiNote"};
-    static juce::String paramModuleMidiChannel_ID{"moduleMidiChannel"};
-    static juce::String paramModuleActive_ID{ "moduleActive" };
-    static juce::String paramModuleColor_ID{ "moduleColor" };
-    static juce::String paramModuleDisplayIndex_ID{ "moduleDisplayIndex" };
+    const static juce::String paramModuleFile_ID{"moduleFilePath"};
+    const static juce::String paramModuleMidiNote_ID{"moduleMidiNote"};
+    const static juce::String paramModuleMidiChannel_ID{"moduleMidiChannel"};
+    const static juce::String paramModuleActive_ID{ "moduleActive" };
+    const static juce::String paramModuleColor_ID{ "moduleColor" };
+    const static juce::String paramModuleDisplayIndex_ID{ "moduleDisplayIndex" };
 }
 
 static float panRangeTo0to1(juce::String text)
@@ -73,11 +73,13 @@ static float panRangeTo0to1(juce::String text)
 
     return range.convertTo0to1(text.getFloatValue());
 }
+
 static juce::String panRangeFrom0To1(float value)
 {
     juce::NormalisableRange<float>range{ -100.0f, 100.0f, 0.01f };
     int converted = (int)range.convertFrom0to1(value);
     juce::String returnString{};
+
     if (converted > 0)
     {
         returnString = juce::String(converted) + " >";
@@ -94,8 +96,7 @@ static juce::String panRangeFrom0To1(float value)
 }
 
 
-class KrumSamplerAudioProcessor  :  public juce::AudioProcessor/*,
-                                    public juce::Thread*/
+class KrumSamplerAudioProcessor  :  public juce::AudioProcessor
 {
 public:
 
@@ -119,7 +120,7 @@ public:
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
-    //void updateEditor();
+    
     //==============================================================================
     const juce::String getName() const override;
 
@@ -145,18 +146,12 @@ public:
 
     void makeModulesFromValueTree();
     void updateValueTreeState();
+    
     int findFreeModuleIndex();
-
-
-    int getNumModulesInSampler()
-    {
-        return sampler.getNumModules();
-    }
+    int getNumModulesInSampler();
 
     juce::AudioThumbnailCache& getThumbnailCache();
-
     KrumFileBrowser& getFileBrowser();
-
 
 private:
 
@@ -169,7 +164,6 @@ private:
     std::atomic<float>* outputGainParameter = nullptr;
     juce::MidiKeyboardState midiState;
 
-
     class ThumbnailCache : public juce::AudioThumbnailCache
     {
     public:
@@ -178,6 +172,7 @@ private:
         {}
         ~ThumbnailCache() override {}
     };
+
     juce::SharedResourcePointer<ThumbnailCache> thumbnailCache;
     
     juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;

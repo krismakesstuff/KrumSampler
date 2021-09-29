@@ -16,6 +16,8 @@
 /*
 * 
 * A class to hold and manage KrumModuleEditors. It holds the module-editors and not the actual modules. It defines the viewport in which they are seen. 
+* This also manages interactions with the mouse being over module-editors, specifically the when dragging from the browser.
+* 
 * 
 */
 
@@ -24,7 +26,7 @@ class KrumModule;
 class KrumSamplerAudioProcessorEditor;
 
 class KrumModuleContainer : public juce::Component,
-                            public juce::DragAndDropTarget,
+                            /*public juce::DragAndDropTarget,*/
                             public juce::Timer
 {
 public:
@@ -38,8 +40,6 @@ public:
     void refreshModuleLayout(bool makeVisible);
     
     void mouseDown(const juce::MouseEvent& event) override;
-
-    //void mouseMove(const juce::MouseEvent& event) override;
 
     void addMidiListener(juce::MidiKeyboardStateListener* newListener);
     void removeMidiListener(juce::MidiKeyboardStateListener* listenerToDelete);
@@ -60,15 +60,15 @@ public:
     void removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove);
     KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
 
-    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
-    void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
-    int findDisplayIndexFromPoint(juce::Point<int> point);
+    //bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+    //void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+    
     KrumSamplerAudioProcessorEditor* getEditor();
     juce::Array<KrumModuleEditor*>& getModuleDisplayOrder();
     int getNumModuleEditors();
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
-    //void hideModuleClipGainSlider(KrumModuleEditor* moduleEditor);
+
     void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
 
@@ -79,7 +79,7 @@ private:
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
  
-    //could probably use a linked list here..
+    //could probably use a linked list here? Would make storing position easier when rearranging. 
     juce::Array<KrumModuleEditor*> moduleDisplayOrder{};
 
     bool moduleDragging = false;

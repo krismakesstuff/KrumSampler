@@ -39,24 +39,8 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
         auto label = static_cast<juce::Label*>(newKrumItem);
         auto comp = static_cast<juce::Component*>(label);
-        //auto newItem = std::make_unique<Component>(comp);
         return std::move(std::unique_ptr<juce::Component>(comp));
     }
-
-    /*void paintItem(juce::Graphics& g, int width, int height) override
-    {
-        juce::Rectangle<int> area {0, 0, width, height};
-
-        g.setColour(isSelected() ? bgColor.brighter() : bgColor);
-        g.fillRect(area);
-
-        if (!editing)
-        {
-            g.setColour(juce::Colours::white);
-            g.drawFittedText(itemName, area.withX(5), juce::Justification::centredLeft, 1);
-        }
-
-    }*/
 
     void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
     {
@@ -64,7 +48,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         newLine.setStart(line.getStartX() - 20, line.getStartY());
         newLine.setEnd(line.getEndX() - 10, line.getEndY());
 
-        //g.setColour(juce::Colours::darkgrey.darker(0.6f));
         g.setColour(juce::Colours::black);
         g.drawLine(newLine);
     }
@@ -93,10 +76,9 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         }
     }
 
-    void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
+    /*void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
     {
-
-    }
+    }*/
 
     void KrumTreeItem::closeLabelEditor(juce::Label* label)
     {
@@ -157,9 +139,9 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         bgColor = newColor;
     }
-   
 
-
+    //-----------------------------------------------------------------------
+    
     KrumTreeItem::EditableComp::EditableComp (KrumTreeItem& o, juce::String itemName, juce::Colour backColor)
         : owner(o), bgColor(backColor)
     {
@@ -181,7 +163,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
             g.setColour(juce::Colours::lightgrey);
             g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
         }
-
     }
 
     void KrumTreeItem::EditableComp::textWasEdited()
@@ -246,7 +227,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
             owner.itemClicked(e);
             owner.setSelected(true, true);
             DBG("Index in parent: " + juce::String(owner.getIndexInParent()));
-
         }
 
         //right click menu
@@ -256,11 +236,10 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
             juce::Rectangle<int> showPoint{ e.getMouseDownScreenX(), e.getMouseDownScreenY(), 0, 0 };
             juce::PopupMenu::Options menuOptions;
 
-            menu.addItem(1, "Rename");
-            menu.addItem(2, "Remove");
+            menu.addItem(RightClickMenuIds::rename_Id, "Rename");
+            menu.addItem(RightClickMenuIds::remove_Id, "Remove");
 
             menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
-            
         }
     }
 
@@ -272,27 +251,24 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         }
     }
 
-
     void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
     {
         owner.itemDoubleClicked(e);
     }
 
-
     void KrumTreeItem::EditableComp::handleResult(int result, EditableComp* comp)
     {
-        if (result == 1)
+        if (result == RightClickMenuIds::rename_Id)
         {
             comp->showEditor();
             comp->repaint();
             comp->owner.setItemEditing(true);
         }
-        else if (result == 2)
+        else if (result == RightClickMenuIds::remove_Id)
         {
             comp->owner.tellParentToRemoveMe();
         }
     }
-
 
 //=================================================================================================================================//
 
@@ -316,7 +292,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
     std::unique_ptr<juce::Component> KrumTreeHeaderItem::createItemComponent()
     {
-
         auto newHeaderComp = new EditableHeaderComp(*this, headerName, bgColor);
 
         if (numFilesExcluded > 0)
@@ -326,7 +301,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
         auto label = static_cast<juce::Label*>(newHeaderComp);
         auto comp = static_cast<juce::Component*>(label);
-        //auto newHeader = std::make_unique<Component>(comp);
         return std::move(std::unique_ptr<juce::Component>(comp));
     }
 
@@ -348,7 +322,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         if (isOpen())
         {
-            //g.setColour(juce::Colours::darkgrey.darker(0.6f));
             g.setColour(juce::Colours::black);
             g.drawLine(line);
         }
@@ -384,7 +357,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         bgColor = newColor;
     }
-    
     
     bool KrumTreeHeaderItem::isItemEditing(bool checkChildren)
     { 
@@ -422,7 +394,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     void KrumTreeHeaderItem::setItemEditing(bool isEditing)
     {
         editing = isEditing;
-
     }
 
     void KrumTreeHeaderItem::setEditable(bool isEditable)
@@ -506,8 +477,6 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     void KrumTreeHeaderItem::EditableHeaderComp::editorAboutToBeHidden(juce::TextEditor* editor)
     {
         owner.setItemEditing(true);
-
-        //owner.tellParentIfEditing(false);
     }
 
     void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e)
@@ -524,47 +493,39 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
             juce::PopupMenu menu;
             juce::PopupMenu::Options menuOptions;
 
-            menu.addItem(1, "Rename");
-            menu.addItem(2, "Remove");
+            menu.addItem(RightClickMenuIds::rename_Id, "Rename");
+            menu.addItem(RightClickMenuIds::remove_Id, "Remove");
 
             menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
-
-            
         }
         else if(e.mods.isPopupMenu() && !owner.isEditable())
         {
             juce::PopupMenu menu;
             juce::PopupMenu::Options menuOptions;
-            menu.addItem(3, "Clear (like, forever)");
+
+            menu.addItem(RightClickMenuIds::clear_Id, "Clear (like, forever)");
 
             menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
         }
     }
 
-  /*  void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
-    {
-        owner.itemDoubleClicked(e);
-    }*/
-
     void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
     {
-        if (result == 1)
+        if (result == RightClickMenuIds::rename_Id)
         {
             comp->showEditor();
             comp->repaint();
             comp->owner.setItemEditing(true);
         }
-        else if (result == 2)
+        else if (result == RightClickMenuIds::remove_Id)
         {
             comp->owner.tellParentToRemoveMe();
         }
-        if (result == 3)
+        if (result == RightClickMenuIds::clear_Id)
         {
             comp->owner.clearAllChildren();
         }
-
     }
-
 
 //=================================================================================================================================//
 //=================================================================================================================================//
@@ -606,9 +567,6 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
     } 
 
     setPaintingIsUnclipped(true);
-
-
-
 }
 
 KrumTreeView::~KrumTreeView()
@@ -618,14 +576,12 @@ KrumTreeView::~KrumTreeView()
 
 void KrumTreeView::paint(juce::Graphics& g) 
 {
-
     auto area = getLocalBounds();
     g.setColour(juce::Colours::darkgrey.darker(0.7f));
 
     g.fillRoundedRectangle(area.expanded(5).toFloat(), 5.0f);
 
     juce::TreeView::paint(g);
-
 }
 
 juce::Rectangle<int> KrumTreeView::getTreeViewBounds()
@@ -633,13 +589,11 @@ juce::Rectangle<int> KrumTreeView::getTreeViewBounds()
     return rootNode->getOwnerView()->getBounds();
 }
 
-
 void KrumTreeView::refreshChildren()
 {
     auto area = getLocalBounds();
 
     DBG("FileBrowser Area: " + area.toString());
-
 }
 
 void KrumTreeView::deselectAllItems()
@@ -649,16 +603,12 @@ void KrumTreeView::deselectAllItems()
 
 bool KrumTreeView::isInterestedInFileDrag(const juce::StringArray& files) 
 {
-    
     //auto wildcard = previewer->getFormatManager()->getWildcardForAllFormats();
-    
     return true;
 }
 
 void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y) 
 {
-   
-    //Maybe do some checks on file type? 
     for (auto fileName : files)
     {
         juce::File leadFile(fileName);
@@ -675,7 +625,6 @@ void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y)
             DBG("File could not be added, no audio format found");
         }
     }
-
 }
 
 void KrumTreeView::pickNewFavorite()
@@ -685,13 +634,13 @@ void KrumTreeView::pickNewFavorite()
 
     //Must set the callback lambda before showing
     currentFileChooser->fileChooserCallback = handleChosenFiles;
-    int fileBrowserFlag = juce::FileBrowserComponent::FileChooserFlags::canSelectMultipleItems | juce::FileBrowserComponent::FileChooserFlags::openMode
-        | juce::FileBrowserComponent::FileChooserFlags::canSelectDirectories | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-    currentFileChooser->showFileChooser(fileBrowserFlag);
 
+    int fileBrowserFlag = juce::FileBrowserComponent::FileChooserFlags::canSelectMultipleItems | juce::FileBrowserComponent::FileChooserFlags::openMode
+                        | juce::FileBrowserComponent::FileChooserFlags::canSelectDirectories | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+    currentFileChooser->showFileChooser(fileBrowserFlag);
 }
 
-//This does NOT check file type, so make sure to you check for formatting before adding it here.
+//This does NOT check file type, so make sure to check for formatting before adding it here.
 void KrumTreeView::addFileToRecent(juce::File file, juce::String name)
 {
     auto recentNode = rootNode->getSubItem(recentFolders_Ids);
@@ -788,7 +737,6 @@ void KrumTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
         }
 
         DBG(fileBrowserValueTree.toXmlString());
-
     }
 
     sortFiles();
@@ -836,9 +784,7 @@ void KrumTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFil
         {
             newSubFolderNode->setNumFilesExcluded(numHiddenFiles);
         }
-
     }
-    
 }
 
 void KrumTreeView::reCreateFileBrowserFromTree()
@@ -1679,8 +1625,6 @@ void KrumFileBrowser::buildDemoKit()
             int mSnapSize;
             auto mSnapData = BinaryData::getNamedResource("Marvin_Snap_wav", mSnapSize);
             marvinSnap.replaceWithData(mSnapData, mSnapSize);
-
-
         }
     }
     else if(fileTree.doesFolderExistInBrowser(demoKit.getFullPathName())) //if true, then the demoKit folder has already been successfully added
@@ -1692,5 +1636,25 @@ void KrumFileBrowser::buildDemoKit()
 
     DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
     fileTree.createNewFavoriteFolder(demoKit.getFullPathName());
+}
 
+//================================================================================================
+
+NumberBubble::NumberBubble(int numberToDisplay, juce::Colour backgroundColor, juce::Rectangle<int> parentBounds)
+    : number(numberToDisplay), bgColor(backgroundColor)
+{
+    setBounds(parentBounds.getRight() - 20, 3, 15, 15);
+}
+
+NumberBubble::~NumberBubble()
+{
+}
+
+void NumberBubble::paint(juce::Graphics& g)
+{
+    g.setColour(bgColor);
+    g.fillEllipse(getBounds().toFloat());
+
+    g.setColour(juce::Colours::white);
+    g.drawFittedText(juce::String(number), getBounds(), juce::Justification::centred, 1);
 }

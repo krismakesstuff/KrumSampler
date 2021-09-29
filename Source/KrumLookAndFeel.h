@@ -191,7 +191,6 @@ public:
     void drawScrollbar(juce::Graphics& g, juce::ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
                         int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override
     {
-        
         juce::Rectangle<int> thumbBounds;
 
         if (isScrollbarVertical)
@@ -199,10 +198,8 @@ public:
         else
             thumbBounds = { thumbStartPosition, y, thumbSize, height };
 
-        //auto c = scrollbar.findColour(juce::ScrollBar::ColourIds::thumbColourId);
         auto c = juce::Colours::darkgrey/*.darker()*/;
         g.setColour(isMouseOver ? c.brighter(0.25f) : c);
-        //g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), 4.0f);
         g.fillRect(thumbBounds.reduced(1));
 
     }
@@ -249,9 +246,7 @@ public:
         }
 
         }
-
     }
-
 
     void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
     {
@@ -262,7 +257,6 @@ public:
         g.drawRect(0, 0, width, height);
     }
 
-
     void drawPopupMenuItem(juce::Graphics& g, const juce::Rectangle<int>& area,
         const bool isSeparator, const bool isActive,
         const bool isHighlighted, const bool isTicked,
@@ -270,7 +264,6 @@ public:
         const juce::String& shortcutKeyText,
         const juce::Drawable* icon, const juce::Colour* const textColourToUse) override
     {
-
         if (isSeparator)
         {
             auto r = area.reduced(5, 0);
@@ -281,11 +274,9 @@ public:
         }
         else
         {
-            auto textColour = (textColourToUse == nullptr ? findColour(juce::PopupMenu::textColourId)
-                : *textColourToUse);
+            auto textColour = (textColourToUse == nullptr ? findColour(juce::PopupMenu::textColourId) : *textColourToUse);
 
             auto r = area.reduced(1);
-
             if (isHighlighted && isActive)
             {
                 g.setColour(findColour(juce::PopupMenu::highlightedBackgroundColourId));
@@ -301,7 +292,6 @@ public:
             r.reduce(juce::jmin(5, area.getWidth() / 20), 0);
 
             auto font = getPopupMenuFont();
-
             auto maxFontHeight = (float)r.getHeight() / 1.3f;
 
             if (font.getHeight() > maxFontHeight)
@@ -354,15 +344,12 @@ public:
                 g.drawText(shortcutKeyText, r, juce::Justification::centredRight, true);
             }
         }
-
     }
 
     void drawBubble(juce::Graphics& g, juce::BubbleComponent& bubble, const juce::Point<float>& tip, const juce::Rectangle<float>& body) override
     {
         juce::Path p;
-        /*p.addBubble(body.reduced(5.0f), body.getUnion(juce::Rectangle<float>(tip.x, tip.y, 1.0f, 1.0f)),
-            tip, 5.0f, juce::jmin(15.0f, body.getWidth() * 0.2f, body.getHeight() * 0.2f));*/
-        
+
         p.addRoundedRectangle(body.reduced(4), 1.0f);
 
         g.setColour(juce::Colours::black/*.withAlpha(0.5f)*/);
@@ -370,8 +357,6 @@ public:
 
         g.setColour(juce::Colours::white);
         g.strokePath(p, juce::PathStrokeType(0.5f));
-
-        
 
     }
 

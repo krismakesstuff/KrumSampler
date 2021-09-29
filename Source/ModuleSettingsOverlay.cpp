@@ -53,7 +53,6 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModu
     midiChannelTitleLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
     midiChannelTitleLabel.setJustificationType(juce::Justification::centred);
 
-
     setMidiLabels();
 }
 
@@ -66,11 +65,11 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
     g.setColour(juce::Colours::black.withAlpha(0.75f));
     g.fillRoundedRectangle(area.toFloat(), cornerSize);
 
-    //probably shouldn't be doing this in the paint function.. 
     if (updateMidiLabels)
     {
         setMidiLabels();
         updateMidiLabels = false;
+
         if (!confirmButton.isVisible())
         {
             showConfirmButton();
@@ -82,7 +81,6 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
     g.setColour(moduleSelectedColor);
     if (!moduleOverlaySelected)
     {
-        //g.setColour(moduleSelectedColor);
         g.setFont(18.0f);
 
         g.drawFittedText("Click to Select", area.withTop(area.getBottom() - 75), juce::Justification::centred, 1);
@@ -100,34 +98,23 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
     }
 
     g.drawRoundedRectangle(area.toFloat(), cornerSize, outlineSize);
-
-
 }
-
-
-//void ModuleSettingsOverlay::mouseDown(const juce::MouseEvent& e)
-//{
-//    //parentModule.setModuleSelected(true);
-//}
-
 
 void ModuleSettingsOverlay::handleMidiInput(int midiChannelNumber, int midiNoteNumber)
 {
     if (moduleOverlaySelected && !isColorOnly)
     {
         setMidi(midiNoteNumber, midiChannelNumber);
-        //showConfirmButton();
     }
 }
 
 void ModuleSettingsOverlay::showConfirmButton()
 {
-    //const juce::MessageManagerLock mmLock;
-
     addAndMakeVisible(confirmButton);
     auto area = getLocalBounds();
     int buttonWidth = area.getWidth() / 1.25;
     int buttonHeight = 35;
+
     confirmButton.setBounds(area.getCentreX() - buttonWidth / 2, area.getCentreY() + buttonHeight*2, buttonWidth, buttonHeight);
     confirmButton.setButtonText("Confirm");
     confirmButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
@@ -139,7 +126,6 @@ void ModuleSettingsOverlay::confirmMidi()
 {
     juce::Colour color;
 
-    //default return color is white, but doesn't look good with the fonts.
     //this logic works out the context of leaving the moduleSettingsOverlay
     if (colorChanged)
     {
@@ -166,20 +152,12 @@ void ModuleSettingsOverlay::setOverlaySelected(bool isSelected)
     if (isSelected && isVisible())
     {
         showButtons();
-        /*if (isColorOnly && colorPalette.isColorSelected())
-        {
-            showConfirmButton();    
-        }*/
-        
     }
     else
     {
         hideButtons();
     }
     moduleOverlaySelected = isSelected;
-
-    /*const juce::MessageManagerLock lock;
-    repaint();*/
 }
 
 bool ModuleSettingsOverlay::isOverlaySelected()
@@ -201,7 +179,6 @@ void ModuleSettingsOverlay::showButtons()
     cancelButton.setBounds(area.getCentreX() - cancelButtonWidth / 2, area.getBottom() - cancelButtonHeight * 2 - 50, cancelButtonWidth, cancelButtonHeight);
     cancelButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     cancelButton.onClick = [this] { cancelSettings(); };
-
 }
 
 void ModuleSettingsOverlay::cancelSettings()
@@ -225,7 +202,6 @@ void ModuleSettingsOverlay::hideButtons()
     removeChildComponent(&colorPalette);
     removeChildComponent(&deleteButton);
     removeChildComponent(&cancelButton);
-    //removeChildComponent(&confirmButton);
 }
 
 juce::Colour ModuleSettingsOverlay::getSelectedColor()
@@ -243,17 +219,13 @@ void ModuleSettingsOverlay::setMidi(int midiNote, int midiChannel)
     midiNoteNum = midiNote;
     midiChanNum = midiChannel;
     updateMidiLabels = true;
-
 }
 
 void ModuleSettingsOverlay::setMidiLabels()
 {
-
     juce::String midiNoteString; 
     juce::String midiChanString; 
 
-    //juce::MessageManagerLock lock;
-    
     if (midiNoteNum == 0)
     {
         midiNoteString = "None Selected";
@@ -287,8 +259,6 @@ void ModuleSettingsOverlay::colorWasChanged(bool colorWasChanged)
     colorChanged = colorWasChanged;
     midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
     midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
-    /*juce::MessageManagerLock lock;
-    repaint();*/
 }
 
 void ModuleSettingsOverlay::showColorsOnly()

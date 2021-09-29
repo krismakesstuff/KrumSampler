@@ -16,33 +16,33 @@
 
 
 
-//For now this class doesn't actuall do anything. It will one day drag and drop the module to re-arrange the order
-class DragHandle : public juce::DrawableButton
-{
-public:
-    DragHandle(KrumModule& owner, const juce::String& buttonName, juce::DrawableButton::ButtonStyle buttonStyle)
-        : parentModule(owner), juce::DrawableButton(buttonName, buttonStyle)
-    {}
-
-    ~DragHandle() override
-    {}
-
-    void mouseDrag(const juce::MouseEvent& e) override
-    {
-        parentModule.info.moduleDragging = true;
-        //DBG("Module Dragging: " + parentModule->getModuleName());
-        parentModule.startDragging("ModuleDragAndDrop", parentModule.getCurrentModuleEditor(), juce::Image(), true);
-    }
-
-    void mouseUp(const juce::MouseEvent& e) override
-    {
-        parentModule.info.moduleDragging = false;
-    }
-
-
-    KrumModule& parentModule;
-
-};
+//For now this class doesn't actuall do anything. It will one day drag and drop the module to re-arrange the order of the modules displayed
+//class DragHandle : public juce::DrawableButton
+//{
+//public:
+//    DragHandle(KrumModule& owner, const juce::String& buttonName, juce::DrawableButton::ButtonStyle buttonStyle)
+//        : parentModule(owner), juce::DrawableButton(buttonName, buttonStyle)
+//    {}
+//
+//    ~DragHandle() override
+//    {}
+//
+//    void mouseDrag(const juce::MouseEvent& e) override
+//    {
+//        parentModule.info.moduleDragging = true;
+//        //DBG("Module Dragging: " + parentModule->getModuleName());
+//        parentModule.startDragging("ModuleDragAndDrop", parentModule.getCurrentModuleEditor(), juce::Image(), true);
+//    }
+//
+//    void mouseUp(const juce::MouseEvent& e) override
+//    {
+//        parentModule.info.moduleDragging = false;
+//    }
+//
+//
+//    KrumModule& parentModule;
+//
+//};
 
 
 //===============================================================================================//
@@ -282,12 +282,8 @@ void KrumModuleEditor::buildModule()
 
     panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + i, panSlider));
 
-    //a moduleProcessor.moduleGain = parent.parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + i);
-    //moduleProcessor.modulePan = parent.parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + i);
-
     parent.updateAudioAtomics();
 
-    
     int playButtonImSize;
     auto playButtonData = BinaryData::getNamedResource("play_arrowblack18dp_svg", playButtonImSize);
     auto playButtonImage = juce::Drawable::createFromImageData(playButtonData, playButtonImSize);
@@ -367,8 +363,6 @@ void KrumModuleEditor::showSettingsMenu()
 
     settingsMenu.showMenuAsync(options.withTargetScreenArea(editButton.getScreenBounds()), juce::ModalCallbackFunction::create(handleSettingsMenuResult, this));
 
-
-    
 }
 
 
@@ -413,10 +407,6 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
         {
             settingsOverlay->setOverlaySelected(false);
         }
-        /*if (settingsOverlay->isOnDesktop())
-        {
-            grabKeyboardFocus();
-        }*/
     }
     else
     {
@@ -480,23 +470,6 @@ void KrumModuleEditor::setModuleDisplayIndex(int newDisplayIndex)
 {
     parent.setModuleDisplayIndex(newDisplayIndex);
 }
-
-//void KrumModuleEditor::setNewAudioFile(juce::File& newFile)
-//{
-//    if (newFile.existsAsFile())
-//    {
-//        parent.info.audioFile = newFile;
-//    }
-//}
-//
-//void KrumModuleEditor::setNewModuleName(juce::String& newName)
-//{
-//    if (newName.isNotEmpty())
-//    {
-//        parent.info.name = newName;
-//        titleBox.setText(newName, juce::sendNotificationAsync);
-//    }
-//}
 
 void KrumModuleEditor::setModuleColor(juce::Colour newColor)
 {
@@ -767,179 +740,3 @@ void KrumModuleEditor::OneShotButton::mouseUp(const juce::MouseEvent& e)
 }
 
 //============================================================================================================================
-
-KrumModuleEditor::DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sourceSamplesPerThumbnailSample, juce::AudioFormatManager& formatManagerToUse, juce::AudioThumbnailCache& cacheToUse)
-    :juce::AudioThumbnail(sourceSamplesPerThumbnailSample, formatManagerToUse, cacheToUse), parentEditor(modEditor)
-{
-    setRepaintsOnMouseActivity(true);
-    /*clipGainSlider.setRange(0, 1, 0.01);
-    clipGainSlider.setValue(0.5, juce::dontSendNotification);*/
-    clipGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
-    clipGainSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-    clipGainSlider.onValueChange = [this] { updateThumbnailClipGain(clipGainSlider.getValue()); };
-    addChildComponent(clipGainSlider);
-
-}
-
-KrumModuleEditor::DragAndDropThumbnail::~DragAndDropThumbnail()
-{
-}
-
-bool KrumModuleEditor::DragAndDropThumbnail::isInterestedInFileDrag(const juce::StringArray& files)
-{
-    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-    return true;
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, int y)
-{
-    if (!(files.size() > 1))
-    {
-        for (auto file : files)
-        {
-            juce::File newFile{ file };
-            addDroppedFile(newFile);
-        }
-    }
-}
-
-bool KrumModuleEditor::DragAndDropThumbnail::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
-{
-    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-    return true;
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::itemDropped(const SourceDetails& dragSourceDetails)
-{
-    auto description = dragSourceDetails.description.toString();
-    DBG("Drag description: " + description);
-
-    auto filePath = description.substring(description.indexOf("-") + 1);
-    DBG("File Path: " + filePath);
-    juce::File newFile{ filePath };
-    addDroppedFile(newFile);
-}
-
-//This will check for validaty before adding
-void KrumModuleEditor::DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
-{
-    canAcceptFile = false;
-    if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager()->findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
-    {
-        droppedFile = newFile;
-        if (parentEditor.parent.info.modulePlaying)
-        {
-            checkDroppedFile = true;
-        }
-        else
-        {
-            moveDroppedFileToParent();
-        }
-    }
-    else
-    {
-        DBG("File Doesn't exist or invalid format::addDroppedFile()");
-    }
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::moveDroppedFileToParent()
-{
-    auto& parent = parentEditor.parent;
-
-    parent.setSampleFile(droppedFile);
-    parent.moduleProcessor->sampler.updateModuleSample(&parent);
-    parentEditor.setAndDrawThumbnail();
-
-    juce::String fileName = droppedFile.getFileName();
-    
-    parent.setModuleName(fileName);
-    parentEditor.titleBox.setText(parent.info.name, juce::sendNotification);
-
-    clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + juce::String(parent.getModuleIndex()), clipGainSlider));
-
-    checkDroppedFile = false;
-    parentEditor.repaint();
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::updateThumbnailClipGain(float newVerticalZoom)
-{
-    verticalZoom = newVerticalZoom;
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::paint(juce::Graphics& g)
-{
-    auto area = getLocalBounds();
-
-    auto color = parentEditor.parent.info.moduleColor;
-    g.setColour(color);
-    g.fillRect(area);
-
-    if (getNumChannels() == 0)
-    {
-        paintIfNoFileLoaded(g, area, color);
-    }
-    else
-    {
-        paintIfFileLoaded(g, area, color);
-    }
-    
-    if (canAcceptFile)
-    {
-        g.setColour(juce::Colours::red);
-        g.drawRect(area, 2);
-    }
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::resized()
-{
-    auto area = getLocalBounds();
-
-    int sliderW = 15;
-    int spacer = 5;
-
-    clipGainSlider.setBounds(area.getRight() - sliderW - (spacer * 2), area.getY() + spacer, sliderW, area.getHeight() - (spacer*2));
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor)
-{
-    g.setColour(bgColor);
-    g.fillRect(thumbnailBounds);
-    g.setColour(bgColor.contrasting());
-    g.drawFittedText("No File Loaded", thumbnailBounds, juce::Justification::centred, 1);
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour moduleColor)
-{
-    g.setColour(moduleColor.darker(0.8f));
-    g.fillRect(thumbnailBounds);
-
-    g.setColour(moduleColor);
-
-    drawChannels(g, thumbnailBounds, 0.0, getTotalLength(), verticalZoom);
-}
-
-
-void KrumModuleEditor::DragAndDropThumbnail::mouseEnter(const juce::MouseEvent& e)
-{
-    parentEditor.editor.moduleContainer.showModuleClipGainSlider(&parentEditor);
-
-    //clipGainSlider.setVisible(true);
-    repaint();
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::mouseExit(const juce::MouseEvent& e)
-{
-    if (isMouseOver(true))
-    {
-        return;
-    }
-    
-    clipGainSlider.setVisible(false);
-    canAcceptFile = false;
-    repaint();
-}
-
-void KrumModuleEditor::DragAndDropThumbnail::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)
-{
-    clipGainSlider.mouseWheelMove(e, wheel);
-}

@@ -27,32 +27,30 @@
 
 namespace EditorDimensions
 {
-    static int  topBar = 55;
+    const static int  topBar = 55;
+    const static int shrinkage = 5;
 
-    static int shrinkage = 5;
+    const static int moduleH = 500;
+    const static int moduleW = 125;
 
-    static int moduleH = 500;
-    static int moduleW = 125;
+    const static int addButtonH = 50;
+    const static int addButtonW = 100;
+    const static int collapseButtonH = 40;
+    const static int collapseButtonW = 15;
 
-    static int addButtonH = 50;
-    static int addButtonW = 100;
-    static int collapseButtonH = 40;
-    static int collapseButtonW = 15;
+    const static int outputW = 80;
+    const static int keyboardH = 90;
 
-    static int outputW = 80;
-     
-    static int keyboardH = 90;
+    const static int infoH = 500;
+    const static int fileTreeH = infoH;
+    const static int fileTreeTitleH = 30;
 
-    static int infoH = 500;
-    static int fileTreeH = infoH;
-    static int fileTreeTitleH = 30;
+    const static int emptyAreaMinW = 300;
+    const static int fileTreeW = emptyAreaMinW;
 
-    static int emptyAreaMinW = 300;
-    static int fileTreeW = emptyAreaMinW;
-
-    static float cornerSize = 5.0f;
-    static float smallOutline = 1.0f;
-    static float bigOutline = 2.0f;
+    const static float cornerSize = 5.0f;
+    const static float smallOutline = 1.0f;
+    const static float bigOutline = 2.0f;
 
     static int extraShrinkage(int extraMultplier = 2)
     {
@@ -122,14 +120,12 @@ private:
 
     bool needsToUpdateThumbs = false;
 
-    //unsure if these are the right approach for access...
-    friend class KrumModule;
     friend class KrumModuleContainer;
     friend class KrumModuleEditor;
+    friend class DragAndDropThumbnail;
 
     KrumLookAndFeel kLaf{};
 
-    //juce::CriticalSection lock;
     juce::Image titleImage;
 
     juce::DrawableButton collapseBrowserButton {"Collapse", juce::DrawableButton::ButtonStyle::ImageStretched};
@@ -149,14 +145,12 @@ private:
     juce::Colour backFontColor{ juce::Colours::darkgrey };
 
     juce::Viewport modulesViewport{ "ModulesViewport" };
-    
 
     juce::AudioProcessorValueTreeState& parameters;
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     
     juce::Slider outputGainSlider;
     std::unique_ptr<SliderAttachment> outputGainAttachment;
-    
  
     KrumSamplerAudioProcessor& audioProcessor;
     KrumSampler& sampler;

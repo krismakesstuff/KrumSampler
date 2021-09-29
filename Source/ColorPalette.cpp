@@ -75,7 +75,6 @@ void ColorPalette::colorClicked(juce::Colour clickedColor, juce::ShapeButton* bu
     {
         parent.showConfirmButton();
     }
-
 }
 
 juce::Colour ColorPalette::getSelectedColor()
@@ -83,13 +82,10 @@ juce::Colour ColorPalette::getSelectedColor()
     return selectedColor;
 }
 
-
 bool ColorPalette::isColorSelected()
 {
     return selectedColor != juce::Colours::white;
 }
-
-
 
 juce::Colour* ColorPalette::getLastRandomColor()
 {

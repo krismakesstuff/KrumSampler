@@ -19,7 +19,7 @@ class KrumModuleContainer;
 * 
 * This is the keyboard you see at the bottom of the app,
 * it draws a normal keyboard but also holds color assignments of choosen notes. 
-* This handles drawing the correct notes, but also can be clicked, and triggers the sample file, if any exists for that note. 
+* This handles drawing the correct notes, but also can be clicked, and triggers the sample file, if any exist for that note. 
 * 
 */
 
