@@ -7,9 +7,12 @@
 ## How to use KrumSampler
 - Drag and drop files into the drop area at the top left to create a new module.
   - You then assign a midi key to your sample. This allows you to record and playback midi clips in your DAW to trigger your assigned samples.
-- Each module has it's own volume, pan and clip gain. The Module's midi and color can be reassigned via the settings menu.  
+- Each module has it's own volume, pan and clip gain. The Module's midi and color can be reassigned via the settings menu. 
+  - The clip gain slider will appear when your mouse is over the thumbnail
+  - All sliders can be reset to default values when you double click on them  
 - You can additionally "hot swap" samples by dragging a sample and dropping it on the thumbnail of the desired module. No need to reassign midi or anything.
 - The File Browser lets you add whole folders of samples for easy access to your favorite packs, and let's you preview them. It also keeps track of your recently used samples.
+  - Additionaly, you can drag and drop files and folders from external apps (DAW, FileExplorer, Finder) that will save to the Favorites section.
 - I envision there only being one instance of the plugin per session and housing all your samples for easy mixing and file management. 
   - That being said, there's nothing stopping you from having multiple instances running (Although, I haven't tested this scenario much)
 - This is a plug-in that comes in AAX, AU, and VST3 formats, and will run on Windows and MacOS. 
