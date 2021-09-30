@@ -12,6 +12,7 @@
   - All sliders can be reset to default values when you double click on them  
 - You can additionally "hot swap" samples by dragging a sample and dropping it on the thumbnail of the desired module. No need to reassign midi or anything.
 - The File Browser lets you add whole folders of samples for easy access to your favorite packs, and let's you preview them. It also keeps track of your recently used samples.
+  - The default behavour to audition a sample is to double-click the file. If the auto-play option is checked, then it will play everytime you click a file. The audio previewer has a seperate volume slider.
   - Additionaly, you can drag and drop files and folders from external apps (DAW, FileExplorer, Finder) that will save to the Favorites section.
 - I envision there only being one instance of the plugin per session and housing all your samples for easy mixing and file management. 
   - That being said, there's nothing stopping you from having multiple instances running (Although, I haven't tested this scenario much)
@@ -21,22 +22,24 @@
   - I'm new to using github so if you have any suggestions on how to handle this better please don't be afraid to let me know 
 - Lastly, I would like to thank you for taking the time to check this out. I'm self taught and stoked to have gotten this far, but there is so much I want to learn and include in this project. Any help or feedback is genuinely appreciated!! Happy mixing, nerds!
 
-## Upcoming features:
+## Upcoming features
 - An awesome library of samples that come with the sampler. I have custom samples from my own use as a working producer, as well as friends that have shown interest in providing samples free of charge. It's just a matter of collecting them. 
+  - If you have any interest in making some samples and allowing them to be distributed for free with this plug-in, please let me know and I'll make sure we give you proper credit!
 - Aux output channels
-  -  Adding Aux outputs will allow you to route the output of each individual module to a track in your DAW, where you can add any plugins you would like.
-- Mute and Solo per module
+  -  Adding Aux outputs will allow you to route the output of each individual module to a seperate track in your DAW, where you can add any plugins you would like.
+- Mute and Solo buttons per module
+  - This would most likely cause the play and settings buttons to be redone as well. 
 - Module Display rearranging
   - This would let you drag and drop modules to move them around in the viewport
   - Could also see a button that would rearrange them according to your midi assignments
 - File Browser to show Drives by default
-- ModuleSettingsOverlay revamp
-  - This is where you assign midi and color, just want it to look better
+- Module Settings Overlay revamp
+  - This is where you assign midi and color, just want it to look better and be easier to use
 
-## Need To Fix/Rework:
+## Need To Fix/Rework
 - Automation is really not safe..
-  - What I mean by that is if you have written automation in your DAW, say the volume slider on module 4. It will work fine, BUT if you delete a module in front of it, say module    2. It will reassign all the automation lanes after that deleted module. So your automation might be attached to the wrong module, or just might be deleted. This is annoying,      and something I would like to address quickly. If you have any experience in dealing with these types of issues then please help!
-  - This one of the issues that Aux output channels will help solve by shifting automation to the DAW lane, but I would still like to be accomodating to either workflow.
+  - What I mean by that is if you have written automation in your DAW on say, the volume slider on module 4. It will work fine, BUT if you delete a module in front of it, say module    2. It will reassign all the automation lanes after that deleted module. So your automation might be attached to the wrong module, or just might be deleted. This is annoying,      and something I would like to address quickly. If you have any experience in dealing with these types of issues then please help!
+  - This is one of the issues that Aux output channels will help solve by shifting automation to the DAW parameters, but I would still like to be accomodating to either workflow.
 
 
 ## How To Build
