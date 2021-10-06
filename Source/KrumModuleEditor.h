@@ -106,6 +106,7 @@ public:
     void triggerNoteOnInParent();
     void triggerNoteOffInParent();
 
+    bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
     
     bool shouldCheckDroppedFile();
@@ -125,7 +126,7 @@ private:
 
     friend class DragAndDropThumbnail;
 
-    bool needsToDrawThumbnail = false;
+    bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
     KrumModule& parent;
     KrumModuleProcessor& moduleProcessor;

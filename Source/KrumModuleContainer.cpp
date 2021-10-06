@@ -301,7 +301,15 @@ void KrumModuleContainer::timerCallback()
 {
     for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        moduleDisplayOrder[i]->repaint();
+        auto modEd = moduleDisplayOrder[i];
+        if (modEd->needsToDrawThumbnail())
+        {
+            modEd->setAndDrawThumbnail();
+        }
+        else
+        {
+            repaint();
+        }
     }
 }
 

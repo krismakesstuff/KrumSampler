@@ -18,13 +18,10 @@ DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sour
     :juce::AudioThumbnail(sourceSamplesPerThumbnailSample, formatManagerToUse, cacheToUse), parentEditor(modEditor)
 {
     setRepaintsOnMouseActivity(true);
-    /*clipGainSlider.setRange(0, 1, 0.01);
-    clipGainSlider.setValue(0.5, juce::dontSendNotification);*/
     clipGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
     clipGainSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
     clipGainSlider.onValueChange = [this] { updateThumbnailClipGain(clipGainSlider.getValue()); };
     addChildComponent(clipGainSlider);
-
 }
 
 DragAndDropThumbnail::~DragAndDropThumbnail()
@@ -94,17 +91,10 @@ void DragAndDropThumbnail::moveDroppedFileToParent()
 
     parent.setSampleFile(droppedFile);
     parent.moduleProcessor->sampler.updateModuleSample(&parent);
-    parentEditor.setAndDrawThumbnail();
-
-    juce::String fileName = droppedFile.getFileName();
-
-    parent.setModuleName(fileName);
-    parentEditor.titleBox.setText(parent.info.name, juce::sendNotification);
-
     clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + juce::String(parent.getModuleIndex()), clipGainSlider));
 
+    parentEditor.drawThumbnail = true;
     checkDroppedFile = false;
-    parentEditor.repaint();
 }
 
 void DragAndDropThumbnail::updateThumbnailClipGain(float newVerticalZoom)
@@ -134,6 +124,7 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
         g.setColour(juce::Colours::red);
         g.drawRect(area, 2);
     }
+
 }
 
 void DragAndDropThumbnail::resized()

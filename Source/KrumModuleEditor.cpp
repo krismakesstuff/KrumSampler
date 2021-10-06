@@ -67,7 +67,7 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumModuleProcessor& p, KrumSa
     else
     {
         buildModule();
-        needsToDrawThumbnail = true;
+        drawThumbnail = true;
     }
 
 }
@@ -625,11 +625,18 @@ void KrumModuleEditor::triggerNoteOffInParent()
     parent.triggerNoteOff();
 }
 
+bool KrumModuleEditor::needsToDrawThumbnail()
+{
+    return drawThumbnail;
+}
+
 void KrumModuleEditor::setAndDrawThumbnail()
 {
     thumbnail.setSource(new juce::FileInputSource(parent.info.audioFile)); 
+    parent.setModuleName(parent.info.audioFile.getFileName());
+    titleBox.setText(parent.info.name, juce::sendNotification);
     repaint();
-    needsToDrawThumbnail = false;
+    drawThumbnail = false;
 }
 
 bool KrumModuleEditor::shouldCheckDroppedFile()
