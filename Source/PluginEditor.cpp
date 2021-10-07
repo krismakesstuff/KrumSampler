@@ -15,7 +15,7 @@
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valueTree, juce::ValueTree& fileBrowserTree)
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(audioProcessor.getFileBrowser())
 {
-    
+    //change this to the resource folder in "CommonFiles", that is put there by the download installer
     int titleImageSize;
     auto titleImageData = BinaryData::getNamedResource("KrumSamplerTitle_png", titleImageSize);
     titleImage = juce::ImageFileFormat::loadFrom(titleImageData, titleImageSize);

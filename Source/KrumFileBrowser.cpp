@@ -1569,6 +1569,7 @@ void KrumFileBrowser::assignModuleContainer(KrumModuleContainer* container)
 
 void KrumFileBrowser::buildDemoKit()
 {
+    //Find the demo kit put there by the installer, instead of this nonsense below...
     juce::File specialLocation = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
     DBG("Location: " + specialLocation.getParentDirectory().getFullPathName());
     juce::String separator = juce::File::getSeparatorString();
