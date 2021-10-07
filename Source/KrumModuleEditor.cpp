@@ -632,8 +632,9 @@ bool KrumModuleEditor::needsToDrawThumbnail()
 
 void KrumModuleEditor::setAndDrawThumbnail()
 {
-    thumbnail.setSource(new juce::FileInputSource(parent.info.audioFile)); 
-    parent.setModuleName(parent.info.audioFile.getFileName());
+    thumbnail.setSource(new juce::FileInputSource(parent.info.audioFile));
+    auto newFileName = parent.info.audioFile.getFileName();
+    parent.setModuleName(newFileName);
     titleBox.setText(parent.info.name, juce::sendNotification);
     repaint();
     drawThumbnail = false;
