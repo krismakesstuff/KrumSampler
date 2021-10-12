@@ -149,10 +149,10 @@ bool KrumModule::isModulePlaying()
 void KrumModule::setModulePlaying(const bool isPlaying)
 {
     info.modulePlaying = isPlaying;
-    if (!isPlaying && moduleEditor &&  moduleEditor->shouldCheckDroppedFile())
-    {
-        moduleEditor->handleLastDroppedFile();
-    }
+//    if (!isPlaying && moduleEditor &&  moduleEditor->shouldCheckDroppedFile())
+//    {
+//        moduleEditor->handleLastDroppedFile();
+//    }
 }
 
 bool KrumModule::isModuleActive()

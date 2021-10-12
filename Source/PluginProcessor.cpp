@@ -202,7 +202,7 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     buffer.applyGain(*outputGainParameter);
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
     
-    //this app does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
+    //this does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
     midiMessages.clear();
 }
 

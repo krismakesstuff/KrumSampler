@@ -54,16 +54,16 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
     void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
     {
-        if (previewer->isAutoPlayActive() && !previewer->wantsToPlayFile())
+        if (previewer->isAutoPlayActive() /*&& !previewer->wantsToPlayFile()*/)
         {
+            previewer->loadFile(file);
             previewer->setWantsToPlayFile(true);
         }
-        else if (!previewer->isAutoPlayActive())
-        {
-            previewer->setWantsToPlayFile(false);
-        }
+//        else if (!previewer->isAutoPlayActive())
+//        {
+//            previewer->setWantsToPlayFile(false);
+//        }
 
-        previewer->loadFile(file);
 
     }
 
@@ -71,8 +71,8 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
     {
         if (!previewer->isAutoPlayActive())
         {
-            previewer->setWantsToPlayFile(true);
             previewer->loadFile(file);
+            previewer->setWantsToPlayFile(true);
         }
     }
 
