@@ -73,6 +73,7 @@ void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
         if (parentEditor.parent.info.modulePlaying)
         {
             checkDroppedFile = true;
+            parentEditor.drawThumbnail = true;
         }
         else
         {
