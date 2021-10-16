@@ -45,6 +45,49 @@
             file="Resources/settings-black-18dp.svg"/>
     </GROUP>
     <GROUP id="{7467111A-3F07-D8FF-124A-27D753DAFADA}" name="Source">
+      <FILE id="QyFQzA" name="ColorPalette.cpp" compile="1" resource="0"
+            file="Source/ColorPalette.cpp"/>
+      <FILE id="ch29Pi" name="ColorPalette.h" compile="0" resource="0" file="Source/ColorPalette.h"/>
+      <FILE id="n9rJYQ" name="DragAndDropThumbnail.cpp" compile="1" resource="0"
+            file="Source/DragAndDropThumbnail.cpp"/>
+      <FILE id="w0hCiW" name="DragAndDropThumbnail.h" compile="0" resource="0"
+            file="Source/DragAndDropThumbnail.h"/>
+      <FILE id="EXEHuy" name="KrumFileBrowser.cpp" compile="1" resource="0"
+            file="Source/KrumFileBrowser.cpp"/>
+      <FILE id="izCUXg" name="KrumFileBrowser.h" compile="0" resource="0"
+            file="Source/KrumFileBrowser.h"/>
+      <FILE id="XDGL1h" name="KrumFileDrop.cpp" compile="1" resource="0"
+            file="Source/KrumFileDrop.cpp"/>
+      <FILE id="Gkk3GK" name="KrumFileDrop.h" compile="0" resource="0" file="Source/KrumFileDrop.h"/>
+      <FILE id="tEUuGR" name="KrumKeyboard.cpp" compile="1" resource="0"
+            file="Source/KrumKeyboard.cpp"/>
+      <FILE id="QvQ8OH" name="KrumKeyboard.h" compile="0" resource="0" file="Source/KrumKeyboard.h"/>
+      <FILE id="hZWMvh" name="KrumLookAndFeel.h" compile="0" resource="0"
+            file="Source/KrumLookAndFeel.h"/>
+      <FILE id="JomK0Q" name="KrumModule.cpp" compile="1" resource="0" file="Source/KrumModule.cpp"/>
+      <FILE id="qVcOt2" name="KrumModule.h" compile="0" resource="0" file="Source/KrumModule.h"/>
+      <FILE id="MvDz5g" name="KrumModuleContainer.cpp" compile="1" resource="0"
+            file="Source/KrumModuleContainer.cpp"/>
+      <FILE id="SLTCmh" name="KrumModuleContainer.h" compile="0" resource="0"
+            file="Source/KrumModuleContainer.h"/>
+      <FILE id="zFVW6B" name="KrumModuleEditor.cpp" compile="1" resource="0"
+            file="Source/KrumModuleEditor.cpp"/>
+      <FILE id="fwhfOO" name="KrumModuleEditor.h" compile="0" resource="0"
+            file="Source/KrumModuleEditor.h"/>
+      <FILE id="vdusOj" name="KrumModuleProcessor.cpp" compile="1" resource="0"
+            file="Source/KrumModuleProcessor.cpp"/>
+      <FILE id="sYetGb" name="KrumModuleProcessor.h" compile="0" resource="0"
+            file="Source/KrumModuleProcessor.h"/>
+      <FILE id="rTSZdu" name="KrumSampler.cpp" compile="1" resource="0" file="Source/KrumSampler.cpp"/>
+      <FILE id="kQ4Iqw" name="KrumSampler.h" compile="0" resource="0" file="Source/KrumSampler.h"/>
+      <FILE id="r6bf7y" name="ModuleSettingsOverlay.cpp" compile="1" resource="0"
+            file="Source/ModuleSettingsOverlay.cpp"/>
+      <FILE id="coe0wi" name="ModuleSettingsOverlay.h" compile="0" resource="0"
+            file="Source/ModuleSettingsOverlay.h"/>
+      <FILE id="YHxAbo" name="SimpleAudioPreviewer.cpp" compile="1" resource="0"
+            file="Source/SimpleAudioPreviewer.cpp"/>
+      <FILE id="Tefjj4" name="SimpleAudioPreviewer.h" compile="0" resource="0"
+            file="Source/SimpleAudioPreviewer.h"/>
       <FILE id="hLUvRs" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="oHkjy0" name="PluginProcessor.h" compile="0" resource="0"
@@ -53,49 +96,6 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="eSKZkx" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
-    <FILE id="QyFQzA" name="ColorPalette.cpp" compile="1" resource="0"
-          file="Source/ColorPalette.cpp"/>
-    <FILE id="ch29Pi" name="ColorPalette.h" compile="0" resource="0" file="Source/ColorPalette.h"/>
-    <FILE id="n9rJYQ" name="DragAndDropThumbnail.cpp" compile="1" resource="0"
-          file="Source/DragAndDropThumbnail.cpp"/>
-    <FILE id="w0hCiW" name="DragAndDropThumbnail.h" compile="0" resource="0"
-          file="Source/DragAndDropThumbnail.h"/>
-    <FILE id="EXEHuy" name="KrumFileBrowser.cpp" compile="1" resource="0"
-          file="Source/KrumFileBrowser.cpp"/>
-    <FILE id="izCUXg" name="KrumFileBrowser.h" compile="0" resource="0"
-          file="Source/KrumFileBrowser.h"/>
-    <FILE id="XDGL1h" name="KrumFileDrop.cpp" compile="1" resource="0"
-          file="Source/KrumFileDrop.cpp"/>
-    <FILE id="Gkk3GK" name="KrumFileDrop.h" compile="0" resource="0" file="Source/KrumFileDrop.h"/>
-    <FILE id="tEUuGR" name="KrumKeyboard.cpp" compile="1" resource="0"
-          file="Source/KrumKeyboard.cpp"/>
-    <FILE id="QvQ8OH" name="KrumKeyboard.h" compile="0" resource="0" file="Source/KrumKeyboard.h"/>
-    <FILE id="hZWMvh" name="KrumLookAndFeel.h" compile="0" resource="0"
-          file="Source/KrumLookAndFeel.h"/>
-    <FILE id="JomK0Q" name="KrumModule.cpp" compile="1" resource="0" file="Source/KrumModule.cpp"/>
-    <FILE id="qVcOt2" name="KrumModule.h" compile="0" resource="0" file="Source/KrumModule.h"/>
-    <FILE id="MvDz5g" name="KrumModuleContainer.cpp" compile="1" resource="0"
-          file="Source/KrumModuleContainer.cpp"/>
-    <FILE id="SLTCmh" name="KrumModuleContainer.h" compile="0" resource="0"
-          file="Source/KrumModuleContainer.h"/>
-    <FILE id="zFVW6B" name="KrumModuleEditor.cpp" compile="1" resource="0"
-          file="Source/KrumModuleEditor.cpp"/>
-    <FILE id="fwhfOO" name="KrumModuleEditor.h" compile="0" resource="0"
-          file="Source/KrumModuleEditor.h"/>
-    <FILE id="vdusOj" name="KrumModuleProcessor.cpp" compile="1" resource="0"
-          file="Source/KrumModuleProcessor.cpp"/>
-    <FILE id="sYetGb" name="KrumModuleProcessor.h" compile="0" resource="0"
-          file="Source/KrumModuleProcessor.h"/>
-    <FILE id="rTSZdu" name="KrumSampler.cpp" compile="1" resource="0" file="Source/KrumSampler.cpp"/>
-    <FILE id="kQ4Iqw" name="KrumSampler.h" compile="0" resource="0" file="Source/KrumSampler.h"/>
-    <FILE id="r6bf7y" name="ModuleSettingsOverlay.cpp" compile="1" resource="0"
-          file="Source/ModuleSettingsOverlay.cpp"/>
-    <FILE id="coe0wi" name="ModuleSettingsOverlay.h" compile="0" resource="0"
-          file="Source/ModuleSettingsOverlay.h"/>
-    <FILE id="YHxAbo" name="SimpleAudioPreviewer.cpp" compile="1" resource="0"
-          file="Source/SimpleAudioPreviewer.cpp"/>
-    <FILE id="Tefjj4" name="SimpleAudioPreviewer.h" compile="0" resource="0"
-          file="Source/SimpleAudioPreviewer.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
   <EXPORTFORMATS>

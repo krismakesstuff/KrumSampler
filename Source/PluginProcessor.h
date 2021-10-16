@@ -32,8 +32,15 @@
 #define MAX_VOICES 8
 #define MAX_FILE_LENGTH_SECS 3
 
+namespace Log
+{
+    static juce::String logFolderName {"KrumSampler"};
+    static juce::String logFileName {"Log"};
+    static juce::String logFileExtension {".txt"};
+    static juce::String welcomeMessage {"KrumSampler started, now log"};
+}
 
-namespace TreeIDs 
+namespace TreeIDs
 {
     //Should I make these all macros instead? 
     //Globals
@@ -154,7 +161,10 @@ public:
     KrumFileBrowser& getFileBrowser();
 
 private:
-
+    
+    
+    static juce::FileLogger* logger;
+    
     void registerFormats();
 
     juce::ValueTree valueTree{"AppState"};
@@ -180,7 +190,7 @@ private:
     KrumSampler sampler{ formatManager.get(), *this };
     SimpleAudioPreviewer previewer{formatManager, valueTree};
     KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree};
-
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessor)
 };

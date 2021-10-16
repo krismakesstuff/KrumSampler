@@ -152,6 +152,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 }
 
 //===================================================================================================================================
+
+juce::FileLogger* KrumSamplerAudioProcessor::logger = juce::FileLogger::createDateStampedLogger (Log::logFolderName, Log::logFileName,                                                                                  Log::logFileExtension,                                                                                                                                       Log::welcomeMessage);
+
 //===================================================================================================================================
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
@@ -169,21 +172,25 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
-
+    
 #if JucePlugin_Build_Standalone
     fileBrowser.buildDemoKit();
+    logger->logMessage("DemoKit Built");
 #endif
+    logger->logMessage("Sampler Processor Constructed");
+    //logger->logMessage("Log File Location: " + juce::FileLogger::getSystemLogFileFolder().getFullPathName());
 }
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 {
+    delete logger;
 }
-
 
 void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam_ID);
     sampler.setCurrentPlaybackSampleRate(sampleRate);
+    logger->logMessage("Processor prepared to play");
 }
 
 void KrumSamplerAudioProcessor::releaseResources()
