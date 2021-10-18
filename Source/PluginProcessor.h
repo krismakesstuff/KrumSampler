@@ -29,20 +29,14 @@
 */
 
 #define MAX_NUM_MODULES 20
-#define MAX_VOICES 8
+#define MAX_VOICES 10
 #define MAX_FILE_LENGTH_SECS 3
 
-namespace Log
-{
-    static juce::String logFolderName {"KrumSampler"};
-    static juce::String logFileName {"Log"};
-    static juce::String logFileExtension {".txt"};
-    static juce::String welcomeMessage {"KrumSampler started, now log"};
-}
+
 
 namespace TreeIDs
 {
-    //Should I make these all macros instead? 
+    //Should I make these all preprocessor define instead?
     //Globals
     //static const int maxNumModules = {30};
     static const float defaultGain = 0.85f;
@@ -161,9 +155,6 @@ public:
     KrumFileBrowser& getFileBrowser();
 
 private:
-    
-    
-    static juce::FileLogger* logger;
     
     void registerFormats();
 

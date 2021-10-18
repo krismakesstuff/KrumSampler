@@ -530,6 +530,11 @@ void KrumModuleEditor::updateName()
     parent.setModuleName(name);
 }
 
+juce::String KrumModuleEditor::getModuleName()
+{
+    return parent.info.name;
+}
+
 //called when the index of the module has changed so now we need to change the slider attachment assignments as well. Might need to approach this differently for cases of automation within the DAW
 void KrumModuleEditor::reassignSliderAttachments()
 {

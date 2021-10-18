@@ -45,6 +45,7 @@
             file="Resources/settings-black-18dp.svg"/>
     </GROUP>
     <GROUP id="{7467111A-3F07-D8FF-124A-27D753DAFADA}" name="Source">
+      <FILE id="N1U8OW" name="Log.h" compile="0" resource="0" file="Source/Log.h"/>
       <FILE id="QyFQzA" name="ColorPalette.cpp" compile="1" resource="0"
             file="Source/ColorPalette.cpp"/>
       <FILE id="ch29Pi" name="ColorPalette.h" compile="0" resource="0" file="Source/ColorPalette.h"/>

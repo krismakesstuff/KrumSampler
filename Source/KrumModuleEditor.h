@@ -89,6 +89,7 @@ public:
     bool isModulePlaying();
 
     void updateName();
+    juce::String getModuleName();
     
     void reassignSliderAttachments();
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);

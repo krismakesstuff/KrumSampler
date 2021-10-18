@@ -85,13 +85,13 @@ bool KrumVoice::canPlaySound(juce::SynthesiserSound* sound)
     {
         return true;
     }
+    return false;
 }
 
 bool KrumVoice::isVoiceActive() const
 {
     return adsr.isActive();
 }
-
 
 void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* s, int pitchWheel)
 {
@@ -103,7 +103,7 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
 
         sourceSamplePosition = 0.0;
 
-        //only storing this, will be applied in the render block
+        //only storing this, it will be applied in the render block
         clipGain = sound->getModuleClipGain()->load();
 
         float moduleGain = *sound->getModuleGain();
@@ -219,7 +219,8 @@ void KrumSampler::initVoices()
         newVoice->setCurrentPlaybackSampleRate(getSampleRate());
     }
 
-    DBG("Voices: " + juce::String(voices.size()));
+    juce::Logger::writeToLog("Voices Initialized: " + juce::String(voices.size()));
+    
 }
 
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 
@@ -329,7 +330,7 @@ void KrumSampler::addSample(KrumModule* moduleToAddSound)
 
     }
 
-    DBG("Sounds: " + juce::String(sounds.size()));
+    juce::Logger::writeToLog("Sample Added - Sounds: " + juce::String(sounds.size()));
 }
 
 void KrumSampler::clearModules()
@@ -338,7 +339,7 @@ void KrumSampler::clearModules()
     voices.clear();
     sounds.clear();
 
-    DBG("Sounds Size: " + juce::String(sounds.size()));
+    juce::Logger::writeToLog("Modules Cleared - Sounds Size: " + juce::String(sounds.size()));
 }
 
 int KrumSampler::getNumModules()

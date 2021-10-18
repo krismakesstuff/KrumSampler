@@ -293,6 +293,7 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
     if (moduleContainer.getNumModuleEditors() > 0)
     {
         needsToUpdateThumbs = true;
+        juce::Logger::writeToLog("Module Editors created: " + juce::String(moduleContainer.getNumModuleEditors()));
     }
 }
 

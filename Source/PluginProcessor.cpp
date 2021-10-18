@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Log.h"
 
 //==============================================================================
 
@@ -153,8 +154,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
 //===================================================================================================================================
 
-juce::FileLogger* KrumSamplerAudioProcessor::logger = juce::FileLogger::createDateStampedLogger (Log::logFolderName, Log::logFileName,                                                                                  Log::logFileExtension,                                                                                                                                       Log::welcomeMessage);
-
 //===================================================================================================================================
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
@@ -169,28 +168,33 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
                                     ,parameters(*this, nullptr, "PARAMS", createParameterLayout())
                         #endif
 {
+    juce::Logger::setCurrentLogger(Log::logger);
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
     
 #if JucePlugin_Build_Standalone
     fileBrowser.buildDemoKit();
-    logger->logMessage("DemoKit Built");
 #endif
-    logger->logMessage("Sampler Processor Constructed");
-    //logger->logMessage("Log File Location: " + juce::FileLogger::getSystemLogFileFolder().getFullPathName());
+    juce::Logger::writeToLog("----------------------------");
+    juce::Logger::writeToLog("Sampler Processor Constructed");
+    juce::Logger::writeToLog("MaxNumModules: " + juce::String(MAX_NUM_MODULES));
+    juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
+    juce::Logger::writeToLog("MaxFileLengthInSeconds: " +       juce::String(MAX_FILE_LENGTH_SECS));
+    juce::Logger::writeToLog("----------------------------");
 }
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 {
-    delete logger;
+    juce::Logger::setCurrentLogger(nullptr);
+    delete Log::logger;
 }
 
 void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam_ID);
     sampler.setCurrentPlaybackSampleRate(sampleRate);
-    logger->logMessage("Processor prepared to play");
+    juce::Logger::writeToLog("Processor prepared to play, sampleRate: " + juce::String(sampleRate) + ", samplesPerBlock: " +                      juce::String(samplesPerBlock));
 }
 
 void KrumSamplerAudioProcessor::releaseResources()
@@ -256,19 +260,6 @@ bool KrumSamplerAudioProcessor::hasEditor() const
 {
     return true; 
 }
-
-//void KrumSamplerAudioProcessor::updateEditor()
-//{
-//    if (hasEditor())
-//    {
-//        auto editor = static_cast<KrumSamplerAudioProcessorEditor*>(getActiveEditor());
-//        if (editor)
-//        {
-//            editor->updateEditor();
-//            editorWantsToUpdate = false;
-//        }
-//    }
-//}
 
 juce::AudioProcessorEditor* KrumSamplerAudioProcessor::createEditor()
 {
@@ -460,16 +451,8 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
         {
             DBG("ValueTree not Valid" + juce::String(i));
         }
-
     }
-
-    /*DBG("Module Display:");
-    for (int i = 0; i < editor->getModuleDisplayOrder().size(); i++)
-    {
-        DBG("Position " + juce::String(i) + " Module " + juce::String(editor->getModuleDisplayOrder().getUnchecked(i)));
-    }
-    DBG("Display Size: " + juce::String(editor->getModuleDisplayOrder().size()));*/
-
+    juce::Logger::writeToLog("Modules made from ValueTree: " + juce::String(sampler.getNumModules()));
 }
 
 void KrumSamplerAudioProcessor::updateValueTreeState()
@@ -560,10 +543,12 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
         }
     }
 
-    DBG("---Updated Tree State---");
-    auto state = valueTree.createCopy();
-    std::unique_ptr<juce::XmlElement> xml = state.createXml();
-    DBG(xml->toString());
+    //DBG("---Updated Tree State---");
+    juce::Logger::writeToLog("---Updated Tree State---");
+    
+//    auto state = valueTree.createCopy();
+//    std::unique_ptr<juce::XmlElement> xml = state.createXml();
+//    DBG(xml->toString());
 
 }
 

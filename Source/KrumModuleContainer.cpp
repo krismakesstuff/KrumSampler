@@ -11,15 +11,18 @@
 #include <JuceHeader.h>
 #include "KrumModuleContainer.h"
 #include "PluginEditor.h"
+//#include "Log.h"
 
 //==============================================================================
-KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner)
+KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner) 
     : editor(owner), fadeArea(50, editor->modulesBG.getHeight())
 {
     refreshModuleLayout(true);
     setInterceptsMouseClicks(true, true);
     setRepaintsOnMouseActivity(true);
     startTimerHz(30);
+    juce::Logger::writeToLog("Module Container created");
+    
 }
 
 KrumModuleContainer::~KrumModuleContainer()
@@ -153,7 +156,8 @@ void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, boo
     }
     else
     {
-        DBG("New Editor is NULL");
+     //   DBG("New Editor is NULL");
+        //juce::Log::postMessage(__func__, "New Editor is NULL");
     }
 }
 
@@ -164,6 +168,7 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
     {
         refreshModuleLayout(false);
     }
+    
 }
 
 
@@ -202,17 +207,24 @@ KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
             return modEd;
         }
     }
+    
+//    juce::Log::postMessage(__func__, "No Module Found by midiNote: " + juce::String(midiNote));
+    return nullptr;
 }
 
 void KrumModuleContainer::addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd)
 {
     moduleDisplayOrder.insert(moduleToAdd->getModuleDisplayIndex(), moduleToAdd);
+    //juce::Log::postMessage(__func__, "Module Editor added to Display order: " + moduleToAdd->getModuleName());
+    juce::Logger::writeToLog("Module Editor added to Display order: " + moduleToAdd->getModuleName());
 }
 
 //Most likely you want to call removeModuleEditor() first, it will call this function
 void KrumModuleContainer::removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove)
 {
     moduleDisplayOrder.remove(moduleToRemove->getModuleDisplayIndex());
+    //juce::Log::postMessage(__func__, "Module Editor removed from Display order: " + moduleToRemove->getModuleName());
+    juce::Logger::writeToLog("Module Editor removed from Display order: " + moduleToRemove->getModuleName());
 }
 
 //For Module Dragging, To Be Implemented
