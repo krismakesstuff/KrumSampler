@@ -169,6 +169,7 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
                         #endif
 {
     juce::Logger::setCurrentLogger(Log::logger);
+    juce::Logger::writeToLog("--BUILD VERSION: " + juce::String(KRUM_BUILD_VERSION));
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
