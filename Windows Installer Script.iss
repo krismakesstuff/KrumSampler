@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define Version "Beta"
-#define Release "1.0.1-"{#Version}""
+#define Release "1.0.1-" + Version
 
 
 [Setup]
