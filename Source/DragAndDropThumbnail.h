@@ -14,7 +14,7 @@
 * This draws the thumbnail of the audioFile that the KrumModuleEditor (parentEditor) gives to it. 
 * It can also accept a file that is dragged onto it and will "hot swap" the audio file out with the dropped one, and boy is it hot! 
 *       - This feature was one that I have been wanting to make since the start, it was one of the main interactions I wanted in my worflow. 
-*       - It is one of the main reasons I wanted to build a drum sampler in the first place
+*       - That being said, it does not handle the hot swap very well when the current audio file is trying to be played as the new one is trying to replace the original. Working on it...
 *
 */
 
@@ -54,7 +54,6 @@ public:
     void moveDroppedFileToParent();
 
     void updateThumbnailClipGain(float newVerticalZoom);
-
 
     float verticalZoom = 1.0f;
     juce::File droppedFile;

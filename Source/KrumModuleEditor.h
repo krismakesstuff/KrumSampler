@@ -121,10 +121,14 @@ public:
     bool canThumbnailAcceptFile();
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
 
+    void handleSettingsMenuResult(int result);
+    
 private:
 
-    static void handleSettingsMenuResult(int result, KrumModuleEditor* parentEditor);
+    //static void handleSettingsMenuResult(int result, KrumModuleEditor* parentEditor);
 
+    //std::function<void(int)> settingsMenuCallback;
+    
     friend class DragAndDropThumbnail;
 
     bool drawThumbnail = false;
@@ -147,11 +151,8 @@ private:
 
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
-
-   
-
+    
     DragAndDropThumbnail thumbnail;
-
 
     class OneShotButton : public juce::DrawableButton
     {
@@ -166,7 +167,23 @@ private:
         std::function<void()> onMouseDown;
     };
 
-
+    class ModalManager : public juce::ModalComponentManager::Callback
+    {
+    public:
+        ModalManager(std::function<void(int)> menuResult)//, KrumModuleEditor* parentEditor)
+            : handleSettingsResult(menuResult)//, parent(parentEditor)
+        {}
+        
+        void modalStateFinished(int returnValue) override
+        {
+            handleSettingsResult(returnValue);
+        }
+        
+        std::function<void(int)> handleSettingsResult;
+        //KrumModuleEditor* parent = nullptr;
+    };
+    
+    
     OneShotButton playButton;
     juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };;
 
