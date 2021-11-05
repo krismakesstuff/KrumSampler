@@ -27,7 +27,7 @@
   - Shows the latest on current bugs and upcoming features! 
 
 ## How To Download
-- Check out [releases](https://github.com/krismakesstuff/KrumSampler/releases) for the latest download. Windows Installer is coming shortly!!!
+- Check out [releases](https://github.com/krismakesstuff/KrumSampler/releases) for the latest download.
 
 ## How To Build
 - If you would like build the plug-in to work on it yourself, you will need the [JUCE](https://github.com/juce-framework/JUCE) framework installed and up to date. 
