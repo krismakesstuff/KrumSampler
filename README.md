@@ -23,8 +23,7 @@
 - Lastly, I would like to thank you for taking the time to check this out. I'm self taught and stoked to have gotten this far, but there is so much I want to learn and include in this project. Any help or feedback is genuinely appreciated! Happy mixing, nerds!
 
 ## MAKE SURE TO CHECK THE ISSUES SECTION
-- Visit [issues](https://github.com/krismakesstuff/KrumSampler/issues)
-  - Shows the latest on current bugs and upcoming features! 
+- Visit [issues](https://github.com/krismakesstuff/KrumSampler/issues). Shows the latest on current bugs and upcoming features! 
 
 ## How To Download
 - Check out [releases](https://github.com/krismakesstuff/KrumSampler/releases) for the latest download.
