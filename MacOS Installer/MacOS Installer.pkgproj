@@ -62,14 +62,26 @@
 													<key>CHILDREN</key>
 													<array>
 														<dict>
+															<key>BUNDLE_CAN_DOWNGRADE</key>
+															<false/>
+															<key>BUNDLE_POSTINSTALL_PATH</key>
+															<dict>
+																<key>PATH_TYPE</key>
+																<integer>0</integer>
+															</dict>
+															<key>BUNDLE_PREINSTALL_PATH</key>
+															<dict>
+																<key>PATH_TYPE</key>
+																<integer>0</integer>
+															</dict>
 															<key>CHILDREN</key>
 															<array/>
 															<key>GID</key>
 															<integer>0</integer>
 															<key>PATH</key>
-															<string>../Builds/MacOSX/build/Release/KrumSampler.component</string>
+															<string>/Users/kriscrawford/Library/Audio/Plug-Ins/Components/KrumSampler.component</string>
 															<key>PATH_TYPE</key>
-															<integer>1</integer>
+															<integer>0</integer>
 															<key>PERMISSIONS</key>
 															<integer>493</integer>
 															<key>TYPE</key>
@@ -602,14 +614,26 @@
 													<key>CHILDREN</key>
 													<array>
 														<dict>
+															<key>BUNDLE_CAN_DOWNGRADE</key>
+															<false/>
+															<key>BUNDLE_POSTINSTALL_PATH</key>
+															<dict>
+																<key>PATH_TYPE</key>
+																<integer>0</integer>
+															</dict>
+															<key>BUNDLE_PREINSTALL_PATH</key>
+															<dict>
+																<key>PATH_TYPE</key>
+																<integer>0</integer>
+															</dict>
 															<key>CHILDREN</key>
 															<array/>
 															<key>GID</key>
 															<integer>0</integer>
 															<key>PATH</key>
-															<string>../Builds/MacOSX/build/Release/KrumSampler.vst3</string>
+															<string>/Users/kriscrawford/Library/Audio/Plug-Ins/VST3/KrumSampler.vst3</string>
 															<key>PATH_TYPE</key>
-															<integer>1</integer>
+															<integer>0</integer>
 															<key>PERMISSIONS</key>
 															<integer>493</integer>
 															<key>TYPE</key>
