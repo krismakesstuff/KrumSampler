@@ -23,6 +23,7 @@
 */
 
 class KrumModuleEditor;
+class DummyKrumModuleEditor;
 class KrumModule;
 class KrumSamplerAudioProcessorEditor;
 
@@ -36,6 +37,8 @@ public:
 
     void paint(juce::Graphics& g) override;
 
+    void drawEditors(juce::Graphics& g);
+    
     void paintLineUnderMouseDrag(juce::Graphics& g, juce::Point<int> mousePosition);
     
     void refreshModuleLayout(bool makeVisible);
@@ -90,6 +93,9 @@ private:
 
     bool modulesOutside = false;
     juce::Rectangle<int> fadeArea;
+    
+    
+    juce::OwnedArray<DummyKrumModuleEditor> editors;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumModuleContainer)
 

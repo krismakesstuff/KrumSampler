@@ -201,3 +201,44 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumModuleEditor)
 };
+
+
+class DummyKrumModuleEditor :   public juce::Component,
+                                public juce::DragAndDropTarget
+{
+public:
+    DummyKrumModuleEditor() { setRepaintsOnMouseActivity(true);}
+    ~DummyKrumModuleEditor() override {}
+    
+    void paint(juce::Graphics& g) override
+    {
+        auto area = getLocalBounds();
+        
+        g.setColour(isMouseOver() ? juce::Colours::grey : juce::Colours::darkgrey);
+        g.drawRoundedRectangle(area.reduced(5).toFloat(), 3.0f, 1.0f);
+        
+        g.setColour(juce::Colours::grey);
+        g.drawFittedText("Drop A Sample Here", area.reduced(5), juce::Justification::centred, 3);
+    }
+
+    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override
+    {
+        return true;
+    }
+    
+    void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails) override
+    {
+        DBG(dragDetails.description.toString());
+    }
+    
+//    void resized() override
+//    {
+//    }
+
+};
+
+class KrumModuleEditorBase :    public juce::Component,
+                                public juce::DragAndDropTarget
+{
+    
+};

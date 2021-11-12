@@ -21,7 +21,16 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner)
     setInterceptsMouseClicks(true, true);
     setRepaintsOnMouseActivity(true);
     startTimerHz(30);
-    juce::Logger::writeToLog("Module Container created");
+    //juce::Logger::writeToLog("Module Container created");
+    
+    editors.ensureStorageAllocated(MAX_NUM_MODULES);
+  
+    for(int i = 0; i < MAX_NUM_MODULES; i++)
+    {
+        auto newEditor = editors.add(new DummyKrumModuleEditor());
+        newEditor->setBounds((i * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage(), 5,EditorDimensions::moduleW, EditorDimensions::moduleH);
+        addAndMakeVisible(newEditor);
+    }
     
 }
 
@@ -41,12 +50,27 @@ void KrumModuleContainer::paint (juce::Graphics& g)
     g.setColour(bgColor);
     g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
 
-    if (editor->sampler.getNumModules() == 0)
-    {
-        g.setColour(juce::Colours::darkgrey.darker());
-        g.drawFittedText("Drop a Sample up there", area.reduced(20), juce::Justification::centred, 1);
-    }
+//    if (editor->sampler.getNumModules() == 0)
+//    {
+//        g.setColour(juce::Colours::darkgrey.darker());
+//        g.drawFittedText("Drop a Sample up there", area.reduced(20), juce::Justification::centred, 1);
+//    }
+    
+    //drawEditors(g);
 }
+
+//void KrumModuleContainer::drawEditors(juce::Graphics& g)
+//{
+//    g.setColour(juce::Colours::darkgrey);
+//
+//    for(int i = 0; i < editors.size(); i++)
+//    {
+//        juce::Rectangle<float> modBounds { ((float)i * EditorDimensions::moduleW) + 10, 5, EditorDimensions::moduleW, EditorDimensions::moduleH};
+//
+//        g.drawRoundedRectangle(modBounds.reduced(5), 3.0f, 1.0f);
+//
+//    }
+//}
 
 void KrumModuleContainer::paintLineUnderMouseDrag(juce::Graphics& g, juce::Point<int> mousePosition)
 {
@@ -83,7 +107,8 @@ void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
 
 void KrumModuleContainer::refreshModuleLayout(bool makeVisible)
 {
-    int numModules = moduleDisplayOrder.size();
+    //int numModules = moduleDisplayOrder.size();
+    int numModules = MAX_NUM_MODULES;
     auto area = getLocalBounds();
     auto viewportBounds = editor->modulesViewport.getBounds();
     int viewportWidth = viewportBounds.getWidth();
@@ -95,37 +120,37 @@ void KrumModuleContainer::refreshModuleLayout(bool makeVisible)
         return;
     }
 
-    int newWidth = viewportWidth;
-
+    //int newWidth = viewportWidth;
+    int newWidth = (MAX_NUM_MODULES) * (EditorDimensions::moduleW + EditorDimensions::extraShrinkage());
     //5 is the number of modules that will fit in the container and not need to scroll. Maybe make this a variable for easy resizing of module size
-    if (numModules > 5)
-    {
-        newWidth += (numModules - 5) * (EditorDimensions::moduleW + EditorDimensions::extraShrinkage());
-    }
+//    if (numModules > 5)
+//    {
+//        newWidth += (numModules - 5) * (EditorDimensions::moduleW + EditorDimensions::extraShrinkage());
+//    }
 
     //MUST set this size before we reposition the modules. Otherwise viewport won't scroll!
     setSize(newWidth, viewportHeight);
 
-    auto zeroMod = moduleDisplayOrder[0];
-    if (zeroMod == nullptr)
-    {
-       // return;
-    }
-    
-    zeroMod->setTopLeftPosition(area.getX() + EditorDimensions::extraShrinkage(), area.getY() + EditorDimensions::extraShrinkage());
-
-    for (int i = 1; i < numModules; i++)
-    {
-        auto modEd = moduleDisplayOrder[i];
-        auto prevModEd = moduleDisplayOrder[i - 1];
-
-        if (makeVisible)
-        {
-            addAndMakeVisible(modEd);
-        }
-
-        modEd->setTopLeftPosition(prevModEd->getRight() + EditorDimensions::extraShrinkage(), area.getY() + EditorDimensions::extraShrinkage());
-    }
+//    auto zeroMod = moduleDisplayOrder[0];
+//    if (zeroMod == nullptr)
+//    {
+//       // return;
+//    }
+//
+//    zeroMod->setTopLeftPosition(area.getX() + EditorDimensions::extraShrinkage(), area.getY() + EditorDimensions::extraShrinkage());
+//
+//    for (int i = 1; i < numModules; i++)
+//    {
+//        auto modEd = moduleDisplayOrder[i];
+//        auto prevModEd = moduleDisplayOrder[i - 1];
+//
+//        if (makeVisible)
+//        {
+//            addAndMakeVisible(modEd);
+//        }
+//
+//        modEd->setTopLeftPosition(prevModEd->getRight() + EditorDimensions::extraShrinkage(), area.getY() + EditorDimensions::extraShrinkage());
+//    }
 }
 
 void KrumModuleContainer::addMidiListener(juce::MidiKeyboardStateListener* newListener)
