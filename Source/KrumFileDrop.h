@@ -11,6 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "InfoPanel.h"
 
 class KrumSampler;
 class KrumModuleContainer;
@@ -25,7 +26,8 @@ class KrumFileBrowser;
 * If valid files are dropped on it, it will automatically make a new module with that audio file. If there are multiple, it will make a new module for each file. 
 * 
 */
-class KrumFileDrop  :   public juce::Component,
+class KrumFileDrop  :   //public juce::Component,
+                        public InfoPanelComponent,
                         public juce::DragAndDropTarget,
                         public juce::FileDragAndDropTarget,
                         public juce::SettableTooltipClient
@@ -58,5 +60,9 @@ private:
     juce::Colour defBGColor{ juce::Colours::black };
     juce::Colour mouseOverColor{ juce::Colours::darkgrey };
 
+    const juce::String infoPanelMessage {"Drop samples here to make new modules. You can drop files from the File Browser, or from external apps. You can also drop multiple files."};
+    const juce::String infoPanelTitle {"File Drop Area"};
+    
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumFileDrop)
 };

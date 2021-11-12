@@ -190,12 +190,12 @@ void KrumModuleEditor::resized()
     int titleHeight = 32;
 
     int spacer = 5;
-    int thumbnailH = 120;
+    int thumbnailH = 130;
 
-    int panSliderH = 25;
+    int panSliderH = 30;
     int panSliderW = area.getWidth();
 
-    int volumeSliderH = 260;
+    int volumeSliderH = 310;
     int volumeSliderW = area.getWidth() / 2.5;
 
     int statusButtonH = 40;
@@ -762,13 +762,12 @@ void KrumModuleEditor::handleSettingsMenuResult(int result)
 //============================================================================================================================
 
 KrumModuleEditor::OneShotButton::OneShotButton()
-    :DrawableButton("PlayButton", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground)
-{
-}
+    //:DrawableButton("PlayButton", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground)
+: InfoPanelDrawableButton("One Shot", "Plays the currently assigned sample", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground)
+{}
 
 KrumModuleEditor::OneShotButton::~OneShotButton()
-{
-}
+{}
 
 void KrumModuleEditor::OneShotButton::mouseDown(const juce::MouseEvent& e)
 {

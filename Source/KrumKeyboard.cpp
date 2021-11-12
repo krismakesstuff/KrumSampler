@@ -12,6 +12,7 @@
 #include "KrumKeyboard.h"
 #include "KrumModuleContainer.h"
 #include "KrumModuleEditor.h"
+#include "InfoPanel.h"
 
 //==============================================================================
 KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori , KrumModuleContainer& container)
@@ -23,6 +24,18 @@ KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboar
 
 KrumKeyboard::~KrumKeyboard()
 {
+}
+
+void KrumKeyboard::mouseEnter(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().setInfoPanelText("Keyboard", "This keyboard shows your midi inputs and assignments. Can be clicked on to send a midi message");
+    juce::MidiKeyboardComponent::mouseEnter(e);
+}
+
+void KrumKeyboard::mouseExit(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().clearPanelText();
+    juce::MidiKeyboardComponent::mouseExit(e);
 }
 
 bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)

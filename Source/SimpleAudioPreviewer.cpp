@@ -12,9 +12,11 @@
 #include "PluginProcessor.h"
 #include "SimpleAudioPreviewer.h"
 
+
 //==============================================================================
 SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::ValueTree& vt)
-    : formatManager(fm), valueTree(vt)
+    :   formatManager(fm), valueTree(vt)
+        //InfoPanelComponent("Audio Previewer", "Double-Click files to preview them, if auto-play is active they will play on a single click. Volume is sepearte from the rest of the sampler")
 {
     addAndMakeVisible(autoPlayToggle);
     autoPlayToggle.setButtonText("Auto-Play");
@@ -59,6 +61,25 @@ void SimpleAudioPreviewer::resized()
     autoPlayToggle.setBounds(area.withRight(area.getWidth() / 3));
     volumeSlider.setBounds(area.withLeft(area.getWidth() / 3).withY(area.getHeight()/3).withHeight(area.getHeight()/2));
 }
+
+//void SimpleAudioPreviewer::mouseEnter(const juce::MouseEvent& e)
+//{
+//
+//
+//    InfoPanel::shared_instance().setInfoPanelText(compTitle, message);
+//
+//    juce::Component::mouseEnter(e);
+//}
+//
+//void SimpleAudioPreviewer::mouseExit(const juce::MouseEvent& e)
+//{
+//    if(!isMouseOver(true))
+//    {
+//        InfoPanel::shared_instance().clearPanelText();
+//    }
+//
+//    juce::Component::mouseExit(e);
+//}
 
 bool SimpleAudioPreviewer::isAutoPlayActive()
 {

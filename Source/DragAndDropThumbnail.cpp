@@ -15,7 +15,8 @@
 
 
 DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sourceSamplesPerThumbnailSample, juce::AudioFormatManager& formatManagerToUse, juce::AudioThumbnailCache& cacheToUse)
-    :juce::AudioThumbnail(sourceSamplesPerThumbnailSample, formatManagerToUse, cacheToUse), parentEditor(modEditor)
+    : juce::AudioThumbnail(sourceSamplesPerThumbnailSample, formatManagerToUse, cacheToUse), parentEditor(modEditor),
+        InfoPanelComponent("Drag & Drop Thumbnail", "Displays the current sample. Also provides clip gain. With the mouse over the thumbnail, use the scroll wheel to set the gain, or use the slider that appears. You can also drop new samples on this and it will 'hot swap' to the new sample")
 {
     setRepaintsOnMouseActivity(true);
     clipGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
@@ -160,8 +161,7 @@ void DragAndDropThumbnail::paintIfFileLoaded(juce::Graphics& g, const juce::Rect
 void DragAndDropThumbnail::mouseEnter(const juce::MouseEvent& e)
 {
     parentEditor.editor.moduleContainer.showModuleClipGainSlider(&parentEditor);
-
-    //clipGainSlider.setVisible(true);
+    InfoPanelComponent::mouseEnter(e);
     repaint();
 }
 
@@ -174,6 +174,7 @@ void DragAndDropThumbnail::mouseExit(const juce::MouseEvent& e)
 
     clipGainSlider.setVisible(false);
     canAcceptFile = false;
+    InfoPanelComponent::mouseExit(e);
     repaint();
 }
 

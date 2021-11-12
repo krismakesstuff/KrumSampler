@@ -29,6 +29,8 @@ public:
     KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori, KrumModuleContainer& container );
     ~KrumKeyboard() override;
 
+    void mouseEnter(const juce::MouseEvent& e) override;
+    void mouseExit(const juce::MouseEvent& e) override;
 
     bool mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
     void mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;

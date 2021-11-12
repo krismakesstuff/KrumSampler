@@ -13,11 +13,12 @@
 #include "KrumModuleContainer.h"
 #include "KrumSampler.h"
 #include "PluginEditor.h"
-//#include "KrumFileBrowser.cpp"
+
 
 //==============================================================================
 KrumFileDrop::KrumFileDrop(KrumSamplerAudioProcessorEditor& e, KrumModuleContainer& c, juce::AudioProcessorValueTreeState& a, KrumFileBrowser& browser)
-    : editor(e), container(c), parameters(a), fileBrowser(browser)
+    : editor(e), container(c), parameters(a), fileBrowser(browser),
+    InfoPanelComponent("File Drop Area", "Drop samples here to make new modules. You can drop files from the File Browser, or from external apps. You can also drop multiple files.")
 {
     setTooltip("Drag and drop samples from anywhere!");   
 }

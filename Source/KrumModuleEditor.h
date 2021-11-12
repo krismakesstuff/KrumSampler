@@ -14,6 +14,7 @@
 #include "ColorPalette.h"
 #include "ModuleSettingsOverlay.h"
 #include "DragAndDropThumbnail.h"
+#include "InfoPanel.h"
 
 //==============================================================================
 
@@ -143,18 +144,22 @@ private:
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour fontColor{ juce::Colours::white.darker() };
     
-    juce::Label titleBox;
-
+    //juce::Label titleBox;
+    InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
+    
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
-    juce::Slider volumeSlider, panSlider;
+    //juce::Slider volumeSlider, panSlider;
 
+    InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
+    InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
+    
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
     
     DragAndDropThumbnail thumbnail;
 
-    class OneShotButton : public juce::DrawableButton
+    class OneShotButton : /*public juce::DrawableButton*/ public InfoPanelDrawableButton
     {
     public:
         OneShotButton();
@@ -185,8 +190,8 @@ private:
     
     
     OneShotButton playButton;
-    juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };;
-
+    //juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };
+    InfoPanelDrawableButton editButton {"Settings", "Provides a list of actions to change the settings of the module", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };
     friend class ColorPalette;
     
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;

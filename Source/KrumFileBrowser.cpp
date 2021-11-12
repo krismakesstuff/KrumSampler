@@ -13,11 +13,12 @@
 #include "KrumFileBrowser.h"
 #include "KrumModuleEditor.h"
 
+
 class KrumTreeHeaderItem;
 
 
 KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name)
-        : previewer(preview), parentTree(parentTreeView)
+        : previewer(preview), parentTree(parentTreeView), InfoPanelComponent("File", "Files can be renames or removed from this browser. NOTE: these aren't you're actual files, so any changes made aren't making changes to the actual file.")
     {
         file = fullPathName;
         itemName = name;
@@ -178,6 +179,16 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         owner.setItemEditing(false);
     }
 
+    void KrumTreeItem::EditableComp::mouseEnter(const juce::MouseEvent& e)
+    {
+        owner.mouseEnter(e);
+    }
+
+    void KrumTreeItem::EditableComp::mouseExit(const juce::MouseEvent& e)
+    {
+        owner.mouseExit(e);
+    }
+
     void KrumTreeItem::EditableComp::mouseDown(const juce::MouseEvent& e)
     {
         bool shift = e.mods.isShiftDown();
@@ -274,7 +285,7 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
 
 
     KrumTreeHeaderItem::KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name, int numFilesHidden)
-        : parentTree(pTree), numFilesExcluded(numFilesHidden)
+        : parentTree(pTree), numFilesExcluded(numFilesHidden), InfoPanelComponent("Folder", "Folders can be renamed and removed, just like Files, these aren't the actual Folders on your system, just a representation")
     {
         file = fullPathName;
         headerName = name;
@@ -479,6 +490,16 @@ KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* p
         owner.setItemEditing(true);
     }
 
+    void KrumTreeHeaderItem::EditableHeaderComp::mouseEnter(const juce::MouseEvent& e)
+    {
+        owner.mouseEnter(e);
+    }
+
+    void KrumTreeHeaderItem::EditableHeaderComp::mouseExit(const juce::MouseEvent& e)
+    {
+        owner.mouseExit(e);
+    }
+
     void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e)
     {
         bool deselect = ! e.mods.isShiftDown();
@@ -547,13 +568,15 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
     recentNode->setLinesDrawnForSubItems(true);
     recentNode->setBGColor(juce::Colours::cadetblue);
     recentNode->setEditable(false);
-
+    recentNode->setNewPanelMessage("Recent Section", "This will populate with files that you recently created modules with. Files can be removed via the right click", "Double-clicking will collapse section");
+    
     auto favNode = new KrumTreeHeaderItem(this, juce::File(), FileBrowserValueTreeIds::favoritesFolderId);
     favNode->setOpen(true);
     favNode->setLinesDrawnForSubItems(true);
     favNode->setBGColor(juce::Colours::cadetblue);
     favNode->setEditable(false);
-
+    favNode->setNewPanelMessage("Favorites Section", "This holds your favorite folders and files, they can be added through the plus button, or dropped from an external app");
+    
     rootNode->addSubItem(recentNode, FileBrowserSectionIds::recentFolders_Ids);
     rootNode->addSubItem(favNode, FileBrowserSectionIds::favoritesFolders_Ids);
     addDummyChild();
@@ -1439,7 +1462,7 @@ KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* it
 //=================================================================================================================================//
 
 KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTree& fileBrowserValueTree/*, juce::AudioFormatManager& formatManager*/)
-    : audioPreviewer(previewer), fileTree(fileBrowserValueTree, &previewer)
+    : audioPreviewer(previewer), fileTree(fileBrowserValueTree, &previewer), InfoPanelComponent(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message)
 {
 
     addAndMakeVisible(audioPreviewer);
@@ -1518,6 +1541,22 @@ void KrumFileBrowser::resized()
 
 }
 
+//void KrumFileBrowser::mouseEnter(const juce::MouseEvent& e)
+//{
+//    InfoPanel::shared_instance().setInfoPanelText(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message);
+//    juce::Component::mouseEnter(e);
+//}
+//
+//void KrumFileBrowser::mouseExit(const juce::MouseEvent& e)
+//{
+//    if(!isMouseOver(true))
+//    {
+//        InfoPanel::shared_instance().clearPanelText();
+//    }
+//
+//    juce::Component::mouseExit(e);
+//}
+//
 
 int KrumFileBrowser::getNumSelectedItems()
 {

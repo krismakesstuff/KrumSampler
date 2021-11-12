@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "InfoPanel.h"
 /*
 * This draws the thumbnail of the audioFile that the KrumModuleEditor (parentEditor) gives to it. 
 * It can also accept a file that is dragged onto it and will "hot swap" the audio file out with the dropped one, and boy is it hot! 
@@ -20,7 +21,7 @@
 
 class KrumModuleEditor;
 
-class DragAndDropThumbnail :    public juce::Component,
+class DragAndDropThumbnail :    public InfoPanelComponent,
                                 public juce::AudioThumbnail,
                                 public juce::DragAndDropTarget,
                                 public juce::FileDragAndDropTarget

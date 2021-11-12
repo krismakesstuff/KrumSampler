@@ -16,6 +16,8 @@
 #include "KrumLookAndFeel.h"
 #include "KrumFileDrop.h"
 #include "KrumModuleContainer.h"
+#include "InfoPanel.h"
+
 
 //==============================================================================
 /*
@@ -27,10 +29,10 @@
 
 namespace EditorDimensions
 {
-    const static int  topBar = 55;
+    const static int  topBar = 85;
     const static int shrinkage = 5;
 
-    const static int moduleH = 500;
+    const static int moduleH = 570;
     const static int moduleW = 125;
 
     const static int addButtonH = 50;
@@ -41,8 +43,8 @@ namespace EditorDimensions
     const static int outputW = 80;
     const static int keyboardH = 90;
 
-    const static int infoH = 500;
-    const static int fileTreeH = infoH;
+    //const static int infoH = 650;
+    const static int fileTreeH = 600;
     const static int fileTreeTitleH = 30;
 
     const static int emptyAreaMinW = 300;
@@ -51,6 +53,10 @@ namespace EditorDimensions
     const static float cornerSize = 5.0f;
     const static float smallOutline = 1.0f;
     const static float bigOutline = 2.0f;
+
+    const static int windowH = 800;
+    const static int windowW = 1200;
+    const static int windowWNoBrowser = 900;
 
     static int extraShrinkage(int extraMultplier = 2)
     {
@@ -93,6 +99,8 @@ public:
     void saveFileBrowserHiddenState();
     bool getSavedFileBrowserHiddenState();
 
+    bool getSavedInfoButtonState();
+    
     void updateOutputGainBubbleComp(juce::Component*);
 
     void setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote = 0);
@@ -117,7 +125,9 @@ public:
 
 private:
 
-
+    
+    
+    
     bool needsToUpdateThumbs = false;
 
     friend class KrumModuleContainer;
@@ -128,7 +138,8 @@ private:
 
     juce::Image titleImage;
 
-    juce::DrawableButton collapseBrowserButton {"Collapse", juce::DrawableButton::ButtonStyle::ImageStretched};
+    //juce::DrawableButton collapseBrowserButton {"Collapse", juce::DrawableButton::ButtonStyle::ImageStretched};
+    InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore"};
     const juce::Font defaultFont{ "Calibri", 11.0f, juce::Font::FontStyleFlags::plain };
 
     juce::Rectangle<int> modulesBG;
@@ -149,7 +160,8 @@ private:
     juce::AudioProcessorValueTreeState& parameters;
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     
-    juce::Slider outputGainSlider;
+    //juce::Slider outputGainSlider;
+    InfoPanelSlider outputGainSlider{"Output Gain", "Overall volume control of the plug-in"};
     std::unique_ptr<SliderAttachment> outputGainAttachment;
  
     KrumSamplerAudioProcessor& audioProcessor;
@@ -163,9 +175,13 @@ private:
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
     juce::TextButton websiteButton;
+    
+    InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
+    //juce::DrawableButton infoButton {"Info Button", juce::DrawableButton::ButtonStyle::ImageStretched};
+    
     juce::Rectangle<int> madeByArea{ 0, 0, 150, 50 };
 
-
+    //static InfoPanel infoPanel;
 
     //Not Using this font anymore, keeping this here incase I want to add a custom font later
     
@@ -176,6 +192,8 @@ private:
 //        return wacky;
 //    }
 
+    
+    
 
     
 

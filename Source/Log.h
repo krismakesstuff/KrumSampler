@@ -18,7 +18,7 @@ namespace Log
     static juce::String logFileExtension{".txt"};
     static juce::String welcomeMessage{"KrumSampler started, now logging"};
 
-    static juce::FileLogger* logger = juce::FileLogger::createDateStampedLogger (Log::logFolderName, Log::logFileName, Log::logFileExtension, Log::welcomeMessage);
+    //static juce::FileLogger* logger = juce::FileLogger::createDateStampedLogger (Log::logFolderName, Log::logFileName, Log::logFileExtension, Log::welcomeMessage);
         
 }
 

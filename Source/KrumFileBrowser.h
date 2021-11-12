@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "InfoPanel.h"
 
 /*
 * 
@@ -49,6 +50,11 @@ namespace FileBrowserValueTreeIds
     static const juce::String opennessId{ "OpennessState" };
 }
 
+namespace FileBrowserInfoStrings
+{
+    static const juce::String compTitle {"File Browser"};
+    static const juce::String message {"This holds your favorite samples. You can drop samples and/or folders into the 'Favorites' section for easy access. You can also manually add files and folders by clicking the plus sign."};
+}
 //Ids for navigating the TreeView
 enum FileBrowserSectionIds
 {
@@ -78,7 +84,8 @@ enum RightClickMenuIds
 
 //Represents a file in the File Browser. Contains a private subclass that responds to mouse clicks
 class KrumTreeItem :    public juce::TreeViewItem,
-                        public juce::Component
+                        public InfoPanelComponent
+                        //public juce::Component
     
 {
 public:
@@ -131,7 +138,10 @@ private:
 
         void textWasEdited() override;
         void editorAboutToBeHidden(juce::TextEditor* editor) override;
-
+        
+        void mouseEnter(const juce::MouseEvent& e) override;
+        void mouseExit(const juce::MouseEvent& e) override;
+        
         void mouseDown(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
         void mouseDoubleClick(const juce::MouseEvent& e) override;
@@ -153,7 +163,8 @@ private:
 //=================================================================================================================================//
 //Similar to the KrumTreeItem, except this is meant to represent folders. So it has some different logic, but has similar structure. Also has a subclass. 
 class KrumTreeHeaderItem :  public juce::TreeViewItem,
-                            public juce::Component
+                            public InfoPanelComponent
+                            //public juce::Component
 {
 public:
     KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name = juce::String(), int numFilesHidden = 0);
@@ -214,6 +225,10 @@ private:
         void textWasEdited() override;
 
         void editorAboutToBeHidden(juce::TextEditor* editor) override;
+        
+        void mouseEnter(const juce::MouseEvent& e) override;
+        void mouseExit(const juce::MouseEvent& e) override;
+        
         void mouseDown(const juce::MouseEvent& e) override;
 
         static void handleResult(int result, EditableHeaderComp* comp);
@@ -402,7 +417,7 @@ private:
 };
 
 
-class KrumFileBrowser : public juce::Component
+class KrumFileBrowser : public InfoPanelComponent
 {
 public:
 
@@ -412,6 +427,9 @@ public:
     void paint(juce::Graphics& g) override;
     void resized() override;
 
+//    void mouseEnter(const juce::MouseEvent& e) override;
+//    void mouseExit(const juce::MouseEvent& e) override;
+//
     int getNumSelectedItems();
     KrumTreeItem* getSelectedItem(int index);
 
@@ -429,8 +447,10 @@ private:
     KrumTreeView fileTree;
 
     SimpleAudioPreviewer& audioPreviewer;
-    juce::DrawableButton addFavoriteButton{ "Add Favorite", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
+    //juce::DrawableButton addFavoriteButton{ "Add Favorite", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
 
+    InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Click this to open a browser and select Folders and Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
+    
     juce::Colour fontColor{ juce::Colours::lightgrey };
     
     int titleH = 30;

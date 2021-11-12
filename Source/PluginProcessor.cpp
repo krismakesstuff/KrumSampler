@@ -33,7 +33,8 @@ juce::ValueTree createValueTree()
                 {
                     {"PreviewerGain",       {{"value", "0.75"}}},
                     {"PreviewerAutoPlay",   {{"value", "0"}}},
-                    {"BrowserHidden",       {{"value", "0"}}}
+                    {"BrowserHidden",       {{"value", "0"}}},
+                    {"InfoPanel",           {{"value", "1"}}}
                 }
             }
         }
@@ -168,8 +169,8 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
                                     ,parameters(*this, nullptr, "PARAMS", createParameterLayout())
                         #endif
 {
-    juce::Logger::setCurrentLogger(Log::logger);
-    juce::Logger::writeToLog("--BUILD VERSION: " + juce::String(KRUM_BUILD_VERSION));
+    //juce::Logger::setCurrentLogger(Log::logger);
+    //juce::Logger::writeToLog("--BUILD VERSION: " + juce::String(KRUM_BUILD_VERSION));
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
@@ -177,25 +178,25 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
 #if JucePlugin_Build_Standalone
     fileBrowser.buildDemoKit();
 #endif
-    juce::Logger::writeToLog("----------------------------");
-    juce::Logger::writeToLog("Sampler Processor Constructed");
-    juce::Logger::writeToLog("MaxNumModules: " + juce::String(MAX_NUM_MODULES));
-    juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
-    juce::Logger::writeToLog("MaxFileLengthInSeconds: " +       juce::String(MAX_FILE_LENGTH_SECS));
-    juce::Logger::writeToLog("----------------------------");
+//    juce::Logger::writeToLog("----------------------------");
+//    juce::Logger::writeToLog("Sampler Processor Constructed");
+//    juce::Logger::writeToLog("MaxNumModules: " + juce::String(MAX_NUM_MODULES));
+//    juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
+//    juce::Logger::writeToLog("MaxFileLengthInSeconds: " +       juce::String(MAX_FILE_LENGTH_SECS));
+//    juce::Logger::writeToLog("----------------------------");
 }
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 {
-    juce::Logger::setCurrentLogger(nullptr);
-    delete Log::logger;
+    //juce::Logger::setCurrentLogger(nullptr);
+    //delete Log::logger;
 }
 
 void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam_ID);
     sampler.setCurrentPlaybackSampleRate(sampleRate);
-    juce::Logger::writeToLog("Processor prepared to play, sampleRate: " + juce::String(sampleRate) + ", samplesPerBlock: " +                      juce::String(samplesPerBlock));
+    //juce::Logger::writeToLog("Processor prepared to play, sampleRate: " + juce::String(sampleRate) + ", samplesPerBlock: " +                      juce::String(samplesPerBlock));
 }
 
 void KrumSamplerAudioProcessor::releaseResources()
@@ -338,7 +339,7 @@ void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData
 
     valueTree.appendChild(parameters.state, nullptr);
     valueTree.appendChild(fileBrowserValueTree, nullptr);
-    
+
     auto state = valueTree.createCopy();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
@@ -359,8 +360,8 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
             //Audio parameters
             parameters.replaceState(juce::ValueTree::fromXml(*xmlState->getChildByName("PARAMS")));
             xmlState->removeChildElement(xmlState->getChildByName("PARAMS"), true);
-            
-            //File Browser 
+
+            //File Browser
             auto xmlFileBrowserTree = xmlState->getChildByName("FileBrowserTree");
             if (xmlFileBrowserTree != nullptr)
             {
@@ -368,17 +369,17 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
                 xmlState->removeChildElement(xmlFileBrowserTree, true);
                 fileBrowser.rebuildBrowser(fileBrowserValueTree);
             }
-            
+
             //Remaining App/Modules Settings
-            valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr); 
+            valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr);
             makeModulesFromValueTree();
             fileBrowser.getAudioPreviewer()->refreshSettings();
-            
+
             DBG("---SET STATE---");
             DBG(juce::ValueTree::fromXml(*xmlState).toXmlString());
-            
+
         }
-        else 
+        else
         {
             DBG("XML has no tagname from ValueTree");
         }
@@ -453,7 +454,7 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
             DBG("ValueTree not Valid" + juce::String(i));
         }
     }
-    juce::Logger::writeToLog("Modules made from ValueTree: " + juce::String(sampler.getNumModules()));
+    //juce::Logger::writeToLog("Modules made from ValueTree: " + juce::String(sampler.getNumModules()));
 }
 
 void KrumSamplerAudioProcessor::updateValueTreeState()
@@ -545,7 +546,7 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
     }
 
     //DBG("---Updated Tree State---");
-    juce::Logger::writeToLog("---Updated Tree State---");
+    //juce::Logger::writeToLog("---Updated Tree State---");
     
 //    auto state = valueTree.createCopy();
 //    std::unique_ptr<juce::XmlElement> xml = state.createXml();

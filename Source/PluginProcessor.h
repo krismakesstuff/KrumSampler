@@ -31,7 +31,7 @@
 #define MAX_NUM_MODULES 20
 #define MAX_VOICES 10
 #define MAX_FILE_LENGTH_SECS 3
-#define KRUM_BUILD_VERSION "1.0.1-Beta"
+#define KRUM_BUILD_VERSION "1.0.2-Beta" //adding InfoPanel
 
 
 namespace TreeIDs
