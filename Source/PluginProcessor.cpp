@@ -48,7 +48,7 @@ juce::ValueTree createValueTree()
         juce::ValueTree newModule =
         { "Module" + index, {{"name",""}},
                 {
-                    {"State", {{"id", TreeIDs::paramModuleActive_ID},       {"value", ""}}},
+                    {"State", {{"id", TreeIDs::paramModuleState_ID},        {"value", "0"}}},
                     {"State", {{"id", TreeIDs::paramModuleFile_ID},         {"value", ""}}},
                     {"State", {{"id", TreeIDs::paramModuleMidiNote_ID},     {"value", ""}}},
                     {"State", {{"id", TreeIDs::paramModuleMidiChannel_ID},  {"value", ""}}},
@@ -174,6 +174,8 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
+    
+   //sampler.initModules(&valueTree, &parameters);
     
 #if JucePlugin_Build_Standalone
     fileBrowser.buildDemoKit();
@@ -410,7 +412,7 @@ juce::MidiKeyboardState& KrumSamplerAudioProcessor::getMidiState()
 
 void KrumSamplerAudioProcessor::makeModulesFromValueTree()
 {
-    sampler.clearModules();
+    //sampler.clearModules();
     auto modulesTree = valueTree.getChildWithName("KrumModules");
     
     for (int i = 0; i < MAX_NUM_MODULES; i++)
@@ -422,31 +424,24 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
             
             juce::ValueTree stateTree;
             bool moduleActive = false;
-            int midiChannel = 0;
             juce::var id;
             juce::var val;
 
-            for (int j = 0; j < 4; j++)                 
+            stateTree = moduleTree.getChild(0);
+            id = stateTree.getProperty("id");
+            val = stateTree.getProperty("value");
+            if(id.toString() == TreeIDs::paramModuleState_ID)
             {
-                stateTree = moduleTree.getChild(j);
-                id = stateTree.getProperty("id");
-                val = stateTree.getProperty("value");
-                //DBG(id.toString() + " " + val.toString());
-                if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) > 0)
-                {
-                    moduleActive = true;
-                }
-                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
-                {
-                    midiChannel = int(val);
-                }
+                moduleActive = static_cast<KrumModule::ModuleState>((int)val) == KrumModule::ModuleState::active;
             }
 
             if (moduleActive)
             {
-                auto newModule = new KrumModule(i, sampler, &valueTree, &parameters);
-                sampler.addModule(newModule, newModule->getMidiTriggerNote() != 0);
-                midiState.addListener(newModule);
+                //auto newModule = new KrumModule(i, sampler, &valueTree, &parameters);
+                auto mod = sampler.getModule(i);
+                mod->updateModuleFromTree();
+                midiState.addListener(mod);
+                //sampler.addModule(newModule, newModule->getMidiTriggerNote() != 0);
             }
         }
         else
@@ -472,9 +467,9 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
                 auto stateTree = moduleTree.getChild(j);
                 auto id = stateTree.getProperty("id");
 
-                if (id.toString() == TreeIDs::paramModuleActive_ID)
+                if (id.toString() == TreeIDs::paramModuleState_ID)
                 {
-                    stateTree.setProperty("value", mod->isModuleActive() ? juce::var(1) : juce::var(0), nullptr);
+                    stateTree.setProperty("value", (int)mod->getModuleState(), nullptr);
                 }
                 else if (id.toString() == TreeIDs::paramModuleFile_ID)
                 {
@@ -517,7 +512,7 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
                 auto stateTree = moduleTree.getChild(j);
                 auto id = stateTree.getProperty("id");
 
-                if (id.toString() == TreeIDs::paramModuleActive_ID)
+                if (id.toString() == TreeIDs::paramModuleState_ID)
                 {
                     stateTree.setProperty("value", juce::var(0), nullptr);
                 }
@@ -555,28 +550,28 @@ void KrumSamplerAudioProcessor::updateValueTreeState()
 }
 
 
-int KrumSamplerAudioProcessor::findFreeModuleIndex()
-{
-    auto modulesTree = valueTree.getChildWithName("KrumModules");
-
-    for (int i = 0; i < MAX_NUM_MODULES; i++)
-    {
-        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
-        
-        juce::ValueTree stateTree;
-        juce::var id;
-        juce::var val;
-        
-        stateTree = moduleTree.getChild(0);             //index of ModuleActive parameter in ValueTree.
-        id = stateTree.getProperty("id");
-        val = stateTree.getProperty("value");
-        if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) == 0)
-        {
-            return i;
-        }
-    }
-
-}
+//int KrumSamplerAudioProcessor::findFreeModuleIndex()
+//{
+//    auto modulesTree = valueTree.getChildWithName("KrumModules");
+//
+//    for (int i = 0; i < MAX_NUM_MODULES; i++)
+//    {
+//        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
+//
+//        juce::ValueTree stateTree;
+//        juce::var id;
+//        juce::var val;
+//
+//        stateTree = moduleTree.getChild(0);             //index of ModuleActive parameter in ValueTree.
+//        id = stateTree.getProperty("id");
+//        val = stateTree.getProperty("value");
+//        if (id.toString() == TreeIDs::paramModuleState_ID && int(val) == 0)
+//        {
+//            return i;
+//        }
+//    }
+//
+//}
 
 int KrumSamplerAudioProcessor::getNumModulesInSampler()
 {

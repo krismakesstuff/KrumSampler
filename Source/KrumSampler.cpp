@@ -201,14 +201,27 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 
 //====================================================================================//
 
-KrumSampler::KrumSampler(juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o)
+KrumSampler::KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o)
     :formatManager(fm), owner(o)
 {
+    initModules(valTree, apvts);
 }
 
 KrumSampler::~KrumSampler()
 {
     clearModules();
+}
+
+void KrumSampler::initModules(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
+{
+    for (int i = 0; i < MAX_NUM_MODULES; i++)
+    {
+        modules.add(new KrumModule(i, *this, valTree, apvts));
+    }
+    
+    DBG("Modules Initialized: " + juce::String(modules.size()));
+    
+    initVoices();
 }
 
 void KrumSampler::initVoices()
@@ -263,7 +276,7 @@ void KrumSampler::addModule(KrumModule* newModule, bool hasSample)
         initVoices();
     }
 
-    modules.insert(newModule->getModuleIndex(), std::move(newModule));
+    modules.insert(newModule->getModuleSamplerIndex(), std::move(newModule));
 
     //in some cases you just want to add the module, but leave it with no sample
     if (hasSample)
@@ -274,7 +287,7 @@ void KrumSampler::addModule(KrumModule* newModule, bool hasSample)
 
 void KrumSampler::removeModule(KrumModule* moduleToDelete)
 {
-    int index = moduleToDelete->getModuleIndex();
+    int index = moduleToDelete->getModuleSamplerIndex();
     modules.remove(index, true);
     sounds.remove(index);
 
@@ -287,7 +300,7 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
         auto modPan = mod->getModulePan()->load();
         
         //reassign the module with it's new index, which the slider attachments use, then give it back it's old values.
-        mod->setModuleIndex(i);
+        mod->setModuleSamplerIndex(i);
         mod->reassignSliders();
 
         //this is my hacky way to easily delete modules and just reassign them on the next slider attachment. Will be making this better to have a realiable automation workflow.
@@ -302,7 +315,7 @@ void KrumSampler::removeModule(KrumModule* moduleToDelete)
 void KrumSampler::updateModuleSample(KrumModule* updatedModule)
 {
     //if this module already has a sound, it removes the original, then adds then new one. 
-    auto sound = sounds[updatedModule->getModuleIndex()];
+    auto sound = sounds[updatedModule->getModuleSamplerIndex()];
     if (sound)
     {
         sounds.removeObject(sound);
@@ -323,12 +336,12 @@ void KrumSampler::addSample(KrumModule* moduleToAddSound)
         {
             if (moduleToAddSound == modules[i])
             {
-                sounds.insert(moduleToAddSound->getModuleIndex(), new KrumSound(moduleToAddSound, moduleToAddSound->getModuleName(), *reader, range, moduleToAddSound->getMidiTriggerNote(),
+                sounds.insert(moduleToAddSound->getModuleSamplerIndex(), new KrumSound(moduleToAddSound, moduleToAddSound->getModuleName(), *reader, range, moduleToAddSound->getMidiTriggerNote(),
                     attackTime, releaseTime, MAX_FILE_LENGTH_SECS));
             }
         }
-
     }
+    
 
     juce::Logger::writeToLog("Sample Added - Sounds: " + juce::String(sounds.size()));
 }
@@ -345,6 +358,31 @@ void KrumSampler::clearModules()
 int KrumSampler::getNumModules()
 {
     return modules.size();
+}
+
+void KrumSampler::getNumFreeModules(int& totalFreeModules, int& firstFreeIndex)
+{
+    totalFreeModules = 0;
+    firstFreeIndex = 0;
+    
+    for(int i = 0; i < modules.size(); i++)
+    {
+        if(modules[i]->getModuleState() == KrumModule::ModuleState::empty)
+        {
+            totalFreeModules++;
+            if(firstFreeIndex < 1 && firstFreeIndex != i)
+            {
+                firstFreeIndex = i;
+            }
+        }
+    }
+    
+    if(totalFreeModules == 0)
+    {
+        firstFreeIndex = -1;
+    }
+    
+    DBG("Free Modules: " + juce::String(totalFreeModules) + ", First Index" + juce::String(firstFreeIndex));
 }
 
 bool KrumSampler::isFileAcceptable(const juce::File& file)
@@ -369,3 +407,5 @@ juce::AudioFormatManager& KrumSampler::getFormatManager()
 {
     return formatManager;
 }
+
+

@@ -61,10 +61,10 @@ ModuleSettingsOverlay::~ModuleSettingsOverlay()
 
 void ModuleSettingsOverlay::paint(juce::Graphics& g)
 {
-    auto area = getLocalBounds();
+    auto area = getLocalBounds().reduced(5);
     g.setColour(juce::Colours::black.withAlpha(0.75f));
     g.fillRoundedRectangle(area.toFloat(), cornerSize);
-
+    
     if (updateMidiLabels)
     {
         setMidiLabels();
@@ -79,6 +79,9 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
     moduleSelectedColor = colorPalette.getSelectedColor();
 
     g.setColour(moduleSelectedColor);
+    
+    g.drawFittedText(parentModule.info.name, area.withTrimmedBottom(area.getHeight() * 0.9f), juce::Justification::centred, 1);
+    
     if (!moduleOverlaySelected)
     {
         g.setFont(18.0f);

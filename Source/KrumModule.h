@@ -35,8 +35,8 @@
 #define THUMBNAIL_RES 256
 
 
-class KrumModule :  public juce::MidiKeyboardStateListener,
-                    public juce::DragAndDropContainer
+class KrumModule :  public juce::MidiKeyboardStateListener
+                    //public juce::DragAndDropContainer
 {
 public:
 
@@ -50,17 +50,22 @@ public:
         moduleReConfig_Id,
         moduleDelete_Id,
     };
-
-    enum ModuleStateIDs
+    
+    enum ModuleState
     {
-        active,
-        inactive,
-        blank,  //needs everything
-        needSample,
-        needMidi,
-        needColor,
+        empty,      //0
+        hasFile,    //1
+        hasMidi,    //2
+        active,     //3
+        muted,      //4
+        soloed,     //5
+        //numerical values are used for value tree saving
     };
 
+    
+    
+    //KrumModule(KrumSampler& km, juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
+    
     KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
         juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
 
@@ -68,6 +73,8 @@ public:
 
     ~KrumModule() override;
 
+    void updateModuleFromTree();
+    
     void handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
     void handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
 
@@ -75,6 +82,9 @@ public:
     void setModuleSelected(bool isModuleSelected);
     void removeSettingsOverlay(bool keepSettings = true);
 
+    void setModuleState(ModuleState newState);
+    ModuleState getModuleState();
+    
     juce::File& getSampleFile();
     void setSampleFile(juce::File& newSample);
 
@@ -85,16 +95,16 @@ public:
     void setMidiTriggerChannel(int newMidiChannel);
 
     juce::String& getModuleName();
-    void setModuleName(juce::String& newName);
+    void setModuleName(juce::String newName);
 
     bool isModulePlaying();
     void setModulePlaying(const bool isPlaying);
 
     bool isModuleActive();
-    void setModuleActive(bool isActive);
+    //void setModuleActive(bool isActive);
 
-    int getModuleIndex();
-    void setModuleIndex(int newIndex);
+    int getModuleSamplerIndex();
+    void setModuleSamplerIndex(int newIndex);
 
     int getModuleDisplayIndex();
     void setModuleDisplayIndex(int newIndex);
@@ -145,15 +155,15 @@ public:
         int midiNote = 0;
         int midiChannel = 0;
         juce::String name;
-        int index;
+        int samplerIndex;
         int displayIndex;
-
-        std::atomic<bool> modulePlaying = false;
-        bool moduleActive = false;
+        //bool moduleActive = false;
+        ModuleState moduleState = ModuleState::empty;
         
+        std::atomic<bool> modulePlaying = false;
         //Is not used yet, but is here as a flag to be used with the draggingHandle being used. Will be impelemented soon!
         // 
-        //bool moduleDragging = false;
+        bool moduleDragging = false;
 
     };
 
@@ -167,7 +177,7 @@ private:
     friend class KrumModuleProcessor;
     friend class DragAndDropThumbnail;
 
-    std::shared_ptr<KrumModuleProcessor> moduleProcessor;
+    //std::shared_ptr<KrumModuleProcessor> moduleProcessor;
     std::shared_ptr<KrumModuleEditor> moduleEditor = nullptr;
 
     juce::AudioProcessorValueTreeState* parameters = nullptr;
@@ -175,6 +185,15 @@ private:
 
     juce::String getIndexString();
 
+    //From Processor
+    KrumSampler& sampler;
+
+    std::atomic<float>* moduleGain = nullptr;
+    std::atomic<float>* modulePan = nullptr;
+    std::atomic<float>* moduleClipGain = nullptr;
+
+    float buttonClickVelocity = 0.5f;
+    
     JUCE_LEAK_DETECTOR(KrumModule)
 
 };

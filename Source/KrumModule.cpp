@@ -12,21 +12,29 @@
 #include "PluginEditor.h"
 
 
+////Blank Module Ctor
+//KrumModule::KrumModule(KrumSampler& km, juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
+//    : sampler(km), valueTree(valTree), parameters(apvts)
+//{
+//    info.moduleState = ModuleState::empty;
+//}
+
 //Creates a module with NO MIDI assigned, up to the module to get this from the user.
 //This ctor is used when creating a new module from the GUI, okay to update Value Tree
 KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
                         juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
-    : valueTree(valTree), parameters(apvts)
+    : valueTree(valTree), parameters(apvts), sampler(km)
 {
-    moduleProcessor.reset(new KrumModuleProcessor(*this, km));
+    //moduleProcessor.reset(new KrumModuleProcessor(*this, km));
 
-    info.index = index;
+    info.samplerIndex = index;
     info.audioFile = file;
     info.name = moduleName;
-    info.moduleActive = true;
+    info.moduleState = hasFile;
+    //info.moduleState = ModuleState::empty;
 
     //for now..
-    info.displayIndex = info.index;
+    //info.displayIndex = info.ndex;
 
     updateValuesInTree();
 }
@@ -34,19 +42,19 @@ KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, Kru
 
 //creates a module from the ValueTree passed in
 KrumModule::KrumModule(int newIndex, KrumSampler& km, juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
-    : valueTree(valTree), parameters(apvts)
+    : valueTree(valTree), parameters(apvts), sampler(km)
 {
-    moduleProcessor.reset(new KrumModuleProcessor(*this, km));
-    info.index = newIndex;
-    getValuesFromTree();
-    updateAudioAtomics();
-    
-    needsToUpdateTree = true;
-
+    info.samplerIndex = newIndex;
 }
 
 KrumModule::~KrumModule()
 {
+}
+
+void KrumModule::updateModuleFromTree()
+{
+    getValuesFromTree();
+    updateAudioAtomics();
 }
 
 //use this only to capture midi assignments, does not trigger any sound
@@ -80,10 +88,65 @@ void KrumModule::setModuleSelected(bool isModuleSelected)
 
 void KrumModule::removeSettingsOverlay(bool keepSettings)
 {
-    if (moduleEditor != nullptr)
+    if (moduleEditor != nullptr) 
     {
         moduleEditor->removeSettingsOverlay(keepSettings);
     }
+}
+
+void KrumModule::setModuleState(ModuleState newState)
+{
+    //if has midi and file make active
+    switch(newState)
+    {
+        case ModuleState::hasFile:
+            if(info.moduleState == ModuleState::hasMidi)
+            {
+                info.moduleState = ModuleState::active;
+            }
+            else
+            {
+                info.moduleState = newState;
+                if(auto modEditor = getCurrentModuleEditor())
+                {
+                    modEditor->showSettingsOverlay(true);
+                }
+            }
+            break;
+        case ModuleState::hasMidi:
+            if(info.moduleState == ModuleState::hasFile)
+            {
+                info.moduleState = ModuleState::active;
+                if(auto modEditor = getCurrentModuleEditor())
+                {
+                    modEditor->buildModule();
+                }
+            }
+            else
+            {
+                info.moduleState = newState;
+            }
+            break;
+        case ModuleState::active: //intentional fallthrough
+            info.moduleState = newState;
+            if(auto modEditor = getCurrentModuleEditor())
+            {
+                modEditor->buildModule();
+            }
+            break;
+        case ModuleState::muted:  //intentional fallthrough
+        case ModuleState::soloed: //intentional fallthrough
+        case ModuleState::empty: //intentional fallthrough
+            info.moduleState = newState;
+            break;
+    }
+    
+    
+}
+
+KrumModule::ModuleState KrumModule::getModuleState()
+{
+    return info.moduleState;
 }
 
 juce::File& KrumModule::getSampleFile()
@@ -96,6 +159,7 @@ void KrumModule::setSampleFile(juce::File& newFile)
     if (newFile.existsAsFile())
     {
         info.audioFile = newFile;
+        setModuleState(ModuleState::hasFile);
         updateValuesInTree();
     }
 }
@@ -114,6 +178,7 @@ void KrumModule::setMidiTriggerNote(int midiNoteNumber, bool removeOld)
     }
 
     info.midiNote = midiNoteNumber;
+    setModuleState(ModuleState::hasMidi);
     updateValuesInTree();
 }
 
@@ -134,7 +199,7 @@ juce::String& KrumModule::getModuleName()
     return info.name;
 }
 
-void KrumModule::setModuleName(juce::String& newName)
+void KrumModule::setModuleName(juce::String newName)
 {
     info.name = newName;
     
@@ -157,25 +222,25 @@ void KrumModule::setModulePlaying(const bool isPlaying)
 
 bool KrumModule::isModuleActive()
 {
-    return info.moduleActive;
+    return info.moduleState == ModuleState::active;
 }
 
-void KrumModule::setModuleActive(bool isActive)
-{
-    info.moduleActive = isActive;
-    updateValuesInTree();
-}
+//void KrumModule::setModuleActive(bool isActive)
+//{
+//    info.moduleActive = isActive;
+//    updateValuesInTree();
+//}
 
-int KrumModule::getModuleIndex()
+int KrumModule::getModuleSamplerIndex()
 {
-    return info.index;
+    return info.samplerIndex;
 }
 
 //automatically sets display index for now.
-void KrumModule::setModuleIndex(int newIndex)
+void KrumModule::setModuleSamplerIndex(int newIndex)
 {
-    info.index = newIndex;
-    setModuleDisplayIndex(newIndex);
+    info.samplerIndex = newIndex;
+    //setModuleDisplayIndex(newIndex);
     updateValuesInTree();
 }
 
@@ -208,13 +273,15 @@ void KrumModule::setModuleColor(juce::Colour newModuleColor, bool refreshChildre
 void KrumModule::triggerNoteOn()
 {
     //not sure if this is the best way to do this
-    moduleProcessor->triggerNoteOn();
+    //moduleProcessor->triggerNoteOn();
+    sampler.noteOn(info.midiChannel, info.midiNote, buttonClickVelocity);
 }
 
 void KrumModule::triggerNoteOff() 
 {
     //setModulePlaying(false);
-    moduleProcessor->triggerNoteOff();
+    //moduleProcessor->triggerNoteOff();
+    sampler.noteOff(info.midiChannel, info.midiNote, 0, true);
 }
 
 void KrumModule::setModuleGain(float newGain)
@@ -226,12 +293,12 @@ void KrumModule::setModuleGain(float newGain)
 
 std::atomic<float>* KrumModule::getModuleGain()
 {
-    return moduleProcessor->moduleGain;
+    return moduleGain;
 }
 
 std::atomic<float>* KrumModule::getModuleClipGain()
 {
-    return moduleProcessor->moduleClipGain;
+    return moduleClipGain;
 }
 
 void KrumModule::setModulePan(float newPan)
@@ -243,7 +310,7 @@ void KrumModule::setModulePan(float newPan)
 //float KrumModule::getModulePan()
 std::atomic<float>* KrumModule::getModulePan()
 {
-    return moduleProcessor->modulePan;
+    return modulePan;
 }
 
 bool KrumModule::doesModuleNeedToUpdateTree()
@@ -271,9 +338,9 @@ void KrumModule::getValuesFromTree()
             id = stateTree.getProperty("id");
             val = stateTree.getProperty("value");
             DBG(id.toString() + " " + val.toString());
-            if (id.toString() == TreeIDs::paramModuleActive_ID && int(val) > 0)
+            if (id.toString() == TreeIDs::paramModuleState_ID)
             {
-                info.moduleActive = true;
+                info.moduleState = static_cast<ModuleState>((int)val);
             }
             else if (id.toString() == TreeIDs::paramModuleFile_ID && !val.isVoid())
             {
@@ -326,9 +393,9 @@ void KrumModule::updateValuesInTree(bool printBefore)
             stateTree = moduleTree.getChild(i);
             id = stateTree.getProperty("id");
 
-            if (id == TreeIDs::paramModuleActive_ID)
+            if (id == TreeIDs::paramModuleState_ID)
             {
-                stateTree.setProperty("value", info.moduleActive ? juce::var(1) : juce::var(0), nullptr);
+                stateTree.setProperty("value", (int)info.moduleState, nullptr);
             }
             else if (id == TreeIDs::paramModuleFile_ID)
             {
@@ -380,10 +447,10 @@ void KrumModule::clearModuleValueTree()
 
 void KrumModule::updateAudioAtomics()
 {
-    moduleProcessor->moduleGain = parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + getIndexString());
-    moduleProcessor->modulePan = parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + getIndexString());
-    moduleProcessor->moduleClipGain = parameters->getRawParameterValue(TreeIDs::paramModuleClipGain_ID + getIndexString());
-    DBG("Raw Value: " + juce::String(*moduleProcessor->moduleGain));
+    moduleGain = parameters->getRawParameterValue(TreeIDs::paramModuleGain_ID + getIndexString());
+    modulePan = parameters->getRawParameterValue(TreeIDs::paramModulePan_ID + getIndexString());
+    moduleClipGain = parameters->getRawParameterValue(TreeIDs::paramModuleClipGain_ID + getIndexString());
+    DBG("Raw Value: " + juce::String(*moduleGain));
 }
 
 //this is needed when deleting modules and needing to reassign the slider listeners in the ValueTree
@@ -400,7 +467,7 @@ KrumModuleEditor* KrumModule::createModuleEditor(KrumSamplerAudioProcessorEditor
 {
     if (moduleEditor == nullptr)
     {
-        moduleEditor.reset(new KrumModuleEditor(*this, *moduleProcessor, editor));
+        moduleEditor.reset(new KrumModuleEditor(*this, editor));
     }
 
     setEditorVisibility(true);
@@ -436,10 +503,13 @@ int KrumModule::deleteEntireModule()
 {
     clearModuleValueTree();
     deleteModuleEditor();
-    moduleProcessor->sampler.removeModule(this);  
+    sampler.removeModule(this);
     return 0;
 }
+
 juce::String KrumModule::getIndexString()
 {
-    return juce::String(info.index);
+    return juce::String(info.samplerIndex);
 }
+
+

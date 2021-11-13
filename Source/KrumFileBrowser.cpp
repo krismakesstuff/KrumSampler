@@ -19,534 +19,534 @@ class KrumTreeHeaderItem;
 
 KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name)
         : previewer(preview), parentTree(parentTreeView), InfoPanelComponent("File", "Files can be renames or removed from this browser. NOTE: these aren't you're actual files, so any changes made aren't making changes to the actual file.")
-    {
-        file = fullPathName;
-        itemName = name;
-        treeHasChanged();
+{
+    file = fullPathName;
+    itemName = name;
+    treeHasChanged();
 
-        setLinesDrawnForSubItems(true);
-        setDrawsInLeftMargin(true);
-        setInterceptsMouseClicks(false, true);
-    } 
+    setLinesDrawnForSubItems(true);
+    setDrawsInLeftMargin(true);
+    setInterceptsMouseClicks(false, true);
+}
 
-    bool KrumTreeItem::mightContainSubItems()
+bool KrumTreeItem::mightContainSubItems()
+{
+    return false;
+}
+
+std::unique_ptr<juce::Component> KrumTreeItem::createItemComponent()
+{
+    auto newKrumItem = new EditableComp(*this, itemName, bgColor);
+
+    auto label = static_cast<juce::Label*>(newKrumItem);
+    auto comp = static_cast<juce::Component*>(label);
+    return std::move(std::unique_ptr<juce::Component>(comp));
+}
+
+void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
+{
+    juce::Line<float> newLine = line;
+    newLine.setStart(line.getStartX() - 20, line.getStartY());
+    newLine.setEnd(line.getEndX() - 10, line.getEndY());
+
+    g.setColour(juce::Colours::black);
+    g.drawLine(newLine);
+}
+
+void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
+{
+    if (previewer->isAutoPlayActive() /*&& !previewer->wantsToPlayFile()*/)
     {
-        return false;
+        previewer->loadFile(file);
+        previewer->setWantsToPlayFile(true);
     }
-    
-    std::unique_ptr<juce::Component> KrumTreeItem::createItemComponent()
-    {
-        auto newKrumItem = new EditableComp(*this, itemName, bgColor);
-
-        auto label = static_cast<juce::Label*>(newKrumItem);
-        auto comp = static_cast<juce::Component*>(label);
-        return std::move(std::unique_ptr<juce::Component>(comp));
-    }
-
-    void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
-    {
-        juce::Line<float> newLine = line;
-        newLine.setStart(line.getStartX() - 20, line.getStartY());
-        newLine.setEnd(line.getEndX() - 10, line.getEndY());
-
-        g.setColour(juce::Colours::black);
-        g.drawLine(newLine);
-    }
-
-    void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
-    {
-        if (previewer->isAutoPlayActive() /*&& !previewer->wantsToPlayFile()*/)
-        {
-            previewer->loadFile(file);
-            previewer->setWantsToPlayFile(true);
-        }
 //        else if (!previewer->isAutoPlayActive())
 //        {
 //            previewer->setWantsToPlayFile(false);
 //        }
 
 
+}
+
+void KrumTreeItem::itemDoubleClicked(const juce::MouseEvent& e)
+{
+    if (!previewer->isAutoPlayActive())
+    {
+        previewer->loadFile(file);
+        previewer->setWantsToPlayFile(true);
+    }
+}
+
+/*void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
+{
+}*/
+
+void KrumTreeItem::closeLabelEditor(juce::Label* label)
+{
+    if (label->getText().isNotEmpty())
+    {
+        itemName = label->getText();
     }
 
-    void KrumTreeItem::itemDoubleClicked(const juce::MouseEvent& e)
+    setItemEditing(false);
+    treeHasChanged();
+    repaintItem();
+}
+
+juce::String KrumTreeItem::getUniqueName() const
+{
+    return juce::String(getIndexInParent() + "-" + file.getFileName());
+}
+
+
+juce::File& KrumTreeItem::getFile()
+{
+    return file;
+}
+
+juce::String KrumTreeItem::getItemName()
+{
+    return itemName;
+}
+
+void KrumTreeItem::setItemName(juce::String newName)
+{
+    itemName = newName.isNotEmpty() ? newName : file.getFileName();
+    parentTree->updateValueTree(getItemIdentifierString());
+}
+
+bool KrumTreeItem::isItemEditing()
+{
+    return editing;
+}
+
+void KrumTreeItem::setItemEditing(bool isEditing)
+{
+    editing = isEditing;
+}
+
+
+void KrumTreeItem::removeThisItem()
+{
+    getParentItem()->removeSubItem(getIndexInParent());
+}
+
+void KrumTreeItem::tellParentToRemoveMe()
+{
+    parentTree->removeItem(getItemIdentifierString());
+}
+
+void KrumTreeItem::setBGColor(juce::Colour newColor)
+{
+    bgColor = newColor;
+}
+
+//-----------------------------------------------------------------------
+
+KrumTreeItem::EditableComp::EditableComp (KrumTreeItem& o, juce::String itemName, juce::Colour backColor)
+    : owner(o), bgColor(backColor)
+{
+    setText(itemName, juce::dontSendNotification);
+    setTooltip(owner.getFile().getFullPathName());
+    setInterceptsMouseClicks(true, true);
+}
+
+void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
+{
+    auto area = getLocalBounds();
+
+    g.setColour( owner.isSelected() ? bgColor : bgColor.darker(0.7f));
+    g.fillRect(area);
+
+
+    if (!isBeingEdited())
     {
-        if (!previewer->isAutoPlayActive())
+        g.setColour(juce::Colours::lightgrey);
+        g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
+    }
+}
+
+void KrumTreeItem::EditableComp::textWasEdited()
+{
+    //passed the text through to the owner to handle different situations
+    owner.setItemName(getText());
+    setText(owner.getItemName(), juce::dontSendNotification);
+    owner.setItemEditing(false);
+}
+
+void KrumTreeItem::EditableComp::editorAboutToBeHidden(juce::TextEditor* editor)
+{
+    owner.setItemEditing(false);
+}
+
+void KrumTreeItem::EditableComp::mouseEnter(const juce::MouseEvent& e)
+{
+    owner.mouseEnter(e);
+}
+
+void KrumTreeItem::EditableComp::mouseExit(const juce::MouseEvent& e)
+{
+    owner.mouseExit(e);
+}
+
+void KrumTreeItem::EditableComp::mouseDown(const juce::MouseEvent& e)
+{
+    bool shift = e.mods.isShiftDown();
+    bool cntrl = e.mods.isCtrlDown();
+    bool itemSelected = owner.isSelected();
+    int thisIndex = owner.getIndexInParent();
+    int numSelectedItems = owner.parentTree->getNumSelectedItems();
+
+    //works out if your mouse click is selecting multpile items by holding the shift or cntrl modifiers
+    if (!itemSelected && (cntrl || shift))
+    {
+        if (shift)
         {
-            previewer->loadFile(file);
-            previewer->setWantsToPlayFile(true);
-        }
-    }
-
-    /*void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
-    {
-    }*/
-
-    void KrumTreeItem::closeLabelEditor(juce::Label* label)
-    {
-        if (label->getText().isNotEmpty())
-        {
-            itemName = label->getText();
-        }
-
-        setItemEditing(false);
-        treeHasChanged();
-        repaintItem();
-    }
-
-    juce::String KrumTreeItem::getUniqueName() const
-    {
-        return juce::String(getIndexInParent() + "-" + file.getFileName());
-    }
-
-
-    juce::File& KrumTreeItem::getFile()
-    { 
-        return file; 
-    }
-
-    juce::String KrumTreeItem::getItemName()
-    { 
-        return itemName; 
-    }
-
-    void KrumTreeItem::setItemName(juce::String newName)
-    { 
-        itemName = newName.isNotEmpty() ? newName : file.getFileName(); 
-        parentTree->updateValueTree(getItemIdentifierString());
-    }
-
-    bool KrumTreeItem::isItemEditing()
-    { 
-        return editing; 
-    }
-    
-    void KrumTreeItem::setItemEditing(bool isEditing)
-    {
-        editing = isEditing;
-    }
-
-
-    void KrumTreeItem::removeThisItem()
-    {
-        getParentItem()->removeSubItem(getIndexInParent());
-    }
-
-    void KrumTreeItem::tellParentToRemoveMe()
-    {
-        parentTree->removeItem(getItemIdentifierString());
-    }
-
-    void KrumTreeItem::setBGColor(juce::Colour newColor)
-    {
-        bgColor = newColor;
-    }
-
-    //-----------------------------------------------------------------------
-    
-    KrumTreeItem::EditableComp::EditableComp (KrumTreeItem& o, juce::String itemName, juce::Colour backColor)
-        : owner(o), bgColor(backColor)
-    {
-        setText(itemName, juce::dontSendNotification);
-        setTooltip(owner.getFile().getFullPathName());
-        setInterceptsMouseClicks(true, true);
-    }
-
-    void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
-    {
-        auto area = getLocalBounds();
-
-        g.setColour( owner.isSelected() ? bgColor : bgColor.darker(0.7f));
-        g.fillRect(area);
-
-
-        if (!isBeingEdited())
-        {
-            g.setColour(juce::Colours::lightgrey);
-            g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
-        }
-    }
-
-    void KrumTreeItem::EditableComp::textWasEdited()
-    {
-        //passed the text through to the owner to handle different situations
-        owner.setItemName(getText());
-        setText(owner.getItemName(), juce::dontSendNotification);
-        owner.setItemEditing(false);
-    }
-
-    void KrumTreeItem::EditableComp::editorAboutToBeHidden(juce::TextEditor* editor)
-    {
-        owner.setItemEditing(false);
-    }
-
-    void KrumTreeItem::EditableComp::mouseEnter(const juce::MouseEvent& e)
-    {
-        owner.mouseEnter(e);
-    }
-
-    void KrumTreeItem::EditableComp::mouseExit(const juce::MouseEvent& e)
-    {
-        owner.mouseExit(e);
-    }
-
-    void KrumTreeItem::EditableComp::mouseDown(const juce::MouseEvent& e)
-    {
-        bool shift = e.mods.isShiftDown();
-        bool cntrl = e.mods.isCtrlDown();
-        bool itemSelected = owner.isSelected();
-        int thisIndex = owner.getIndexInParent();
-        int numSelectedItems = owner.parentTree->getNumSelectedItems();
-
-        //works out if your mouse click is selecting multpile items by holding the shift or cntrl modifiers
-        if (!itemSelected && (cntrl || shift))
-        {
-            if (shift)
+            if (numSelectedItems > 0)
             {
-                if (numSelectedItems > 0)
+                auto parentItem = owner.getParentItem();
+                int firstSelected = owner.parentTree->getSelectedItem(0)->getIndexInParent();
+                int lastSelected = owner.parentTree->getSelectedItem(numSelectedItems - 1)->getIndexInParent();
+
+                if (thisIndex > lastSelected)
                 {
-                    auto parentItem = owner.getParentItem();
-                    int firstSelected = owner.parentTree->getSelectedItem(0)->getIndexInParent();
-                    int lastSelected = owner.parentTree->getSelectedItem(numSelectedItems - 1)->getIndexInParent();
-
-                    if (thisIndex > lastSelected)
+                    for (; lastSelected <= thisIndex; lastSelected++)
                     {
-                        for (; lastSelected <= thisIndex; lastSelected++)
-                        {
-                            parentItem->getSubItem(lastSelected)->setSelected(true, false);
-                        }
-
+                        parentItem->getSubItem(lastSelected)->setSelected(true, false);
                     }
-                    else if(thisIndex < firstSelected)
+
+                }
+                else if(thisIndex < firstSelected)
+                {
+                    for (; thisIndex <= firstSelected; firstSelected--)
                     {
-                        for (; thisIndex <= firstSelected; firstSelected--)
-                        {
-                            parentItem->getSubItem(firstSelected)->setSelected(true, false);
-                        }
+                        parentItem->getSubItem(firstSelected)->setSelected(true, false);
                     }
                 }
             }
-            else if(cntrl)
+        }
+        else if(cntrl)
+        {
+            if (numSelectedItems > 0)
             {
-                if (numSelectedItems > 0)
-                {
-                    owner.setSelected(true, false);
-                }
+                owner.setSelected(true, false);
             }
         }
-        else if(!itemSelected) //with no mods
-        {
-            owner.itemClicked(e);
-            owner.setSelected(true, true);
-            DBG("Index in parent: " + juce::String(owner.getIndexInParent()));
-        }
-
-        //right click menu
-        if (e.mods.isPopupMenu())
-        {
-            juce::PopupMenu menu;
-            juce::Rectangle<int> showPoint{ e.getMouseDownScreenX(), e.getMouseDownScreenY(), 0, 0 };
-            juce::PopupMenu::Options menuOptions;
-
-            menu.addItem(RightClickMenuIds::rename_Id, "Rename");
-            menu.addItem(RightClickMenuIds::remove_Id, "Remove");
-
-            menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
-        }
     }
-
-    void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)
+    else if(!itemSelected) //with no mods
     {
-        if (!(e.mods.isCtrlDown() || e.mods.isShiftDown()) && !e.mouseWasDraggedSinceMouseDown())
-        {
-            owner.setSelected(true, true);
-        }
+        owner.itemClicked(e);
+        owner.setSelected(true, true);
+        DBG("Index in parent: " + juce::String(owner.getIndexInParent()));
     }
 
-    void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
+    //right click menu
+    if (e.mods.isPopupMenu())
     {
-        owner.itemDoubleClicked(e);
-    }
+        juce::PopupMenu menu;
+        juce::Rectangle<int> showPoint{ e.getMouseDownScreenX(), e.getMouseDownScreenY(), 0, 0 };
+        juce::PopupMenu::Options menuOptions;
 
-    void KrumTreeItem::EditableComp::handleResult(int result, EditableComp* comp)
-    {
-        if (result == RightClickMenuIds::rename_Id)
-        {
-            comp->showEditor();
-            comp->repaint();
-            comp->owner.setItemEditing(true);
-        }
-        else if (result == RightClickMenuIds::remove_Id)
-        {
-            comp->owner.tellParentToRemoveMe();
-        }
+        menu.addItem(RightClickMenuIds::rename_Id, "Rename");
+        menu.addItem(RightClickMenuIds::remove_Id, "Remove");
+
+        menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
     }
+}
+
+void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)
+{
+    if (!(e.mods.isCtrlDown() || e.mods.isShiftDown()) && !e.mouseWasDraggedSinceMouseDown())
+    {
+        owner.setSelected(true, true);
+    }
+}
+
+void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
+{
+    owner.itemDoubleClicked(e);
+}
+
+void KrumTreeItem::EditableComp::handleResult(int result, EditableComp* comp)
+{
+    if (result == RightClickMenuIds::rename_Id)
+    {
+        comp->showEditor();
+        comp->repaint();
+        comp->owner.setItemEditing(true);
+    }
+    else if (result == RightClickMenuIds::remove_Id)
+    {
+        comp->owner.tellParentToRemoveMe();
+    }
+}
 
 //=================================================================================================================================//
 
 
-    KrumTreeHeaderItem::KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name, int numFilesHidden)
-        : parentTree(pTree), numFilesExcluded(numFilesHidden), InfoPanelComponent("Folder", "Folders can be renamed and removed, just like Files, these aren't the actual Folders on your system, just a representation")
-    {
-        file = fullPathName;
-        headerName = name;
-        treeHasChanged();
-        setLinesDrawnForSubItems(true);
-        setInterceptsMouseClicks(false, true);
+KrumTreeHeaderItem::KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name, int numFilesHidden)
+    : parentTree(pTree), numFilesExcluded(numFilesHidden), InfoPanelComponent("Folder", "Folders can be renamed and removed, just like Files, these aren't the actual Folders on your system, just a representation")
+{
+    file = fullPathName;
+    headerName = name;
+    treeHasChanged();
+    setLinesDrawnForSubItems(true);
+    setInterceptsMouseClicks(false, true);
 
+}
+
+bool KrumTreeHeaderItem::mightContainSubItems()
+{
+    //this should contain subItems
+    return true;
+}
+
+std::unique_ptr<juce::Component> KrumTreeHeaderItem::createItemComponent()
+{
+    auto newHeaderComp = new EditableHeaderComp(*this, headerName, bgColor);
+
+    if (numFilesExcluded > 0)
+    {
+        newHeaderComp->setTooltip(newHeaderComp->getTooltip() + " (" + juce::String(numFilesExcluded) + " files excluded)");
     }
 
-    bool KrumTreeHeaderItem::mightContainSubItems()
+    auto label = static_cast<juce::Label*>(newHeaderComp);
+    auto comp = static_cast<juce::Component*>(label);
+    return std::move(std::unique_ptr<juce::Component>(comp));
+}
+
+void KrumTreeHeaderItem::paintOpenCloseButton(juce::Graphics&, const juce::Rectangle< float >& area, juce::Colour backgroundColour, bool isMouseOver)
+{
+
+}
+
+void KrumTreeHeaderItem::paintVerticalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
+{
+    juce::Line<float> newLine = line;
+
+    g.setColour(juce::Colours::black);
+    g.drawLine(newLine);
+
+}
+
+void KrumTreeHeaderItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
+{
+    if (isOpen())
     {
-        //this should contain subItems
+        g.setColour(juce::Colours::black);
+        g.drawLine(line);
+    }
+}
+
+void KrumTreeHeaderItem::itemClicked(const juce::MouseEvent& e)
+{
+    //repaintItem();
+    //DBG(headerName + " Clicked");
+}
+
+void KrumTreeHeaderItem::itemDoubleClicked(const juce::MouseEvent& e)
+{
+    setOpen(!isOpen());
+    DBG("HeaderItem Double Clicked:" + juce::String(isOpen() ? "is Open" : "is NOT Open"));
+}
+
+juce::File& KrumTreeHeaderItem::getFile() { return file; }
+
+juce::String KrumTreeHeaderItem::getItemHeaderName() { return headerName; }
+void KrumTreeHeaderItem::setItemHeaderName(juce::String newName)
+{
+    headerName = newName.isNotEmpty() ? newName : file.getFileName();
+    parentTree->updateValueTree(getItemIdentifierString());
+}
+
+juce::String KrumTreeHeaderItem::getUniqueName() const
+{
+    return juce::String(getIndexInParent() + "-" + file.getFileName());
+}
+
+void KrumTreeHeaderItem::setBGColor(juce::Colour newColor)
+{
+    bgColor = newColor;
+}
+
+bool KrumTreeHeaderItem::isItemEditing(bool checkChildren)
+{
+    if (editing)
+    {
         return true;
     }
-
-    std::unique_ptr<juce::Component> KrumTreeHeaderItem::createItemComponent()
+    else if (checkChildren && getNumSubItems() > 0)
     {
-        auto newHeaderComp = new EditableHeaderComp(*this, headerName, bgColor);
-
-        if (numFilesExcluded > 0)
+        for (int i = 0; i < getNumSubItems(); i++)
         {
-            newHeaderComp->setTooltip(newHeaderComp->getTooltip() + " (" + juce::String(numFilesExcluded) + " files excluded)");
-        }
-
-        auto label = static_cast<juce::Label*>(newHeaderComp);
-        auto comp = static_cast<juce::Component*>(label);
-        return std::move(std::unique_ptr<juce::Component>(comp));
-    }
-
-    void KrumTreeHeaderItem::paintOpenCloseButton(juce::Graphics&, const juce::Rectangle< float >& area, juce::Colour backgroundColour, bool isMouseOver)
-    {
-
-    }
-
-    void KrumTreeHeaderItem::paintVerticalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
-    {
-        juce::Line<float> newLine = line;
-
-        g.setColour(juce::Colours::black);
-        g.drawLine(newLine);
-
-    }
-
-    void KrumTreeHeaderItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
-    {
-        if (isOpen())
-        {
-            g.setColour(juce::Colours::black);
-            g.drawLine(line);
-        }
-    }
-
-    void KrumTreeHeaderItem::itemClicked(const juce::MouseEvent& e)
-    {
-        //repaintItem();
-        //DBG(headerName + " Clicked");
-    }
-
-    void KrumTreeHeaderItem::itemDoubleClicked(const juce::MouseEvent& e)
-    {
-        setOpen(!isOpen());
-        DBG("HeaderItem Double Clicked:" + juce::String(isOpen() ? "is Open" : "is NOT Open"));
-    }
-
-    juce::File& KrumTreeHeaderItem::getFile() { return file; }
-
-    juce::String KrumTreeHeaderItem::getItemHeaderName() { return headerName; }
-    void KrumTreeHeaderItem::setItemHeaderName(juce::String newName)
-    { 
-        headerName = newName.isNotEmpty() ? newName : file.getFileName();
-        parentTree->updateValueTree(getItemIdentifierString());
-    }
-
-    juce::String KrumTreeHeaderItem::getUniqueName() const
-    {
-        return juce::String(getIndexInParent() + "-" + file.getFileName());
-    }
-
-    void KrumTreeHeaderItem::setBGColor(juce::Colour newColor)
-    {
-        bgColor = newColor;
-    }
-    
-    bool KrumTreeHeaderItem::isItemEditing(bool checkChildren)
-    { 
-        if (editing)
-        {
-            return true;
-        }
-        else if (checkChildren && getNumSubItems() > 0)
-        {
-            for (int i = 0; i < getNumSubItems(); i++)
+            auto item = getSubItem(i);
+            if (item->mightContainSubItems())
             {
-                auto item = getSubItem(i);
-                if (item->mightContainSubItems())
+                auto headerItem = parentTree->makeHeaderItem(item);
+                if (headerItem && headerItem->isItemEditing(true))
                 {
-                    auto headerItem = parentTree->makeHeaderItem(item);
-                    if (headerItem && headerItem->isItemEditing(true))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-                else
+            }
+            else
+            {
+                auto treeItem = parentTree->makeTreeItem(item);
+                if (treeItem && treeItem->isItemEditing())
                 {
-                    auto treeItem = parentTree->makeTreeItem(item);
-                    if (treeItem && treeItem->isItemEditing())
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
-
-        return false;
-    }
-    
-    void KrumTreeHeaderItem::setItemEditing(bool isEditing)
-    {
-        editing = isEditing;
     }
 
-    void KrumTreeHeaderItem::setEditable(bool isEditable)
-    {
-        editable = isEditable;
-    }
+    return false;
+}
 
-    bool KrumTreeHeaderItem::isEditable()
-    {
-        return editable;
-    }
-    
-    void KrumTreeHeaderItem::removeThisHeaderItem()
-    {
-        getParentItem()->removeSubItem(getIndexInParent());
-    }
+void KrumTreeHeaderItem::setItemEditing(bool isEditing)
+{
+    editing = isEditing;
+}
 
-    void KrumTreeHeaderItem::tellParentToRemoveMe()
-    {
-        parentTree->removeItem(getItemIdentifierString());
-    }
+void KrumTreeHeaderItem::setEditable(bool isEditable)
+{
+    editable = isEditable;
+}
 
-    void KrumTreeHeaderItem::clearAllChildren()
+bool KrumTreeHeaderItem::isEditable()
+{
+    return editable;
+}
+
+void KrumTreeHeaderItem::removeThisHeaderItem()
+{
+    getParentItem()->removeSubItem(getIndexInParent());
+}
+
+void KrumTreeHeaderItem::tellParentToRemoveMe()
+{
+    parentTree->removeItem(getItemIdentifierString());
+}
+
+void KrumTreeHeaderItem::clearAllChildren()
+{
+    int index = getIndexInParent();
+    if (index == FileBrowserSectionIds::recentFolders_Ids)
     {
-        int index = getIndexInParent();
-        if (index == FileBrowserSectionIds::recentFolders_Ids)
+        parentTree->clearRecent();
+    }
+    else if (index == FileBrowserSectionIds::favoritesFolders_Ids)
+    {
+        parentTree->clearFavorites();
+    }
+}
+
+void KrumTreeHeaderItem::setNumFilesExcluded(int numFilesHidden)
+{
+    numFilesExcluded = numFilesHidden;
+    parentTree->updateValueTree(getItemIdentifierString());
+}
+
+int KrumTreeHeaderItem::getNumFilesExcluded()
+{
+    return numFilesExcluded;
+}
+
+KrumTreeHeaderItem::EditableHeaderComp::EditableHeaderComp(KrumTreeHeaderItem& o, juce::String itemName, juce::Colour backColor)
+    : owner(o), bgColor(backColor)
+{
+    setText(itemName, juce::dontSendNotification);
+    setTooltip(owner.getFile().getFullPathName());
+    setInterceptsMouseClicks(true, true);
+}
+
+void KrumTreeHeaderItem::EditableHeaderComp::paint(juce::Graphics& g)
+{
+    auto area = getLocalBounds();
+    g.setColour(owner.isSelected() ? bgColor : bgColor.darker(0.7f));
+    g.fillRect(area);
+
+    if (!isBeingEdited())
+    {
+        g.setColour(juce::Colours::lightgrey);
+        g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
+
+        if (owner.isEditable())
         {
-            parentTree->clearRecent();
-        }
-        else if (index == FileBrowserSectionIds::favoritesFolders_Ids)
-        {
-            parentTree->clearFavorites();
-        }
-    }
-
-    void KrumTreeHeaderItem::setNumFilesExcluded(int numFilesHidden)
-    {
-        numFilesExcluded = numFilesHidden;
-        parentTree->updateValueTree(getItemIdentifierString());
-    }
-
-    int KrumTreeHeaderItem::getNumFilesExcluded()
-    {
-        return numFilesExcluded;
-    }
-
-    KrumTreeHeaderItem::EditableHeaderComp::EditableHeaderComp(KrumTreeHeaderItem& o, juce::String itemName, juce::Colour backColor)
-        : owner(o), bgColor(backColor)
-    {
-        setText(itemName, juce::dontSendNotification);
-        setTooltip(owner.getFile().getFullPathName());
-        setInterceptsMouseClicks(true, true);
-    }
-
-    void KrumTreeHeaderItem::EditableHeaderComp::paint(juce::Graphics& g)
-    {
-        auto area = getLocalBounds();
-        g.setColour(owner.isSelected() ? bgColor : bgColor.darker(0.7f));
-        g.fillRect(area);
-
-        if (!isBeingEdited())
-        {
-            g.setColour(juce::Colours::lightgrey);
-            g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
-
-            if (owner.isEditable())
-            {
-                g.setFont(g.getCurrentFont().getHeightInPoints() - 5.0f);
-                g.drawFittedText("Folder", area.withTrimmedRight(5) , juce::Justification::centredRight, 1);
-            }
-        }
-    }
-
-    void KrumTreeHeaderItem::EditableHeaderComp::textWasEdited()
-    {
-        owner.setItemHeaderName(getText());
-        setText(owner.getItemHeaderName(), juce::dontSendNotification);
-        owner.setItemEditing(true);
-    }
-
-    void KrumTreeHeaderItem::EditableHeaderComp::editorAboutToBeHidden(juce::TextEditor* editor)
-    {
-        owner.setItemEditing(true);
-    }
-
-    void KrumTreeHeaderItem::EditableHeaderComp::mouseEnter(const juce::MouseEvent& e)
-    {
-        owner.mouseEnter(e);
-    }
-
-    void KrumTreeHeaderItem::EditableHeaderComp::mouseExit(const juce::MouseEvent& e)
-    {
-        owner.mouseExit(e);
-    }
-
-    void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e)
-    {
-        bool deselect = ! e.mods.isShiftDown();
-
-        owner.setSelected(true, deselect);
-        owner.itemClicked(e);
-
-        juce::Rectangle<int> showPoint{ e.getMouseDownScreenX(), e.getMouseDownScreenY(), 0, 0 };
-
-        if (e.mods.isPopupMenu() && owner.isEditable())
-        {
-            juce::PopupMenu menu;
-            juce::PopupMenu::Options menuOptions;
-
-            menu.addItem(RightClickMenuIds::rename_Id, "Rename");
-            menu.addItem(RightClickMenuIds::remove_Id, "Remove");
-
-            menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
-        }
-        else if(e.mods.isPopupMenu() && !owner.isEditable())
-        {
-            juce::PopupMenu menu;
-            juce::PopupMenu::Options menuOptions;
-
-            menu.addItem(RightClickMenuIds::clear_Id, "Clear (like, forever)");
-
-            menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
+            g.setFont(g.getCurrentFont().getHeightInPoints() - 5.0f);
+            g.drawFittedText("Folder", area.withTrimmedRight(5) , juce::Justification::centredRight, 1);
         }
     }
+}
 
-    void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
+void KrumTreeHeaderItem::EditableHeaderComp::textWasEdited()
+{
+    owner.setItemHeaderName(getText());
+    setText(owner.getItemHeaderName(), juce::dontSendNotification);
+    owner.setItemEditing(true);
+}
+
+void KrumTreeHeaderItem::EditableHeaderComp::editorAboutToBeHidden(juce::TextEditor* editor)
+{
+    owner.setItemEditing(true);
+}
+
+void KrumTreeHeaderItem::EditableHeaderComp::mouseEnter(const juce::MouseEvent& e)
+{
+    owner.mouseEnter(e);
+}
+
+void KrumTreeHeaderItem::EditableHeaderComp::mouseExit(const juce::MouseEvent& e)
+{
+    owner.mouseExit(e);
+}
+
+void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e)
+{
+    bool deselect = ! e.mods.isShiftDown();
+
+    owner.setSelected(true, deselect);
+    owner.itemClicked(e);
+
+    juce::Rectangle<int> showPoint{ e.getMouseDownScreenX(), e.getMouseDownScreenY(), 0, 0 };
+
+    if (e.mods.isPopupMenu() && owner.isEditable())
     {
-        if (result == RightClickMenuIds::rename_Id)
-        {
-            comp->showEditor();
-            comp->repaint();
-            comp->owner.setItemEditing(true);
-        }
-        else if (result == RightClickMenuIds::remove_Id)
-        {
-            comp->owner.tellParentToRemoveMe();
-        }
-        if (result == RightClickMenuIds::clear_Id)
-        {
-            comp->owner.clearAllChildren();
-        }
+        juce::PopupMenu menu;
+        juce::PopupMenu::Options menuOptions;
+
+        menu.addItem(RightClickMenuIds::rename_Id, "Rename");
+        menu.addItem(RightClickMenuIds::remove_Id, "Remove");
+
+        menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
     }
+    else if(e.mods.isPopupMenu() && !owner.isEditable())
+    {
+        juce::PopupMenu menu;
+        juce::PopupMenu::Options menuOptions;
+
+        menu.addItem(RightClickMenuIds::clear_Id, "Clear (like, forever)");
+
+        menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
+    }
+}
+
+void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
+{
+    if (result == RightClickMenuIds::rename_Id)
+    {
+        comp->showEditor();
+        comp->repaint();
+        comp->owner.setItemEditing(true);
+    }
+    else if (result == RightClickMenuIds::remove_Id)
+    {
+        comp->owner.tellParentToRemoveMe();
+    }
+    if (result == RightClickMenuIds::clear_Id)
+    {
+        comp->owner.clearAllChildren();
+    }
+}
 
 //=================================================================================================================================//
 //=================================================================================================================================//

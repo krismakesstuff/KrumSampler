@@ -101,12 +101,13 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     modulesViewport.setScrollBarsShown(false, true, false, false);
     
     //By the time this constructor runs,if the sampler needs updating, it will have already been updated from the state tree.
-    if (sampler.getNumModules() > 0)
-    {
-        createModuleEditors();
-        keyboard.updateKeysFromContainer();
-    }
+//    if (sampler.getNumModules() > 0)
+//    {
+//        createModuleEditors();
+//        keyboard.updateKeysFromContainer();
+//    }
 
+    createModuleEditors();
     setPaintingIsUnclipped(true);
 
 
@@ -245,7 +246,7 @@ void KrumSamplerAudioProcessorEditor::visibilityChanged()
 {
     if (needsToUpdateThumbs)
     {
-        updateThumbnails();
+        //updateThumbnails();
     }
 
     juce::Component::visibilityChanged();
@@ -313,11 +314,11 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
         }
     }
 
-    if (moduleContainer.getNumModuleEditors() > 0)
-    {
-        needsToUpdateThumbs = true;
-        juce::Logger::writeToLog("Module Editors created: " + juce::String(moduleContainer.getNumModuleEditors()));
-    }
+//    if (moduleContainer.getNumModuleEditors() > 0)
+//    {
+//        needsToUpdateThumbs = true;
+//        //juce::Logger::writeToLog("Module Editors created: " + juce::String(moduleContainer.getNumModuleEditors()));
+//    }
 }
 
 KrumModuleContainer& KrumSamplerAudioProcessorEditor::getModuleContainer()
@@ -353,7 +354,7 @@ void KrumSamplerAudioProcessorEditor::printModules()
     for (int i = 0; i < sampler.getNumModules(); i++)
     {
         auto mod = sampler.getModule(i);
-        DBG("Module Index: " + juce::String(mod->getModuleIndex()));
+        DBG("Module Index: " + juce::String(mod->getModuleSamplerIndex()));
         DBG("Module Display Index: " + juce::String(mod->getModuleDisplayIndex()));
         DBG("Module Name: " + juce::String(mod->getModuleName()));
         DBG("Midi Note: " + juce::String(mod->getMidiTriggerNote()));
@@ -467,7 +468,7 @@ void KrumSamplerAudioProcessorEditor::cleanUpEmptyModuleTrees(/*int numModules*/
                 auto stateTree = moduleTree.getChild(j);
                 auto id = stateTree.getProperty("id");
 
-                if (id.toString() == TreeIDs::paramModuleActive_ID)
+                if (id.toString() == TreeIDs::paramModuleState_ID)
                 {
                     stateTree.setProperty("value", juce::var(0), nullptr);
                 }

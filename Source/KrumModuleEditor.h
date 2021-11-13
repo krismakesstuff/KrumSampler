@@ -41,24 +41,25 @@ class KrumModuleProcessor;
 class KrumSamplerAudioProcessorEditor;
 class DragHandle;
 class ModuleSettingsOverlay;
+class KrumFileBrowser;
 
-class KrumModuleEditor  : public juce::Component
+class KrumModuleEditor  :   public juce::Component,
+                            public juce::DragAndDropTarget,
+                            public juce::FileDragAndDropTarget
 {
 public:
-    KrumModuleEditor(KrumModule& o, KrumModuleProcessor& p, KrumSamplerAudioProcessorEditor& e);
+    KrumModuleEditor(KrumModule& o, KrumSamplerAudioProcessorEditor& e);
     ~KrumModuleEditor() override;
 
     void paint (juce::Graphics&) override;
-
+    
     void paintVolumeSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds);
     void paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds);
 
     void resized() override;
-
     void mouseDown(const juce::MouseEvent& e) override;
     
     void buildModule();
-
     void setChildCompColors();
 
     void showSettingsMenu();
@@ -96,11 +97,9 @@ public:
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
 
     int getAudioFileLengthInMs();
-
     void setKeyboardColor();
 
     bool doesEditorWantMidi();
-
     void handleMidi(int midiChannel, int midiNote);
     
     void removeFromDisplay();
@@ -124,42 +123,45 @@ public:
 
     void handleSettingsMenuResult(int result);
     
+    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
+    void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
+    
+    bool isInterestedInFileDrag(const juce::StringArray& files) override;
+    void filesDropped(const juce::StringArray& files, int x, int y) override;
+    
+    void updateModuleFile(juce::File& newFile);
+    
 private:
 
-    //static void handleSettingsMenuResult(int result, KrumModuleEditor* parentEditor);
-
-    //std::function<void(int)> settingsMenuCallback;
+    
     
     friend class DragAndDropThumbnail;
 
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
+    
     KrumModule& parent;
-    KrumModuleProcessor& moduleProcessor;
     KrumSamplerAudioProcessorEditor& editor;
-
+    
+    
     int oldMidiNote = 0;
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour fontColor{ juce::Colours::white.darker() };
-    
-    //juce::Label titleBox;
+
     InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
     
-    typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
-
-    //juce::Slider volumeSlider, panSlider;
-
     InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
     InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
     
+    typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
     
     DragAndDropThumbnail thumbnail;
 
-    class OneShotButton : /*public juce::DrawableButton*/ public InfoPanelDrawableButton
+    class OneShotButton : public InfoPanelDrawableButton
     {
     public:
         OneShotButton();
@@ -175,8 +177,8 @@ private:
     class ModalManager : public juce::ModalComponentManager::Callback
     {
     public:
-        ModalManager(std::function<void(int)> menuResult)//, KrumModuleEditor* parentEditor)
-            : handleSettingsResult(menuResult)//, parent(parentEditor)
+        ModalManager(std::function<void(int)> menuResult)
+            : handleSettingsResult(menuResult)
         {}
         
         void modalStateFinished(int returnValue) override
@@ -185,60 +187,18 @@ private:
         }
         
         std::function<void(int)> handleSettingsResult;
-        //KrumModuleEditor* parent = nullptr;
     };
     
     
     OneShotButton playButton;
-    //juce::DrawableButton editButton{ "Edit Button", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };
     InfoPanelDrawableButton editButton {"Settings", "Provides a list of actions to change the settings of the module", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };
     friend class ColorPalette;
     
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
     
     //For Later..
-    //std::unique_ptr<DragHandle> dragHandle;
+    std::unique_ptr<DragHandle> dragHandle;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumModuleEditor)
 };
 
-
-class DummyKrumModuleEditor :   public juce::Component,
-                                public juce::DragAndDropTarget
-{
-public:
-    DummyKrumModuleEditor() { setRepaintsOnMouseActivity(true);}
-    ~DummyKrumModuleEditor() override {}
-    
-    void paint(juce::Graphics& g) override
-    {
-        auto area = getLocalBounds();
-        
-        g.setColour(isMouseOver() ? juce::Colours::grey : juce::Colours::darkgrey);
-        g.drawRoundedRectangle(area.reduced(5).toFloat(), 3.0f, 1.0f);
-        
-        g.setColour(juce::Colours::grey);
-        g.drawFittedText("Drop A Sample Here", area.reduced(5), juce::Justification::centred, 3);
-    }
-
-    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override
-    {
-        return true;
-    }
-    
-    void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails) override
-    {
-        DBG(dragDetails.description.toString());
-    }
-    
-//    void resized() override
-//    {
-//    }
-
-};
-
-class KrumModuleEditorBase :    public juce::Component,
-                                public juce::DragAndDropTarget
-{
-    
-};

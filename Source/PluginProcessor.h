@@ -31,7 +31,7 @@
 #define MAX_NUM_MODULES 20
 #define MAX_VOICES 10
 #define MAX_FILE_LENGTH_SECS 3
-#define KRUM_BUILD_VERSION "1.0.2-Beta" //adding InfoPanel
+#define KRUM_BUILD_VERSION "1.1.0-Beta" //Module Re-work
 
 
 namespace TreeIDs
@@ -51,10 +51,11 @@ namespace TreeIDs
     const static juce::String paramModuleClipGain_ID{ "moduleClipGain" };
 
     //ValueTree
+    const static juce::String paramModuleState_ID{"moduleState"};
     const static juce::String paramModuleFile_ID{"moduleFilePath"};
     const static juce::String paramModuleMidiNote_ID{"moduleMidiNote"};
     const static juce::String paramModuleMidiChannel_ID{"moduleMidiChannel"};
-    const static juce::String paramModuleActive_ID{ "moduleActive" };
+    //const static juce::String paramModuleActive_ID{ "moduleActive" };
     const static juce::String paramModuleColor_ID{ "moduleColor" };
     const static juce::String paramModuleDisplayIndex_ID{ "moduleDisplayIndex" };
 }
@@ -148,7 +149,7 @@ public:
     void makeModulesFromValueTree();
     void updateValueTreeState();
     
-    int findFreeModuleIndex();
+    //int findFreeModuleIndex();
     int getNumModulesInSampler();
 
     juce::AudioThumbnailCache& getThumbnailCache();
@@ -178,7 +179,7 @@ private:
     
     juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
   
-    KrumSampler sampler{ formatManager.get(), *this };
+    KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this };
     SimpleAudioPreviewer previewer{formatManager, valueTree};
     KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree};
     

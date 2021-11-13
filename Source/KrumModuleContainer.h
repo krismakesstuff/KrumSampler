@@ -48,13 +48,14 @@ public:
     void addMidiListener(juce::MidiKeyboardStateListener* newListener);
     void removeMidiListener(juce::MidiKeyboardStateListener* listenerToDelete);
 
-    int findFreeModuleIndex();
+    //int findFreeModuleIndex();
     void addModuleEditor(KrumModuleEditor* newModule, bool refreshLayout = true);
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
     void moveModule(KrumModule* moduleToMove, int newDisplayIndex);
 
     void setModuleSelected(KrumModule* moduleToMakeActive);
     void setModuleUnselected(KrumModule* moduleToMakeDeselect);
+    void deselectAllModules();
     
     KrumModuleEditor* getModuleFromMidiNote(int midiNote);
 
@@ -95,7 +96,7 @@ private:
     juce::Rectangle<int> fadeArea;
     
     
-    juce::OwnedArray<DummyKrumModuleEditor> editors;
+    //juce::OwnedArray<DummyKrumModuleEditor> editors;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumModuleContainer)
 

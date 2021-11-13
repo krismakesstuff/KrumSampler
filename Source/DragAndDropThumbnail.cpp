@@ -92,8 +92,8 @@ void DragAndDropThumbnail::moveDroppedFileToParent()
     auto& parent = parentEditor.parent;
 
     parent.setSampleFile(droppedFile);
-    parent.moduleProcessor->sampler.updateModuleSample(&parent);
-    clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + juce::String(parent.getModuleIndex()), clipGainSlider));
+    parent.sampler.updateModuleSample(&parent);
+    clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + juce::String(parent.getModuleSamplerIndex()), clipGainSlider));
 
     parentEditor.drawThumbnail = true;
     checkDroppedFile = false;
@@ -109,12 +109,12 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
     auto area = getLocalBounds();
 
     auto color = parentEditor.parent.info.moduleColor;
-    g.setColour(color);
+    g.setColour(juce::Colours::black);
     g.fillRect(area);
 
     if (getNumChannels() == 0)
     {
-        paintIfNoFileLoaded(g, area, color);
+        paintIfNoFileLoaded(g, area, juce::Colours::black);
     }
     else
     {
@@ -149,7 +149,7 @@ void DragAndDropThumbnail::paintIfNoFileLoaded(juce::Graphics& g, const juce::Re
 
 void DragAndDropThumbnail::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour moduleColor)
 {
-    g.setColour(moduleColor.darker(0.8f));
+    g.setColour(juce::Colours::black);
     g.fillRect(thumbnailBounds);
 
     g.setColour(moduleColor);

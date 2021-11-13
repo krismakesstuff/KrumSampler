@@ -90,9 +90,11 @@ class KrumSamplerAudioProcessor;
 class KrumSampler : public juce::Synthesiser
 {
 public:
-    KrumSampler(juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o);
+    KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o);
     ~KrumSampler() override;
 
+    void initModules(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
+    
     void initVoices();
 
     void noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) override;
@@ -108,6 +110,8 @@ public:
     void clearModules();
     int getNumModules();
 
+    void getNumFreeModules(int& totalFreeModules, int& firstFreeIndex);
+    
     bool isFileAcceptable(const juce::File& file);
     juce::AudioFormatManager& getFormatManager();
 
