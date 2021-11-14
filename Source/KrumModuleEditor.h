@@ -71,7 +71,9 @@ public:
     void cleanUpOverlay(bool keepSettings);
     void setModuleButtonsClickState(bool isClickable);
 
-    int getModuleIndex();
+    int getModuleState();
+    
+    int getModuleSamplerIndex();
     void setModuleIndex(int newIndex);
 
     int getModuleDisplayIndex();
@@ -143,7 +145,6 @@ private:
     KrumModule& parent;
     KrumSamplerAudioProcessorEditor& editor;
     
-    
     int oldMidiNote = 0;
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
@@ -151,7 +152,6 @@ private:
     juce::Colour fontColor{ juce::Colours::white.darker() };
 
     InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
-    
     InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
     InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
     

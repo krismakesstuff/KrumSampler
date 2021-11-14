@@ -21,8 +21,8 @@
 class DragHandle : public InfoPanelDrawableButton
 {
 public:
-    DragHandle(KrumModule& owner, const juce::String& buttonName, juce::DrawableButton::ButtonStyle buttonStyle)
-    : parentModule(owner), InfoPanelDrawableButton(buttonName, "Drag this handle to move the module around")
+    DragHandle(KrumModuleContainer& c, KrumModule& owner, const juce::String& buttonName, juce::DrawableButton::ButtonStyle buttonStyle)
+    : container(c), parentModule(owner), InfoPanelDrawableButton(buttonName, "Drag this handle to move the module around")
     {
        // auto edBounds = parentModule.getCurrentModuleEditor()->getBounds();
         constrainer.setMinimumOnscreenAmounts(0xffffff, 0xffffff, 0xffffff, 0xffffff);
@@ -34,18 +34,21 @@ public:
 
     void mouseDown(const juce::MouseEvent& e) override
     {
-        dragger.startDraggingComponent(parentModule.getCurrentModuleEditor(), e);
+        auto modEd = parentModule.getCurrentModuleEditor();
+        //dragger.startDraggingComponent(parentModule.getCurrentModuleEditor(), e);
+        container.startModuleDrag(modEd, e.getEventRelativeTo(&container));
         InfoPanelDrawableButton::mouseDown(e);
     }
     
     void mouseDrag(const juce::MouseEvent& e) override
     {
         //auto edBounds = parentModule.getCurrentModuleEditor()->getBounds();
-        
-        
+        auto modEd = parentModule.getCurrentModuleEditor();
         
         parentModule.info.moduleDragging = true;
-        dragger.dragComponent(parentModule.getCurrentModuleEditor(), e, &constrainer);
+        container.dragModule(modEd, e.getEventRelativeTo(&container));
+        //dragger.dragComponent(parentModule.getCurrentModuleEditor(), e, &constrainer);
+        
         //DBG("Module Dragging: " + parentModule->getModuleName());
         //parentModule.startDragging("ModuleDragAndDrop", parentModule.getCurrentModuleEditor(), juce::Image(), true);
     }
@@ -53,6 +56,7 @@ public:
     void mouseUp(const juce::MouseEvent& e) override
     {
         parentModule.info.moduleDragging = false;
+        container.endModuleDrag(parentModule.getCurrentModuleEditor());
         InfoPanelDrawableButton::mouseUp(e);
     }
 
@@ -60,6 +64,7 @@ public:
     juce::ComponentBoundsConstrainer constrainer;
     
     KrumModule& parentModule;
+    KrumModuleContainer& container;
 
 };
 
@@ -263,11 +268,10 @@ void KrumModuleEditor::buildModule()
     auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
     auto dragHandelIm = juce::Drawable::createFromImageData(dragHandleData, dragHandleSize);
 
-    dragHandle.reset(new DragHandle{ parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
+    dragHandle.reset(new DragHandle{ editor.moduleContainer, parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
     dragHandle->setImages(dragHandelIm.get());
     addAndMakeVisible(dragHandle.get());
     dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");
-    
     
     addAndMakeVisible(thumbnail);
     thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + i, thumbnail.clipGainSlider));
@@ -479,7 +483,12 @@ void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
     }
 }
 
-int KrumModuleEditor::getModuleIndex()
+int KrumModuleEditor::getModuleState()
+{
+    return parent.getModuleState();
+}
+
+int KrumModuleEditor::getModuleSamplerIndex()
 {
     return parent.getModuleSamplerIndex();
 }

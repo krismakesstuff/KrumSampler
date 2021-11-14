@@ -27,6 +27,8 @@ class DummyKrumModuleEditor;
 class KrumModule;
 class KrumSamplerAudioProcessorEditor;
 
+
+
 class KrumModuleContainer : public juce::Component,
                             /*public juce::DragAndDropTarget,*/
                             public juce::Timer
@@ -41,13 +43,13 @@ public:
     
     void paintLineUnderMouseDrag(juce::Graphics& g, juce::Point<int> mousePosition);
     
-    void refreshModuleLayout(bool makeVisible);
+    void refreshModuleLayout();
     
     void mouseDown(const juce::MouseEvent& event) override;
 
     void addMidiListener(juce::MidiKeyboardStateListener* newListener);
     void removeMidiListener(juce::MidiKeyboardStateListener* listenerToDelete);
-
+    
     //int findFreeModuleIndex();
     void addModuleEditor(KrumModuleEditor* newModule, bool refreshLayout = true);
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
@@ -65,6 +67,15 @@ public:
     void removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove);
     KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
 
+    void updateDisplayIndices();
+    
+    void startModuleDrag(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
+    void dragModule(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
+    void endModuleDrag(KrumModuleEditor* moduleToDrag);
+    
+    bool isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& boundsOfModuleUnderMouse);
+    void isIntersectingWithModules(KrumModuleEditor* editorToTest);
+    
     //bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
     //void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
     
@@ -84,10 +95,53 @@ private:
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
  
-    //could probably use a linked list here? Would make storing position easier when rearranging. 
+    //could probably use a linked list here? Would make storing position easier when rearranging.
     juce::Array<KrumModuleEditor*> moduleDisplayOrder{};
 
-    bool moduleDragging = false;
+    struct ModuleDragInfo
+    {
+        bool dragging = false;
+        juce::Rectangle<int> origBounds;
+        bool showOriginBounds = false;
+        juce::Point<int> mousePos;
+        
+        bool drawLineBetween = false;
+        int leftDisplayIndex = 0;
+        int rightDisplayIndex = 0;
+        
+        void setInfo(bool isDragging, juce::Rectangle<int> draggingBounds, juce::Point<int> mousePosition)
+        {
+            dragging = isDragging;
+            origBounds = draggingBounds;
+            mousePos = mousePosition;
+        }
+        
+        void reset()
+        {
+            dragging = false;
+            showOriginBounds = false;
+            origBounds = {};
+            mousePos = {};
+            
+            drawLineBetween = false;
+            leftDisplayIndex = 0;
+            rightDisplayIndex = 0;
+        }
+        
+    };
+    
+    ModuleDragInfo moduleDragInfo;
+    
+    struct ModulesIntersecting
+    {
+        KrumModuleEditor* first = nullptr;
+        KrumModuleEditor* second = nullptr;
+        
+        void reset() { first = nullptr; second = nullptr;}
+    };
+
+    ModulesIntersecting modulesIntersecting;
+    
 
     KrumSamplerAudioProcessorEditor* editor;
     juce::Colour bgColor{ juce::Colours::black };
@@ -95,6 +149,10 @@ private:
     bool modulesOutside = false;
     juce::Rectangle<int> fadeArea;
     
+    juce::ComponentDragger dragger;
+    
+    //set constrainer and make esc key exit drag
+    juce::ComponentBoundsConstrainer boundsConstrainer;
     
     //juce::OwnedArray<DummyKrumModuleEditor> editors;
 
