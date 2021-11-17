@@ -45,7 +45,8 @@ class KrumFileBrowser;
 
 class KrumModuleEditor  :   public juce::Component,
                             public juce::DragAndDropTarget,
-                            public juce::FileDragAndDropTarget
+                            public juce::FileDragAndDropTarget,
+                            public juce::DragAndDropContainer
 {
 public:
     KrumModuleEditor(KrumModule& o, KrumSamplerAudioProcessorEditor& e);
@@ -58,6 +59,7 @@ public:
 
     void resized() override;
     void mouseDown(const juce::MouseEvent& e) override;
+    void forceMouseUp();
     
     void buildModule();
     void setChildCompColors();
@@ -95,7 +97,7 @@ public:
     void updateName();
     juce::String getModuleName();
     
-    void reassignSliderAttachments();
+    //void reassignSliderAttachments();
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
 
     int getAudioFileLengthInMs();
@@ -109,6 +111,8 @@ public:
     void triggerNoteOnInParent();
     void triggerNoteOffInParent();
 
+    bool needsToBuildEditor();
+    
     bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
     
@@ -124,6 +128,8 @@ public:
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
 
     void handleSettingsMenuResult(int result);
+    
+    void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
     
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
@@ -197,7 +203,9 @@ private:
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
     
     //For Later..
-    std::unique_ptr<DragHandle> dragHandle;
+//    std::unique_ptr<DragHandle> dragHandle;
+//    friend class DragHandle;
+//    bool forcedMouseUp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumModuleEditor)
 };

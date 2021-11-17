@@ -21,23 +21,23 @@
 
 //Creates a module with NO MIDI assigned, up to the module to get this from the user.
 //This ctor is used when creating a new module from the GUI, okay to update Value Tree
-KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
-                        juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
-    : valueTree(valTree), parameters(apvts), sampler(km)
-{
-    //moduleProcessor.reset(new KrumModuleProcessor(*this, km));
-
-    info.samplerIndex = index;
-    info.audioFile = file;
-    info.name = moduleName;
-    info.moduleState = hasFile;
-    //info.moduleState = ModuleState::empty;
-
-    //for now..
-    //info.displayIndex = info.ndex;
-
-    updateValuesInTree();
-}
+//KrumModule::KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
+//                        juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
+//    : valueTree(valTree), parameters(apvts), sampler(km)
+//{
+//    //moduleProcessor.reset(new KrumModuleProcessor(*this, km));
+//
+//    info.samplerIndex = index;
+//    info.audioFile = file;
+//    info.name = moduleName;
+//    info.moduleState = hasFile;
+//    //info.moduleState = ModuleState::empty;
+//
+//    //for now..
+//    //info.displayIndex = info.ndex;
+//
+//    updateValuesInTree();
+//}
 
 
 //creates a module from the ValueTree passed in
@@ -96,50 +96,66 @@ void KrumModule::removeSettingsOverlay(bool keepSettings)
 
 void KrumModule::setModuleState(ModuleState newState)
 {
-    //if has midi and file make active
-    switch(newState)
+    if(newState == ModuleState::hasFile && info.moduleState == ModuleState::hasFile)
     {
-        case ModuleState::hasFile:
-            if(info.moduleState == ModuleState::hasMidi)
-            {
-                info.moduleState = ModuleState::active;
-            }
-            else
-            {
-                info.moduleState = newState;
-                if(auto modEditor = getCurrentModuleEditor())
-                {
-                    modEditor->showSettingsOverlay(true);
-                }
-            }
-            break;
-        case ModuleState::hasMidi:
-            if(info.moduleState == ModuleState::hasFile)
-            {
-                info.moduleState = ModuleState::active;
-                if(auto modEditor = getCurrentModuleEditor())
-                {
-                    modEditor->buildModule();
-                }
-            }
-            else
-            {
-                info.moduleState = newState;
-            }
-            break;
-        case ModuleState::active: //intentional fallthrough
-            info.moduleState = newState;
-            if(auto modEditor = getCurrentModuleEditor())
-            {
-                modEditor->buildModule();
-            }
-            break;
-        case ModuleState::muted:  //intentional fallthrough
-        case ModuleState::soloed: //intentional fallthrough
-        case ModuleState::empty: //intentional fallthrough
-            info.moduleState = newState;
-            break;
+        info.moduleState = ModuleState::active;
     }
+    else
+    {
+        info.moduleState = newState;
+    }
+    
+    updateEditorFromState();
+    updateValuesInTree();
+    
+//    switch(newState)
+//    {
+//        case ModuleState::hasFile:
+//            if(info.moduleState == ModuleState::hasMidi)
+//            {
+//                info.moduleState = ModuleState::active;
+//            }
+//            else
+//            {
+//                info.moduleState = newState;
+//                if(auto modEditor = getCurrentModuleEditor())
+//                {
+//                    modEditor->showSettingsOverlay(true);
+//                }
+//            }
+//            break;
+//        case ModuleState::hasMidi:
+//            if(info.moduleState == ModuleState::hasFile)
+//            {
+//                info.moduleState = ModuleState::active;
+//                if(auto modEditor = getCurrentModuleEditor())
+//                {
+//                    modEditor->buildModule();
+//                }
+//            }
+//            else if (info.moduleState == ModuleState::active)
+//            {
+//                break;
+//            }
+//            else
+//            {
+//
+//                info.moduleState = newState;
+//            }
+//            break;
+//        case ModuleState::active:
+//            info.moduleState = newState;
+//            if(auto modEditor = getCurrentModuleEditor())
+//            {
+//                modEditor->buildModule();
+//            }
+//            break;
+//        case ModuleState::muted:  //intentional fallthrough
+//        case ModuleState::soloed: //intentional fallthrough
+//        case ModuleState::empty: //intentional fallthrough
+//            info.moduleState = newState;
+//            break;
+//    }
     
     
 }
@@ -178,7 +194,7 @@ void KrumModule::setMidiTriggerNote(int midiNoteNumber, bool removeOld)
     }
 
     info.midiNote = midiNoteNumber;
-    setModuleState(ModuleState::hasMidi);
+    //setModuleState(ModuleState::hasMidi);
     updateValuesInTree();
 }
 
@@ -225,11 +241,10 @@ bool KrumModule::isModuleActive()
     return info.moduleState == ModuleState::active;
 }
 
-//void KrumModule::setModuleActive(bool isActive)
-//{
-//    info.moduleActive = isActive;
-//    updateValuesInTree();
-//}
+bool KrumModule::isModuleEmpty()
+{
+    return info.moduleState == ModuleState::empty;
+}
 
 int KrumModule::getModuleSamplerIndex()
 {
@@ -268,6 +283,16 @@ void KrumModule::setModuleColor(juce::Colour newModuleColor, bool refreshChildre
     {
         moduleEditor->setKeyboardColor();
     }
+}
+
+bool KrumModule::isModuleDragging()
+{
+    return info.moduleDragging;
+}
+
+void KrumModule::setModuleDragging(bool isDragging)
+{
+    info.moduleDragging = isDragging;
 }
 
 void KrumModule::triggerNoteOn()
@@ -380,7 +405,6 @@ void KrumModule::updateValuesInTree(bool printBefore)
         }
 
         auto modulesTree = valueTree->getChildWithName("KrumModules");
-
         auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
 
         moduleTree.setProperty("name", juce::var(info.name), nullptr);
@@ -453,15 +477,48 @@ void KrumModule::updateAudioAtomics()
     DBG("Raw Value: " + juce::String(*moduleGain));
 }
 
-//this is needed when deleting modules and needing to reassign the slider listeners in the ValueTree
-void KrumModule::reassignSliders()
+void KrumModule::updateEditorFromState()
 {
-    if (moduleEditor != nullptr)
+    if(hasEditor())
     {
-        moduleEditor->reassignSliderAttachments();
-        updateAudioAtomics();
+        auto currentEditor = getCurrentModuleEditor();
+        
+        if (info.moduleState == ModuleState::active) //has a file and a midi assignment
+        {
+            if (currentEditor->needsToBuildEditor())
+            {
+                currentEditor->buildModule();
+            }
+            else
+            {
+                currentEditor->repaint();
+            }
+        }
+        else if (info.moduleState == ModuleState::hasFile) //has a file but NO midi assignment
+        {
+            currentEditor->showSettingsOverlay();
+            currentEditor->repaint();
+        }
+        else if (info.moduleState == ModuleState::empty) //has nothing
+        {
+            deleteModuleEditor();
+            deleteEntireModule();
+            
+        }
     }
+    
+    
 }
+
+//this is needed when deleting modules and needing to reassign the slider listeners in the ValueTree
+//void KrumModule::reassignSliders()
+//{
+//    if (moduleEditor != nullptr)
+//    {
+//        moduleEditor->reassignSliderAttachments();
+//        updateAudioAtomics();
+//    }
+//}
 
 KrumModuleEditor* KrumModule::createModuleEditor(KrumSamplerAudioProcessorEditor& editor)
 {
@@ -502,8 +559,7 @@ void KrumModule::deleteModuleEditor()
 int KrumModule::deleteEntireModule()
 {
     clearModuleValueTree();
-    deleteModuleEditor();
-    sampler.removeModule(this);
+    getValuesFromTree();
     return 0;
 }
 

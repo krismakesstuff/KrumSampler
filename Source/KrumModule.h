@@ -55,10 +55,7 @@ public:
     {
         empty,      //0
         hasFile,    //1
-        hasMidi,    //2
-        active,     //3
-        muted,      //4
-        soloed,     //5
+        active,     //2
         //numerical values are used for value tree saving
     };
 
@@ -101,6 +98,7 @@ public:
     void setModulePlaying(const bool isPlaying);
 
     bool isModuleActive();
+    bool isModuleEmpty();
     //void setModuleActive(bool isActive);
 
     int getModuleSamplerIndex();
@@ -112,6 +110,11 @@ public:
     juce::Colour getModuleColor();
     void setModuleColor(juce::Colour newModuleColor, bool refreshChildren = true);
 
+    bool isModuleDragging();
+    void setModuleDragging(bool isDragging);
+    
+    
+    
     void triggerNoteOn();
     void triggerNoteOff();
 
@@ -129,8 +132,10 @@ public:
     void clearModuleValueTree();
 
     void updateAudioAtomics();
-
-    void reassignSliders();
+    
+    void updateEditorFromState();
+    
+    //void reassignSliders();
 
     KrumModuleEditor* createModuleEditor(KrumSamplerAudioProcessorEditor& editor);
     KrumModuleEditor* getCurrentModuleEditor();
@@ -159,8 +164,9 @@ public:
         int displayIndex;
         //bool moduleActive = false;
         ModuleState moduleState = ModuleState::empty;
-        
         std::atomic<bool> modulePlaying = false;
+        
+        
         //Is not used yet, but is here as a flag to be used with the draggingHandle being used. Will be impelemented soon!
         // 
         bool moduleDragging = false;

@@ -399,7 +399,6 @@ juce::AudioFormatManager* KrumSamplerAudioProcessor::getFormatManager()
     return formatManager;
 }
 
-
 juce::ValueTree* KrumSamplerAudioProcessor::getValueTree()
 {
     return &valueTree;
@@ -423,25 +422,31 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
             juce::var nameValue = moduleTree.getProperty("name");
             
             juce::ValueTree stateTree;
-            bool moduleActive = false;
+            bool hasFile = false;
             juce::var id;
             juce::var val;
 
             stateTree = moduleTree.getChild(0);
             id = stateTree.getProperty("id");
             val = stateTree.getProperty("value");
+            
+            KrumModule::ModuleState state;
+            
             if(id.toString() == TreeIDs::paramModuleState_ID)
             {
-                moduleActive = static_cast<KrumModule::ModuleState>((int)val) == KrumModule::ModuleState::active;
+                state = static_cast<KrumModule::ModuleState>((int)val);
+                hasFile = state == KrumModule::ModuleState::active || state == KrumModule::ModuleState::hasFile;
             }
 
-            if (moduleActive)
+            if (hasFile)
             {
-                //auto newModule = new KrumModule(i, sampler, &valueTree, &parameters);
                 auto mod = sampler.getModule(i);
                 mod->updateModuleFromTree();
                 midiState.addListener(mod);
-                //sampler.addModule(newModule, newModule->getMidiTriggerNote() != 0);
+                if(state == KrumModule::ModuleState::active)
+                {
+                    sampler.updateModuleSample(mod);
+                }
             }
         }
         else

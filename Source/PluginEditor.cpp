@@ -53,8 +53,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     outputGainAttachment.reset(new SliderAttachment(parameters, TreeIDs::outputGainParam_ID, outputGainSlider));
 
-    addAndMakeVisible(fileDrop); 
-    fileDrop.setRepaintsOnMouseActivity(true);
+//    addAndMakeVisible(fileDrop);
+//    fileDrop.setRepaintsOnMouseActivity(true);
 
     addAndMakeVisible(fileBrowser);
     fileBrowser.assignModuleContainer(&moduleContainer);
@@ -214,8 +214,8 @@ void KrumSamplerAudioProcessorEditor::resized()
         
         modulesBG = area.withTop(EditorDimensions::topBar).withLeft(area.getX()  + EditorDimensions::emptyAreaMinW/* - dimensions.outputW*/).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
         
-        fileDrop.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).withBottom(area.getBottom() - EditorDimensions::fileTreeH).reduced(EditorDimensions::extraShrinkage()));
-        fileBrowser.setBounds(area.withTop(fileDrop.getBottom()+ EditorDimensions::shrinkage).withRight(modulesBG.getX()).reduced(EditorDimensions::extraShrinkage(3)));
+        //fileDrop.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).withBottom(area.getBottom() - EditorDimensions::fileTreeH).reduced(EditorDimensions::extraShrinkage()));
+        fileBrowser.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).reduced(EditorDimensions::extraShrinkage(3)));
        
         modulesViewport.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH)/*.withLeft(modulesBG.getX() + dimensions.shrinkage)*/.withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
         moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH)/*.withLeft(modulesBG.getX() + dimensions.shrinkage)*/.withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
@@ -265,41 +265,41 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
 }
 
 //called when we create a new module from the editor
-bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
-{
-    if (sampler.getNumModules() >= MAX_NUM_MODULES)
-    {
-        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"Too many samples!",
-            "Right now this only supports " + juce::String(MAX_NUM_MODULES) + " samples.");
-        return false;
-    }
-
-    if (sampler.isFileAcceptable(file))
-    {
-        auto mod = new KrumModule(moduleName, index, file, sampler, audioProcessor.getValueTree(), &parameters);
-        auto modEd = mod->createModuleEditor(*this);
-
-        if (mod != nullptr && modEd != nullptr)
-        {
-            addKeyboardListener(mod);
-            sampler.addModule(mod, false);
-            moduleContainer.addModuleEditor(modEd);
-            modulesViewport.setViewPositionProportionately(1, 0);
-            modEd->setWantsKeyboardFocus(true);
-            return true;
-        }
-        else
-        {
-            DBG("Module Creation failed");
-            return false;
-        }
-    }
-    else
-    {
-        DBG("File is unacceptable");
-        return false;
-    }
-}
+//bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
+//{
+//    if (sampler.getNumModules() >= MAX_NUM_MODULES)
+//    {
+//        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"Too many samples!",
+//            "Right now this only supports " + juce::String(MAX_NUM_MODULES) + " samples.");
+//        return false;
+//    }
+//
+//    if (sampler.isFileAcceptable(file))
+//    {
+//        auto mod = new KrumModule(moduleName, index, file, sampler, audioProcessor.getValueTree(), &parameters);
+//        auto modEd = mod->createModuleEditor(*this);
+//
+//        if (mod != nullptr && modEd != nullptr)
+//        {
+//            addKeyboardListener(mod);
+//            sampler.addModule(mod, false);
+//            moduleContainer.addModuleEditor(modEd);
+//            modulesViewport.setViewPositionProportionately(1, 0);
+//            modEd->setWantsKeyboardFocus(true);
+//            return true;
+//        }
+//        else
+//        {
+//            DBG("Module Creation failed");
+//            return false;
+//        }
+//    }
+//    else
+//    {
+//        DBG("File is unacceptable");
+//        return false;
+//    }
+//}
 
 //This gets called when we open the GUI and need to rebuild all of the moduleEditors
 void KrumSamplerAudioProcessorEditor::createModuleEditors()
@@ -308,11 +308,27 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
     {
         auto mod = sampler.getModule(i);
         auto modEd = mod->createModuleEditor(*this);
-        if (mod->hasEditor())
+        if (mod->hasEditor())//&& (!mod->isModuleEmpty()))
         {
-            moduleContainer.addModuleEditor(modEd, true);
+            moduleContainer.addModuleEditor(modEd);
         }
     }
+    
+    //showLastModule();
+    
+//
+//    KrumModule* mod = nullptr;
+//    if(lastActiveIndex == 0)
+//    {
+//        mod = sampler.getModule(0);
+//    }
+//    else
+//    {
+//        mod = sampler.getModule(lastActiveIndex + 1);
+//    }
+//
+//    moduleContainer.addModuleEditor(mod->getCurrentModuleEditor());
+    
 
 //    if (moduleContainer.getNumModuleEditors() > 0)
 //    {
@@ -363,7 +379,7 @@ void KrumSamplerAudioProcessorEditor::printModules()
 
 void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 {
-    fileDrop.setVisible(false);
+    //fileDrop.setVisible(false);
     fileBrowser.setVisible(false);
     InfoPanel::shared_instance().setVisible(false);
     
@@ -375,7 +391,7 @@ void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 
 void KrumSamplerAudioProcessorEditor::showFileBrowser()
 {
-    fileDrop.setVisible(true);
+    //fileDrop.setVisible(true);
     fileBrowser.setVisible(true);
     InfoPanel::shared_instance().setVisible(true);
     setSize(EditorDimensions::windowW, EditorDimensions::windowH);
@@ -527,6 +543,11 @@ KrumFileBrowser* KrumSamplerAudioProcessorEditor::getFileBrowser()
     return &fileBrowser;
 }
 
+juce::Viewport* KrumSamplerAudioProcessorEditor::getModuleViewport()
+{
+    return &modulesViewport; 
+}
+
 void KrumSamplerAudioProcessorEditor::updateThumbnails()
 {
     for (int i = 0; i < moduleContainer.getModuleDisplayOrder().size(); i++)
@@ -535,6 +556,25 @@ void KrumSamplerAudioProcessorEditor::updateThumbnails()
         modEd->setAndDrawThumbnail();
     }
     needsToUpdateThumbs = false;
+}
+
+void KrumSamplerAudioProcessorEditor::showLastModule()
+{
+    //get next empty module
+    int lastActiveIndex = -1;
+    for(int i = 0; i < sampler.getNumModules(); i++)
+    {
+        if(KrumModule* mod = sampler.getModule(i))
+        {
+            if(mod->isModuleActive())
+            {
+                lastActiveIndex = i;
+            }
+        }
+    }
+    
+    //show it
+    moduleContainer.addModuleEditor(sampler.getModule(lastActiveIndex + 1)->getCurrentModuleEditor());
 }
 
 //=========================================================================================

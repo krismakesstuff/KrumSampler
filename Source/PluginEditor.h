@@ -86,7 +86,7 @@ public:
     
     static juce::String getMidiInfo(const juce::MidiMessage&);
 
-    bool createModule(juce::String& moduleName, int index, juce::File& file);
+    //bool createModule(juce::String& moduleName, int index, juce::File& file);
     void createModuleEditors();
     KrumModuleContainer& getModuleContainer();
 
@@ -118,10 +118,13 @@ public:
     juce::ValueTree* getValueTree();
     juce::AudioProcessorValueTreeState* getParameters();
     KrumFileBrowser* getFileBrowser();
+    juce::Viewport* getModuleViewport();
 
     juce::SharedResourcePointer<juce::TooltipWindow> toolTipWindow;
 
     void updateThumbnails();
+    void showLastModule();
+    
 
 private:
 
@@ -170,7 +173,7 @@ private:
 
     KrumModuleContainer moduleContainer{this};
     KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer };
-    KrumFileDrop fileDrop{ *this, moduleContainer, parameters, fileBrowser };
+    //KrumFileDrop fileDrop{ *this, moduleContainer, parameters, fileBrowser };
 
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };

@@ -269,45 +269,46 @@ KrumModule* KrumSampler::getModule(int index)
     return modules[index];
 }
 
-void KrumSampler::addModule(KrumModule* newModule, bool hasSample)
-{
-    if (voices.size() == 0)
-    {
-        initVoices();
-    }
-
-    modules.insert(newModule->getModuleSamplerIndex(), std::move(newModule));
-
-    //in some cases you just want to add the module, but leave it with no sample
-    if (hasSample)
-    {
-        addSample(newModule);
-    }
-}
+//void KrumSampler::addModule(KrumModule* newModule, bool hasSample)
+//{
+//    if (voices.size() == 0)
+//    {
+//        initVoices();
+//    }
+//
+//    modules.insert(newModule->getModuleSamplerIndex(), std::move(newModule));
+//
+//    //in some cases you just want to add the module, but leave it with no sample
+//    if (hasSample)
+//    {
+//        addSample(newModule);
+//    }
+//}
 
 void KrumSampler::removeModule(KrumModule* moduleToDelete)
 {
     int index = moduleToDelete->getModuleSamplerIndex();
-    modules.remove(index, true);
+    //modules.remove(index, true);
     sounds.remove(index);
 
     //updating the module's knowledge of it's own index from the removal upwards
-    for (int i = index; i < getNumModules(); i++)
-    {
-        //grab the old values
-        auto mod = modules[i];
-        auto modGain = mod->getModuleGain()->load();
-        auto modPan = mod->getModulePan()->load();
-        
-        //reassign the module with it's new index, which the slider attachments use, then give it back it's old values.
-        mod->setModuleSamplerIndex(i);
-        mod->reassignSliders();
-
-        //this is my hacky way to easily delete modules and just reassign them on the next slider attachment. Will be making this better to have a realiable automation workflow.
-        mod->setModuleGain(modGain);
-        mod->setModulePan(modPan);
-        mod->updateAudioAtomics();
-    }
+//    for (int i = index; i < getNumModules(); i++)
+//    {
+//        //grab the old values
+//        auto mod = modules[i];
+//        auto modGain = mod->getModuleGain()->load();
+//        auto modPan = mod->getModulePan()->load();
+//
+//        //reassign the module with it's new index, which the slider attachments use, then give it back it's old values.
+//        mod->setModuleSamplerIndex(i);
+//        //mod->reassignSliders();
+//
+//
+//        //this is my hacky way to easily delete modules and just reassign them on the next slider attachment. Will be making this better to have a realiable automation workflow.
+//        mod->setModuleGain(modGain);
+//        mod->setModulePan(modPan);
+//        mod->updateAudioAtomics();
+//    }
 
     owner.updateValueTreeState();
 }
@@ -363,26 +364,26 @@ int KrumSampler::getNumModules()
 void KrumSampler::getNumFreeModules(int& totalFreeModules, int& firstFreeIndex)
 {
     totalFreeModules = 0;
-    firstFreeIndex = 0;
+    firstFreeIndex = -1; //-1 indicates the value hasn't been changed yet
     
     for(int i = 0; i < modules.size(); i++)
     {
         if(modules[i]->getModuleState() == KrumModule::ModuleState::empty)
         {
             totalFreeModules++;
-            if(firstFreeIndex < 1 && firstFreeIndex != i)
+            if(firstFreeIndex == -1)
             {
                 firstFreeIndex = i;
             }
         }
     }
     
-    if(totalFreeModules == 0)
-    {
-        firstFreeIndex = -1;
-    }
+//    if(totalFreeModules == 0)
+//    {
+//        firstFreeIndex = -1;
+//    }
     
-    DBG("Free Modules: " + juce::String(totalFreeModules) + ", First Index" + juce::String(firstFreeIndex));
+    DBG("Free Modules: " + juce::String(totalFreeModules) + ", First Index " + juce::String(firstFreeIndex));
 }
 
 bool KrumSampler::isFileAcceptable(const juce::File& file)

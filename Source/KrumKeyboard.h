@@ -41,13 +41,19 @@ public:
     void drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
                         bool isDown, bool isOver, juce::Colour noteFillColour) override;
 
+    //void drawUpDownButton(juce::Graphics& g, int w, int h, bool isMouseOver, bool isButtonPressed, bool movesOctavesUp) override;
+    
     void assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote = 0);
     void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
     bool isMidiNoteAssigned(int midiNote);
 
     void updateKeysFromContainer();
 
+    
     void printCurrentlyAssignedMidiNotes();
+    
+    //smallest to biggest
+    juce::Array<int> getMidiAssignmentsInOrder();
 
 private:
 

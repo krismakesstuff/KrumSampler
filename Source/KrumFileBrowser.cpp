@@ -12,6 +12,7 @@
 #include "KrumModuleContainer.h"
 #include "KrumFileBrowser.h"
 #include "KrumModuleEditor.h"
+#include "PluginEditor.h"
 
 
 class KrumTreeHeaderItem;
@@ -600,8 +601,9 @@ KrumTreeView::~KrumTreeView()
 void KrumTreeView::paint(juce::Graphics& g) 
 {
     auto area = getLocalBounds();
-    g.setColour(juce::Colours::darkgrey.darker(0.7f));
-
+    //g.setColour(juce::Colours::darkgrey.darker(0.7f));
+    auto grade = juce::ColourGradient::vertical(juce::Colours::darkgrey.darker(0.7f), juce::Colours::black, area);
+    g.setGradientFill(grade);
     g.fillRoundedRectangle(area.expanded(5).toFloat(), 5.0f);
 
     juce::TreeView::paint(g);
@@ -1200,6 +1202,11 @@ void KrumTreeView::mouseDrag(const juce::MouseEvent& event)
                 }
 
                 startDragging(description, this, itemImage, true);
+//                if(moduleContainer)
+//                {
+//                    auto me = event.getEventRelativeTo(moduleContainer);
+//                    moduleContainer->getEditor()->getModuleViewport()->autoScroll(me.getPosition().getX(), me.getPosition().getY(), 20, 10);
+//                }
             }
         }
         else
@@ -1520,7 +1527,9 @@ void KrumFileBrowser::paint(juce::Graphics& g)
     auto fileTreeFillBounds = fileTree.getBounds().expanded(5).withBottom(audioPreviewer.getBottom()).toFloat();
     g.drawRoundedRectangle(fileTreeFillBounds, cornerSize, outline);
 
-    g.setColour(juce::Colours::darkgrey.darker());
+    //g.setColour(juce::Colours::darkgrey.darker());
+    auto grade = juce::ColourGradient::vertical(juce::Colours::darkgrey.darker(),juce::Colours::black, area);
+    g.setGradientFill(grade);
     g.fillRoundedRectangle(fileTreeFillBounds, cornerSize);
 
 }

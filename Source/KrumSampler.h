@@ -102,8 +102,9 @@ public:
 
     KrumModule* getModule(int index);
     void addModule(KrumModule* newModule, bool hasSample = false);
-    void removeModule(KrumModule* moduleToDelete);
     
+    
+    void removeModule(KrumModule* moduleToDelete);
     void updateModuleSample(KrumModule* updatedModule);
     void addSample(KrumModule* moduleToAddSound);
     

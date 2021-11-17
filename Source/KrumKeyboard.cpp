@@ -20,6 +20,8 @@ KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboar
 {
     setScrollButtonsVisible(true);
     updateKeysFromContainer();
+    setColour(juce::MidiKeyboardComponent::ColourIds::shadowColourId, juce::Colours::black);
+    setColour(juce::MidiKeyboardComponent::ColourIds::upDownButtonBackgroundColourId, juce::Colours::darkgrey.darker());
 }
 
 KrumKeyboard::~KrumKeyboard()
@@ -42,9 +44,17 @@ bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
 {
     if (isMidiNoteAssigned(midiNoteNumber))
     {
-        auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
-        mod->setModulePlaying(true);
-        mod->triggerNoteOnInParent();
+        auto mods = e.mods;
+        if(mods.isAltDown() && mods.isCommandDown() && mods.isCtrlDown())
+        {
+            moduleContainer.matchModuleDisplayToMidiNotes(getMidiAssignmentsInOrder());
+        }
+        else
+        {
+            auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
+            mod->setModulePlaying(true);
+            mod->triggerNoteOnInParent();
+        }
     }
     
     return true;
@@ -74,7 +84,9 @@ void KrumKeyboard::drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Re
         if (isOver)  c = c.darker();
     }
 
-    g.setColour(c); 
+    //g.setColour(c);
+    auto grade = juce::ColourGradient::vertical(c, juce::Colours::black, area);
+    g.setGradientFill(grade);
     g.fillRect(area);
 
     auto text = getWhiteNoteText(midiNoteNumber);
@@ -134,7 +146,9 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
         if (isOver)  c = c.darker();
     }
 
-    g.setColour(c);
+    //g.setColour(c);
+    auto grade = juce::ColourGradient::vertical(c, juce::Colours::black, area);
+    g.setGradientFill(grade);
     g.fillRect(area);
 
     if (isDown)
@@ -159,6 +173,32 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
         }
     }
 }
+
+//void KrumKeyboard::drawUpDownButton(juce::Graphics &g, int w, int h, bool isMouseOver, bool isButtonPressed, bool movesOctavesUp)
+//{
+//    g.fillAll (findColour (upDownButtonBackgroundColourId));
+//
+//    float angle = 0;
+//
+//    switch (orientation)
+//    {
+//        case horizontalKeyboard:            angle = movesOctavesUp ? 0.0f  : 0.5f;  break;
+//        case verticalKeyboardFacingLeft:    angle = movesOctavesUp ? 0.25f : 0.75f; break;
+//        case verticalKeyboardFacingRight:   angle = movesOctavesUp ? 0.75f : 0.25f; break;
+//        default:                            jassertfalse; break;
+//    }
+//
+//    Path path;
+//    path.addTriangle (0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
+//    path.applyTransform (AffineTransform::rotation (MathConstants<float>::twoPi * angle, 0.5f, 0.5f));
+//
+//    g.setColour (findColour (upDownButtonArrowColourId)
+//                  .withAlpha (buttonDown ? 1.0f : (mouseOver ? 0.6f : 0.4f)));
+//
+//    g.fillPath (path, path.getTransformToScaleToFit (1.0f, 1.0f, (float) w - 2.0f, (float) h - 2.0f, true));
+//}
+
+
 //oldNote is default 0;
 void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote)
 {
@@ -215,4 +255,29 @@ void KrumKeyboard::printCurrentlyAssignedMidiNotes()
 
         DBG("Assigned Note: " + midiNote + ", Color: " + color);
     }
+}
+
+juce::Array<int> KrumKeyboard::getMidiAssignmentsInOrder()
+{
+    juce::Array<int> retArray;
+    
+    int lastMidiNote = 0; //64
+    
+    for (auto it = currentlyAssignedMidiNotes.begin(); it != currentlyAssignedMidiNotes.end(); it++)
+    {
+        int currentMidiNote = it->first;
+        if(currentMidiNote > lastMidiNote)
+        {
+            retArray.add(currentMidiNote);
+        }
+        else if(currentMidiNote < lastMidiNote)
+        {
+            retArray.insert(retArray.getLast() - 1, currentMidiNote);
+        }
+        
+        lastMidiNote = currentMidiNote;
+    }
+    
+    return retArray;
+    
 }

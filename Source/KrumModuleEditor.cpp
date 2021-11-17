@@ -16,57 +16,79 @@
 #include "KrumFileBrowser.h"
 
 
-//For now this class doesn't actually do anything. It will one day drag and drop the module to re-arrange the order of the modules displayed
+//This class will one day drag and drop the module to re-arrange the order of the modules displayed
 //
-class DragHandle : public InfoPanelDrawableButton
-{
-public:
-    DragHandle(KrumModuleContainer& c, KrumModule& owner, const juce::String& buttonName, juce::DrawableButton::ButtonStyle buttonStyle)
-    : container(c), parentModule(owner), InfoPanelDrawableButton(buttonName, "Drag this handle to move the module around")
-    {
-       // auto edBounds = parentModule.getCurrentModuleEditor()->getBounds();
-        constrainer.setMinimumOnscreenAmounts(0xffffff, 0xffffff, 0xffffff, 0xffffff);
-        //constrainer.setMinimumOnscreenAmounts(edBounds.getHeight(), edBounds.getWidth(), edBounds.getHeight(), edBounds.getWidth());
-    }
-
-    ~DragHandle() override
-    {}
-
-    void mouseDown(const juce::MouseEvent& e) override
-    {
-        auto modEd = parentModule.getCurrentModuleEditor();
-        //dragger.startDraggingComponent(parentModule.getCurrentModuleEditor(), e);
-        container.startModuleDrag(modEd, e.getEventRelativeTo(&container));
-        InfoPanelDrawableButton::mouseDown(e);
-    }
-    
-    void mouseDrag(const juce::MouseEvent& e) override
-    {
-        //auto edBounds = parentModule.getCurrentModuleEditor()->getBounds();
-        auto modEd = parentModule.getCurrentModuleEditor();
-        
-        parentModule.info.moduleDragging = true;
-        container.dragModule(modEd, e.getEventRelativeTo(&container));
-        //dragger.dragComponent(parentModule.getCurrentModuleEditor(), e, &constrainer);
-        
-        //DBG("Module Dragging: " + parentModule->getModuleName());
-        //parentModule.startDragging("ModuleDragAndDrop", parentModule.getCurrentModuleEditor(), juce::Image(), true);
-    }
-
-    void mouseUp(const juce::MouseEvent& e) override
-    {
-        parentModule.info.moduleDragging = false;
-        container.endModuleDrag(parentModule.getCurrentModuleEditor());
-        InfoPanelDrawableButton::mouseUp(e);
-    }
-
-    juce::ComponentDragger dragger;
-    juce::ComponentBoundsConstrainer constrainer;
-    
-    KrumModule& parentModule;
-    KrumModuleContainer& container;
-
-};
+//class DragHandle : public InfoPanelDrawableButton
+//{
+//public:
+//    DragHandle(KrumModuleContainer& c, KrumModule& owner, const juce::String& buttonName, juce::DrawableButton::ButtonStyle buttonStyle)
+//    : container(c), parentModule(owner), InfoPanelDrawableButton(buttonName, "Drag this handle to move the module around")
+//    {
+//       // auto edBounds = parentModule.getCurrentModuleEditor()->getBounds();
+//        //constrainer.setMinimumOnscreenAmounts(0xffffff, 0xffffff, 0xffffff, 0xffffff);
+//        //constrainer.setMinimumOnscreenAmounts(edBounds.getHeight(), edBounds.getWidth(), edBounds.getHeight(), edBounds.getWidth());
+//    }
+//
+//    ~DragHandle() override
+//    {}
+//
+//    void mouseDown(const juce::MouseEvent& e) override
+//    {
+//        //auto modEd = parentModule.getCurrentModuleEditor();
+//        //dragger.startDraggingComponent(parentModule.getCurrentModuleEditor(), e);
+//        //container.startModuleDrag(modEd, e.getEventRelativeTo(&container));
+//        InfoPanelDrawableButton::mouseDown(e);
+//    }
+//
+//    void mouseDrag(const juce::MouseEvent& e) override
+//    {
+//        auto modEd = parentModule.getCurrentModuleEditor();
+//        modEd->toFront(false);
+//        //juce::Point<int> offset = e.getEventRelativeTo(modEd).getPosition();
+//        juce::Point<int>offset = getBoundsInParent().getCentre();
+//        auto origMouseY = e.getMouseDownY();
+//        auto clippedMouse = e.withNewPosition(juce::Point<int>(e.getPosition().getX(), origMouseY));
+//
+//        parentModule.setModuleDragging(true);
+//        //container.startModuleDrag(modEd, e);
+//        modEd->startDragging("ModuleDrag-", modEd, modEd->createComponentSnapshot(modEd->getLocalBounds()), false, &offset);//, &clippedMouse.source);
+//
+//
+////        if(modEd->forcedMouseUp)
+////        {
+////            InfoPanelDrawableButton::mouseUp(e);
+////            modEd->forcedMouseUp = false;
+////            DBG("Forced Mouse Up");
+////        }
+////        else
+////        {
+////            parentModule.info.moduleDragging = true;
+////            container.dragModule(modEd, e.getEventRelativeTo(&container));
+////
+////            DBG("Module Dragging: " + parentModule.getModuleName());
+////        }
+//
+//    }
+//
+//    void mouseUp(const juce::MouseEvent& e) override
+//    {
+//        if(parentModule.isModuleDragging())
+//        {
+//            //auto modEd = parentModule.getCurrentModuleEditor();
+//            parentModule.setModuleDragging(false);
+//            //container.endModuleDrag(parentModule.getCurrentModuleEditor());
+//            //modEd->dragOperationEnded({"ModuleDragEnded-", modEd, e.getPosition()});
+//        }
+//        InfoPanelDrawableButton::mouseUp(e);
+//    }
+//
+//    //juce::ComponentDragger dragger;
+//    //juce::ComponentBoundsConstrainer constrainer;
+//
+//    KrumModule& parentModule;
+//    KrumModuleContainer& container;
+//
+//};
 
 
 //===============================================================================================//
@@ -240,10 +262,10 @@ void KrumModuleEditor::resized()
     playButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(statusButtonH).withWidth(area.getWidth() / 2).reduced(spacer));
     editButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(statusButtonH).withLeft(playButton.getRight() + spacer).withWidth(area.getWidth() / 2).reduced(spacer));
 
-    if (dragHandle != nullptr)
-    {
-        dragHandle->setBounds(area.withTop(editButton.getBottom()));
-    }
+//    if (dragHandle != nullptr)
+//    {
+//        dragHandle->setBounds(area.withTop(editButton.getBottom()));
+//    }
 
 }
 
@@ -256,23 +278,30 @@ void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
     else
     {
         editor.moduleContainer.deselectAllModules();
-        juce::Component::mouseDown(e);
+        //juce::Component::mouseDown(e);
     }
+}
+
+void KrumModuleEditor::forceMouseUp()
+{
+    parent.info.moduleDragging = false;
+//    editor.moduleContainer.endModuleDrag(nullptr);
+//    forcedMouseUp = true;
 }
 
 void KrumModuleEditor::buildModule()
 {
     juce::String i = juce::String(parent.info.samplerIndex);
 
-    int dragHandleSize;
-    auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
-    auto dragHandelIm = juce::Drawable::createFromImageData(dragHandleData, dragHandleSize);
+//    int dragHandleSize;
+//    auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
+//    auto dragHandelIm = juce::Drawable::createFromImageData(dragHandleData, dragHandleSize);
 
-    dragHandle.reset(new DragHandle{ editor.moduleContainer, parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
-    dragHandle->setImages(dragHandelIm.get());
-    addAndMakeVisible(dragHandle.get());
-    dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");
-    
+//    dragHandle.reset(new DragHandle{ editor.moduleContainer, parent, "Drag Handle", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground });
+//    dragHandle->setImages(dragHandelIm.get());
+//    addAndMakeVisible(dragHandle.get());
+//    dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");
+//
     addAndMakeVisible(thumbnail);
     thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + i, thumbnail.clipGainSlider));
 
@@ -349,9 +378,9 @@ void KrumModuleEditor::setChildCompColors()
 {
     auto moduleColor = parent.info.moduleColor;
 
-    dragHandle->setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
-    dragHandle->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::transparentBlack);
-    dragHandle->setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.99f));
+//    dragHandle->setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
+//    dragHandle->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::transparentBlack);
+//    dragHandle->setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.99f));
 
     panSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
     panSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
@@ -420,6 +449,7 @@ void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
 
 void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 {
+    DBG("Module State: " + juce::String(parent.info.moduleState));
     editor.removeKeyboardListener(&parent);
     settingsOverlay.reset();
     cleanUpOverlay(keepSettings);
@@ -455,9 +485,10 @@ void KrumModuleEditor::cleanUpOverlay(bool keepSettings)
         buildModule();
     }
 
+   
     if (keepSettings)
     {
-        if (oldMidiNote > 0)
+        if (oldMidiNote > 0) //removes the old color assignment on the keyboard
         {
             editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor, oldMidiNote);
         }
@@ -465,12 +496,18 @@ void KrumModuleEditor::cleanUpOverlay(bool keepSettings)
         {
             editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor);
         }
-        parent.sampler.updateModuleSample(&parent);
-        setAndDrawThumbnail();
+        
+        parent.sampler.updateModuleSample(&parent); //update midi assignment is Sound
         setChildCompColors();
+        setAndDrawThumbnail();
+        needsToBuildModuleEditor = true;
+        parent.setModuleState(KrumModule::ModuleState::active);
     }
 
     setModuleButtonsClickState(true);
+    resized();
+    repaint();
+    DBG("Module State: " + juce::String(parent.info.moduleState));
 }
 
 void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
@@ -573,12 +610,12 @@ juce::String KrumModuleEditor::getModuleName()
 }
 
 //called when the index of the module has changed so now we need to change the slider attachment assignments as well. Might need to approach this differently for cases of automation within the DAW
-void KrumModuleEditor::reassignSliderAttachments()
-{
-    volumeSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleGain_ID + parent.getIndexString(), volumeSlider));
-    panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + parent.getIndexString(), panSlider));
-    thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + parent.getIndexString(), thumbnail.clipGainSlider));
-}
+//void KrumModuleEditor::reassignSliderAttachments()
+//{
+//    volumeSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleGain_ID + parent.getIndexString(), volumeSlider));
+//    panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + parent.getIndexString(), panSlider));
+//    thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + parent.getIndexString(), thumbnail.clipGainSlider));
+//}
 
 //updates the postion of the "dB" readout of the sliders
 void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* comp)
@@ -667,6 +704,11 @@ void KrumModuleEditor::triggerNoteOffInParent()
     parent.triggerNoteOff();
 }
 
+bool KrumModuleEditor::needsToBuildEditor()
+{
+    return needsToBuildModuleEditor;
+}
+
 bool KrumModuleEditor::needsToDrawThumbnail()
 {
     return drawThumbnail;
@@ -682,9 +724,9 @@ void KrumModuleEditor::setAndDrawThumbnail()
     thumbnail.setSource (new juce::FileInputSource(parent.info.audioFile));
     auto newFileName = parent.info.audioFile.getFileName();
     parent.setModuleName(newFileName);
-    titleBox.setText(parent.info.name, juce::sendNotification);
-    repaint();
+    titleBox.setText(parent.info.name, juce::dontSendNotification);
     drawThumbnail = false;
+    repaint();
 }
 
 bool KrumModuleEditor::shouldCheckDroppedFile()
@@ -756,87 +798,113 @@ void KrumModuleEditor::handleSettingsMenuResult(int result)
        else if (result == KrumModule::moduleDelete_Id)
        {
            //removeFromDisplay();
-           parent.deleteEntireModule();
+           //parent.deleteEntireModule();
+           parent.setModuleState(KrumModule::ModuleState::empty);
        }
     
 }
 
-//Drag and Drop Target From KrumFileBrowser
+//Drag and Drop Target
 bool KrumModuleEditor::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails &dragDetails)
 {
     auto desc = dragDetails.description.toString();
-    return desc.isNotEmpty() && desc.contains("FileBrowserDrag-");
+    return desc.isNotEmpty() && (desc.contains("FileBrowserDrag-") || desc.contains("ModuleDrag-"));
 }
 
-//Drag and Drop Target From KrumFileBrowser
+//Drag and Drop Target
 void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails &dragDetails)
 {
-    int numDroppedItems = editor.fileBrowser.getNumSelectedItems();
-    if(numDroppedItems > 1)
+    auto desc = dragDetails.description.toString();
+    
+    if(desc.contains("FileBrowserDrag-"))
     {
-        int numFreeModules, firstFreeIndex;
-        parent.sampler.getNumFreeModules(numFreeModules, firstFreeIndex);
-        
-        if(numDroppedItems <= numFreeModules)
+        int numDroppedItems = editor.fileBrowser.getNumSelectedItems();
+        if(numDroppedItems > 1)
         {
-            for (int i = 0; i < numDroppedItems; i++)
+            int numFreeModules, firstFreeIndex;
+            parent.sampler.getNumFreeModules(numFreeModules, firstFreeIndex);
+            
+            if(numDroppedItems <= numFreeModules)
             {
-                auto krumItem = editor.fileBrowser.getSelectedItem(i);
-                if (krumItem != nullptr)
+                for (int i = 0; i < numDroppedItems; i++)
                 {
-                    auto file = krumItem->getFile();
-                    auto itemName = krumItem->getItemName();
-                    if (!krumItem->mightContainSubItems())
+                    auto krumItem = editor.fileBrowser.getSelectedItem(i);
+                    if (krumItem != nullptr)
                     {
-                        if(parent.sampler.isFileAcceptable(file))
+                        auto file = krumItem->getFile();
+                        auto itemName = krumItem->getItemName();
+                        if (!krumItem->mightContainSubItems())
                         {
-                            DBG("Item: " + file.getFullPathName());
-                            parent.sampler.getModule(firstFreeIndex++)->getCurrentModuleEditor()->updateModuleFile(file);
+                            if(parent.sampler.isFileAcceptable(file))
+                            {
+                                
+                                auto mod = parent.sampler.getModule(firstFreeIndex);
+                                parent.sampler.getModule(firstFreeIndex++)->getCurrentModuleEditor()->updateModuleFile(file);
+
+                                DBG("-------");
+                                DBG("Module: " + juce::String(mod->getModuleSamplerIndex()));
+                                DBG("Item: " + file.getFullPathName());
+                            }
+                        }
+                        else
+                        {
+                            DBG("Folders Not Supported");
+                            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Folders Not Supported Yet", "I might support folder dropping in the future. For now, drop the folder into favorites to keep it locally.");
                         }
                     }
                     else
                     {
-                        DBG("Folders Not Supported");
-                        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Folders Not Supported Yet", "I might support folder dropping in the future. For now, drop the folder into favorites to keep it locally.");
+                        DBG("Krum Item NULL");
                     }
-                }
-                else
-                {
-                    DBG("Krum Item NULL");
-                }
-            }
-        }
-        else
-        {
-            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not enough modules available", "");
-        }
-    }
-    else
-    {
-        auto krumItem = editor.fileBrowser.getSelectedItem(0);
-        if (krumItem != nullptr)
-        {
-            auto file = krumItem->getFile();
-            auto itemName = krumItem->getItemName();
-            if (!krumItem->mightContainSubItems())
-            {
-                if(parent.sampler.isFileAcceptable(file))
-                {
-                    DBG("Item: " + file.getFullPathName());
-                    updateModuleFile(file);
                 }
             }
             else
             {
-                DBG("Folders Not Supported");
-                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Folders Not Supported Yet", "I might support folder dropping in the future. For now, drop the folder into favorites to keep it locally.");
+                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not enough modules available", "");
             }
         }
         else
         {
-            DBG("Krum Item NULL");
+            auto krumItem = editor.fileBrowser.getSelectedItem(0);
+            if (krumItem != nullptr)
+            {
+                auto file = krumItem->getFile();
+                auto itemName = krumItem->getItemName();
+                if (!krumItem->mightContainSubItems())
+                {
+                    if(parent.sampler.isFileAcceptable(file))
+                    {
+                        DBG("Item: " + file.getFullPathName());
+                        updateModuleFile(file);
+                        //editor.showLastModule();
+                    }
+                }
+                else
+                {
+                    DBG("Folders Not Supported");
+                    juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Folders Not Supported Yet", "I might support folder dropping in the future. For now, drop the folder into favorites to keep it locally.");
+                }
+            }
+            else
+            {
+                DBG("Krum Item NULL");
+            }
         }
     }
+    else if (desc.contains("ModuleDrag-"))
+    {
+        auto modEdDropped = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
+        DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped on Module " + juce::String(getModuleSamplerIndex()));
+        if(modEdDropped)
+        {
+            editor.moduleContainer.moveModule(modEdDropped->getModuleDisplayIndex(), parent.getModuleDisplayIndex());
+        }
+    }
+}
+
+void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails &dragDetails)
+{
+    //
 }
 
 //EXTERNAL File Drag and Drop Target
@@ -849,9 +917,32 @@ bool KrumModuleEditor::isInterestedInFileDrag(const juce::StringArray &files)
 //EXTERNAL File Drag and Drop Target
 void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y)
 {
-    for (auto file : files)
+    
+    if(files.size() > 1)
     {
-        juce::File audioFile{ file };
+        int numFreeModules, firstFreeIndex;
+        parent.sampler.getNumFreeModules(numFreeModules, firstFreeIndex);
+        
+        if(files.size() <= numFreeModules)
+        {
+            for (auto file : files)
+            {
+                juce::File audioFile {file};
+                if(parent.sampler.isFileAcceptable(audioFile))
+                {
+                    auto mod = parent.sampler.getModule(firstFreeIndex);
+                    parent.sampler.getModule(firstFreeIndex++)->getCurrentModuleEditor()->updateModuleFile(audioFile);
+
+                    DBG("-------");
+                    DBG("Module: " + juce::String(mod->getModuleSamplerIndex()));
+                    DBG("Item: " + audioFile.getFullPathName());
+                }
+            }
+        }
+    }
+    else
+    {
+        juce::File audioFile{ files[0] };
         if (parent.sampler.isFileAcceptable(audioFile))
         {
             updateModuleFile(audioFile);
@@ -861,6 +952,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
         {
             DBG("Audio Format Not Supported");
         }
+        
     }
 }
 
@@ -870,6 +962,7 @@ void KrumModuleEditor::updateModuleFile(juce::File& file)
     parent.setModuleName(file.getFileName());
     parent.sampler.updateModuleSample(&parent);
     editor.fileBrowser.addFileToRecent(file, parent.info.name);
+    repaint();
 }
 
 //============================================================================================================================

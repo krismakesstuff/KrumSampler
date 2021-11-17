@@ -30,8 +30,9 @@ class KrumSamplerAudioProcessorEditor;
 
 
 class KrumModuleContainer : public juce::Component,
-                            /*public juce::DragAndDropTarget,*/
-                            public juce::Timer
+                            public juce::DragAndDropTarget,
+                            public juce::Timer,
+                            public juce::KeyListener
 {
 public:
     KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner);
@@ -46,14 +47,19 @@ public:
     void refreshModuleLayout();
     
     void mouseDown(const juce::MouseEvent& event) override;
-
+    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
+    
+    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
+    void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)override;
+    
+    
     void addMidiListener(juce::MidiKeyboardStateListener* newListener);
     void removeMidiListener(juce::MidiKeyboardStateListener* listenerToDelete);
     
     //int findFreeModuleIndex();
     void addModuleEditor(KrumModuleEditor* newModule, bool refreshLayout = true);
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
-    void moveModule(KrumModule* moduleToMove, int newDisplayIndex);
+    void moveModule(int moduleIndexToMove, int newDisplayIndex);
 
     void setModuleSelected(KrumModule* moduleToMakeActive);
     void setModuleUnselected(KrumModule* moduleToMakeDeselect);
@@ -63,24 +69,28 @@ public:
 
     void addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd);
 
-    
     void removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove);
     KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
 
-    void updateDisplayIndices();
+    void matchModuleDisplayToMidiNotes(juce::Array<int> sortedMidiAssignments);
     
-    void startModuleDrag(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
-    void dragModule(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
-    void endModuleDrag(KrumModuleEditor* moduleToDrag);
+    void updateModuleDisplayIndices(bool repaint);
     
     bool isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& boundsOfModuleUnderMouse);
     void isIntersectingWithModules(KrumModuleEditor* editorToTest);
     
+    //    void startModuleDrag(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
+    //    void dragModule(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
+    //    void endModuleDrag(KrumModuleEditor* moduleToDrag);
+    //    bool isModuleBeingDragged();
+    //
     //bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
     //void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
     
     KrumSamplerAudioProcessorEditor* getEditor();
     juce::Array<KrumModuleEditor*>& getModuleDisplayOrder();
+    
+    int getNumActiveModules();
     int getNumModuleEditors();
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
@@ -104,10 +114,13 @@ private:
         juce::Rectangle<int> origBounds;
         bool showOriginBounds = false;
         juce::Point<int> mousePos;
+        bool escPressed = false;
         
         bool drawLineBetween = false;
         int leftDisplayIndex = 0;
         int rightDisplayIndex = 0;
+        
+        KrumModuleEditor* draggedModule = nullptr;
         
         void setInfo(bool isDragging, juce::Rectangle<int> draggingBounds, juce::Point<int> mousePosition)
         {
@@ -122,10 +135,14 @@ private:
             showOriginBounds = false;
             origBounds = {};
             mousePos = {};
+            escPressed = false;
             
             drawLineBetween = false;
             leftDisplayIndex = 0;
             rightDisplayIndex = 0;
+            
+            draggedModule = nullptr;
+            DBG("Drag Info reset");
         }
         
     };
@@ -144,15 +161,16 @@ private:
     
 
     KrumSamplerAudioProcessorEditor* editor;
+    
     juce::Colour bgColor{ juce::Colours::black };
 
     bool modulesOutside = false;
     juce::Rectangle<int> fadeArea;
     
-    juce::ComponentDragger dragger;
+    //juce::ComponentDragger dragger;
     
     //set constrainer and make esc key exit drag
-    juce::ComponentBoundsConstrainer boundsConstrainer;
+    //juce::ComponentBoundsConstrainer boundsConstrainer;
     
     //juce::OwnedArray<DummyKrumModuleEditor> editors;
 
