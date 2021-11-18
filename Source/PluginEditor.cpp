@@ -24,7 +24,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     laf.setDefaultLookAndFeel(&kLaf);
     laf.setDefaultSansSerifTypefaceName("Calibri");
     InfoPanel::shared_instance().getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
-    toolTipWindow->setMillisecondsBeforeTipAppears(1000);
+    toolTipWindow->setMillisecondsBeforeTipAppears(2000);
 
     addAndMakeVisible(websiteButton);
     websiteButton.setButtonText(websiteURL.getDomain());
@@ -72,7 +72,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
     collapseBrowserButton.setClickingTogglesState(true);
     collapseBrowserButton.setToggleState(getSavedFileBrowserHiddenState(), juce::dontSendNotification);
-    collapseBrowserButton.onStateChange = [this] { collapseBrowserButton.getToggleState() ? hideFileBrowser() : showFileBrowser(); };
+    collapseBrowserButton.onClick = [this] { collapseBrowserButton.getToggleState() ? hideFileBrowser() : showFileBrowser(); };
     collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::darkgrey.darker());
     collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::darkgrey);
     addAndMakeVisible(collapseBrowserButton);
@@ -88,7 +88,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     infoButton.setImages(infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOnIm.get());
     infoButton.setClickingTogglesState(true);
     infoButton.setToggleState(getSavedInfoButtonState(), juce::dontSendNotification);
-    infoButton.onStateChange = [this] { InfoPanel::shared_instance().setVisible(infoButton.getToggleState()); };
+    infoButton.onClick = [this] { infoButtonClicked();  };
     addAndMakeVisible(infoButton);
     
     addAndMakeVisible(keyboard);
@@ -127,19 +127,26 @@ KrumSamplerAudioProcessorEditor::~KrumSamplerAudioProcessorEditor()
 }
 
 //==============================================================================
+
 void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
     g.setColour(bgColor);
+    //g.setGradientFill(ColorPaletteColors::makeGradientFromAllColors(false, {(float)area.getCentreX(), (float)area.getY()}, {(float)area.getCentreX(), (float)area.getBottom()}));
     g.fillRect(area);
     
-    auto titleRect = area.withHeight(EditorDimensions::topBar - EditorDimensions::shrinkage).withY(5).withX(area.getWidth() / 3.3).withWidth(area.getWidth() / 2.3).toFloat();
-
-    g.drawImage(titleImage, titleRect, juce::RectanglePlacement::stretchToFit);
+    auto titleRect = area.withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).withCentre({area.getCentreX(), EditorDimensions::topBar / 2}).toFloat();
+    //juce::Rectangle<int> titleRect { 5 , 50, EditorDimensions::topBar, EditorDimensions::titleImageW};
+//    g.setColour(juce::Colours::red);
+//    g.drawRect(titleRect);
+    g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xMid );
 
     g.setColour(modulesBGColor);
     g.fillRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize);
+
+    g.setColour(juce::Colours::black);
+    g.fillRoundedRectangle(modulesViewport.getBounds().toFloat(), EditorDimensions::cornerSize);
     
     g.setColour(outlineColor);
     g.drawFittedText(madeByString, madeByArea.withX(area.getRight() - (madeByArea.getWidth() + 10)).withY(area.getY() + 5), juce::Justification::centred, 1);
@@ -301,20 +308,31 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
 //    }
 //}
 
-//This gets called when we open the GUI and need to rebuild all of the moduleEditors
+//This gets called when we open the GUI to rebuild all of the moduleEditors
 void KrumSamplerAudioProcessorEditor::createModuleEditors()
 {
+    bool showingFirstEmpty = false;
+    
     for (int i = 0; i < sampler.getNumModules(); i++)
     {
         auto mod = sampler.getModule(i);
-        auto modEd = mod->createModuleEditor(*this);
-        if (mod->hasEditor())//&& (!mod->isModuleEmpty()))
+        if (mod->isModuleActive() || mod->getModuleState() == KrumModule::ModuleState::hasFile)
         {
+            auto modEd = mod->createModuleEditor(*this);
             moduleContainer.addModuleEditor(modEd);
+        }
+        else if (mod->isModuleEmpty() && (!showingFirstEmpty))
+        {
+            moduleContainer.addModuleEditor(mod->createModuleEditor(*this));
+            showingFirstEmpty = true;
+        }
+        else
+        {
+            return; 
         }
     }
     
-    //showLastModule();
+    //moduleContainer.showFirstEmptyModule();
     
 //
 //    KrumModule* mod = nullptr;
@@ -335,6 +353,19 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
 //        needsToUpdateThumbs = true;
 //        //juce::Logger::writeToLog("Module Editors created: " + juce::String(moduleContainer.getNumModuleEditors()));
 //    }
+}
+
+void KrumSamplerAudioProcessorEditor::addNextModuleEditor()
+{
+    for (int i = 0; i < sampler.getNumModules(); i++)
+    {
+        auto mod = sampler.getModule(i);
+        if(mod->isModuleEmpty() && (!mod->hasEditor()))
+        {
+            moduleContainer.addModuleEditor(mod->createModuleEditor(*this));
+            return;
+        }
+    }
 }
 
 KrumModuleContainer& KrumSamplerAudioProcessorEditor::getModuleContainer()
@@ -377,6 +408,7 @@ void KrumSamplerAudioProcessorEditor::printModules()
     }
 }
 
+
 void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 {
     //fileDrop.setVisible(false);
@@ -393,7 +425,8 @@ void KrumSamplerAudioProcessorEditor::showFileBrowser()
 {
     //fileDrop.setVisible(true);
     fileBrowser.setVisible(true);
-    InfoPanel::shared_instance().setVisible(true);
+    
+    InfoPanel::shared_instance().setVisible(getSavedInfoButtonState());
     setSize(EditorDimensions::windowW, EditorDimensions::windowH);
 
     saveFileBrowserHiddenState();
@@ -416,12 +449,35 @@ bool KrumSamplerAudioProcessorEditor::getSavedFileBrowserHiddenState()
     return (int)hiddenTree.getProperty("value") > 0;
 }
 
+void KrumSamplerAudioProcessorEditor::infoButtonClicked()
+{
+    if(fileBrowser.isVisible())
+    {
+        InfoPanel::shared_instance().setVisible(infoButton.getToggleState());
+    }
+    else
+    {
+        InfoPanel::shared_instance().setVisible(false);
+    }
+    
+    saveInfoButtonState();
+}
+
+
 bool KrumSamplerAudioProcessorEditor::getSavedInfoButtonState()
 {
     auto globalTree = getValueTree()->getChildWithName("GlobalSettings");
     auto infoPanelTree = globalTree.getChildWithName("InfoPanel");
     
     return (int)infoPanelTree.getProperty("value");
+}
+
+void KrumSamplerAudioProcessorEditor::saveInfoButtonState()
+{
+    auto globalTree = getValueTree()->getChildWithName("GlobalSettings");
+    auto infoPanelTree = globalTree.getChildWithName("InfoPanel");
+    
+    infoPanelTree.setProperty("value", infoButton.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
 }
 
 void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component* comp)
@@ -558,24 +614,7 @@ void KrumSamplerAudioProcessorEditor::updateThumbnails()
     needsToUpdateThumbs = false;
 }
 
-void KrumSamplerAudioProcessorEditor::showLastModule()
-{
-    //get next empty module
-    int lastActiveIndex = -1;
-    for(int i = 0; i < sampler.getNumModules(); i++)
-    {
-        if(KrumModule* mod = sampler.getModule(i))
-        {
-            if(mod->isModuleActive())
-            {
-                lastActiveIndex = i;
-            }
-        }
-    }
-    
-    //show it
-    moduleContainer.addModuleEditor(sampler.getModule(lastActiveIndex + 1)->getCurrentModuleEditor());
-}
+
 
 //=========================================================================================
 

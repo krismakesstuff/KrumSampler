@@ -84,7 +84,7 @@ void KrumModuleContainer::refreshModuleLayout()
         return;
     }
 
-    int newWidth = (MAX_NUM_MODULES) * (EditorDimensions::moduleW + EditorDimensions::extraShrinkage());
+    int newWidth = (getNumVisibleModules()) * (EditorDimensions::moduleW + EditorDimensions::extraShrinkage());
 
     //MUST set this size before we reposition the modules. Otherwise viewport won't scroll!
     setSize(newWidth, viewportHeight);
@@ -213,7 +213,7 @@ void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, boo
     }
     else
     {
-     //   DBG("New Editor is NULL");
+       DBG("New Editor is NULL");
         //juce::Log::postMessage(__func__, "New Editor is NULL");
     }
 }
@@ -274,8 +274,8 @@ KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
 
 void KrumModuleContainer::addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd)
 {
-    //moduleDisplayOrder.insert(moduleToAdd->getModuleDisplayIndex(), moduleToAdd);
     int displayIndex = moduleToAdd->getModuleDisplayIndex();
+ 
     if(moduleToAdd->getModuleState() == KrumModule::ModuleState::active)
     {
         moduleDisplayOrder.insert(displayIndex, moduleToAdd);
@@ -308,17 +308,28 @@ void KrumModuleContainer::matchModuleDisplayToMidiNotes(juce::Array<int> sortedM
 {
     juce::Array<KrumModuleEditor*> newDisplayOrder;
     
+    
     for(int i = 0; i < sortedMidiAssignments.size(); i++)
     {
         auto modEd = getModuleFromMidiNote(sortedMidiAssignments[i]);
         newDisplayOrder.add(modEd);
+        //moduleDisplayOrder.move(modEd->getModuleDisplayIndex(), i);
+        //DBG("Module: " + juce::String(modEd->getModuleDisplayIndex()) + " Moved To " + juce::String(i));
     }
     
     
+    int remaining = MAX_NUM_MODULES - newDisplayOrder.size();
+    for(int i = remaining - 1; i < moduleDisplayOrder.size(); i++)
+    {
+        newDisplayOrder.add(moduleDisplayOrder[i]);
+    }
+    
     moduleDisplayOrder = newDisplayOrder;
+    //showFirstEmptyModule();
     refreshModuleLayout();
     updateModuleDisplayIndices(true);
-    
+    //repaint();
+    DBG("Match Notes, Bounds: " + getLocalBounds().toString());
     
 }
 
@@ -327,6 +338,7 @@ void KrumModuleContainer::updateModuleDisplayIndices(bool shouldRepaint)
     for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
         moduleDisplayOrder[i]->setModuleDisplayIndex(i);
+        DBG("Module: " + juce::String(moduleDisplayOrder[i]->getModuleSamplerIndex()) + " Display Index: " + juce::String(moduleDisplayOrder[i]->getModuleDisplayIndex()));
     }
     
     if(shouldRepaint)
@@ -522,3 +534,40 @@ void KrumModuleContainer::timerCallback()
     repaint();
 }
 
+//void KrumModuleContainer::showFirstEmptyModule()
+//{
+//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+//    {
+//        auto modEd = moduleDisplayOrder[i];
+//        if(modEd->getModuleState() == KrumModule::ModuleState::empty)
+//        {
+//            modEd->setVisible(true);
+//            refreshModuleLayout();
+//            modEd->repaint();
+//            return;
+//        }
+//    }
+//}
+
+int KrumModuleContainer::getNumVisibleModules()
+{
+    int numVisible = 0;
+    for(int i = 0; i < moduleDisplayOrder.size(); i++)
+    {
+        if(moduleDisplayOrder[i]->isVisible())
+        {
+            numVisible++;
+        }
+    }
+    return numVisible;
+    
+//    for(int i = 0; i < moduleDisplayOrder.size(); i++)
+//    {
+//        if(!moduleDisplayOrder[i]->isVisible())
+//        {
+//            return moduleDisplayOrder[i-1]->getRight();
+//        }
+//    }
+//    return getLocalBounds().getRight();
+}
+  

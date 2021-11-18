@@ -100,6 +100,10 @@ void KrumModule::setModuleState(ModuleState newState)
     {
         info.moduleState = ModuleState::active;
     }
+    else if (info.moduleState == ModuleState::active && newState != ModuleState::empty)
+    {
+        return;
+    }
     else
     {
         info.moduleState = newState;
@@ -482,7 +486,6 @@ void KrumModule::updateEditorFromState()
     if(hasEditor())
     {
         auto currentEditor = getCurrentModuleEditor();
-        
         if (info.moduleState == ModuleState::active) //has a file and a midi assignment
         {
             if (currentEditor->needsToBuildEditor())
@@ -506,7 +509,26 @@ void KrumModule::updateEditorFromState()
             
         }
     }
-    
+//    else
+//    {
+//        auto currentEditor = createModuleEditor(*parentEditor);
+//
+//        if (info.moduleState == ModuleState::active) //has a file and a midi assignment
+//        {
+//            currentEditor->buildModule();
+//        }
+//        else if (info.moduleState == ModuleState::hasFile) //has a file but NO midi assignment
+//        {
+//            currentEditor->showSettingsOverlay();
+//            currentEditor->repaint();
+//        }
+//        else if (info.moduleState == ModuleState::empty) //has nothing
+//        {
+//            deleteModuleEditor();
+//            deleteEntireModule();
+//
+//        }
+//    }
     
 }
 
@@ -563,9 +585,14 @@ int KrumModule::deleteEntireModule()
     return 0;
 }
 
+//void KrumModule::setParentEditor(KrumSamplerAudioProcessorEditor* parent)
+//{
+//    parentEditor = parent;
+//}
+
 juce::String KrumModule::getIndexString()
 {
     return juce::String(info.samplerIndex);
 }
 
-
+ 

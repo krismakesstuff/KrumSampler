@@ -32,7 +32,7 @@ DragAndDropThumbnail::~DragAndDropThumbnail()
 bool DragAndDropThumbnail::isInterestedInFileDrag(const juce::StringArray& files)
 {
     //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-    return true;
+    return false;
 }
 
 void DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, int y)
@@ -50,7 +50,7 @@ void DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, i
 bool DragAndDropThumbnail::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
 {
     //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-    return true;
+    return false;
 }
 
 void DragAndDropThumbnail::itemDropped(const SourceDetails& dragSourceDetails)

@@ -74,7 +74,7 @@ public:
     void setModuleButtonsClickState(bool isClickable);
 
     int getModuleState();
-    
+     
     int getModuleSamplerIndex();
     void setModuleIndex(int newIndex);
 
@@ -139,6 +139,20 @@ public:
     
     void updateModuleFile(juce::File& newFile);
     
+    
+//    bool operator<(KrumModuleEditor* other)
+//    {
+//        int firstMidi = getModuleMidiNote();
+//        if(firstMidi == 0)
+//        {
+//            return false;
+//        }
+//        else
+//        {
+//            return firstMidi < other->getModuleMidiNote();
+//        }
+//    }
+//
 private:
 
     
@@ -195,6 +209,25 @@ private:
         std::function<void(int)> handleSettingsResult;
     };
     
+    class MidiLabel :   public juce::Component,
+                        public juce::SettableTooltipClient
+    {
+    public:
+        MidiLabel(KrumModuleEditor* parentEditor);
+        ~MidiLabel() override;
+        
+        void paint(juce::Graphics& g) override;
+        //juce::String getTooltip() override;
+        void setStrings(juce::String note, juce::String channel);
+        
+        
+        juce::String noteNumber;
+        juce::String channelNumber;
+        
+        KrumModuleEditor* moduleEditor = nullptr;
+    };
+    
+    MidiLabel midiLabel{this};
     
     OneShotButton playButton;
     InfoPanelDrawableButton editButton {"Settings", "Provides a list of actions to change the settings of the module", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };

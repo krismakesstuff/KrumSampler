@@ -39,6 +39,21 @@ namespace ColorPaletteColors
     static juce::Array<juce::Colour> colorArray{ redSalsa, orangeRed, yellowOrange, mangoTango, maize,
                                                 pistachio, zomp, cadetBlue, queenBlue, cgBlue };
 
+    static juce::ColourGradient makeGradientFromAllColors(bool radial, juce::Point<float> pointOne, juce::Point<float> pointTwo)
+    {
+        juce::ColourGradient retGrade;
+        juce::NormalisableRange<double> colorRange {0, (double)colorArray.size()};
+        for(int i = 0; i < colorArray.size(); i++)
+        {
+            retGrade.addColour(colorRange.convertTo0to1(i), colorArray[i]);
+        }
+        
+        retGrade.isRadial = radial;
+        retGrade.point1 = pointOne;
+        retGrade.point2 = pointTwo;
+        
+        return retGrade;
+    }
 }
 
 

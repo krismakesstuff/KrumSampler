@@ -127,17 +127,17 @@ void KrumModuleEditor::paint (juce::Graphics& g)
     g.setColour(bgColor);
     juce::Colour c = parent.info.moduleColor.withAlpha(0.5f);
 
-    if (settingsOverlay != nullptr)
-    {
-        c = settingsOverlay->getSelectedColor().withAlpha(0.5f);
-    }
-    else if (parent.info.moduleState == KrumModule::ModuleState::empty)
+//    if (settingsOverlay != nullptr)
+//    {
+//        c = settingsOverlay->getSelectedColor().withAlpha(0.5f);
+//    }
+    if (parent.info.moduleState == KrumModule::ModuleState::empty)
     {
         g.setColour(isMouseOver() ? juce::Colours::grey : juce::Colours::darkgrey);
         g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 1.0f);
         
         g.setColour(juce::Colours::darkgrey);
-        g.drawFittedText("Drop Sample Here", area.withWidth(30).withX(area.getCentreX() - 15), juce::Justification::centred, 1);
+        g.drawFittedText("Drop Sample Here", area.reduced(20), juce::Justification::centred, 3);
     }
     else if (parent.info.moduleState == KrumModule::ModuleState::active)
     {
@@ -150,29 +150,13 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         
         juce::Rectangle<int> leftLabelRect{ area.getX() + 2, panSlider.getBottom() - 5, 20, 20 };
         juce::Rectangle<int> rightLabelRect{ area.getRight() - 22, panSlider.getBottom() - 5, 20, 20 };
-        juce::Rectangle<int> midiNoteRect{ 13, thumbnail.getBottom() + 5, area.getWidth() - 20, 20};
-        juce::Rectangle<int> midiChanRect{ 13, midiNoteRect.getBottom() - 5, area.getWidth() - 20, 20 };
 
-        juce::Rectangle<int> labelsBGRect = midiNoteRect.withBottom(midiChanRect.getBottom()).withX(thumbnail.getX()).withWidth(thumbnail.getWidth());
-
-        //g.setColour(c.darker(0.5f));
-        g.setColour(juce::Colours::black);
-        g.fillRect(labelsBGRect);
-        
         g.setColour(c);
 
         g.setFont(11.0f);
         g.drawFittedText("L", leftLabelRect, juce::Justification::centred, 1);
         g.drawFittedText("R", rightLabelRect, juce::Justification::centred, 1);
 
-        g.setColour(fontColor);
-        g.setFont(14.0f);
-
-        g.drawFittedText("Note:", midiNoteRect, juce::Justification::centredLeft, 1);
-        g.drawFittedText(getModuleMidiNoteString(true), midiNoteRect, juce::Justification::centredRight, 1);
-
-        g.drawFittedText("Channel:", midiChanRect, juce::Justification::centredLeft, 1);
-        g.drawFittedText(juce::String(getModuleMidiChannel()), midiChanRect, juce::Justification::centredRight, 1);
 
         auto sliderBounds = volumeSlider.getBoundsInParent().toFloat();
         auto sliderLineBounds = sliderBounds.withTrimmedTop(22).withBottom(sliderBounds.getBottom() - 6).withWidth(sliderBounds.getWidth() + 10).withX(sliderBounds.getX() - 5);
@@ -243,6 +227,8 @@ void KrumModuleEditor::resized()
     int spacer = 5;
     int thumbnailH = 130;
 
+    int midiLabelH = 40;
+    
     int panSliderH = 30;
     int panSliderW = area.getWidth();
 
@@ -254,7 +240,7 @@ void KrumModuleEditor::resized()
     titleBox.setBounds(area.withBottom(titleHeight).reduced(spacer));
     //thumbnailBG = area.withBottom(thumbnailH).withTop(titleBox.getBottom()).reduced(spacer);
     thumbnail.setBounds(area.withBottom(thumbnailH).withTop(titleBox.getBottom()).reduced(spacer));
-
+    midiLabel.setBounds(area.withTrimmedTop(thumbnail.getBottom()).withHeight(midiLabelH).reduced(spacer));
 
     panSlider.setBounds(area.withTop(thumbnail.getBottom() + (spacer * 10)).withBottom(thumbnail.getBottom() + panSliderH + (spacer * 7)).withWidth(panSliderW).withLeft(area.getCentreX() - (panSliderW/2)).withHeight(panSliderH/* - spacer*/)/*.reduced(spacer)*/);
     volumeSlider.setBounds(area.withTop(panSlider.getBottom()/* + spacer*/).withBottom(panSlider.getBottom() + volumeSliderH).withLeft(area.getCentreX() - (volumeSliderW / 2)).withWidth(volumeSliderW)/*.reduced(spacer)*/);
@@ -340,6 +326,9 @@ void KrumModuleEditor::buildModule()
 
     panSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModulePan_ID + i, panSlider));
 
+    addAndMakeVisible(midiLabel);
+    
+    
     parent.updateAudioAtomics();
 
     int playButtonImSize;
@@ -824,7 +813,7 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails 
             int numFreeModules, firstFreeIndex;
             parent.sampler.getNumFreeModules(numFreeModules, firstFreeIndex);
             
-            if(numDroppedItems <= numFreeModules)
+            if(numDroppedItems <= numFreeModules) //checks to make sure we have enough modules
             {
                 for (int i = 0; i < numDroppedItems; i++)
                 {
@@ -838,8 +827,13 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails 
                             if(parent.sampler.isFileAcceptable(file))
                             {
                                 
-                                auto mod = parent.sampler.getModule(firstFreeIndex);
-                                parent.sampler.getModule(firstFreeIndex++)->getCurrentModuleEditor()->updateModuleFile(file);
+                                auto mod = parent.sampler.getModule(firstFreeIndex++);
+                                if(!mod->hasEditor())
+                                {
+                                    editor.moduleContainer.addModuleEditor(mod->createModuleEditor(editor));
+                                }
+                                
+                                mod->getCurrentModuleEditor()->updateModuleFile(file);
 
                                 DBG("-------");
                                 DBG("Module: " + juce::String(mod->getModuleSamplerIndex()));
@@ -891,15 +885,16 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails 
             }
         }
     }
-    else if (desc.contains("ModuleDrag-"))
-    {
-        auto modEdDropped = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
-        DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped on Module " + juce::String(getModuleSamplerIndex()));
-        if(modEdDropped)
-        {
-            editor.moduleContainer.moveModule(modEdDropped->getModuleDisplayIndex(), parent.getModuleDisplayIndex());
-        }
-    }
+//    else if (desc.contains("ModuleDrag-"))
+//    {
+//        auto modEdDropped = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
+//        DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped on Module " + juce::String(getModuleSamplerIndex()));
+//        if(modEdDropped)
+//        {
+//            editor.moduleContainer.moveModule(modEdDropped->getModuleDisplayIndex(), parent.getModuleDisplayIndex());
+//        }
+//    }
+    editor.addNextModuleEditor();
 }
 
 void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails &dragDetails)
@@ -930,8 +925,14 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
                 juce::File audioFile {file};
                 if(parent.sampler.isFileAcceptable(audioFile))
                 {
-                    auto mod = parent.sampler.getModule(firstFreeIndex);
-                    parent.sampler.getModule(firstFreeIndex++)->getCurrentModuleEditor()->updateModuleFile(audioFile);
+                    //auto mod = parent.sampler.getModule(firstFreeIndex);
+                    auto mod = parent.sampler.getModule(firstFreeIndex++);
+                    if(!mod->hasEditor())
+                    {
+                        editor.moduleContainer.addModuleEditor(mod->createModuleEditor(editor));
+                    }
+                    
+                    mod->getCurrentModuleEditor()->updateModuleFile(audioFile);
 
                     DBG("-------");
                     DBG("Module: " + juce::String(mod->getModuleSamplerIndex()));
@@ -954,6 +955,8 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
         }
         
     }
+    //editor.moduleContainer.showFirstEmptyModule();
+    editor.addNextModuleEditor();
 }
 
 void KrumModuleEditor::updateModuleFile(juce::File& file)
@@ -962,6 +965,7 @@ void KrumModuleEditor::updateModuleFile(juce::File& file)
     parent.setModuleName(file.getFileName());
     parent.sampler.updateModuleSample(&parent);
     editor.fileBrowser.addFileToRecent(file, parent.info.name);
+    
     repaint();
 }
 
@@ -998,3 +1002,40 @@ void KrumModuleEditor::OneShotButton::mouseUp(const juce::MouseEvent& e)
 
 //============================================================================================================================
 
+KrumModuleEditor::MidiLabel::MidiLabel(KrumModuleEditor* editor)
+    : moduleEditor(editor)
+{
+    setTooltip("Lane: " + juce::String(moduleEditor->getModuleSamplerIndex()));
+}
+
+KrumModuleEditor::MidiLabel::~MidiLabel()
+{
+    
+}
+ 
+void KrumModuleEditor::MidiLabel::paint(juce::Graphics& g)
+{
+    auto area = getLocalBounds();
+    
+    g.setColour(juce::Colours::black);
+    g.fillRect(area);
+    
+    g.setColour(juce::Colours::white.darker());
+    g.setFont(14.0f);
+
+    juce::Rectangle<int> midiNoteRect = area.withTrimmedBottom(area.getHeight() / 2).withX(5).withWidth(area.getWidth() - 10);
+    juce::Rectangle<int> midiChanRect = area.withTrimmedTop(area.getHeight() / 2).withX(5).withWidth(area.getWidth() - 10);
+
+    g.drawFittedText("Note:", midiNoteRect, juce::Justification::centredLeft, 1);
+    g.drawFittedText(moduleEditor->getModuleMidiNoteString(true), midiNoteRect, juce::Justification::centredRight, 1);
+
+    g.drawFittedText("Channel:", midiChanRect, juce::Justification::centredLeft, 1);
+    g.drawFittedText(juce::String(moduleEditor->getModuleMidiChannel()), midiChanRect, juce::Justification::centredRight, 1);
+}
+
+//juce::String KrumModuleEditor::MidiLabel::getTooltip()
+//{
+//    return "Lane: " + juce::String(moduleEditor->getModuleSamplerIndex());
+//}
+
+//============================================================================================================================

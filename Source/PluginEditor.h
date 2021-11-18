@@ -43,6 +43,9 @@ namespace EditorDimensions
     const static int outputW = 80;
     const static int keyboardH = 90;
 
+    //const static int titleImageH;
+    const static int titleImageW = 420; //nice
+    
     //const static int infoH = 650;
     const static int fileTreeH = 600;
     const static int fileTreeTitleH = 30;
@@ -88,6 +91,7 @@ public:
 
     //bool createModule(juce::String& moduleName, int index, juce::File& file);
     void createModuleEditors();
+    void addNextModuleEditor();
     KrumModuleContainer& getModuleContainer();
 
     void reconstructModuleDisplay(juce::ValueTree& moduleDisplayTree);
@@ -96,10 +100,14 @@ public:
     void hideFileBrowser();
     void showFileBrowser();
 
+    
     void saveFileBrowserHiddenState();
     bool getSavedFileBrowserHiddenState();
 
+    void infoButtonClicked();
     bool getSavedInfoButtonState();
+    void saveInfoButtonState();
+    
     
     void updateOutputGainBubbleComp(juce::Component*);
 
@@ -123,7 +131,7 @@ public:
     juce::SharedResourcePointer<juce::TooltipWindow> toolTipWindow;
 
     void updateThumbnails();
-    void showLastModule();
+    
     
 
 private:
@@ -146,7 +154,7 @@ private:
     const juce::Font defaultFont{ "Calibri", 11.0f, juce::Font::FontStyleFlags::plain };
 
     juce::Rectangle<int> modulesBG;
-    juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.999f) };
+    juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.99f) };
     juce::Colour outlineColor{ juce::Colours::white };
     juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
@@ -163,7 +171,6 @@ private:
     juce::AudioProcessorValueTreeState& parameters;
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     
-    //juce::Slider outputGainSlider;
     InfoPanelSlider outputGainSlider{"Output Gain", "Overall volume control of the plug-in"};
     std::unique_ptr<SliderAttachment> outputGainAttachment;
  
@@ -173,18 +180,14 @@ private:
 
     KrumModuleContainer moduleContainer{this};
     KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer };
-    //KrumFileDrop fileDrop{ *this, moduleContainer, parameters, fileBrowser };
 
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
     juce::TextButton websiteButton;
     
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
-    //juce::DrawableButton infoButton {"Info Button", juce::DrawableButton::ButtonStyle::ImageStretched};
     
     juce::Rectangle<int> madeByArea{ 0, 0, 150, 50 };
-
-    //static InfoPanel infoPanel;
 
     //Not Using this font anymore, keeping this here incase I want to add a custom font later
     

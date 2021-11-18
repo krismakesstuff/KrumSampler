@@ -80,7 +80,7 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
 
     g.setColour(moduleSelectedColor);
     
-    g.drawFittedText(parentModule.info.name, area.withTrimmedBottom(area.getHeight() * 0.9f), juce::Justification::centred, 1);
+    //g.drawFittedText(parentModule.info.name, area.withTrimmedBottom(area.getHeight() * 0.9f), juce::Justification::centred, 1);
     
     if (!moduleOverlaySelected)
     {
@@ -193,7 +193,7 @@ void ModuleSettingsOverlay::cancelSettings()
     }
     else
     {
-        parentModule.deleteEntireModule();
+        parentModule.setModuleState(KrumModule::ModuleState::empty);
         DBG("Deleted");
     }
 

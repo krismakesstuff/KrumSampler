@@ -98,6 +98,8 @@ public:
     void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
 
+    //void showFirstEmptyModule();
+    
 private:
 
     void timerCallback() override;
@@ -167,6 +169,8 @@ private:
     bool modulesOutside = false;
     juce::Rectangle<int> fadeArea;
     
+    int getNumVisibleModules();
+    
     //juce::ComponentDragger dragger;
     
     //set constrainer and make esc key exit drag
@@ -174,6 +178,18 @@ private:
     
     //juce::OwnedArray<DummyKrumModuleEditor> editors;
 
+//    class MidiSorter
+//    {
+//    public:
+//        MidiSorter() {}
+//
+//        int compareElements(int firstMidiNote, int secondMidiNote)
+//        {
+//
+//        }
+//
+//    };
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumModuleContainer)
 
 };

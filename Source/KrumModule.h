@@ -113,8 +113,6 @@ public:
     bool isModuleDragging();
     void setModuleDragging(bool isDragging);
     
-    
-    
     void triggerNoteOn();
     void triggerNoteOff();
 
@@ -180,10 +178,8 @@ private:
     bool needsToUpdateTree = false;
 
     friend class KrumModuleEditor;
-    friend class KrumModuleProcessor;
     friend class DragAndDropThumbnail;
 
-    //std::shared_ptr<KrumModuleProcessor> moduleProcessor;
     std::shared_ptr<KrumModuleEditor> moduleEditor = nullptr;
 
     juce::AudioProcessorValueTreeState* parameters = nullptr;
@@ -191,7 +187,6 @@ private:
 
     juce::String getIndexString();
 
-    //From Processor
     KrumSampler& sampler;
 
     std::atomic<float>* moduleGain = nullptr;
