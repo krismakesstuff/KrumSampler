@@ -53,6 +53,8 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModu
     midiChannelTitleLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
     midiChannelTitleLabel.setJustificationType(juce::Justification::centred);
 
+    addChildComponent(&colorPalette);
+    
     setMidiLabels();
 }
 
@@ -244,7 +246,12 @@ void ModuleSettingsOverlay::setMidiLabels()
 
     midiNoteNumberLabel.setText(midiNoteString, juce::dontSendNotification);
     midiChannelNumberLabel.setText(midiChanString, juce::dontSendNotification);
-
+    
+    if(isColorOnly)
+    {
+        midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::darkgrey);
+        midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::darkgrey);
+    }
 }
 
 bool ModuleSettingsOverlay::hasMidi()
@@ -264,8 +271,8 @@ void ModuleSettingsOverlay::colorWasChanged(bool colorWasChanged)
     midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
 }
 
-void ModuleSettingsOverlay::showColorsOnly()
+void ModuleSettingsOverlay::setToOnlyShowColors(bool onlyShowColors)
 {
-    addAndMakeVisible(colorPalette);
-    isColorOnly = true;
+    isColorOnly = onlyShowColors;
+    colorPalette.setVisible(isColorOnly);
 }

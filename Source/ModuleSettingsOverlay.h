@@ -55,7 +55,7 @@ public:
 
     void keepCurrentColor(bool keepColor);
     void colorWasChanged(bool colorWasChanged);
-    void showColorsOnly();
+    void setToOnlyShowColors(bool onlyShowColors);
 
 private:
 

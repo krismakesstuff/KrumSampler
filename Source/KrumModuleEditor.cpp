@@ -103,6 +103,10 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumSamplerAudioProcessorEdito
     setVisible(true);
     setPaintingIsUnclipped(true);
     
+    //We make a settings overlay in the ctor and keep it for the entire life of the module editor so we don't have to heap allocate when changing settings
+    settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
+    addChildComponent(settingsOverlay.get());
+    
     //this decides which GUI to draw. If this is active we draw a normal module, if not we draw a ModuleSettingsOverlay
     if (parent.isModuleActive())
     {
@@ -112,7 +116,6 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumSamplerAudioProcessorEdito
     else if(parent.info.moduleState == KrumModule::ModuleState::hasFile)
     {
         needsToBuildModuleEditor = true;
-        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
         showSettingsOverlay();
     }
 }
@@ -122,15 +125,17 @@ KrumModuleEditor::~KrumModuleEditor()
 
 void KrumModuleEditor::paint (juce::Graphics& g)
 {
+    if (settingsOverlay->isVisible())
+    {
+        return;
+    }
+
     auto area = getLocalBounds().reduced(EditorDimensions::shrinkage);
 
     g.setColour(bgColor);
     juce::Colour c = parent.info.moduleColor.withAlpha(0.5f);
 
-//    if (settingsOverlay != nullptr)
-//    {
-//        c = settingsOverlay->getSelectedColor().withAlpha(0.5f);
-//    }
+    
     if (parent.info.moduleState == KrumModule::ModuleState::empty)
     {
         g.setColour(isMouseOver() ? juce::Colours::grey : juce::Colours::darkgrey);
@@ -257,7 +262,7 @@ void KrumModuleEditor::resized()
 
 void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 {
-    if (settingsOverlay != nullptr)
+    if (settingsOverlay->isVisible())
     {
         editor.moduleContainer.setModuleSelected(&parent);
     }
@@ -439,22 +444,22 @@ void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
 void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 {
     DBG("Module State: " + juce::String(parent.info.moduleState));
-    editor.removeKeyboardListener(&parent);
-    settingsOverlay.reset();
-    cleanUpOverlay(keepSettings);
+    //editor.removeKeyboardListener(&parent);
+    //settingsOverlay.reset();
+    settingsOverlay->setVisible(false);
+    setModuleButtonsClickState(true);
+    handleOverlayData(keepSettings);
+    showModule();
 }
 
 
 void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
 {
-    if (settingsOverlay == nullptr)
-    {
-        settingsOverlay.reset(new ModuleSettingsOverlay(getLocalBounds(), parent));
-    }
 
+    hideModule();
     setModuleButtonsClickState(false);
-    addAndMakeVisible(settingsOverlay.get());
-
+    settingsOverlay->setVisible(true);
+    
     if (selectOverlay)
     {
         //we have the container control selecting so we don't have multiple selections
@@ -467,14 +472,13 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
 }
 
 
-void KrumModuleEditor::cleanUpOverlay(bool keepSettings)
+void KrumModuleEditor::handleOverlayData(bool keepSettings)
 {
     if (needsToBuildModuleEditor)
     {
         buildModule();
     }
 
-   
     if (keepSettings)
     {
         if (oldMidiNote > 0) //removes the old color assignment on the keyboard
@@ -493,7 +497,6 @@ void KrumModuleEditor::cleanUpOverlay(bool keepSettings)
         parent.setModuleState(KrumModule::ModuleState::active);
     }
 
-    setModuleButtonsClickState(true);
     resized();
     repaint();
     DBG("Module State: " + juce::String(parent.info.moduleState));
@@ -507,6 +510,30 @@ void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
     {
         getChildComponent(i)->setInterceptsMouseClicks(isClickable, isClickable);
     }
+}
+
+void KrumModuleEditor::hideModule()
+{
+    //set child components to not visible
+    titleBox.setVisible(false);
+    midiLabel.setVisible(false);
+    panSlider.setVisible(false);
+    volumeSlider.setVisible(false);
+    playButton.setVisible(false);
+    editButton.setVisible(false);
+    thumbnail.setVisible(false);
+}
+
+void KrumModuleEditor::showModule()
+{
+    //set child components to visible
+    titleBox.setVisible(true);
+    midiLabel.setVisible(true);
+    panSlider.setVisible(true);
+    volumeSlider.setVisible(true);
+    playButton.setVisible(true);
+    editButton.setVisible(true);
+    thumbnail.setVisible(true);
 }
 
 int KrumModuleEditor::getModuleState()
@@ -665,12 +692,13 @@ void KrumModuleEditor::setKeyboardColor()
 //the editor should only want midi if it's being assigned
 bool KrumModuleEditor::doesEditorWantMidi()
 {
-    return settingsOverlay != nullptr;
+    //return settingsOverlay != nullptr;
+    return settingsOverlay->isVisible();
 }
 
 void KrumModuleEditor::handleMidi(int midiChannel, int midiNote)
 {
-    if (settingsOverlay != nullptr)
+    if (settingsOverlay != nullptr && settingsOverlay->isVisible())
     {
         settingsOverlay->handleMidiInput(midiChannel, midiNote);
     }
@@ -765,23 +793,24 @@ void KrumModuleEditor::handleSettingsMenuResult(int result)
         auto localBounds = getLocalBounds();
        if (result == KrumModule::moduleReConfig_Id)
        {
-           settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+           //settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
            settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
            settingsOverlay->keepCurrentColor(true);
            showSettingsOverlay(true);
        }
        else if (result == KrumModule::ModuleSettingIDs::moduleMidiNote_Id)
        {
-           settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+           //settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+           settingsOverlay->setToOnlyShowColors(false);
            settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
            settingsOverlay->keepCurrentColor(true);
            showSettingsOverlay(true);
        }
        else if (result == KrumModule::ModuleSettingIDs::moduleColor_Id)
        {
-          settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+          //settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
+           settingsOverlay->setToOnlyShowColors(true);
           settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
-          settingsOverlay->showColorsOnly();
           showSettingsOverlay(true);
        }
        else if (result == KrumModule::moduleDelete_Id)
@@ -796,8 +825,12 @@ void KrumModuleEditor::handleSettingsMenuResult(int result)
 //Drag and Drop Target
 bool KrumModuleEditor::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails &dragDetails)
 {
-    auto desc = dragDetails.description.toString();
-    return desc.isNotEmpty() && (desc.contains("FileBrowserDrag-") || desc.contains("ModuleDrag-"));
+    if(shouldModuleAcceptFileDrop())
+    {
+        auto desc = dragDetails.description.toString();
+        return desc.isNotEmpty() && (desc.contains("FileBrowserDrag-") || desc.contains("ModuleDrag-"));
+    }
+    return false;
 }
 
 //Drag and Drop Target
@@ -906,7 +939,7 @@ void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceD
 bool KrumModuleEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
     //check if file format is supported?
-    return true;
+    return shouldModuleAcceptFileDrop();
 }
 
 //EXTERNAL File Drag and Drop Target
@@ -967,6 +1000,13 @@ void KrumModuleEditor::updateModuleFile(juce::File& file)
     editor.fileBrowser.addFileToRecent(file, parent.info.name);
     
     repaint();
+}
+
+bool KrumModuleEditor::shouldModuleAcceptFileDrop()
+{
+    //auto state = parent.getModuleState();
+    //return state == KrumModule::active || state == KrumModule::hasFile;
+    return parent.isModuleEmpty();
 }
 
 //============================================================================================================================

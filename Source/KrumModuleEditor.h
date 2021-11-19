@@ -70,9 +70,12 @@ public:
     void removeSettingsOverlay(bool keepSettings);
 
     void showSettingsOverlay(bool selectOverlay = false);
-    void cleanUpOverlay(bool keepSettings);
+    void handleOverlayData(bool keepSettings);
     void setModuleButtonsClickState(bool isClickable);
-
+    
+    void hideModule();
+    void showModule();
+    
     int getModuleState();
      
     int getModuleSamplerIndex();
@@ -139,6 +142,7 @@ public:
     
     void updateModuleFile(juce::File& newFile);
     
+    bool shouldModuleAcceptFileDrop();
     
 //    bool operator<(KrumModuleEditor* other)
 //    {
