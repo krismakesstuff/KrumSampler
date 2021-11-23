@@ -111,7 +111,7 @@ KrumModuleEditor::KrumModuleEditor(KrumModule& o, KrumSamplerAudioProcessorEdito
     if (parent.isModuleActive())
     {
         buildModule();
-        setAndDrawThumbnail();
+        //setAndDrawThumbnail();
     }
     else if(parent.info.moduleState == KrumModule::ModuleState::hasFile)
     {
@@ -357,6 +357,8 @@ void KrumModuleEditor::buildModule()
     
     //parent.setModuleActive(true);
 
+    setAndDrawThumbnail();
+    
     setChildCompColors();
     editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor);
 
@@ -443,6 +445,8 @@ void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
 
 void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 {
+    //const juce::MessageManagerLock mm;
+    
     DBG("Module State: " + juce::String(parent.info.moduleState));
     //editor.removeKeyboardListener(&parent);
     //settingsOverlay.reset();
@@ -456,6 +460,8 @@ void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
 {
 
+    //const juce::MessageManagerLock mm;
+    
     hideModule();
     setModuleButtonsClickState(false);
     settingsOverlay->setVisible(true);
@@ -490,7 +496,7 @@ void KrumModuleEditor::handleOverlayData(bool keepSettings)
             editor.setKeyboardNoteColor(parent.info.midiNote, parent.info.moduleColor);
         }
         
-        parent.sampler.updateModuleSample(&parent); //update midi assignment is Sound
+        parent.sampler.updateModuleSample(&parent); //update midi assignment in Sound
         setChildCompColors();
         setAndDrawThumbnail();
         needsToBuildModuleEditor = true;
@@ -810,8 +816,8 @@ void KrumModuleEditor::handleSettingsMenuResult(int result)
        {
           //settingsOverlay.reset(new ModuleSettingsOverlay(localBounds, parent));
            settingsOverlay->setToOnlyShowColors(true);
-          settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
-          showSettingsOverlay(true);
+           settingsOverlay->setMidi(parent.info.midiNote, parent.info.midiChannel);
+           showSettingsOverlay(true);
        }
        else if (result == KrumModule::moduleDelete_Id)
        {

@@ -202,6 +202,7 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 //oldNote is default 0;
 void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote)
 {
+    //we test the midi note to make sure the same module doesn't have multiple assignments
     int testNote = oldNote > 0 ? oldNote : midiNote;
     if (isMidiNoteAssigned(testNote))
     {
@@ -209,6 +210,8 @@ void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, i
     }
 
     currentlyAssignedMidiNotes.emplace(std::make_pair(midiNote, moduleColor));
+    
+   // const juce::MessageManagerLock mm;
     repaint();
 }
 
@@ -227,7 +230,11 @@ void KrumKeyboard::removeMidiNoteColorAssignment(int midiNote, bool shouldRepain
 
 bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
 {
-    return currentlyAssignedMidiNotes.find(midiNote) != currentlyAssignedMidiNotes.end();
+    if(midiNote > 0)
+    {
+        return currentlyAssignedMidiNotes.find(midiNote) != currentlyAssignedMidiNotes.end();
+    }
+    return false;
 }
 
 void KrumKeyboard::updateKeysFromContainer()

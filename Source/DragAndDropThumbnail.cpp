@@ -160,13 +160,15 @@ void DragAndDropThumbnail::paintIfFileLoaded(juce::Graphics& g, const juce::Rect
 
 void DragAndDropThumbnail::mouseEnter(const juce::MouseEvent& e)
 {
+    //const juce::MessageManagerLock mm;
     parentEditor.editor.moduleContainer.showModuleClipGainSlider(&parentEditor);
     InfoPanelComponent::mouseEnter(e);
-    repaint();
+    //repaint();
 }
 
 void DragAndDropThumbnail::mouseExit(const juce::MouseEvent& e)
 {
+    //const juce::MessageManagerLock mm;
     if (isMouseOver(true))
     {
         return;
@@ -175,7 +177,7 @@ void DragAndDropThumbnail::mouseExit(const juce::MouseEvent& e)
     clipGainSlider.setVisible(false);
     canAcceptFile = false;
     InfoPanelComponent::mouseExit(e);
-    repaint();
+    //repaint();
 }
 
 void DragAndDropThumbnail::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)
