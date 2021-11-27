@@ -15,7 +15,7 @@
 
 //==============================================================================
 KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner) 
-    : editor(owner), fadeArea(50, editor->modulesBG.getHeight())
+    : editor(owner)//, fadeArea(50, editor->modulesBG.getHeight())
 {
     
     addKeyListener(this);
@@ -104,20 +104,21 @@ void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
     for (int i = 0; i < editor->sampler.getNumModules(); i++)
     {
         auto mod = editor->sampler.getModule(i);
+        KrumModuleEditor* modEditor = nullptr;
         juce::Rectangle<int> modBounds;
         if (mod->hasEditor())
         {
-            auto modEditor = mod->getCurrentModuleEditor();
+            modEditor = mod->getCurrentModuleEditor();
             modBounds = modEditor->getBoundsInParent();
         }
         //Controlling the mouseDown from here so we can "click-off" and it will unselect all modules.
         if (modBounds.contains(mousePos))
         {
-            setModuleSelected(mod);
+            setModuleSelected(modEditor);
         }
         else
         {
-            setModuleUnselected(mod);
+            setModuleUnselected(modEditor);
         }
     }
     
@@ -236,25 +237,37 @@ void KrumModuleContainer::moveModule(int moduleIndexToMove, int newDisplayIndex)
     updateModuleDisplayIndices(true);
 }
 
-void KrumModuleContainer::setModuleSelected(KrumModule* moduleToMakeActive)
+void KrumModuleContainer::setModuleSelected(KrumModuleEditor* moduleToMakeActive)
 {
     deselectAllModules();
     moduleToMakeActive->setModuleSelected(true);
     repaint();
 }
 
-void KrumModuleContainer::setModuleUnselected(KrumModule* moduleToDeselect)
+void KrumModuleContainer::setModuleUnselected(KrumModuleEditor* moduleToDeselect)
 {
     moduleToDeselect->setModuleSelected(false);
 }
 
 void KrumModuleContainer::deselectAllModules()
 {
-    for (int i = 0; i < editor->sampler.getNumModules(); i++)
+    for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        auto mod = editor->sampler.getModule(i);
-        mod->setModuleSelected(false);
+        moduleDisplayOrder[i]->setModuleSelected(false);
     }
+
+    /*if (editor)
+    {
+        for (int i = 0; i < editor->sampler.getNumModules(); i++)
+        {
+            auto mod = editor->sampler.getModule(i);
+            mod->setModuleSelected(false);
+        }
+    }
+    else
+    {
+        DBG("DeselectingAllModules() -- editor is NULL");
+    }*/
 }
 
 KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
@@ -484,9 +497,10 @@ void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEdito
 {
     for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        if (moduleDisplayOrder[i] != moduleEditor)
+        auto* modEd = moduleDisplayOrder[i];
+        if (modEd != nullptr && modEd != moduleEditor)
         {
-            moduleDisplayOrder[i]->setClipGainSliderVisibility(false);
+            modEd->setClipGainSliderVisibility(false);
         }
     }
 

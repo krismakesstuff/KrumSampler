@@ -239,6 +239,7 @@ bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
 
 void KrumKeyboard::updateKeysFromContainer()
 {
+    //not getting called on init from plugin editor?
     auto displayOrder = moduleContainer.getModuleDisplayOrder();
     for (int i = 0; i < displayOrder.size(); i++)
     {

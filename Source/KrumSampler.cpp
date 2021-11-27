@@ -233,6 +233,7 @@ void KrumSampler::initVoices()
     }
 
     juce::Logger::writeToLog("Voices Initialized: " + juce::String(voices.size()));
+    printVoices();
     
 }
 
@@ -285,42 +286,41 @@ KrumModule* KrumSampler::getModule(int index)
 //    }
 //}
 
-void KrumSampler::removeModule(KrumModule* moduleToDelete)
+void KrumSampler::removeModuleSound(KrumModule* moduleToDelete, bool updateTree)
 {
-    int index = moduleToDelete->getModuleSamplerIndex();
-    //modules.remove(index, true);
-    sounds.remove(index);
 
-    //updating the module's knowledge of it's own index from the removal upwards
-//    for (int i = index; i < getNumModules(); i++)
-//    {
-//        //grab the old values
-//        auto mod = modules[i];
-//        auto modGain = mod->getModuleGain()->load();
-//        auto modPan = mod->getModulePan()->load();
-//
-//        //reassign the module with it's new index, which the slider attachments use, then give it back it's old values.
-//        mod->setModuleSamplerIndex(i);
-//        //mod->reassignSliders();
-//
-//
-//        //this is my hacky way to easily delete modules and just reassign them on the next slider attachment. Will be making this better to have a realiable automation workflow.
-//        mod->setModuleGain(modGain);
-//        mod->setModulePan(modPan);
-//        mod->updateAudioAtomics();
-//    }
+    DBG("Module Index To Delete: " + juce::String(moduleToDelete->getModuleSamplerIndex()));
+    DBG("Module Sample: " + moduleToDelete->getSampleFile().getFullPathName());
 
-    owner.updateValueTreeState();
+    KrumSound* ksound = nullptr;
+    for (int i = 0; i < sounds.size(); i++)
+    {
+        auto sound = sounds.getObjectPointer(i);
+        //cast to juce::samplersound first? 
+        ksound = static_cast<KrumSound*>(sound);
+        if (ksound && ksound->isParent(moduleToDelete))
+        {
+            sounds.removeObject(sound);
+            DBG("sound removed");
+            printSounds();
+            if (updateTree)
+            {
+                owner.updateValueTreeState();
+            }
+            return;
+        }
+        
+    }
+
+    DBG("no sounds removed");
+
 }
  
 void KrumSampler::updateModuleSample(KrumModule* updatedModule)
 {
-    //if this module already has a sound, it removes the original, then adds then new one. 
-    auto sound = sounds[updatedModule->getModuleSamplerIndex()];
-    if (sound)
-    {
-        sounds.removeObject(sound);
-    }
+    //removes the currently assigned sound of the module, if none exist this function will do nothing
+    //we pass in false to NOT update the valueTree as we are about to add sample to it and we don't want the tree to set the module inactive
+    removeModuleSound(updatedModule, false); 
 
     addSample(updatedModule);
 }
@@ -333,18 +333,15 @@ void KrumSampler::addSample(KrumModule* moduleToAddSound)
         juce::BigInteger range;
         range.setBit(moduleToAddSound->getMidiTriggerNote());
 
-        for (int i = 0; i < getNumModules(); i++)
-        {
-            if (moduleToAddSound == modules[i])
-            {
-                sounds.insert(moduleToAddSound->getModuleSamplerIndex(), new KrumSound(moduleToAddSound, moduleToAddSound->getModuleName(), *reader, range, moduleToAddSound->getMidiTriggerNote(),
-                    attackTime, releaseTime, MAX_FILE_LENGTH_SECS));
-            }
-        }
+        sounds.add(new KrumSound(moduleToAddSound, moduleToAddSound->getModuleName(), *reader, range, moduleToAddSound->getMidiTriggerNote(),
+                            attackTime, releaseTime, MAX_FILE_LENGTH_SECS));
+
+
+        //juce::Logger::writeToLog("Sample Added - Sounds: " + juce::String(sounds.size()));
+        printSounds();
     }
     
 
-    juce::Logger::writeToLog("Sample Added - Sounds: " + juce::String(sounds.size()));
 }
 
 void KrumSampler::clearModules()
@@ -407,6 +404,31 @@ bool KrumSampler::isFileAcceptable(const juce::File& file)
 juce::AudioFormatManager& KrumSampler::getFormatManager()
 {
     return formatManager;
+}
+
+void KrumSampler::printSounds()
+{
+    DBG("Sounds Size = " + juce::String(sounds.size()));
+    for (int i = 0; i < sounds.size(); i++)
+    {
+        auto sound = sounds[i];
+        //auto krumSound = static_cast<KrumSound*>(&sounds[i]);
+        DBG("Sound: " + juce::String(i) + (sound ? " is valid" : " is NULL"));
+    }
+
+}
+
+void KrumSampler::printVoices()
+{
+    DBG("Voices Size = " + juce::String(voices.size()));
+    for (int i = 0; i < voices.size(); i++)
+    {
+        auto voice = voices[i];
+        //auto krumSound = static_cast<KrumSound*>(&sounds[i]);
+        DBG("Voice: " + juce::String(i) + (voice ? " is valid" : " is NULL"));
+    }
+
+
 }
 
 

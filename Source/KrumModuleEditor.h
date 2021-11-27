@@ -58,6 +58,8 @@ public:
     void paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds);
 
     void resized() override;
+    void mouseEnter(const juce::MouseEvent& event) override;
+    void mouseExit(const juce::MouseEvent& event) override;
     void mouseDown(const juce::MouseEvent& e) override;
     void forceMouseUp();
     

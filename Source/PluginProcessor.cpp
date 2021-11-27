@@ -158,16 +158,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 //===================================================================================================================================
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor(  BusesProperties()
-                        #if ! JucePlugin_IsMidiEffect
-                        #if ! JucePlugin_IsSynth
-                                    .withInput("Input", juce::AudioChannelSet::stereo(), true)
-                        #endif
-                                    .withOutput("Output", juce::AudioChannelSet::stereo(), true))
-                        #endif
+     : AudioProcessor(  BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true))                        
                                     ,parameters(*this, nullptr, "PARAMS", createParameterLayout())
-                        #endif
+
 {
     //juce::Logger::setCurrentLogger(Log::logger);
     //juce::Logger::writeToLog("--BUILD VERSION: " + juce::String(KRUM_BUILD_VERSION));
@@ -175,17 +168,17 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
     
-   //sampler.initModules(&valueTree, &parameters);
-    
 #if JucePlugin_Build_Standalone
     fileBrowser.buildDemoKit();
 #endif
-//    juce::Logger::writeToLog("----------------------------");
-//    juce::Logger::writeToLog("Sampler Processor Constructed");
-//    juce::Logger::writeToLog("MaxNumModules: " + juce::String(MAX_NUM_MODULES));
-//    juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
-//    juce::Logger::writeToLog("MaxFileLengthInSeconds: " +       juce::String(MAX_FILE_LENGTH_SECS));
-//    juce::Logger::writeToLog("----------------------------");
+
+    juce::Logger::writeToLog("----------------------------");
+    juce::Logger::writeToLog("Sampler Processor Constructed");
+    juce::Logger::writeToLog("MaxNumModules: " + juce::String(MAX_NUM_MODULES));
+    juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
+    juce::Logger::writeToLog("MaxFileLengthInSeconds: " +       juce::String(MAX_FILE_LENGTH_SECS));
+    juce::Logger::writeToLog("----------------------------");
+
 }
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()

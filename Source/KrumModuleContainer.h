@@ -46,6 +46,7 @@ public:
     
     void refreshModuleLayout();
     
+   
     void mouseDown(const juce::MouseEvent& event) override;
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
     
@@ -61,8 +62,8 @@ public:
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
     void moveModule(int moduleIndexToMove, int newDisplayIndex);
 
-    void setModuleSelected(KrumModule* moduleToMakeActive);
-    void setModuleUnselected(KrumModule* moduleToMakeDeselect);
+    void setModuleSelected(KrumModuleEditor* moduleToMakeActive);
+    void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect);
     void deselectAllModules();
     
     KrumModuleEditor* getModuleFromMidiNote(int midiNote);
@@ -162,12 +163,12 @@ private:
     ModulesIntersecting modulesIntersecting;
     
 
-    KrumSamplerAudioProcessorEditor* editor;
+    KrumSamplerAudioProcessorEditor* editor = nullptr;
     
     juce::Colour bgColor{ juce::Colours::black };
 
     bool modulesOutside = false;
-    juce::Rectangle<int> fadeArea;
+    //juce::Rectangle<int> fadeArea;
     
     int getNumVisibleModules();
     

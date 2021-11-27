@@ -18,7 +18,6 @@ InfoPanel::InfoPanel()
 
 InfoPanel::~InfoPanel()
 {
-
 }
 
 void InfoPanel::paint (juce::Graphics& g)
@@ -55,7 +54,7 @@ void InfoPanel::paint (juce::Graphics& g)
         
         //message
         juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight()).withTrimmedLeft(5).toNearestInt();
-        g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::plain).withHeight(numLines));
+        //g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::plain).withHeight(numLines));
         g.drawFittedText(message, messageArea, juce::Justification::centredLeft, numLines);
         
         //keycommand

@@ -103,9 +103,11 @@ public:
     KrumModule* getModule(int index);
     void addModule(KrumModule* newModule, bool hasSample = false);
     
-    
-    void removeModule(KrumModule* moduleToDelete);
+    //if there is no sound that has this module as a parent, nothing will happen
+    void removeModuleSound(KrumModule* moduleToDelete, bool updateTree = true);
+    //will remove the modules current sound(if it has one) and then add the sample set in the module
     void updateModuleSample(KrumModule* updatedModule);
+    //makes a Krum Sound and adds it to the samplers sounds array, using the assigned file in the passed in module
     void addSample(KrumModule* moduleToAddSound);
     
     void clearModules();
@@ -117,6 +119,9 @@ public:
     juce::AudioFormatManager& getFormatManager();
 
 private:
+
+    void printSounds();
+    void printVoices();
 
     double attackTime = 0.01;
     double releaseTime = 0.01;

@@ -50,7 +50,7 @@ namespace EditorDimensions
     const static int fileTreeH = 600;
     const static int fileTreeTitleH = 30;
 
-    const static int emptyAreaMinW = 300;
+    const static int emptyAreaMinW = 350;
     const static int fileTreeW = emptyAreaMinW;
 
     const static float cornerSize = 5.0f;
@@ -136,9 +136,7 @@ public:
 
 private:
 
-    
-    
-    
+
     bool needsToUpdateThumbs = false;
 
     friend class KrumModuleContainer;

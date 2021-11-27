@@ -14,6 +14,7 @@
 #include "KrumModule.h"
 #include "PluginEditor.h"
 #include "KrumFileBrowser.h"
+#include "InfoPanel.h"
 
 
 //This class will one day drag and drop the module to re-arrange the order of the modules displayed
@@ -260,11 +261,31 @@ void KrumModuleEditor::resized()
 
 }
 
+void KrumModuleEditor::mouseEnter(const juce::MouseEvent& event)
+{
+    if(parent.getModuleState() == KrumModule::ModuleState::empty)
+    {
+        InfoPanel::shared_instance().setInfoPanelText("Empty Module", "Drop a file(s) to fill this module with a sample and then assign it a midi note and color.");
+    }
+
+    juce::Component::mouseEnter(event);
+}
+
+void KrumModuleEditor::mouseExit(const juce::MouseEvent& event)
+{
+    if (parent.getModuleState() == KrumModule::ModuleState::empty)
+    {
+        InfoPanel::shared_instance().clearPanelText();
+    }
+
+    juce::Component::mouseExit(event);
+}
+
 void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 {
     if (settingsOverlay->isVisible())
     {
-        editor.moduleContainer.setModuleSelected(&parent);
+        editor.moduleContainer.setModuleSelected(this);
     }
     else
     {
@@ -407,16 +428,10 @@ void KrumModuleEditor::showSettingsMenu()
 {
     juce::PopupMenu settingsMenu;
     juce::PopupMenu::Options options;
-   
-    //juce::Rectangle<int> showPoint{ editButton.getScreenBounds().getX(), editButton.getScreenBounds().getY(), 0, 0 };
-    
-    //settingsMenu.addItem(KrumModule::moduleReConfig_Id, "Re-Config");
+
     settingsMenu.addItem(KrumModule::ModuleSettingIDs::moduleMidiNote_Id, "Change Midi");
     settingsMenu.addItem(KrumModule::ModuleSettingIDs::moduleColor_Id, "Change Color");
     settingsMenu.addItem(KrumModule::moduleDelete_Id, "Delete Module");
-
-    //settingsMenu.showMenuAsync(options.withTargetScreenArea(editButton.getScreenBounds()), juce::ModalCallbackFunction::create(handleSettingsMenuResult, this));
-    //settingsMenu.showMenuAsync(options.withTargetScreenArea(editButton.getScreenBounds()), handleSettingsMenuResult);
 
     settingsMenu.showMenuAsync(options.withTargetScreenArea(editButton.getScreenBounds()), new ModalManager([this](int choice)
         {
@@ -445,11 +460,6 @@ void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
 
 void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 {
-    //const juce::MessageManagerLock mm;
-    
-    DBG("Module State: " + juce::String(parent.info.moduleState));
-    //editor.removeKeyboardListener(&parent);
-    //settingsOverlay.reset();
     settingsOverlay->setVisible(false);
     setModuleButtonsClickState(true);
     handleOverlayData(keepSettings);
@@ -459,9 +469,6 @@ void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 
 void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
 {
-
-    //const juce::MessageManagerLock mm;
-    
     hideModule();
     setModuleButtonsClickState(false);
     settingsOverlay->setVisible(true);
@@ -469,7 +476,7 @@ void KrumModuleEditor::showSettingsOverlay(bool selectOverlay)
     if (selectOverlay)
     {
         //we have the container control selecting so we don't have multiple selections
-        editor.getModuleContainer().setModuleSelected(&parent);
+        editor.getModuleContainer().setModuleSelected(this);
     }
     else
     {
@@ -840,19 +847,20 @@ bool KrumModuleEditor::isInterestedInDragSource(const juce::DragAndDropTarget::S
 }
 
 //Drag and Drop Target
-void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails &dragDetails)
+void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails)
 {
     auto desc = dragDetails.description.toString();
+    bool addNextModule = false; //set flag true if files are accepted by module, otherwise leave false
     
-    if(desc.contains("FileBrowserDrag-"))
+    if (desc.contains("FileBrowserDrag-"))
     {
         int numDroppedItems = editor.fileBrowser.getNumSelectedItems();
-        if(numDroppedItems > 1)
+        if (numDroppedItems > 1)
         {
             int numFreeModules, firstFreeIndex;
             parent.sampler.getNumFreeModules(numFreeModules, firstFreeIndex);
-            
-            if(numDroppedItems <= numFreeModules) //checks to make sure we have enough modules
+
+            if (numDroppedItems <= numFreeModules) //checks to make sure we have enough modules
             {
                 for (int i = 0; i < numDroppedItems; i++)
                 {
@@ -863,20 +871,25 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails 
                         auto itemName = krumItem->getItemName();
                         if (!krumItem->mightContainSubItems())
                         {
-                            if(parent.sampler.isFileAcceptable(file))
+                            if (parent.sampler.isFileAcceptable(file))
                             {
-                                
+
                                 auto mod = parent.sampler.getModule(firstFreeIndex++);
-                                if(!mod->hasEditor())
+                                if (!mod->hasEditor())
                                 {
                                     editor.moduleContainer.addModuleEditor(mod->createModuleEditor(editor));
                                 }
-                                
+
                                 mod->getCurrentModuleEditor()->updateModuleFile(file);
+                                addNextModule = true;
 
                                 DBG("-------");
                                 DBG("Module: " + juce::String(mod->getModuleSamplerIndex()));
                                 DBG("Item: " + file.getFullPathName());
+                            }
+                            else
+                            {
+                                DBG("File Not Acceptable");
                             }
                         }
                         else
@@ -905,10 +918,11 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails 
                 auto itemName = krumItem->getItemName();
                 if (!krumItem->mightContainSubItems())
                 {
-                    if(parent.sampler.isFileAcceptable(file))
+                    if (parent.sampler.isFileAcceptable(file))
                     {
                         DBG("Item: " + file.getFullPathName());
                         updateModuleFile(file);
+                        addNextModule = true;
                         //editor.showLastModule();
                     }
                 }
@@ -924,16 +938,19 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails 
             }
         }
     }
-//    else if (desc.contains("ModuleDrag-"))
-//    {
-//        auto modEdDropped = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
-//        DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped on Module " + juce::String(getModuleSamplerIndex()));
-//        if(modEdDropped)
-//        {
-//            editor.moduleContainer.moveModule(modEdDropped->getModuleDisplayIndex(), parent.getModuleDisplayIndex());
-//        }
-//    }
-    editor.addNextModuleEditor();
+    //    else if (desc.contains("ModuleDrag-"))
+    //    {
+    //        auto modEdDropped = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
+    //        DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped on Module " + juce::String(getModuleSamplerIndex()));
+    //        if(modEdDropped)
+    //        {
+    //            editor.moduleContainer.moveModule(modEdDropped->getModuleDisplayIndex(), parent.getModuleDisplayIndex());
+    //        }
+    //    }
+    if (addNextModule)
+    {
+        editor.addNextModuleEditor();
+    }
 }
 
 void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails &dragDetails)
@@ -944,14 +961,15 @@ void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceD
 //EXTERNAL File Drag and Drop Target
 bool KrumModuleEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
-    //check if file format is supported?
+    //TODO: check if file format is supported?
     return shouldModuleAcceptFileDrop();
 }
 
 //EXTERNAL File Drag and Drop Target
 void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y)
 {
-    
+    bool addNextModule = false; //set flag true if files are accepted by module, otherwise leave false
+
     if(files.size() > 1)
     {
         int numFreeModules, firstFreeIndex;
@@ -972,10 +990,15 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
                     }
                     
                     mod->getCurrentModuleEditor()->updateModuleFile(audioFile);
+                    addNextModule = true;
 
                     DBG("-------");
                     DBG("Module: " + juce::String(mod->getModuleSamplerIndex()));
                     DBG("Item: " + audioFile.getFullPathName());
+                }
+                else
+                {
+                    DBG("External File Not Acceptable");
                 }
             }
         }
@@ -986,6 +1009,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
         if (parent.sampler.isFileAcceptable(audioFile))
         {
             updateModuleFile(audioFile);
+            addNextModule = true;
             DBG("File: " + audioFile.getFullPathName());
         }
         else
@@ -995,7 +1019,10 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
         
     }
     //editor.moduleContainer.showFirstEmptyModule();
-    editor.addNextModuleEditor();
+    if (addNextModule)
+    {
+        editor.addNextModuleEditor();
+    }
 }
 
 void KrumModuleEditor::updateModuleFile(juce::File& file)

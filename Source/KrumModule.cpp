@@ -63,12 +63,10 @@ void KrumModule::handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNu
     if (moduleEditor == nullptr)
     {
         source->removeListener(this);
-        return;
     }
     else if (moduleEditor->doesEditorWantMidi())
     {
         moduleEditor->handleMidi(midiChannelNumber, midiNoteNumber);
-        return;
     }
    
 }
@@ -506,29 +504,10 @@ void KrumModule::updateEditorFromState()
         {
             deleteModuleEditor();
             deleteEntireModule();
+            sampler.removeModuleSound(this);
             
         }
     }
-//    else
-//    {
-//        auto currentEditor = createModuleEditor(*parentEditor);
-//
-//        if (info.moduleState == ModuleState::active) //has a file and a midi assignment
-//        {
-//            currentEditor->buildModule();
-//        }
-//        else if (info.moduleState == ModuleState::hasFile) //has a file but NO midi assignment
-//        {
-//            currentEditor->showSettingsOverlay();
-//            currentEditor->repaint();
-//        }
-//        else if (info.moduleState == ModuleState::empty) //has nothing
-//        {
-//            deleteModuleEditor();
-//            deleteEntireModule();
-//
-//        }
-//    }
     
 }
 

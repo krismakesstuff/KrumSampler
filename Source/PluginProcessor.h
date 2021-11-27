@@ -29,7 +29,7 @@
 */
 
 #define MAX_NUM_MODULES 20
-#define MAX_VOICES 10
+#define MAX_VOICES 15
 #define MAX_FILE_LENGTH_SECS 3
 #define KRUM_BUILD_VERSION "1.1.0-Beta" //Module Re-work
 
@@ -38,7 +38,6 @@ namespace TreeIDs
 {
     //Should I make these all preprocessor define instead?
     //Globals
-    //static const int maxNumModules = {30};
     static const float defaultGain = 0.85f;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;

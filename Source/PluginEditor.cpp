@@ -35,7 +35,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     websiteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     websiteButton.onClick = [this] { websiteURL.launchInDefaultBrowser(); };
 
-    addAndMakeVisible(InfoPanel::shared_instance());
     
     addAndMakeVisible(outputGainSlider);
     
@@ -56,9 +55,25 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 //    addAndMakeVisible(fileDrop);
 //    fileDrop.setRepaintsOnMouseActivity(true);
 
-    addAndMakeVisible(fileBrowser);
-    fileBrowser.assignModuleContainer(&moduleContainer);
 
+    
+    addAndMakeVisible(keyboard);
+    
+    addAndMakeVisible(modulesViewport);
+    
+    modulesViewport.setViewedComponent(&moduleContainer);
+    modulesViewport.setSingleStepSizes(10, 10);
+    modulesViewport.setInterceptsMouseClicks(true, true);
+    modulesViewport.setScrollBarsShown(false, true, false, false);
+    
+    createModuleEditors();
+    keyboard.updateKeysFromContainer();
+    setPaintingIsUnclipped(true);
+    
+    fileBrowser.assignModuleContainer(&moduleContainer);
+    addAndMakeVisible(InfoPanel::shared_instance());
+    addAndMakeVisible(fileBrowser);
+    
     int leftChevSize, rightChevSize;
 
     auto leftChevData = BinaryData::getNamedResource("chevron_left_black_24dp_svg", leftChevSize);
@@ -71,8 +86,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
                                     collapseLeftIm.get());
 
     collapseBrowserButton.setClickingTogglesState(true);
-    collapseBrowserButton.setToggleState(getSavedFileBrowserHiddenState(), juce::dontSendNotification);
     collapseBrowserButton.onClick = [this] { collapseBrowserButton.getToggleState() ? hideFileBrowser() : showFileBrowser(); };
+    collapseBrowserButton.setToggleState(getSavedFileBrowserHiddenState(), juce::sendNotification);
     collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::darkgrey.darker());
     collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::darkgrey);
     addAndMakeVisible(collapseBrowserButton);
@@ -87,36 +102,28 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     infoButton.setImages(infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOnIm.get());
     infoButton.setClickingTogglesState(true);
-    infoButton.setToggleState(getSavedInfoButtonState(), juce::dontSendNotification);
     infoButton.onClick = [this] { infoButtonClicked();  };
     addAndMakeVisible(infoButton);
-    
-    addAndMakeVisible(keyboard);
-    
-    addAndMakeVisible(modulesViewport);
-    
-    modulesViewport.setViewedComponent(&moduleContainer);
-    modulesViewport.setSingleStepSizes(10, 10);
-    modulesViewport.setInterceptsMouseClicks(true, true);
-    modulesViewport.setScrollBarsShown(false, true, false, false);
-    
-    //By the time this constructor runs,if the sampler needs updating, it will have already been updated from the state tree.
-//    if (sampler.getNumModules() > 0)
-//    {
-//        createModuleEditors();
-//        keyboard.updateKeysFromContainer();
-//    }
 
-    createModuleEditors();
-    setPaintingIsUnclipped(true);
+    if (getSavedInfoButtonState())
+    {
+        infoButton.setToggleState(true, juce::sendNotification); //a button's toggle state is false by default and wont call lambda if the state passed in is the same as the current one
+    }
+    else
+    {
+        //infoButton.onClick();
+        infoButtonClicked();
+    }
 
 
     if (collapseBrowserButton.getToggleState())
     {
+        //Browser is Hidden
         setSize(EditorDimensions::windowWNoBrowser, EditorDimensions::windowH);
     }
     else
     {
+        //Browser is Visible
         setSize (EditorDimensions::windowW, EditorDimensions::windowH);
     }
 }
@@ -312,8 +319,28 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
 void KrumSamplerAudioProcessorEditor::createModuleEditors()
 {
     bool showingFirstEmpty = false;
-    
+
+
+    juce::Array<int> activeModuleIndices;
+
+    //TODO: make this function in sampler
     for (int i = 0; i < sampler.getNumModules(); i++)
+    {
+        auto mod = sampler.getModule(i);
+        if (mod->isModuleActive() || mod->getModuleState() == KrumModule::ModuleState::hasFile)
+        {
+            activeModuleIndices.add(mod->getModuleSamplerIndex());
+        }
+    }
+
+    for (int i = 0; i < activeModuleIndices.size(); i++)
+    {
+        auto newEditor = sampler.getModule(activeModuleIndices[i])->createModuleEditor(*this);
+        moduleContainer.addModuleEditor(newEditor);
+    }
+
+    addNextModuleEditor();
+    /*for (int i = 0; i < sampler.getNumModules(); i++)
     {
         auto mod = sampler.getModule(i);
         if (mod->isModuleActive() || mod->getModuleState() == KrumModule::ModuleState::hasFile)
@@ -330,7 +357,7 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
         {
             return; 
         }
-    }
+    }*/
     
     //moduleContainer.showFirstEmptyModule();
     
@@ -469,7 +496,7 @@ bool KrumSamplerAudioProcessorEditor::getSavedInfoButtonState()
     auto globalTree = getValueTree()->getChildWithName("GlobalSettings");
     auto infoPanelTree = globalTree.getChildWithName("InfoPanel");
     
-    return (int)infoPanelTree.getProperty("value");
+    return (int)infoPanelTree.getProperty("value") > 0;
 }
 
 void KrumSamplerAudioProcessorEditor::saveInfoButtonState()

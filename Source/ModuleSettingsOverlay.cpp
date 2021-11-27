@@ -120,7 +120,7 @@ void ModuleSettingsOverlay::showConfirmButton()
     int buttonWidth = area.getWidth() / 1.25;
     int buttonHeight = 35;
 
-    confirmButton.setBounds(area.getCentreX() - buttonWidth / 2, area.getCentreY() + buttonHeight*2, buttonWidth, buttonHeight);
+    confirmButton.setBounds(area.getCentreX() - buttonWidth / 2, area.getCentreY() + buttonHeight * 3.75, buttonWidth, buttonHeight);
     confirmButton.setButtonText("Confirm");
     confirmButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     confirmButton.onClick = [this] { confirmMidi(); };
@@ -181,7 +181,7 @@ void ModuleSettingsOverlay::showButtons()
     int cancelButtonHeight = 30;
 
     cancelButton.setButtonText("Cancel");
-    cancelButton.setBounds(area.getCentreX() - cancelButtonWidth / 2, area.getBottom() - cancelButtonHeight * 2 - 50, cancelButtonWidth, cancelButtonHeight);
+    cancelButton.setBounds(area.getCentreX() - cancelButtonWidth / 2, area.getBottom() - (cancelButtonHeight * 2) - 50, cancelButtonWidth, cancelButtonHeight);
     cancelButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     cancelButton.onClick = [this] { cancelSettings(); };
 }
