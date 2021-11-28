@@ -13,13 +13,15 @@
 #include "KrumModuleContainer.h"
 #include "KrumModuleEditor.h"
 #include "InfoPanel.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
-KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori , KrumModuleContainer& container)
-    : juce::MidiKeyboardComponent(midiState, ori), moduleContainer(container)
+KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori , KrumModuleContainer& container, juce::ValueTree& valTree)
+    : juce::MidiKeyboardComponent(midiState, ori), moduleContainer(container), valueTree(valTree)
 {
     setScrollButtonsVisible(true);
-    updateKeysFromContainer();
+    //updateKeysFromContainer();
+    updateKeysFromValueTree();
     setColour(juce::MidiKeyboardComponent::ColourIds::shadowColourId, juce::Colours::black);
     setColour(juce::MidiKeyboardComponent::ColourIds::upDownButtonBackgroundColourId, juce::Colours::darkgrey.darker());
 }
@@ -47,7 +49,7 @@ bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
         auto mods = e.mods;
         if(mods.isAltDown() && mods.isCommandDown() && mods.isCtrlDown())
         {
-            moduleContainer.matchModuleDisplayToMidiNotes(getMidiAssignmentsInOrder());
+           // moduleContainer.matchModuleDisplayToMidiNotes(getMidiAssignmentsInOrder());
         }
         else
         {
@@ -79,7 +81,8 @@ void KrumKeyboard::drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 
     if (isMidiNoteAssigned(midiNoteNumber))
     {
-        c = c.interpolatedWith(currentlyAssignedMidiNotes.find(midiNoteNumber)->second, 0.8f);
+        //c = c.interpolatedWith(currentlyAssignedMidiNotes.find(midiNoteNumber)->second, 0.8f);
+        c = c.interpolatedWith(findColorFromMidiNote(midiNoteNumber), 0.8f);
         if (isDown)  c = c.darker(0.2f);
         if (isOver)  c = c.darker();
     }
@@ -141,7 +144,8 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 
     if (isMidiNoteAssigned(midiNoteNumber))
     {
-        c = c.interpolatedWith(currentlyAssignedMidiNotes.find(midiNoteNumber)->second, 0.8f);
+        //c = c.interpolatedWith(currentlyAssignedMidiNotes.find(midiNoteNumber)->second, 0.8f);
+        c = c.interpolatedWith(findColorFromMidiNote(midiNoteNumber), 0.8f);
         if (isDown)  c = c.darker(0.2f);
         if (isOver)  c = c.darker();
     }
@@ -174,31 +178,6 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     }
 }
 
-//void KrumKeyboard::drawUpDownButton(juce::Graphics &g, int w, int h, bool isMouseOver, bool isButtonPressed, bool movesOctavesUp)
-//{
-//    g.fillAll (findColour (upDownButtonBackgroundColourId));
-//
-//    float angle = 0;
-//
-//    switch (orientation)
-//    {
-//        case horizontalKeyboard:            angle = movesOctavesUp ? 0.0f  : 0.5f;  break;
-//        case verticalKeyboardFacingLeft:    angle = movesOctavesUp ? 0.25f : 0.75f; break;
-//        case verticalKeyboardFacingRight:   angle = movesOctavesUp ? 0.75f : 0.25f; break;
-//        default:                            jassertfalse; break;
-//    }
-//
-//    Path path;
-//    path.addTriangle (0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
-//    path.applyTransform (AffineTransform::rotation (MathConstants<float>::twoPi * angle, 0.5f, 0.5f));
-//
-//    g.setColour (findColour (upDownButtonArrowColourId)
-//                  .withAlpha (buttonDown ? 1.0f : (mouseOver ? 0.6f : 0.4f)));
-//
-//    g.fillPath (path, path.getTransformToScaleToFit (1.0f, 1.0f, (float) w - 2.0f, (float) h - 2.0f, true));
-//}
-
-
 //oldNote is default 0;
 void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote)
 {
@@ -209,7 +188,11 @@ void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, i
         removeMidiNoteColorAssignment(testNote);
     }
 
-    currentlyAssignedMidiNotes.emplace(std::make_pair(midiNote, moduleColor));
+    KrumKey newKey;
+    newKey.midiNote = midiNote;
+    newKey.color = moduleColor;
+    currentlyAssignedKeys.add(newKey);
+    //currentlyAssignedMidiNotes.emplace(std::make_pair(midiNote, moduleColor));
     
    // const juce::MessageManagerLock mm;
     repaint();
@@ -217,36 +200,129 @@ void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor, i
 
 void KrumKeyboard::removeMidiNoteColorAssignment(int midiNote, bool shouldRepaint)
 {
-    auto search = currentlyAssignedMidiNotes.find(midiNote);
-    if (search != currentlyAssignedMidiNotes.end())
+
+    for (int i = 0; i < currentlyAssignedKeys.size(); i++)
     {
-        currentlyAssignedMidiNotes.erase(midiNote);
-        if (shouldRepaint)
+        if (midiNote == currentlyAssignedKeys[i].midiNote)
         {
-            repaint();
+            currentlyAssignedKeys.remove(i);
+            if (shouldRepaint)
+            {
+                repaint();
+            }
+        }
+    }
+
+    //auto search = currentlyAssignedMidiNotes.find(midiNote);
+    //if (search != currentlyAssignedMidiNotes.end())
+    //{
+    //    currentlyAssignedMidiNotes.erase(midiNote);
+    //    if (shouldRepaint)
+    //    {
+    //        repaint();
+    //    }
+    //}
+}
+
+void KrumKeyboard::updateMidiNoteColor(int noteToUpdate, juce::Colour newColor)
+{
+    for (int i = 0; i < currentlyAssignedKeys.size(); i++)
+    {
+        auto key = currentlyAssignedKeys[i];
+        if (key.midiNote == noteToUpdate)
+        {
+            key.color = newColor;
         }
     }
 }
 
 bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
 {
-    if(midiNote > 0)
+    if (midiNote > 0)
     {
-        return currentlyAssignedMidiNotes.find(midiNote) != currentlyAssignedMidiNotes.end();
+        for (int i = 0; i < currentlyAssignedKeys.size(); i++)
+        {
+            if (midiNote == currentlyAssignedKeys[i].midiNote)
+            {
+                return true;
+            }
+        }
+
+
+        //return currentlyAssignedMidiNotes.find(midiNote) != currentlyAssignedMidiNotes.end();
     }
     return false;
 }
 
-void KrumKeyboard::updateKeysFromContainer()
+//void KrumKeyboard::updateKeysFromContainer()
+//{
+//    //not getting called on init from plugin editor?
+//    auto displayOrder = moduleContainer.getModuleDisplayOrder();
+//    for (int i = 0; i < displayOrder.size(); i++)
+//    {
+//        auto modEd = displayOrder[i];
+//        if (modEd->getModuleMidiNote() > 0)
+//        {
+//            assignMidiNoteColor(modEd->getModuleMidiNote(), modEd->getModuleColor());
+//        }
+//    }
+//
+//    printCurrentlyAssignedMidiNotes();
+//    repaint();
+//}
+
+void KrumKeyboard::updateKeysFromValueTree()
 {
-    //not getting called on init from plugin editor?
-    auto displayOrder = moduleContainer.getModuleDisplayOrder();
-    for (int i = 0; i < displayOrder.size(); i++)
+    auto krumModuleTree = valueTree.getChildWithName("KrumModules");
+
+    for (int i = 0; i < krumModuleTree.getNumChildren(); i++)
     {
-        auto modEd = displayOrder[i];
-        if (modEd->getModuleMidiNote() > 0)
+        auto modTree = krumModuleTree.getChildWithName("Module" + juce::String(i));
+        if (modTree.isValid())
         {
-            assignMidiNoteColor(modEd->getModuleMidiNote(), modEd->getModuleColor());
+            for (int j = 1; j < modTree.getNumChildren(); j++) //we start at 1, the 0 index is the state which we grab manually
+            {
+                auto stateTree = modTree.getChild(0);
+                auto stateId = stateTree.getProperty("id");
+                auto stateVal = stateTree.getProperty("value");
+
+                KrumModule::ModuleState state;
+
+                if (stateId.toString() == TreeIDs::paramModuleState_ID)
+                {
+                    state = static_cast<KrumModule::ModuleState>((int)stateVal);
+                    if (state == KrumModule::ModuleState::active)
+                    {
+                        KrumKey newKey;
+
+                        juce::var id;
+                        juce::var val;
+                        auto modChild = modTree.getChild(i);
+                        id = modChild.getProperty("id");
+
+                        if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
+                        {
+                            newKey.midiNote = (int)modChild.getProperty("val");
+                        }
+                        
+                        if (id.toString() == TreeIDs::paramModuleColor_ID)
+                        {
+                            newKey.color = juce::Colour::fromString(modChild.getProperty("val").toString());
+                        }
+
+                        if (!newKey.color.isOpaque() && newKey.midiNote > 0)
+                        {
+                            currentlyAssignedKeys.add(newKey);
+                            break;
+                        }
+
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -256,36 +332,55 @@ void KrumKeyboard::updateKeysFromContainer()
 
 void KrumKeyboard::printCurrentlyAssignedMidiNotes()
 {
-    for (auto it = currentlyAssignedMidiNotes.begin(); it != currentlyAssignedMidiNotes.end(); it++)
+
+    for (int i = 0; i < currentlyAssignedKeys.size(); i++)
+    {
+        juce::String midiNote(currentlyAssignedKeys[i].midiNote);
+        juce::String color(currentlyAssignedKeys[i].color.toDisplayString(true));
+        DBG("Assigned Note: " + midiNote + ", Color: " + color);
+    }
+
+    /*for (auto it = currentlyAssignedMidiNotes.begin(); it != currentlyAssignedMidiNotes.end(); it++)
     {
         juce::String midiNote(it->first);
         juce::String color(it->second.toDisplayString(true));
 
         DBG("Assigned Note: " + midiNote + ", Color: " + color);
+    }*/
+}
+
+juce::Colour KrumKeyboard::findColorFromMidiNote(int midiNote)
+{
+    for (int i = 0; i < currentlyAssignedKeys.size(); i++)
+    {
+        if (midiNote == currentlyAssignedKeys[i].midiNote)
+        {
+            return currentlyAssignedKeys[i].color;
+        }
     }
 }
 
-juce::Array<int> KrumKeyboard::getMidiAssignmentsInOrder()
-{
-    juce::Array<int> retArray;
-    
-    int lastMidiNote = 0; //64
-    
-    for (auto it = currentlyAssignedMidiNotes.begin(); it != currentlyAssignedMidiNotes.end(); it++)
-    {
-        int currentMidiNote = it->first;
-        if(currentMidiNote > lastMidiNote)
-        {
-            retArray.add(currentMidiNote);
-        }
-        else if(currentMidiNote < lastMidiNote)
-        {
-            retArray.insert(retArray.getLast() - 1, currentMidiNote);
-        }
-        
-        lastMidiNote = currentMidiNote;
-    }
-    
-    return retArray;
-    
-}
+//juce::Array<int> KrumKeyboard::getMidiAssignmentsInOrder()
+//{
+//    juce::Array<int> retArray;
+//    
+//    int lastMidiNote = 0; //64
+//    
+//    for (auto it = currentlyAssignedMidiNotes.begin(); it != currentlyAssignedMidiNotes.end(); it++)
+//    {
+//        int currentMidiNote = it->first;
+//        if(currentMidiNote > lastMidiNote)
+//        {
+//            retArray.add(currentMidiNote);
+//        }
+//        else if(currentMidiNote < lastMidiNote)
+//        {
+//            retArray.insert(retArray.getLast() - 1, currentMidiNote);
+//        }
+//        
+//        lastMidiNote = currentMidiNote;
+//    }
+//    
+//    return retArray;
+//    
+//}

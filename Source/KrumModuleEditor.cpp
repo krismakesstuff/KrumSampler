@@ -445,14 +445,14 @@ void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
 {
     if (settingsOverlay != nullptr)
     {
-        if (isModuleSelected)
-        {
-            editor.addKeyboardListener(&parent);
-        }
-        else
-        {
-            editor.removeKeyboardListener(&parent);
-        }
+        //if (isModuleSelected)
+        //{
+        //    editor.addKeyboardListener(&parent);
+        //}
+        //else
+        //{
+        //    editor.removeKeyboardListener(&parent);
+        //}
 
         settingsOverlay->setOverlaySelected(isModuleSelected);
     }
@@ -692,21 +692,21 @@ int KrumModuleEditor::getAudioFileLengthInMs()
 void KrumModuleEditor::setKeyboardColor()
 {
     setChildCompColors();
-    int midiNote = parent.getMidiTriggerNote();
+    //int midiNote = parent.getMidiTriggerNote();
 
-    if (editor.keyboard.isMidiNoteAssigned(midiNote))
+   /* if (editor.keyboard.isMidiNoteAssigned(midiNote))
     {
         editor.keyboard.removeMidiNoteColorAssignment(midiNote);
-    }
+    }*/
 
-    editor.setKeyboardNoteColor(midiNote, parent.info.moduleColor);
+    editor.setKeyboardNoteColor(parent.getMidiTriggerNote(), parent.info.moduleColor);
 }
 
 //the editor should only want midi if it's being assigned
 bool KrumModuleEditor::doesEditorWantMidi()
 {
     //return settingsOverlay != nullptr;
-    return settingsOverlay->isVisible();
+    return settingsOverlay->isVisible() && settingsOverlay->isOverlaySelected();
 }
 
 void KrumModuleEditor::handleMidi(int midiChannel, int midiNote)
@@ -719,7 +719,7 @@ void KrumModuleEditor::handleMidi(int midiChannel, int midiNote)
 
 void KrumModuleEditor::removeFromDisplay()
 {
-    editor.removeKeyboardListener(&parent);
+    //editor.removeKeyboardListener(&parent);
     editor.keyboard.removeMidiNoteColorAssignment(parent.info.midiNote);
     editor.getModuleContainer().removeModuleEditor(this);
 }

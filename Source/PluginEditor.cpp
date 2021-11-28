@@ -67,7 +67,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     modulesViewport.setScrollBarsShown(false, true, false, false);
     
     createModuleEditors();
-    keyboard.updateKeysFromContainer();
+    keyboard.updateKeysFromValueTree();
     setPaintingIsUnclipped(true);
     
     fileBrowser.assignModuleContainer(&moduleContainer);
@@ -320,14 +320,13 @@ void KrumSamplerAudioProcessorEditor::createModuleEditors()
 {
     bool showingFirstEmpty = false;
 
-
     juce::Array<int> activeModuleIndices;
 
     //TODO: make this function in sampler
     for (int i = 0; i < sampler.getNumModules(); i++)
     {
         auto mod = sampler.getModule(i);
-        if (mod->isModuleActive() || mod->getModuleState() == KrumModule::ModuleState::hasFile)
+        if (mod->isModuleActiveOrHasFile())
         {
             activeModuleIndices.add(mod->getModuleSamplerIndex());
         }
@@ -520,7 +519,6 @@ void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component
     }
     outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue()));
 }
-
 
 void KrumSamplerAudioProcessorEditor::setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote)
 {

@@ -50,8 +50,8 @@ juce::ValueTree createValueTree()
                 {
                     {"State", {{"id", TreeIDs::paramModuleState_ID},        {"value", "0"}}},
                     {"State", {{"id", TreeIDs::paramModuleFile_ID},         {"value", ""}}},
-                    {"State", {{"id", TreeIDs::paramModuleMidiNote_ID},     {"value", ""}}},
-                    {"State", {{"id", TreeIDs::paramModuleMidiChannel_ID},  {"value", ""}}},
+                    {"State", {{"id", TreeIDs::paramModuleMidiNote_ID},     {"value", "0"}}},
+                    {"State", {{"id", TreeIDs::paramModuleMidiChannel_ID},  {"value", "0"}}},
                     {"State", {{"id", TreeIDs::paramModuleColor_ID},        {"value", ""}}},
                     {"State", {{"id", TreeIDs::paramModuleDisplayIndex_ID}, {"value", ""}}}
                 }
@@ -412,14 +412,14 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
         auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
         if (moduleTree.isValid())
         {
-            juce::var nameValue = moduleTree.getProperty("name");
+            //juce::var nameValue = moduleTree.getProperty("name");
             
             juce::ValueTree stateTree;
             bool hasFile = false;
             juce::var id;
             juce::var val;
 
-            stateTree = moduleTree.getChild(0);
+            stateTree = moduleTree.getChild(0); //we have the moduleState as the first index, probably not great to do it this way...
             id = stateTree.getProperty("id");
             val = stateTree.getProperty("value");
             
@@ -435,7 +435,7 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
             {
                 auto mod = sampler.getModule(i);
                 mod->updateModuleFromTree();
-                midiState.addListener(mod);
+                //midiState.addListener(mod);
                 if(state == KrumModule::ModuleState::active)
                 {
                     sampler.updateModuleSample(mod);

@@ -35,7 +35,7 @@
 #define THUMBNAIL_RES 256
 
 
-class KrumModule :  public juce::MidiKeyboardStateListener
+class KrumModule //:  public juce::MidiKeyboardStateListener
                     //public juce::DragAndDropContainer
 {
 public:
@@ -68,12 +68,12 @@ public:
 
     KrumModule(int index, KrumSampler& km, juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
 
-    ~KrumModule() override;
+    ~KrumModule(); //override;
 
     void updateModuleFromTree();
     
-    void handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
-    void handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
+    //void handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
+    //void handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
 
     
     void setModuleSelected(bool isModuleSelected);
@@ -99,6 +99,7 @@ public:
 
     bool isModuleActive();
     bool isModuleEmpty();
+    bool isModuleActiveOrHasFile();
     //void setModuleActive(bool isActive);
 
     int getModuleSamplerIndex();

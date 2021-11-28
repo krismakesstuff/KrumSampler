@@ -32,7 +32,8 @@ class KrumSamplerAudioProcessorEditor;
 class KrumModuleContainer : public juce::Component,
                             public juce::DragAndDropTarget,
                             public juce::Timer,
-                            public juce::KeyListener
+                            public juce::KeyListener,
+                            public juce::MidiKeyboardStateListener
 {
 public:
     KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner);
@@ -40,8 +41,6 @@ public:
 
     void paint(juce::Graphics& g) override;
 
-    void drawEditors(juce::Graphics& g);
-    
     void paintLineUnderMouseDrag(juce::Graphics& g, juce::Point<int> mousePosition);
     
     void refreshModuleLayout();
@@ -53,11 +52,9 @@ public:
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)override;
     
-    
-    void addMidiListener(juce::MidiKeyboardStateListener* newListener);
-    void removeMidiListener(juce::MidiKeyboardStateListener* listenerToDelete);
-    
-    //int findFreeModuleIndex();
+    void handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
+    void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
+
     void addModuleEditor(KrumModuleEditor* newModule, bool refreshLayout = true);
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
     void moveModule(int moduleIndexToMove, int newDisplayIndex);

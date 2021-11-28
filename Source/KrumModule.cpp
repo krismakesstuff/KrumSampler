@@ -58,22 +58,22 @@ void KrumModule::updateModuleFromTree()
 }
 
 //use this only to capture midi assignments, does not trigger any sound
-void KrumModule::handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
-{
-    if (moduleEditor == nullptr)
-    {
-        source->removeListener(this);
-    }
-    else if (moduleEditor->doesEditorWantMidi())
-    {
-        moduleEditor->handleMidi(midiChannelNumber, midiNoteNumber);
-    }
-   
-}
-void KrumModule::handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
-{
-    //nothing to do with note off messages in this context. It is a virtual function from inheriting from juce::MidiKeyboardStateListener, making it manditory. 
-}
+//void KrumModule::handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
+//{
+//    if (moduleEditor == nullptr)
+//    {
+//        source->removeListener(this);
+//    }
+//    else if (moduleEditor->doesEditorWantMidi())
+//    {
+//        moduleEditor->handleMidi(midiChannelNumber, midiNoteNumber);
+//    }
+//   
+//}
+//void KrumModule::handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity)
+//{
+//    //nothing to do with note off messages in this context. It is a virtual function from inheriting from juce::MidiKeyboardStateListener, making it manditory. 
+//}
 
 
 void KrumModule::setModuleSelected(bool isModuleSelected)
@@ -109,56 +109,6 @@ void KrumModule::setModuleState(ModuleState newState)
     
     updateEditorFromState();
     updateValuesInTree();
-    
-//    switch(newState)
-//    {
-//        case ModuleState::hasFile:
-//            if(info.moduleState == ModuleState::hasMidi)
-//            {
-//                info.moduleState = ModuleState::active;
-//            }
-//            else
-//            {
-//                info.moduleState = newState;
-//                if(auto modEditor = getCurrentModuleEditor())
-//                {
-//                    modEditor->showSettingsOverlay(true);
-//                }
-//            }
-//            break;
-//        case ModuleState::hasMidi:
-//            if(info.moduleState == ModuleState::hasFile)
-//            {
-//                info.moduleState = ModuleState::active;
-//                if(auto modEditor = getCurrentModuleEditor())
-//                {
-//                    modEditor->buildModule();
-//                }
-//            }
-//            else if (info.moduleState == ModuleState::active)
-//            {
-//                break;
-//            }
-//            else
-//            {
-//
-//                info.moduleState = newState;
-//            }
-//            break;
-//        case ModuleState::active:
-//            info.moduleState = newState;
-//            if(auto modEditor = getCurrentModuleEditor())
-//            {
-//                modEditor->buildModule();
-//            }
-//            break;
-//        case ModuleState::muted:  //intentional fallthrough
-//        case ModuleState::soloed: //intentional fallthrough
-//        case ModuleState::empty: //intentional fallthrough
-//            info.moduleState = newState;
-//            break;
-//    }
-    
     
 }
 
@@ -246,6 +196,11 @@ bool KrumModule::isModuleActive()
 bool KrumModule::isModuleEmpty()
 {
     return info.moduleState == ModuleState::empty;
+}
+
+bool KrumModule::isModuleActiveOrHasFile()
+{
+    return isModuleActive() || info.moduleState == ModuleState::hasFile;
 }
 
 int KrumModule::getModuleSamplerIndex()

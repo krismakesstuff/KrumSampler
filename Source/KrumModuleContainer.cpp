@@ -23,17 +23,14 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner)
     setInterceptsMouseClicks(true, true);
     setRepaintsOnMouseActivity(true);
     startTimerHz(30);
+    editor->addKeyboardListener(this);
     //juce::Logger::writeToLog("Module Container created");
         
 }
 
 KrumModuleContainer::~KrumModuleContainer()
 {
-//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
-//    {
-//        auto editor = moduleDisplayOrder[i];
-//        editor->setVisible(false);
-//    }
+    editor->removeKeyboardListener(this);
 }
 
 void KrumModuleContainer::paint (juce::Graphics& g)
@@ -184,20 +181,23 @@ void KrumModuleContainer::itemDropped(const juce::DragAndDropTarget::SourceDetai
     repaint();
 }
 
-void KrumModuleContainer::addMidiListener(juce::MidiKeyboardStateListener* newListener)
+void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
 {
-    editor->addKeyboardListener(newListener);
+    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    {
+        auto modEd = moduleDisplayOrder[i];
+        if (modEd->doesEditorWantMidi())
+        {
+            modEd->handleMidi(midiChannel, midiNoteNumber);
+            return; 
+        }
+    }
 }
 
-void KrumModuleContainer::removeMidiListener(juce::MidiKeyboardStateListener* listenerToDelete)
+void KrumModuleContainer::handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
 {
-    editor->removeKeyboardListener(listenerToDelete);
+    
 }
-
-//int KrumModuleContainer::findFreeModuleIndex()
-//{
-//    return editor->audioProcessor.findFreeModuleIndex();
-//}
 
 void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, bool refreshLayout)
 {
@@ -241,7 +241,7 @@ void KrumModuleContainer::setModuleSelected(KrumModuleEditor* moduleToMakeActive
 {
     deselectAllModules();
     moduleToMakeActive->setModuleSelected(true);
-    repaint();
+    //repaint();
 }
 
 void KrumModuleContainer::setModuleUnselected(KrumModuleEditor* moduleToDeselect)
@@ -533,6 +533,7 @@ KrumModuleEditor* KrumModuleContainer::getEditorFromModule(KrumModule* krumModul
 
 void KrumModuleContainer::timerCallback()
 {
+    repaint();
 //    for (int i = 0; i < moduleDisplayOrder.size(); i++)
 //    {
 //        auto modEd = moduleDisplayOrder[i];
@@ -545,7 +546,6 @@ void KrumModuleContainer::timerCallback()
 //            repaint();
 //        }
 //    }
-    repaint();
 }
 
 //void KrumModuleContainer::showFirstEmptyModule()

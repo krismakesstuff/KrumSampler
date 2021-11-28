@@ -26,7 +26,7 @@ class KrumModuleContainer;
 class KrumKeyboard  :   public juce::MidiKeyboardComponent
 {
 public:
-    KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori, KrumModuleContainer& container );
+    KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori, KrumModuleContainer& container, juce::ValueTree& valTree);
     ~KrumKeyboard() override;
 
     void mouseEnter(const juce::MouseEvent& e) override;
@@ -45,21 +45,38 @@ public:
     
     void assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote = 0);
     void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
+    void updateMidiNoteColor(int noteToUpdate, juce::Colour newColor);
     bool isMidiNoteAssigned(int midiNote);
 
-    void updateKeysFromContainer();
-
+    //void updateKeysFromContainer();
+    void updateKeysFromValueTree();
     
     void printCurrentlyAssignedMidiNotes();
-    
+    juce::Colour findColorFromMidiNote(int midiNote);
     //smallest to biggest
-    juce::Array<int> getMidiAssignmentsInOrder();
+    //juce::Array<int> getMidiAssignmentsInOrder();
 
 private:
 
-    std::map<int, juce::Colour> currentlyAssignedMidiNotes{};
+    //std::map<int, juce::Colour> currentlyAssignedMidiNotes{};
+
+
+    //struct KrumKeyboardLayout
+  /*  {
+        
+    };*/
+    struct KrumKey
+    {
+        int midiNote;
+        juce::Colour color;
+    };
+
+
+    juce::Array<KrumKey> currentlyAssignedKeys;
 
     KrumModuleContainer& moduleContainer;
+
+    juce::ValueTree valueTree;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumKeyboard)
 };
