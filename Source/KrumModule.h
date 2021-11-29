@@ -150,6 +150,7 @@ public:
             - BUT, prefer to access these via setters and getters!!
             - Although, you can access them directly, doing that doesn't ensure they will be saved, among doing other tasks that might need to be done
     */
+
     struct ModuleInfo
     {
         juce::Colour moduleColor{ juce::Colours::blue };
@@ -181,7 +182,8 @@ private:
     friend class KrumModuleEditor;
     friend class DragAndDropThumbnail;
 
-    std::shared_ptr<KrumModuleEditor> moduleEditor = nullptr;
+    //the sampler owns this module so this editor should be owned by the plugin editor, not this module
+    //std::shared_ptr<KrumModuleEditor> moduleEditor = nullptr;
 
     juce::AudioProcessorValueTreeState* parameters = nullptr;
     juce::ValueTree* valueTree = nullptr;

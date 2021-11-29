@@ -47,6 +47,7 @@ class KrumModuleEditor  :   public juce::Component,
                             public juce::DragAndDropTarget,
                             public juce::FileDragAndDropTarget,
                             public juce::DragAndDropContainer
+                           // public juce::ReferenceCountedObject
 {
 public:
     KrumModuleEditor(KrumModule& o, KrumSamplerAudioProcessorEditor& e);
@@ -161,7 +162,7 @@ public:
 //
 private:
 
-    
+    //using Ptr = juce::ReferenceCountedObjectPtr<KrumModuleEditor>;
     
     friend class DragAndDropThumbnail;
 

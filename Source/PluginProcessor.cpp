@@ -46,8 +46,14 @@ juce::ValueTree createValueTree()
     {
         juce::String index = juce::String(i);
         juce::ValueTree newModule =
-        { "Module" + index, {{"name",""}},
-                {
+        { "Module" + index, {{TreeIDs::paramModuleName_ID,""}},{} };
+        newModule.setProperty(TreeIDs::paramModuleState_ID, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::paramModuleFile_ID, juce::var(""), nullptr);
+        newModule.setProperty(TreeIDs::paramModuleMidiNote_ID, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::paramModuleMidiChannel_ID, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::paramModuleColor_ID, juce::var(""), nullptr);
+        newModule.setProperty(TreeIDs::paramModuleDisplayIndex_ID, juce::var(-1), nullptr);
+                /*{
                     {"State", {{"id", TreeIDs::paramModuleState_ID},        {"value", "0"}}},
                     {"State", {{"id", TreeIDs::paramModuleFile_ID},         {"value", ""}}},
                     {"State", {{"id", TreeIDs::paramModuleMidiNote_ID},     {"value", "0"}}},
@@ -55,7 +61,7 @@ juce::ValueTree createValueTree()
                     {"State", {{"id", TreeIDs::paramModuleColor_ID},        {"value", ""}}},
                     {"State", {{"id", TreeIDs::paramModuleDisplayIndex_ID}, {"value", ""}}}
                 }
-        };
+        };*/
         krumModulesTree.addChild(newModule, i, nullptr);
     }
 
@@ -419,17 +425,20 @@ void KrumSamplerAudioProcessor::makeModulesFromValueTree()
             juce::var id;
             juce::var val;
 
-            stateTree = moduleTree.getChild(0); //we have the moduleState as the first index, probably not great to do it this way...
-            id = stateTree.getProperty("id");
-            val = stateTree.getProperty("value");
-            
-            KrumModule::ModuleState state;
-            
-            if(id.toString() == TreeIDs::paramModuleState_ID)
+            //stateTree = moduleTree.getChild(0); //we have the moduleState as the first index, probably not great to do it this way...
+            //id = stateTree.getProperty("id");
+            //val = stateTree.getProperty("value");
+            auto modState = moduleTree.getProperty(TreeIDs::paramModuleState_ID);
+
+            KrumModule::ModuleState state = static_cast<KrumModule::ModuleState>((int)modState);
+            hasFile = state == KrumModule::ModuleState::active || state == KrumModule::ModuleState::hasFile;
+
+
+            /*if(id.toString() == TreeIDs::paramModuleState_ID)
             {
-                state = static_cast<KrumModule::ModuleState>((int)val);
+                state = static_cast<KrumModule::ModuleState>((int)modState);
                 hasFile = state == KrumModule::ModuleState::active || state == KrumModule::ModuleState::hasFile;
-            }
+            }*/
 
             if (hasFile)
             {

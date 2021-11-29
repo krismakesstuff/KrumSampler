@@ -67,8 +67,15 @@ private:
     };*/
     struct KrumKey
     {
-        int midiNote;
-        juce::Colour color;
+        KrumKey() = default;
+        KrumKey(int midi, juce::Colour& c)
+            : midiNote(midi), color(c) {}
+
+        bool hasColor() { return color != juce::Colour(); }
+        bool hasMidiNote() { return midiNote > 0; }
+
+        int midiNote = 0;
+        juce::Colour color = juce::Colour{};
     };
 
 

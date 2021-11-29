@@ -273,56 +273,20 @@ bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
 
 void KrumKeyboard::updateKeysFromValueTree()
 {
+    currentlyAssignedKeys.clear();
+    currentlyAssignedKeys.ensureStorageAllocated(MAX_NUM_MODULES);
+
     auto krumModuleTree = valueTree.getChildWithName("KrumModules");
 
     for (int i = 0; i < krumModuleTree.getNumChildren(); i++)
     {
         auto modTree = krumModuleTree.getChildWithName("Module" + juce::String(i));
-        if (modTree.isValid())
+        KrumModule::ModuleState state = static_cast<KrumModule::ModuleState>((int)modTree.getProperty(TreeIDs::paramModuleState_ID));
+        
+        if (state == KrumModule::ModuleState::active)
         {
-            for (int j = 1; j < modTree.getNumChildren(); j++) //we start at 1, the 0 index is the state which we grab manually
-            {
-                auto stateTree = modTree.getChild(0);
-                auto stateId = stateTree.getProperty("id");
-                auto stateVal = stateTree.getProperty("value");
-
-                KrumModule::ModuleState state;
-
-                if (stateId.toString() == TreeIDs::paramModuleState_ID)
-                {
-                    state = static_cast<KrumModule::ModuleState>((int)stateVal);
-                    if (state == KrumModule::ModuleState::active)
-                    {
-                        KrumKey newKey;
-
-                        juce::var id;
-                        juce::var val;
-                        auto modChild = modTree.getChild(i);
-                        id = modChild.getProperty("id");
-
-                        if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
-                        {
-                            newKey.midiNote = (int)modChild.getProperty("val");
-                        }
-                        
-                        if (id.toString() == TreeIDs::paramModuleColor_ID)
-                        {
-                            newKey.color = juce::Colour::fromString(modChild.getProperty("val").toString());
-                        }
-
-                        if (!newKey.color.isOpaque() && newKey.midiNote > 0)
-                        {
-                            currentlyAssignedKeys.add(newKey);
-                            break;
-                        }
-
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
+            KrumKey newKey((int)modTree.getProperty(TreeIDs::paramModuleMidiNote_ID), juce::Colour::fromString(modTree.getProperty(TreeIDs::paramModuleColor_ID).toString()));
+            currentlyAssignedKeys.add(newKey);
         }
     }
 
@@ -332,6 +296,12 @@ void KrumKeyboard::updateKeysFromValueTree()
 
 void KrumKeyboard::printCurrentlyAssignedMidiNotes()
 {
+
+    if (currentlyAssignedKeys.size() == 0)
+    {
+        DBG("No Keys currently assigned");
+        return;
+    }
 
     for (int i = 0; i < currentlyAssignedKeys.size(); i++)
     {

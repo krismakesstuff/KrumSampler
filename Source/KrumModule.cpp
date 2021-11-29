@@ -306,11 +306,20 @@ void KrumModule::getValuesFromTree()
     if (valueTree != nullptr)
     {
         auto modulesTree = valueTree->getChildWithName("KrumModules");
-        auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
-        juce::var nameValue = moduleTree.getProperty("name");
-        info.name = nameValue.toString();
+        auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString()); //the index from getIndexString() is set in ctor
         
-        juce::ValueTree stateTree;
+        info.name = moduleTree.getProperty(TreeIDs::paramModuleName_ID);
+        info.moduleState = static_cast<ModuleState>((int)moduleTree.getProperty(TreeIDs::paramModuleState_ID));
+        info.audioFile = juce::File(moduleTree.getProperty(TreeIDs::paramModuleFile_ID).toString());
+        info.midiNote = (int)moduleTree.getProperty(TreeIDs::paramModuleMidiNote_ID);
+        info.midiChannel = (int)moduleTree.getProperty(TreeIDs::paramModuleMidiChannel_ID);
+        info.moduleColor = juce::Colour::fromString(moduleTree.getProperty(TreeIDs::paramModuleColor_ID).toString());
+        info.displayIndex = (int)moduleTree.getProperty(TreeIDs::paramModuleDisplayIndex_ID);
+
+        /*juce::var nameValue = moduleTree.getProperty("name");
+        info.name = nameValue.toString();*/
+
+        /*juce::ValueTree stateTree;
         juce::var id;
         juce::var val;
 
@@ -344,7 +353,7 @@ void KrumModule::getValuesFromTree()
             {
                 info.displayIndex = int(val);
             }
-        }
+        }*/
     }
 }
 
@@ -364,12 +373,18 @@ void KrumModule::updateValuesInTree(bool printBefore)
         auto modulesTree = valueTree->getChildWithName("KrumModules");
         auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
 
-        moduleTree.setProperty("name", juce::var(info.name), nullptr);
+        moduleTree.setProperty(TreeIDs::paramModuleName_ID, juce::var(info.name), nullptr);
+        moduleTree.setProperty(TreeIDs::paramModuleState_ID, (int)info.moduleState, nullptr);
+        moduleTree.setProperty(TreeIDs::paramModuleFile_ID, juce::var(info.audioFile.getFullPathName()), nullptr);
+        moduleTree.setProperty(TreeIDs::paramModuleMidiNote_ID, juce::var(info.midiNote), nullptr);
+        moduleTree.setProperty(TreeIDs::paramModuleMidiChannel_ID, juce::var(info.midiChannel), nullptr);
+        moduleTree.setProperty(TreeIDs::paramModuleColor_ID, juce::var(info.moduleColor.toDisplayString(true)), nullptr);
+        moduleTree.setProperty(TreeIDs::paramModuleDisplayIndex_ID, juce::var(info.displayIndex), nullptr);
 
-        juce::ValueTree stateTree;
-        juce::var id;
-
-        for (int i = 0; i < moduleTree.getNumChildren(); i++)         
+        /*juce::ValueTree stateTree;
+        juce::var id;*/
+        
+        /*for (int i = 0; i < moduleTree.getNumChildren(); i++)         
         {
             stateTree = moduleTree.getChild(i);
             id = stateTree.getProperty("id");
@@ -398,7 +413,7 @@ void KrumModule::updateValuesInTree(bool printBefore)
             {
                 stateTree.setProperty("value", juce::var(info.displayIndex), nullptr);
             }
-        }
+        }*/
 
         /*DBG("Value Tree In Module " + name);
         auto state = valueTree->createCopy();
@@ -414,16 +429,26 @@ void KrumModule::clearModuleValueTree()
     auto modulesTree = valueTree->getChildWithName("KrumModules");
     auto moduleTree = modulesTree.getChildWithName("Module" + getIndexString());
 
-    moduleTree.setProperty("name", juce::var(""), nullptr);
+    //moduleTree.setProperty("name", juce::var(""), nullptr);
 
-    juce::ValueTree stateTree;
-    //juce::var id;
+    //juce::ValueTree stateTree;
+    ////juce::var id;
 
-    for (int i = 0; i < moduleTree.getNumChildren(); i++)
-    {
-        stateTree = moduleTree.getChild(i);
-        stateTree.setProperty("value", juce::var(""), nullptr);
-    }
+    //for (int i = 0; i < moduleTree.getNumChildren(); i++)
+    //{
+    //    stateTree = moduleTree.getChild(i);
+    //    stateTree.setProperty("value", juce::var(""), nullptr);
+    //}
+
+    moduleTree.setProperty(TreeIDs::paramModuleName_ID, juce::var(""), nullptr);
+    moduleTree.setProperty(TreeIDs::paramModuleState_ID, juce::var(0), nullptr);
+    moduleTree.setProperty(TreeIDs::paramModuleFile_ID, juce::var(""), nullptr);
+    moduleTree.setProperty(TreeIDs::paramModuleMidiNote_ID, juce::var(0), nullptr);
+    moduleTree.setProperty(TreeIDs::paramModuleMidiChannel_ID, juce::var(0), nullptr);
+    moduleTree.setProperty(TreeIDs::paramModuleColor_ID, juce::var(""), nullptr);
+    moduleTree.setProperty(TreeIDs::paramModuleDisplayIndex_ID, juce::var(-1), nullptr);
+
+
 }
 
 void KrumModule::updateAudioAtomics()

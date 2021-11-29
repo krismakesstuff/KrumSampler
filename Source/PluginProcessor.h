@@ -50,11 +50,11 @@ namespace TreeIDs
     const static juce::String paramModuleClipGain_ID{ "moduleClipGain" };
 
     //ValueTree
+    const static juce::String paramModuleName_ID{ "name" };
     const static juce::String paramModuleState_ID{"moduleState"};
     const static juce::String paramModuleFile_ID{"moduleFilePath"};
     const static juce::String paramModuleMidiNote_ID{"moduleMidiNote"};
     const static juce::String paramModuleMidiChannel_ID{"moduleMidiChannel"};
-    //const static juce::String paramModuleActive_ID{ "moduleActive" };
     const static juce::String paramModuleColor_ID{ "moduleColor" };
     const static juce::String paramModuleDisplayIndex_ID{ "moduleDisplayIndex" };
 }

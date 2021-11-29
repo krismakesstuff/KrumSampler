@@ -14,8 +14,8 @@
 //#include "Log.h"
 
 //==============================================================================
-KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner) 
-    : editor(owner)//, fadeArea(50, editor->modulesBG.getHeight())
+KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner, juce::ValueTree& valTree)
+    : editor(owner), valueTree(valTree)//, fadeArea(50, editor->modulesBG.getHeight())
 {
     
     addKeyListener(this);
@@ -291,11 +291,11 @@ void KrumModuleContainer::addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd)
  
     if(moduleToAdd->getModuleState() == KrumModule::ModuleState::active)
     {
-        moduleDisplayOrder.insert(displayIndex, moduleToAdd);
+        moduleDisplayOrder.insert(displayIndex, std::make_unique<KrumModuleEditor>(std::make_shared<KrumModuleEditor>(moduleToAdd).get()));
     }
     else
     {
-        moduleDisplayOrder.add(moduleToAdd);
+        moduleDisplayOrder.add(std::make_shared<KrumModuleEditor>(moduleToAdd));
         updateModuleDisplayIndices(true);
     }
 
@@ -319,25 +319,25 @@ KrumSamplerAudioProcessorEditor* KrumModuleContainer::getEditor()
 
 void KrumModuleContainer::matchModuleDisplayToMidiNotes(juce::Array<int> sortedMidiAssignments)
 {
-    juce::Array<KrumModuleEditor*> newDisplayOrder;
-    
-    
-    for(int i = 0; i < sortedMidiAssignments.size(); i++)
-    {
-        auto modEd = getModuleFromMidiNote(sortedMidiAssignments[i]);
-        newDisplayOrder.add(modEd);
-        //moduleDisplayOrder.move(modEd->getModuleDisplayIndex(), i);
-        //DBG("Module: " + juce::String(modEd->getModuleDisplayIndex()) + " Moved To " + juce::String(i));
-    }
-    
-    
-    int remaining = MAX_NUM_MODULES - newDisplayOrder.size();
-    for(int i = remaining - 1; i < moduleDisplayOrder.size(); i++)
-    {
-        newDisplayOrder.add(moduleDisplayOrder[i]);
-    }
-    
-    moduleDisplayOrder = newDisplayOrder;
+    //juce::Array<KrumModuleEditor*> newDisplayOrder;
+    //
+    //
+    //for(int i = 0; i < sortedMidiAssignments.size(); i++)
+    //{
+    //    auto modEd = getModuleFromMidiNote(sortedMidiAssignments[i]);
+    //    newDisplayOrder.add(modEd);
+    //    //moduleDisplayOrder.move(modEd->getModuleDisplayIndex(), i);
+    //    //DBG("Module: " + juce::String(modEd->getModuleDisplayIndex()) + " Moved To " + juce::String(i));
+    //}
+    //
+    //
+    //int remaining = MAX_NUM_MODULES - newDisplayOrder.size();
+    //for(int i = remaining - 1; i < moduleDisplayOrder.size(); i++)
+    //{
+    //    newDisplayOrder.add(moduleDisplayOrder[i]);
+    //}
+    //
+    //moduleDisplayOrder = newDisplayOrder;
     //showFirstEmptyModule();
     refreshModuleLayout();
     updateModuleDisplayIndices(true);
@@ -350,8 +350,8 @@ void KrumModuleContainer::updateModuleDisplayIndices(bool shouldRepaint)
 {
     for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        moduleDisplayOrder[i]->setModuleDisplayIndex(i);
-        DBG("Module: " + juce::String(moduleDisplayOrder[i]->getModuleSamplerIndex()) + " Display Index: " + juce::String(moduleDisplayOrder[i]->getModuleDisplayIndex()));
+        moduleDisplayOrder[i]->get()->setModuleDisplayIndex(i);
+        DBG("Module: " + juce::String(moduleDisplayOrder[i]->get()->getModuleSamplerIndex()) + " Display Index: " + juce::String(moduleDisplayOrder[i]->get()->getModuleDisplayIndex()));
     }
     
     if(shouldRepaint)
@@ -427,7 +427,7 @@ void KrumModuleContainer::isIntersectingWithModules(KrumModuleEditor* editorToTe
     modulesIntersecting.reset();
     for(int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        auto modEd = moduleDisplayOrder[i];
+        auto modEd = moduleDisplayOrder[i]->get();
         if(modEd == editorToTest)
         {
             continue;
@@ -453,7 +453,7 @@ bool KrumModuleContainer::isMouseOverModule(const juce::Point<int> positionToTes
 {
     for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        auto modEd = moduleDisplayOrder[i];
+        auto modEd = moduleDisplayOrder[i]->get();
         if (modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getBounds().contains(positionToTest))
         {
             bounds = modEd->getBounds();
@@ -468,7 +468,7 @@ bool KrumModuleContainer::isMouseOverModule(const juce::Point<int> positionToTes
     return false;
 }
 
-juce::Array<KrumModuleEditor*>& KrumModuleContainer::getModuleDisplayOrder()
+juce::OwnedArray<std::shared_ptr<KrumModuleEditor>>& KrumModuleContainer::getModuleDisplayOrder()
 {
     return moduleDisplayOrder;
 }
@@ -479,7 +479,7 @@ int KrumModuleContainer::getNumActiveModules()
     
     for(int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        if(moduleDisplayOrder[i]->getModuleState() == KrumModule::ModuleState::active)
+        if(moduleDisplayOrder[i]->get()->getModuleState() == KrumModule::ModuleState::active)
         {
             ++count;
         }
@@ -495,9 +495,10 @@ int KrumModuleContainer::getNumModuleEditors()
 
 void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEditor)
 {
+    //this loop clears any shown clipGain sliders
     for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        auto* modEd = moduleDisplayOrder[i];
+        auto modEd = moduleDisplayOrder.getUnchecked(i)->get();
         if (modEd != nullptr && modEd != moduleEditor)
         {
             modEd->setClipGainSliderVisibility(false);
@@ -511,7 +512,7 @@ void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor
 {
     for (int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        auto modEd = moduleDisplayOrder[i];
+        auto modEd = moduleDisplayOrder[i]->get();
         if (modEd->canThumbnailAcceptFile() && modEd != moduleEditor)
         {
             modEd->setThumbnailCanAcceptFile(false);
@@ -568,7 +569,7 @@ int KrumModuleContainer::getNumVisibleModules()
     int numVisible = 0;
     for(int i = 0; i < moduleDisplayOrder.size(); i++)
     {
-        if(moduleDisplayOrder[i]->isVisible())
+        if(moduleDisplayOrder[i]->get()->isVisible())
         {
             numVisible++;
         }

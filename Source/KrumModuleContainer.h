@@ -34,9 +34,11 @@ class KrumModuleContainer : public juce::Component,
                             public juce::Timer,
                             public juce::KeyListener,
                             public juce::MidiKeyboardStateListener
+                            //START HERE
+                            //public juce::ValueTree::Listener ??
 {
 public:
-    KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner);
+    KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner, juce::ValueTree& valTree);
     ~KrumModuleContainer() override;
 
     void paint(juce::Graphics& g) override;
@@ -86,7 +88,7 @@ public:
     //void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
     
     KrumSamplerAudioProcessorEditor* getEditor();
-    juce::Array<KrumModuleEditor*>& getModuleDisplayOrder();
+    juce::OwnedArray<std::shared_ptr<KrumModuleEditor>>& getModuleDisplayOrder();
     
     int getNumActiveModules();
     int getNumModuleEditors();
@@ -100,13 +102,18 @@ public:
     
 private:
 
+    juce::ValueTree valueTree;
+
     void timerCallback() override;
 
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
  
     //could probably use a linked list here? Would make storing position easier when rearranging.
-    juce::Array<KrumModuleEditor*> moduleDisplayOrder{};
+    juce::OwnedArray<KrumModuleEditor> moduleDisplayOrder{};
+
+    //juce::CriticalSection crit;
+    //juce::ReferenceCountedArray<KrumModuleEditor*, juce::CriticalSection()> moduleDispalyOrder;
 
     struct ModuleDragInfo
     {
