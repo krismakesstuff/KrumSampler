@@ -19,11 +19,11 @@
 KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori , KrumModuleContainer& container, juce::ValueTree& valTree)
     : juce::MidiKeyboardComponent(midiState, ori), moduleContainer(container), valueTree(valTree)
 {
-    setScrollButtonsVisible(true);
-    //updateKeysFromContainer();
-    updateKeysFromValueTree();
     setColour(juce::MidiKeyboardComponent::ColourIds::shadowColourId, juce::Colours::black);
     setColour(juce::MidiKeyboardComponent::ColourIds::upDownButtonBackgroundColourId, juce::Colours::darkgrey.darker());
+    
+    setScrollButtonsVisible(true);
+    updateKeysFromValueTree();
     valueTree.addListener(this);
 }
 
@@ -281,16 +281,15 @@ void KrumKeyboard::updateKeysFromValueTree()
 
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
-        auto modTree = modulesTree.getChildWithName(TreeIDs::MODULE);
+        auto modTree = modulesTree.getChild(i);
         if ((int)modTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::active)
         {
-            KrumKey newKey((int)modTree.getProperty(TreeIDs::moduleMidiNote), juce::Colour::fromString(modTree.getProperty(TreeIDs::moduleColor).toString()));
-            currentlyAssignedKeys.add(newKey);
+            assignMidiNoteColor((int)modTree.getProperty(TreeIDs::moduleMidiNote), juce::Colour::fromString(modTree.getProperty(TreeIDs::moduleColor).toString()));
         }
     }
 
     printCurrentlyAssignedMidiNotes();
-    repaint();
+    //repaint();
 }
 
 void KrumKeyboard::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)

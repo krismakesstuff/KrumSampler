@@ -303,8 +303,9 @@ void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 
 void KrumModuleEditor::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)
 {
-    if (treeWhoChanged.hasType(TreeIDs::MODULE) &&
-        ((int)treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex) == getModuleDisplayIndex()))
+    //if (treeWhoChanged.hasType(TreeIDs::MODULE) &&
+    //    ((int)treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex) == getModuleDisplayIndex()))
+    if(treeWhoChanged == moduleTree)
     {
         if (property == TreeIDs::moduleState)
         {
@@ -314,9 +315,11 @@ void KrumModuleEditor::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged,
                 showSettingsOverlay();
             }
         }
+        else if (property == TreeIDs::moduleColor)
+        {
+            setChildCompColors();
+        }
     }
-    
-
 }
 
 
@@ -845,7 +848,7 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
                                     if ((int)itTree.getProperty(TreeIDs::moduleState) == 0)
                                     {
                                         itTree.setProperty(TreeIDs::moduleFile, file.getFullPathName(), nullptr);
-                                        editor.moduleContainer.addModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
+                                        editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
                                         addNextModule = true;
                                 
                                         if ((int)itTree.getProperty(TreeIDs::moduleMidiChannel) > 0)
@@ -980,7 +983,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
                             if ((int)itTree.getProperty(TreeIDs::moduleState) == 0)
                             {
                                 itTree.setProperty(TreeIDs::moduleFile, audioFile.getFullPathName(), nullptr);
-                                editor.moduleContainer.addModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
+                                editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
 
                                 if ((int)itTree.getProperty(TreeIDs::moduleMidiChannel) > 0)
                                 {

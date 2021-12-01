@@ -103,9 +103,9 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     addAndMakeVisible(infoButton);
 
     
-    createModuleEditors();
-    keyboard.updateKeysFromValueTree();
+    moduleContainer.createModuleEditors();
     moduleContainer.showFirstEmptyModule();
+    keyboard.updateKeysFromValueTree();
     setPaintingIsUnclipped(true);
     
     if (getSavedInfoButtonState())
@@ -318,47 +318,10 @@ void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* key
 //    }
 //}
 
-//This gets called when we open the GUI to rebuild all of the moduleEditors
-void KrumSamplerAudioProcessorEditor::createModuleEditors()
-{
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
-
-    for (int i = 0; i < modulesTree.getNumChildren(); i++)
-    {
-        auto moduleTree = modulesTree.getChild(i);
-        if(moduleTree.isValid() && ((int)moduleTree.getProperty(TreeIDs::moduleState) > 0)) //reference KrumModule::ModuleState, 0 is empty module
-        {
-            moduleContainer.addModuleEditor(new KrumModuleEditor(moduleTree, *this, sampler.getFormatManager()));
-        }
-    }
-
-
-    //bool showingFirstEmpty = false;
-
-    //juce::Array<int> activeModuleIndices;
-
-    ////TODO: make this function in sampler
-    //for (int i = 0; i < sampler.getNumModules(); i++)
-    //{
-    //    auto mod = sampler.getModule(i);
-    //    if (mod->isModuleActiveOrHasFile())
-    //    {
-    //        activeModuleIndices.add(mod->getModuleSamplerIndex());
-    //    }
-    //}
-
-    //for (int i = 0; i < activeModuleIndices.size(); i++)
-    //{
-    //    auto newEditor = sampler.getModule(activeModuleIndices[i])->createModuleEditor(*this);
-    //    moduleContainer.addModuleEditor(newEditor);
-    //}
-
-    //addNextModuleEditor();
-
-}
 
 void KrumSamplerAudioProcessorEditor::addNextModuleEditor()
 {
+    moduleContainer.showFirstEmptyModule();
     //It through valueTree instead!
   /*  for (int i = 0; i < sampler.getNumModules(); i++)
     {
@@ -370,16 +333,17 @@ void KrumSamplerAudioProcessorEditor::addNextModuleEditor()
         }
     }*/
 
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
-    for (int i = 0; i < modulesTree.getNumChildren(); i++)
-    {
-        auto moduleTree = modulesTree.getChild(i);
-        if ((int)moduleTree.getProperty(TreeIDs::moduleState) == 0)
-        {
-            moduleContainer.addModuleEditor(new KrumModuleEditor(moduleTree, *this, sampler.getFormatManager()));
-            return; //we only want to show one more empty module
-        }
-    }
+
+    //auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    //for (int i = 0; i < modulesTree.getNumChildren(); i++)
+    //{
+    //    auto moduleTree = modulesTree.getChild(i);
+    //    if ((int)moduleTree.getProperty(TreeIDs::moduleState) == 0)
+    //    {
+    //        moduleContainer.addModuleEditor(new KrumModuleEditor(moduleTree, *this, sampler.getFormatManager()));
+    //        return; //we only want to show one more empty module
+    //    }
+    //}
 
 }
 

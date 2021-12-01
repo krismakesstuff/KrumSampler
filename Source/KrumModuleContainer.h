@@ -46,9 +46,9 @@ public:
     
     void refreshModuleLayout();
     
-   
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+    
     void mouseDown(const juce::MouseEvent& event) override;
-    //bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
     
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)override;
@@ -56,12 +56,9 @@ public:
     void handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
     void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
 
-    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
-
-    void addModuleEditor(KrumModuleEditor* newModule, bool refreshLayout = true);
+    void addNewModuleEditor(KrumModuleEditor* newModuleEditor);
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
-    //void moveModule(int moduleIndexToMove, int newDisplayIndex);
 
     void setModuleSelected(KrumModuleEditor* moduleToMakeActive);
     void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect);
@@ -69,26 +66,9 @@ public:
     
     KrumModuleEditor* getModuleFromMidiNote(int midiNote);
 
-    //void addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd);
 
-    void removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove);
-    //KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
+    
 
-    void matchModuleDisplayToMidiNotes(juce::Array<int> sortedMidiAssignments);
-    
-    void updateModuleDisplayIndices(bool repaint);
-    
-    /*bool isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& boundsOfModuleUnderMouse);
-    void isIntersectingWithModules(KrumModuleEditor* editorToTest);
-    */
-    //    void startModuleDrag(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
-    //    void dragModule(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
-    //    void endModuleDrag(KrumModuleEditor* moduleToDrag);
-    //    bool isModuleBeingDragged();
-    //
-    //bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
-    //void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
-    
     KrumSamplerAudioProcessorEditor* getEditor();
     juce::OwnedArray<KrumModuleEditor>& getModuleDisplayOrder();
     
@@ -101,8 +81,34 @@ public:
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
 
     void showFirstEmptyModule();
-    
+    void createModuleEditors();
+
+    //void removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove);
+    //void matchModuleDisplayToMidiNotes(juce::Array<int> sortedMidiAssignments);
+    //bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
+//void moveModule(int moduleIndexToMove, int newDisplayIndex);
+//void addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd);
+//KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
+/*bool isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& boundsOfModuleUnderMouse);
+void isIntersectingWithModules(KrumModuleEditor* editorToTest);
+*/
+//    void startModuleDrag(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
+//    void dragModule(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
+//    void endModuleDrag(KrumModuleEditor* moduleToDrag);
+//    bool isModuleBeingDragged();
+//
+//bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+//void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+
+
 private:
+
+    void addModuleEditor(KrumModuleEditor* moduleToAdd, bool refreshLayout = true);
+
+    KrumModuleEditor* getEditorFromDisplayIndex(int displayIndex);
+
+    void updateModuleDisplayIndicesAfterDelete(int displayIndexDeleted);
+    int getNumVisibleModules();
 
     juce::ValueTree valueTree;
 
@@ -173,7 +179,6 @@ private:
     bool modulesOutside = false;
     //juce::Rectangle<int> fadeArea;
     
-    int getNumVisibleModules();
     
     //juce::ComponentDragger dragger;
     

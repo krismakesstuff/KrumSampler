@@ -90,7 +90,7 @@ public:
     static juce::String getMidiInfo(const juce::MidiMessage&);
 
     //bool createModule(juce::String& moduleName, int index, juce::File& file);
-    void createModuleEditors();
+    //void createModuleEditors();
     void addNextModuleEditor();
     KrumModuleContainer& getModuleContainer();
 
@@ -179,7 +179,7 @@ private:
     KrumFileBrowser& fileBrowser;
 
     KrumModuleContainer moduleContainer{this, valueTree};
-    KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer, *audioProcessor.getValueTree() };
+    KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer, valueTree };
 
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
