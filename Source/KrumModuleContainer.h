@@ -32,10 +32,9 @@ class KrumSamplerAudioProcessorEditor;
 class KrumModuleContainer : public juce::Component,
                             public juce::DragAndDropTarget,
                             public juce::Timer,
-                            public juce::KeyListener,
-                            public juce::MidiKeyboardStateListener
-                            //START HERE
-                            //public juce::ValueTree::Listener ??
+                            public juce::MidiKeyboardStateListener,
+                            public juce::ValueTree::Listener
+                            //public juce::KeyListener,
 {
 public:
     KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner, juce::ValueTree& valTree);
@@ -49,7 +48,7 @@ public:
     
    
     void mouseDown(const juce::MouseEvent& event) override;
-    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
+    //bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
     
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)override;
@@ -57,9 +56,12 @@ public:
     void handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
     void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
 
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+
+
     void addModuleEditor(KrumModuleEditor* newModule, bool refreshLayout = true);
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
-    void moveModule(int moduleIndexToMove, int newDisplayIndex);
+    //void moveModule(int moduleIndexToMove, int newDisplayIndex);
 
     void setModuleSelected(KrumModuleEditor* moduleToMakeActive);
     void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect);
@@ -67,18 +69,18 @@ public:
     
     KrumModuleEditor* getModuleFromMidiNote(int midiNote);
 
-    void addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd);
+    //void addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd);
 
     void removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove);
-    KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
+    //KrumModuleEditor* getEditorFromModule(KrumModule* krumModule);
 
     void matchModuleDisplayToMidiNotes(juce::Array<int> sortedMidiAssignments);
     
     void updateModuleDisplayIndices(bool repaint);
     
-    bool isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& boundsOfModuleUnderMouse);
+    /*bool isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& boundsOfModuleUnderMouse);
     void isIntersectingWithModules(KrumModuleEditor* editorToTest);
-    
+    */
     //    void startModuleDrag(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
     //    void dragModule(KrumModuleEditor* moduleToDrag, const juce::MouseEvent& e);
     //    void endModuleDrag(KrumModuleEditor* moduleToDrag);
@@ -88,7 +90,7 @@ public:
     //void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
     
     KrumSamplerAudioProcessorEditor* getEditor();
-    juce::OwnedArray<std::shared_ptr<KrumModuleEditor>>& getModuleDisplayOrder();
+    juce::OwnedArray<KrumModuleEditor>& getModuleDisplayOrder();
     
     int getNumActiveModules();
     int getNumModuleEditors();
@@ -98,7 +100,7 @@ public:
     void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
 
-    //void showFirstEmptyModule();
+    void showFirstEmptyModule();
     
 private:
 
@@ -109,13 +111,10 @@ private:
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
  
-    //could probably use a linked list here? Would make storing position easier when rearranging.
-    juce::OwnedArray<KrumModuleEditor> moduleDisplayOrder{};
+    juce::OwnedArray<KrumModuleEditor> moduleEditors{};
 
-    //juce::CriticalSection crit;
-    //juce::ReferenceCountedArray<KrumModuleEditor*, juce::CriticalSection()> moduleDispalyOrder;
 
-    struct ModuleDragInfo
+    /*struct ModuleDragInfo
     {
         bool dragging = false;
         juce::Rectangle<int> origBounds;
@@ -164,7 +163,7 @@ private:
         void reset() { first = nullptr; second = nullptr;}
     };
 
-    ModulesIntersecting modulesIntersecting;
+    ModulesIntersecting modulesIntersecting;*/
     
 
     KrumSamplerAudioProcessorEditor* editor = nullptr;

@@ -208,34 +208,28 @@ juce::AudioFormatManager* SimpleAudioPreviewer::getFormatManager()
 
 void SimpleAudioPreviewer::saveToggleState()
 {
-    auto globalTree = valueTree.getChildWithName("GlobalSettings");
-    auto autoPTree = globalTree.getChildWithName("PreviewerAutoPlay");
-
-    autoPTree.setProperty("value", autoPlayToggle.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
+    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
+    globalTree.setProperty(TreeIDs::previewerAutoPlay, autoPlayToggle.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
 }
 
 bool SimpleAudioPreviewer::getSavedToggleState()
 {
-    auto globalTree = valueTree.getChildWithName("GlobalSettings");
-    auto autoPTree = globalTree.getChildWithName("PreviewerAutoPlay");
-    bool state = (int)autoPTree.getProperty("value") > 0;
-    return state;
+    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
+    return (int)globalTree.getProperty(TreeIDs::previewerAutoPlay) > 0;
+    
 }
 
 void SimpleAudioPreviewer::savePreviewerGainState()
 {
-    auto globalTree = valueTree.getChildWithName("GlobalSettings");
-    auto prevTree = globalTree.getChildWithName("PreviewerGain");
-
-    prevTree.setProperty("value", juce::var(volumeSlider.getValue()), nullptr);
+    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
+    globalTree.setProperty(TreeIDs::previewerGain, juce::var(volumeSlider.getValue()), nullptr);
 }
 
 float SimpleAudioPreviewer::getSavedPreviewerGainState()
 {
-    auto globalTree = valueTree.getChildWithName("GlobalSettings");
-    auto prevTree = globalTree.getChildWithName("PreviewerGain");
+    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
 
-    return (float)prevTree.getProperty("value");
+    return (float)globalTree.getProperty(TreeIDs::previewerGain);
 }
 
 void SimpleAudioPreviewer::refreshSettings()

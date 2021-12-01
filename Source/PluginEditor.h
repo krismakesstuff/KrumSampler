@@ -117,7 +117,7 @@ public:
     void addKeyboardListener(juce::MidiKeyboardStateListener* listener);
     void removeKeyboardListener(juce::MidiKeyboardStateListener* listenerToRemove);
 
-    void cleanUpEmptyModuleTrees();
+    //void cleanUpEmptyModuleTrees();
 
     juce::AudioFormatManager* getAudioFormatManager();
     juce::AudioThumbnailCache& getThumbnailCache();
@@ -130,7 +130,7 @@ public:
 
     juce::SharedResourcePointer<juce::TooltipWindow> toolTipWindow;
 
-    void updateThumbnails();
+    //void updateThumbnails();
     
     
 
@@ -169,6 +169,8 @@ private:
     juce::AudioProcessorValueTreeState& parameters;
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     
+    juce::ValueTree valueTree;
+
     InfoPanelSlider outputGainSlider{"Output Gain", "Overall volume control of the plug-in"};
     std::unique_ptr<SliderAttachment> outputGainAttachment;
  
@@ -176,7 +178,7 @@ private:
     KrumSampler& sampler;
     KrumFileBrowser& fileBrowser;
 
-    KrumModuleContainer moduleContainer{this};
+    KrumModuleContainer moduleContainer{this, valueTree};
     KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer, *audioProcessor.getValueTree() };
 
     juce::String madeByString{ "Made by Kris Crawford" };

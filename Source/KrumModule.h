@@ -32,10 +32,11 @@
 * 
 */
 
-#define THUMBNAIL_RES 256
 
 
-class KrumModule //:  public juce::MidiKeyboardStateListener
+
+class KrumModule  : public juce::ValueTree::Listener
+                    //:  public juce::MidiKeyboardStateListener
                     //public juce::DragAndDropContainer
 {
 public:
@@ -60,89 +61,82 @@ public:
     };
 
     
+    KrumModule(KrumSampler& km, juce::ValueTree& valTree, juce::AudioProcessorValueTreeState* apvts);
+
+    ~KrumModule();
+
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+
+    ModuleState getModuleState();
+    juce::File& getSampleFile();
+    int getMidiTriggerNote();
+    int getMidiTriggerChannel();
+    juce::String& getModuleName();
+    int getModuleSamplerIndex();
+    int getModuleDisplayIndex();
+    juce::Colour getModuleColor();
+
+    bool isModuleActive();
+    bool isModuleEmpty();
+    bool isModuleActiveOrHasFile();    
+
+    std::atomic<float>* getModuleGain();
+    std::atomic<float>* getModuleClipGain();
+    std::atomic<float>* getModulePan();
+
+
+    //bool doesModuleNeedToUpdateTree();
+    /*void triggerNoteOn();
+    void triggerNoteOff();*/
+    /*bool isModulePlaying();
+    void setModulePlaying(const bool isPlaying);*/
     
     //KrumModule(KrumSampler& km, juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
     
-    KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
-        juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
+    //KrumModule(juce::String& moduleName, int index, juce::File file, KrumSampler& km,
+    //    juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
 
-    KrumModule(int index, KrumSampler& km, juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
-
-    ~KrumModule(); //override;
-
-    void updateModuleFromTree();
+    //void updateModuleFromTree();
     
     //void handleNoteOn(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
     //void handleNoteOff(juce::MidiKeyboardState* source, int midiChannelNumber, int midiNoteNumber, float velocity) override;
 
+    //void setModuleActive(bool isActive);
+   // void setModuleGain(float newGain);
+    //void setModulePan(float newPan);
+
+    //void getValuesFromTree();
+    //void updateValuesInTree(bool printBefore = false);
+    //void clearModuleValueTree();
+
+    //void updateAudioAtomics();
     
+    //void updateEditorFromState();
+    
+  /*  void setModuleColor(juce::Colour newModuleColor, bool refreshChildren = true);
     void setModuleSelected(bool isModuleSelected);
     void removeSettingsOverlay(bool keepSettings = true);
 
     void setModuleState(ModuleState newState);
-    ModuleState getModuleState();
-    
-    juce::File& getSampleFile();
     void setSampleFile(juce::File& newSample);
 
-    int getMidiTriggerNote();
     void setMidiTriggerNote(int midiNoteNumber, bool removOld = false);
-
-    int getMidiTriggerChannel();
     void setMidiTriggerChannel(int newMidiChannel);
-
-    juce::String& getModuleName();
     void setModuleName(juce::String newName);
-
-    bool isModulePlaying();
-    void setModulePlaying(const bool isPlaying);
-
-    bool isModuleActive();
-    bool isModuleEmpty();
-    bool isModuleActiveOrHasFile();
-    //void setModuleActive(bool isActive);
-
-    int getModuleSamplerIndex();
     void setModuleSamplerIndex(int newIndex);
-
-    int getModuleDisplayIndex();
     void setModuleDisplayIndex(int newIndex);
 
-    juce::Colour getModuleColor();
-    void setModuleColor(juce::Colour newModuleColor, bool refreshChildren = true);
-
     bool isModuleDragging();
-    void setModuleDragging(bool isDragging);
-    
-    void triggerNoteOn();
-    void triggerNoteOff();
-
-    void setModuleGain(float newGain);
-    std::atomic<float>* getModuleGain();
-    std::atomic<float>* getModuleClipGain();
-
-    void setModulePan(float newPan);
-    std::atomic<float>* getModulePan();
-
-    bool doesModuleNeedToUpdateTree();
-
-    void getValuesFromTree();
-    void updateValuesInTree(bool printBefore = false);
-    void clearModuleValueTree();
-
-    void updateAudioAtomics();
-    
-    void updateEditorFromState();
-    
+    void setModuleDragging(bool isDragging);*/
     //void reassignSliders();
 
-    KrumModuleEditor* createModuleEditor(KrumSamplerAudioProcessorEditor& editor);
-    KrumModuleEditor* getCurrentModuleEditor();
-    bool hasEditor();
-    void setEditorVisibility(bool isVisible);
-    void deleteModuleEditor();
+    //KrumModuleEditor* createModuleEditor(KrumSamplerAudioProcessorEditor& editor);
+    //KrumModuleEditor* getCurrentModuleEditor();
+    //bool hasEditor();
+    //void setEditorVisibility(bool isVisible);
+    //void deleteModuleEditor();
 
-    int deleteEntireModule();
+    //int deleteEntireModule();
 
     /*
         ModuleInfo struct holds the info that needs to be saved
@@ -151,31 +145,32 @@ public:
             - Although, you can access them directly, doing that doesn't ensure they will be saved, among doing other tasks that might need to be done
     */
 
-    struct ModuleInfo
-    {
-        juce::Colour moduleColor{ juce::Colours::blue };
-        juce::File audioFile;
+    //struct ModuleInfo
+    //{
+    //    juce::Colour moduleColor{ juce::Colours::blue };
+    //    juce::File audioFile;
 
-        //These rely on being intialized like this to see if we need to display the module differently, i.e. ModuleSettingsOverlay
-        int midiNote = 0;
-        int midiChannel = 0;
-        juce::String name;
-        int samplerIndex;
-        int displayIndex;
-        //bool moduleActive = false;
-        ModuleState moduleState = ModuleState::empty;
-        std::atomic<bool> modulePlaying = false;
-        
-        
-        //Is not used yet, but is here as a flag to be used with the draggingHandle being used. Will be impelemented soon!
-        // 
-        bool moduleDragging = false;
+    //    //These rely on being intialized like this to see if we need to display the module differently, i.e. ModuleSettingsOverlay
+    //    int midiNote = 0;
+    //    int midiChannel = 0;
+    //    juce::String name;
+    //    int samplerIndex;
+    //    int displayIndex;
+    //    ModuleState moduleState = ModuleState::empty;
+    //    std::atomic<bool> modulePlaying = false;
+    //    
+    //    
+    //    //Is not used yet, but is here as a flag to be used with the draggingHandle being used. Will be impelemented soon!
+    //    bool moduleDragging = false;
 
-    };
+    //};
 
-    ModuleInfo info;
+    //ModuleInfo info;
 
 private:
+
+    void updateSamplerSound();
+    juce::String getIndexString();
 
     bool needsToUpdateTree = false;
 
@@ -186,17 +181,11 @@ private:
     //std::shared_ptr<KrumModuleEditor> moduleEditor = nullptr;
 
     juce::AudioProcessorValueTreeState* parameters = nullptr;
-    juce::ValueTree* valueTree = nullptr;
-
-    juce::String getIndexString();
-
+    juce::ValueTree moduleTree;
+    
     KrumSampler& sampler;
 
-    std::atomic<float>* moduleGain = nullptr;
-    std::atomic<float>* modulePan = nullptr;
-    std::atomic<float>* moduleClipGain = nullptr;
-
-    float buttonClickVelocity = 0.5f;
+    
     
     JUCE_LEAK_DETECTOR(KrumModule)
 

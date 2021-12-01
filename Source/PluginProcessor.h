@@ -36,6 +36,49 @@
 
 namespace TreeIDs
 {
+#define DECLARE_ID(name) const juce::Identifier name(#name);
+
+    DECLARE_ID(APPSTATE)
+
+        DECLARE_ID(GLOBALSETTINGS) //GlobaalSettings tree
+
+            DECLARE_ID(previewerGain)
+            DECLARE_ID(previewerAutoPlay)
+            DECLARE_ID(fileBrowserHidden)
+            DECLARE_ID(infoPanelToggle)
+
+        DECLARE_ID(KRUMMODULES) //Module Tree
+
+            DECLARE_ID(MODULE)
+
+                DECLARE_ID(moduleName)
+                DECLARE_ID(moduleState)
+                DECLARE_ID(moduleFile)
+                DECLARE_ID(moduleMidiNote)
+                DECLARE_ID(moduleMidiChannel)
+                DECLARE_ID(moduleColor)
+                DECLARE_ID(moduleDisplayIndex)
+                DECLARE_ID(moduleSamplerIndex)
+         
+        DECLARE_ID(PARAMS) //APVTS
+            
+            DECLARE_ID(paramModuleGain)
+            DECLARE_ID(paramModulePan)
+            DECLARE_ID(paramModuleOutputChannel)
+            DECLARE_ID(paramModuleClipGain)
+        
+        DECLARE_ID(FILEBROWSERTREE) //File Browser Tree    
+
+            DECLARE_ID(RECENT)
+            DECLARE_ID(FAVORITES)
+
+                DECLARE_ID(Folder)
+                DECLARE_ID(File)
+
+            DECLARE_ID(OPENSTATE)
+
+#undef DECLARE_ID
+
     //Should I make these all preprocessor define instead?
     //Globals
     static const float defaultGain = 0.85f;
@@ -44,19 +87,34 @@ namespace TreeIDs
     static juce::String outputGainParam_ID{"outputGain"};
 
     //APVTS
-    const static juce::String paramModuleGain_ID{"moduleGain"};
+   /* const static juce::String paramModuleGain_ID{"moduleGain"};
     const static juce::String paramModulePan_ID{"modulePan"};
     const static juce::String paramModuleOutputChannels_ID{"moduleOutputChannel"};
-    const static juce::String paramModuleClipGain_ID{ "moduleClipGain" };
+    const static juce::String paramModuleClipGain_ID{ "moduleClipGain" };*/
 
-    //ValueTree
-    const static juce::String paramModuleName_ID{ "name" };
-    const static juce::String paramModuleState_ID{"moduleState"};
-    const static juce::String paramModuleFile_ID{"moduleFilePath"};
-    const static juce::String paramModuleMidiNote_ID{"moduleMidiNote"};
-    const static juce::String paramModuleMidiChannel_ID{"moduleMidiChannel"};
-    const static juce::String paramModuleColor_ID{ "moduleColor" };
-    const static juce::String paramModuleDisplayIndex_ID{ "moduleDisplayIndex" };
+
+    //ValueTree Nodes
+    //const static juce::String APPSTATE{ "AppState" };
+//    const static juce::String GLOBALSETTINGS{ "GlobalSettings" };
+ //   const static juce::String KRUMMODULES{ "KrumModules" };
+ //   const static juce::String MODULE{ "Module" };
+    
+    //ValueTree - module's state parameters
+    //const static juce::String moduleName_ID{ "name" };
+    //const static juce::String moduleState_ID{"moduleState"};
+    //const static juce::String moduleFile_ID{"moduleFilePath"};
+    //const static juce::String moduleMidiNote_ID{"moduleMidiNote"};
+    //const static juce::String moduleMidiChannel_ID{"moduleMidiChannel"};
+    //const static juce::String moduleColor_ID{ "moduleColor" };
+    //const static juce::String moduleDisplayIndex_ID{ "moduleDisplayIndex" };
+    //const static juce::String moduleSamplerIndex_ID{ "moduleSamplerIndex" };
+
+    //ValueTree - global settings
+    /*const static juce::String previewerGain_ID {"PreviewerGain"};
+    const static juce::String previewerAutoPlay_ID{ "PreviewerAutoPlay" };
+    const static juce::String fileBrowserHidden_ID{ "BrowserHidden" };
+    const static juce::String infoPanelToggle_ID{ "InfoPanelToggle" };*/
+
 }
 
 static float panRangeTo0to1(juce::String text)
@@ -145,8 +203,8 @@ public:
     juce::ValueTree* getValueTree();
     juce::MidiKeyboardState& getMidiState();
 
-    void makeModulesFromValueTree();
-    void updateValueTreeState();
+    void updateModulesFromValueTree();
+    //void updateValueTreeState();
     
     //int findFreeModuleIndex();
     int getNumModulesInSampler();

@@ -18,12 +18,13 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner,
     : editor(owner), valueTree(valTree)//, fadeArea(50, editor->modulesBG.getHeight())
 {
     
-    addKeyListener(this);
-    refreshModuleLayout();
+    //addKeyListener(this);
     setInterceptsMouseClicks(true, true);
     setRepaintsOnMouseActivity(true);
     startTimerHz(30);
     editor->addKeyboardListener(this);
+    valueTree.addListener(this);
+    refreshModuleLayout();
     //juce::Logger::writeToLog("Module Container created");
         
 }
@@ -31,6 +32,7 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner,
 KrumModuleContainer::~KrumModuleContainer()
 {
     editor->removeKeyboardListener(this);
+    valueTree.removeListener(this);
 }
 
 void KrumModuleContainer::paint (juce::Graphics& g)
@@ -40,21 +42,21 @@ void KrumModuleContainer::paint (juce::Graphics& g)
     g.setColour(bgColor);
     g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
     
-    if (moduleDragInfo.dragging && moduleDragInfo.showOriginBounds)
-    {
-        g.setColour(juce::Colours::yellow);
-        g.drawRoundedRectangle(moduleDragInfo.origBounds.reduced(EditorDimensions::shrinkage).toFloat(), EditorDimensions::cornerSize, 1.0f);
-        //paintLineUnderMouseDrag(g,)
-    }
-    else if (moduleDragInfo.dragging && moduleDragInfo.drawLineBetween)
-    {
-        g.setColour(juce::Colours::yellow);
-        
-        auto lineX = moduleDisplayOrder[moduleDragInfo.leftDisplayIndex]->getRight();
-        juce::Rectangle<int> lineRect {lineX, EditorDimensions::shrinkage, 5, EditorDimensions::moduleH};
-        
-        g.fillRoundedRectangle(lineRect.toFloat(), EditorDimensions::cornerSize/2);
-    }
+    //if (moduleDragInfo.dragging && moduleDragInfo.showOriginBounds)
+    //{
+    //    g.setColour(juce::Colours::yellow);
+    //    g.drawRoundedRectangle(moduleDragInfo.origBounds.reduced(EditorDimensions::shrinkage).toFloat(), EditorDimensions::cornerSize, 1.0f);
+    //    //paintLineUnderMouseDrag(g,)
+    //}
+    //else if (moduleDragInfo.dragging && moduleDragInfo.drawLineBetween)
+    //{
+    //    g.setColour(juce::Colours::yellow);
+    //    
+    //    auto lineX = moduleDisplayOrder[moduleDragInfo.leftDisplayIndex]->getRight();
+    //    juce::Rectangle<int> lineRect {lineX, EditorDimensions::shrinkage, 5, EditorDimensions::moduleH};
+    //    
+    //    g.fillRoundedRectangle(lineRect.toFloat(), EditorDimensions::cornerSize/2);
+    //}
 }
 
 void KrumModuleContainer::paintLineUnderMouseDrag(juce::Graphics& g, juce::Point<int> mousePosition)
@@ -86,117 +88,147 @@ void KrumModuleContainer::refreshModuleLayout()
     //MUST set this size before we reposition the modules. Otherwise viewport won't scroll!
     setSize(newWidth, viewportHeight);
 
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        auto modEd = moduleDisplayOrder[i];
+        auto modEd = moduleEditors[i];
         modEd->setTopLeftPosition((i * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage(), EditorDimensions::shrinkage);
     }
 
+    //grab the editors display position and setBounds accordingly
 }
 
 void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
 {
     auto mousePos = event.getMouseDownPosition();
     
-    for (int i = 0; i < editor->sampler.getNumModules(); i++)
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        auto mod = editor->sampler.getModule(i);
-        KrumModuleEditor* modEditor = nullptr;
-        juce::Rectangle<int> modBounds;
-        if (mod->hasEditor())
-        {
-            modEditor = mod->getCurrentModuleEditor();
-            modBounds = modEditor->getBoundsInParent();
-        }
-        //Controlling the mouseDown from here so we can "click-off" and it will unselect all modules.
+        auto modEd = moduleEditors[i];
+        auto modBounds = modEd->getBoundsInParent();
+
         if (modBounds.contains(mousePos))
         {
-            setModuleSelected(modEditor);
+            setModuleSelected(modEd);
         }
         else
         {
-            setModuleUnselected(modEditor);
+            setModuleUnselected(modEd);
         }
     }
-    
 }
 
-bool KrumModuleContainer::keyPressed(const juce::KeyPress &key, juce::Component *originatingComponent)
-{
-    if(key.isKeyCode(juce::KeyPress::escapeKey) && moduleDragInfo.dragging)
-    {
-        //endModuleDrag(nullptr);
-        //mouseup in module editor
-
-        //moduleDragInfo.draggedModule->mouseUp(dummyMouse);
-        //moduleDragInfo.draggedModule->forceMouseUp();
-        moduleDragInfo.escPressed = true;
-        return true;
-    }
-    return false;
-}
+//bool KrumModuleContainer::keyPressed(const juce::KeyPress &key, juce::Component *originatingComponent)
+//{
+//    if(key.isKeyCode(juce::KeyPress::escapeKey) && moduleDragInfo.dragging)
+//    {
+//        //endModuleDrag(nullptr);
+//        //mouseup in module editor
+//
+//        //moduleDragInfo.draggedModule->mouseUp(dummyMouse);
+//        //moduleDragInfo.draggedModule->forceMouseUp();
+//        moduleDragInfo.escPressed = true;
+//        return true;
+//    }
+//    return false;
+//}
 
 bool KrumModuleContainer::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails &dragDetails)
 {
-    auto desc = dragDetails.description.toString();
-    //bool isModuleDrag;
-    if (desc.contains("ModuleDrag-") && (!moduleDragInfo.escPressed))
-    {
-        //get mouse position, draw appropriate lines and shapes
-        KrumModuleEditor* moduleBeingDragged = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
-        moduleDragInfo.setInfo(true, dragDetails.sourceComponent->getBounds(), dragDetails.localPosition);
-        
-        isIntersectingWithModules(moduleBeingDragged);
-        
-        moduleDragInfo.showOriginBounds = true;
-        
-        if(modulesIntersecting.first != nullptr && modulesIntersecting.second != nullptr)
-        {
-            //need to draw line between modules
-            moduleDragInfo.drawLineBetween = true;
-            moduleDragInfo.showOriginBounds = false;
-            moduleDragInfo.leftDisplayIndex = modulesIntersecting.first->getModuleDisplayIndex();
-            moduleDragInfo.rightDisplayIndex = modulesIntersecting.second->getModuleDisplayIndex();
-            
-        }
-        else if (modulesIntersecting.first != nullptr || modulesIntersecting.second != nullptr)
-        {
-            moduleDragInfo.drawLineBetween = false;
-            moduleDragInfo.showOriginBounds = true;
-        }
-        return true;
-    }
+    //auto desc = dragDetails.description.toString();
+    ////bool isModuleDrag;
+    //if (desc.contains("ModuleDrag-") && (!moduleDragInfo.escPressed))
+    //{
+    //    //get mouse position, draw appropriate lines and shapes
+    //    KrumModuleEditor* moduleBeingDragged = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
+    //    moduleDragInfo.setInfo(true, dragDetails.sourceComponent->getBounds(), dragDetails.localPosition);
+    //    
+    //    isIntersectingWithModules(moduleBeingDragged);
+    //    
+    //    moduleDragInfo.showOriginBounds = true;
+    //    
+    //    if(modulesIntersecting.first != nullptr && modulesIntersecting.second != nullptr)
+    //    {
+    //        //need to draw line between modules
+    //        moduleDragInfo.drawLineBetween = true;
+    //        moduleDragInfo.showOriginBounds = false;
+    //        moduleDragInfo.leftDisplayIndex = modulesIntersecting.first->getModuleDisplayIndex();
+    //        moduleDragInfo.rightDisplayIndex = modulesIntersecting.second->getModuleDisplayIndex();
+    //        
+    //    }
+    //    else if (modulesIntersecting.first != nullptr || modulesIntersecting.second != nullptr)
+    //    {
+    //        moduleDragInfo.drawLineBetween = false;
+    //        moduleDragInfo.showOriginBounds = true;
+    //    }
+    //    return true;
+    //}
 
     return false;
 }
 
 void KrumModuleContainer::itemDropped(const juce::DragAndDropTarget::SourceDetails &dragSourceDetails)
 {
-    //if module Drag
-        //get position and move modules if necessary
-    auto modEdDropped = static_cast<KrumModuleEditor*>(dragSourceDetails.sourceComponent.get());
-    DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped");
-    
-    moduleDragInfo.reset();
-    repaint();
+    ////if module Drag
+    //    //get position and move modules if necessary
+    //auto modEdDropped = static_cast<KrumModuleEditor*>(dragSourceDetails.sourceComponent.get());
+    //DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped");
+    //
+    //moduleDragInfo.reset();
+    //repaint();
 }
 
 void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
 {
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    bool alreadySentMidi = false;
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        auto modEd = moduleDisplayOrder[i];
-        if (modEd->doesEditorWantMidi())
+        auto modEd = moduleEditors[i];
+        if (modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getModuleMidiNote() == midiNoteNumber)
+        {
+            modEd->setModulePlaying(true);
+        }
+        else if (modEd->doesEditorWantMidi())
         {
             modEd->handleMidi(midiChannel, midiNoteNumber);
-            return; 
+            alreadySentMidi = true; //restricting this to only pass the midi message to one module, but removing this could pass the midi to multiple selected modules
         }
+
     }
 }
 
 void KrumModuleContainer::handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
 {
-    
+    for (int i = 0; i < moduleEditors.size(); i++)
+    {
+        auto modEd = moduleEditors[i];
+        if (modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getModuleMidiNote() == midiNoteNumber)
+        {
+            modEd->setModulePlaying(false);
+        }
+    }
+}
+
+void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)
+{
+    //check tree type that changed?
+    //if it's a module AND the module is active, then we update that module's editor
+
+    if (property == TreeIDs::moduleState)
+    {
+        int state = treeWhoChanged.getProperty(TreeIDs::moduleState);
+        int index = treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex);
+        if (state == KrumModule::ModuleState::empty && index > -1)
+        {
+            moduleEditors.remove(index);
+            refreshModuleLayout();
+            repaint();
+        }
+        else if (state > 0 && index > -1)
+        {
+            moduleEditors[index]->repaint();
+        }
+    }
+
 }
 
 void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, bool refreshLayout)
@@ -204,7 +236,8 @@ void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, boo
     if (newModuleEditor != nullptr)
     {
         addAndMakeVisible(newModuleEditor);
-        addModuleToDisplayOrder(newModuleEditor);
+        moduleEditors.add(newModuleEditor);
+        //newModuleEditor->setModuleDisplayIndex(moduleEditors.size() - 1);
         repaint();
         
         if (refreshLayout)
@@ -231,11 +264,11 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
 }
 
 
-void KrumModuleContainer::moveModule(int moduleIndexToMove, int newDisplayIndex)
-{
-    moduleDisplayOrder.swap(moduleIndexToMove, newDisplayIndex);
-    updateModuleDisplayIndices(true);
-}
+//void KrumModuleContainer::moveModule(int moduleIndexToMove, int newDisplayIndex)
+//{
+//    moduleDisplayOrder.swap(moduleIndexToMove, newDisplayIndex);
+//    updateModuleDisplayIndices(true);
+//}
 
 void KrumModuleContainer::setModuleSelected(KrumModuleEditor* moduleToMakeActive)
 {
@@ -251,9 +284,9 @@ void KrumModuleContainer::setModuleUnselected(KrumModuleEditor* moduleToDeselect
 
 void KrumModuleContainer::deselectAllModules()
 {
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        moduleDisplayOrder[i]->setModuleSelected(false);
+        moduleEditors[i]->setModuleSelected(false);
     }
 
     /*if (editor)
@@ -272,9 +305,9 @@ void KrumModuleContainer::deselectAllModules()
 
 KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
 {
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        auto modEd = moduleDisplayOrder[i];
+        auto modEd = moduleEditors[i];
         if (modEd->getModuleMidiNote() == midiNote)
         {
             return modEd;
@@ -285,28 +318,35 @@ KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
     return nullptr;
 }
 
-void KrumModuleContainer::addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd)
-{
-    int displayIndex = moduleToAdd->getModuleDisplayIndex();
- 
-    if(moduleToAdd->getModuleState() == KrumModule::ModuleState::active)
-    {
-        moduleDisplayOrder.insert(displayIndex, std::make_unique<KrumModuleEditor>(std::make_shared<KrumModuleEditor>(moduleToAdd).get()));
-    }
-    else
-    {
-        moduleDisplayOrder.add(std::make_shared<KrumModuleEditor>(moduleToAdd));
-        updateModuleDisplayIndices(true);
-    }
-
-    //juce::Log::postMessage(__func__, "Module Editor added to Display order: " + moduleToAdd->getModuleName());
-    juce::Logger::writeToLog("Module Editor added to Display order: " + moduleToAdd->getModuleName());
-}
+//void KrumModuleContainer::addModuleToDisplayOrder(KrumModuleEditor* moduleToAdd)
+//{
+//    /*int displayIndex = moduleToAdd->getModuleDisplayIndex();
+// 
+//    if(moduleToAdd->getModuleState() == KrumModule::ModuleState::active)
+//    {
+//        moduleDisplayOrder.insert(displayIndex, std::make_unique<KrumModuleEditor>(std::make_shared<KrumModuleEditor>(moduleToAdd).get()));
+//    }
+//    else
+//    {
+//        moduleDisplayOrder.add(std::make_shared<KrumModuleEditor>(moduleToAdd));
+//        updateModuleDisplayIndices(true);
+//    }*/
+//
+//    if (moduleToAdd)
+//    {
+//        moduleEditors.add(std::move(moduleToAdd));
+//        addAndMakeVisible(moduleToAdd);
+//    }
+//
+//
+//    //juce::Log::postMessage(__func__, "Module Editor added to Display order: " + moduleToAdd->getModuleName());
+//    juce::Logger::writeToLog("Module Editor added to Display order: " + moduleToAdd->getModuleName());
+//}
 
 //Most likely you want to call removeModuleEditor() first, it will call this function
 void KrumModuleContainer::removeModuleFromDisplayOrder(KrumModuleEditor* moduleToRemove)
 {
-    moduleDisplayOrder.remove(moduleToRemove->getModuleDisplayIndex());
+    moduleEditors.remove(moduleToRemove->getModuleDisplayIndex());
     updateModuleDisplayIndices(true);
     //juce::Log::postMessage(__func__, "Module Editor removed from Display order: " + moduleToRemove->getModuleName());
     juce::Logger::writeToLog("Module Editor removed from Display order: " + moduleToRemove->getModuleName());
@@ -348,10 +388,10 @@ void KrumModuleContainer::matchModuleDisplayToMidiNotes(juce::Array<int> sortedM
 
 void KrumModuleContainer::updateModuleDisplayIndices(bool shouldRepaint)
 {
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        moduleDisplayOrder[i]->get()->setModuleDisplayIndex(i);
-        DBG("Module: " + juce::String(moduleDisplayOrder[i]->get()->getModuleSamplerIndex()) + " Display Index: " + juce::String(moduleDisplayOrder[i]->get()->getModuleDisplayIndex()));
+        moduleEditors[i]->setModuleDisplayIndex(i);
+        DBG("Module: " + juce::String(moduleEditors[i]->getModuleSamplerIndex()) + " Display Index: " + juce::String(moduleEditors[i]->getModuleDisplayIndex()));
     }
     
     if(shouldRepaint)
@@ -421,65 +461,65 @@ void KrumModuleContainer::updateModuleDisplayIndices(bool shouldRepaint)
 //    return moduleDragInfo.dragging;
 //}
 
-void KrumModuleContainer::isIntersectingWithModules(KrumModuleEditor* editorToTest)
-{
-    auto boundsToTest = editorToTest->getBounds();
-    modulesIntersecting.reset();
-    for(int i = 0; i < moduleDisplayOrder.size(); i++)
-    {
-        auto modEd = moduleDisplayOrder[i]->get();
-        if(modEd == editorToTest)
-        {
-            continue;
-        }
-        
-        if(modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getBounds().intersects(boundsToTest))
-        {
-            if(modulesIntersecting.first == nullptr)
-            {
-                modulesIntersecting.first = modEd;
-            }
-            else if(modulesIntersecting.second == nullptr)
-            {
-                modulesIntersecting.second = modEd;
-                return;
-            }
-        }
-    }
-    
-}
+//void KrumModuleContainer::isIntersectingWithModules(KrumModuleEditor* editorToTest)
+//{
+//    auto boundsToTest = editorToTest->getBounds();
+//    modulesIntersecting.reset();
+//    for(int i = 0; i < moduleDisplayOrder.size(); i++)
+//    {
+//        auto modEd = moduleDisplayOrder[i]->get();
+//        if(modEd == editorToTest)
+//        {
+//            continue;
+//        }
+//        
+//        if(modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getBounds().intersects(boundsToTest))
+//        {
+//            if(modulesIntersecting.first == nullptr)
+//            {
+//                modulesIntersecting.first = modEd;
+//            }
+//            else if(modulesIntersecting.second == nullptr)
+//            {
+//                modulesIntersecting.second = modEd;
+//                return;
+//            }
+//        }
+//    }
+//    
+//}
+//
+//bool KrumModuleContainer::isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& bounds)
+//{
+//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+//    {
+//        auto modEd = moduleDisplayOrder[i]->get();
+//        if (modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getBounds().contains(positionToTest))
+//        {
+//            bounds = modEd->getBounds();
+//            DBG("Mouse Over: Module " + juce::String(modEd->getModuleDisplayIndex()) + " - Bounds: " + bounds.toString());
+//            return true;
+//        }
+//        else
+//        {
+//            //DBG("Not in Bounds: " +)
+//        }
+//    }
+//    return false;
+//}
 
-bool KrumModuleContainer::isMouseOverModule(const juce::Point<int> positionToTest, juce::Rectangle<int>& bounds)
+juce::OwnedArray<KrumModuleEditor>& KrumModuleContainer::getModuleDisplayOrder()
 {
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
-    {
-        auto modEd = moduleDisplayOrder[i]->get();
-        if (modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getBounds().contains(positionToTest))
-        {
-            bounds = modEd->getBounds();
-            DBG("Mouse Over: Module " + juce::String(modEd->getModuleDisplayIndex()) + " - Bounds: " + bounds.toString());
-            return true;
-        }
-        else
-        {
-            //DBG("Not in Bounds: " +)
-        }
-    }
-    return false;
-}
-
-juce::OwnedArray<std::shared_ptr<KrumModuleEditor>>& KrumModuleContainer::getModuleDisplayOrder()
-{
-    return moduleDisplayOrder;
+    return moduleEditors;
 }
 
 int KrumModuleContainer::getNumActiveModules()
 {
     int count = 0;
     
-    for(int i = 0; i < moduleDisplayOrder.size(); i++)
+    for(int i = 0; i < moduleEditors.size(); i++)
     {
-        if(moduleDisplayOrder[i]->get()->getModuleState() == KrumModule::ModuleState::active)
+        if(moduleEditors[i]->getModuleState() == KrumModule::ModuleState::active)
         {
             ++count;
         }
@@ -490,15 +530,15 @@ int KrumModuleContainer::getNumActiveModules()
 
 int KrumModuleContainer::getNumModuleEditors()
 {
-    return moduleDisplayOrder.size();
+    return moduleEditors.size();
 }
 
 void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEditor)
 {
     //this loop clears any shown clipGain sliders
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        auto modEd = moduleDisplayOrder.getUnchecked(i)->get();
+        auto modEd = moduleEditors.getUnchecked(i);
         if (modEd != nullptr && modEd != moduleEditor)
         {
             modEd->setClipGainSliderVisibility(false);
@@ -510,9 +550,9 @@ void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEdito
 
 void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
 {
-    for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    for (int i = 0; i < moduleEditors.size(); i++)
     {
-        auto modEd = moduleDisplayOrder[i]->get();
+        auto modEd = moduleEditors[i];
         if (modEd->canThumbnailAcceptFile() && modEd != moduleEditor)
         {
             modEd->setThumbnailCanAcceptFile(false);
@@ -527,10 +567,10 @@ void KrumModuleContainer::hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor
     moduleEditor->setThumbnailCanAcceptFile(false);
 }
 
-KrumModuleEditor* KrumModuleContainer::getEditorFromModule(KrumModule* krumModule)
-{
-    return krumModule->getCurrentModuleEditor();
-}
+//KrumModuleEditor* KrumModuleContainer::getEditorFromModule(KrumModule* krumModule)
+//{
+//    return krumModule->getCurrentModuleEditor();
+//}
 
 void KrumModuleContainer::timerCallback()
 {
@@ -549,27 +589,39 @@ void KrumModuleContainer::timerCallback()
 //    }
 }
 
-//void KrumModuleContainer::showFirstEmptyModule()
-//{
-//    for (int i = 0; i < moduleDisplayOrder.size(); i++)
-//    {
-//        auto modEd = moduleDisplayOrder[i];
-//        if(modEd->getModuleState() == KrumModule::ModuleState::empty)
-//        {
-//            modEd->setVisible(true);
-//            refreshModuleLayout();
-//            modEd->repaint();
-//            return;
-//        }
-//    }
-//}
+void KrumModuleContainer::showFirstEmptyModule()
+{
+
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    for (int i = 0; i < modulesTree.getNumChildren(); i++)
+    {
+        auto moduleTree = modulesTree.getChild(i);
+        if ((int)moduleTree.getProperty(TreeIDs::moduleState) == 0)
+        {
+            addModuleEditor({ new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()) });
+            return;
+        }
+    }
+
+    //for (int i = 0; i < moduleDisplayOrder.size(); i++)
+    //{
+    //    auto modEd = moduleDisplayOrder[i];
+    //    if(modEd->getModuleState() == KrumModule::ModuleState::empty)
+    //    {
+    //        modEd->setVisible(true);
+    //        refreshModuleLayout();
+    //        modEd->repaint();
+    //        return;
+    //    }
+    //}
+}
 
 int KrumModuleContainer::getNumVisibleModules()
 {
     int numVisible = 0;
-    for(int i = 0; i < moduleDisplayOrder.size(); i++)
+    for(int i = 0; i < moduleEditors.size(); i++)
     {
-        if(moduleDisplayOrder[i]->get()->isVisible())
+        if(moduleEditors[i]->isVisible())
         {
             numVisible++;
         }

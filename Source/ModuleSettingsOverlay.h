@@ -12,7 +12,7 @@
 #include <JuceHeader.h>
 #include "ColorPalette.h"
 
-class KrumModule;
+class KrumModuleEditor;
 
 /*
 * This class represents the overlay that lives on top of the modules when settings are being changed. 
@@ -29,20 +29,20 @@ class ModuleSettingsOverlay : public juce::Component
 {
 public:
 
-    ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModule& parent, bool isColorOnly = false);
+    ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModuleEditor& parent, bool isColorOnly = false);
     ~ModuleSettingsOverlay() override;
     
     void paint(juce::Graphics& g) override;
 
     void handleMidiInput(int midiChannelNumber, int midiNoteNumber);
-    void showConfirmButton();
-    void confirmMidi();
 
     void setOverlaySelected(bool isSelected);
     bool isOverlaySelected();
 
-    void showButtons();
+    void showConfirmButton();
+    void confirmMidi();
 
+    void showButtons();
     void cancelSettings();
     void hideButtons();
 
@@ -70,7 +70,7 @@ private:
     juce::Label midiChannelTitleLabel{ "Midi Channel", "Midi Channel" };
 
     ColorPalette colorPalette;
-    KrumModule& parentModule;
+    KrumModuleEditor& parentEditor;
     
     //Needs to be initialized white
     juce::Colour moduleSelectedColor{ juce::Colours::white };
@@ -78,11 +78,13 @@ private:
     int midiNoteNum = 0;
     int midiChanNum = 0;
     
+
     float cornerSize = 5.0f;
     float outlineSize = 1.0f;
 
     bool moduleOverlaySelected = false;
     bool updateMidiLabels = false;
+    bool showingConfirmButton = false;
 
     //Flags to set in different cases while using the overlay.. Needs a redesign
     bool isColorOnly = false;

@@ -24,6 +24,7 @@ KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboar
     updateKeysFromValueTree();
     setColour(juce::MidiKeyboardComponent::ColourIds::shadowColourId, juce::Colours::black);
     setColour(juce::MidiKeyboardComponent::ColourIds::upDownButtonBackgroundColourId, juce::Colours::darkgrey.darker());
+    valueTree.addListener(this);
 }
 
 KrumKeyboard::~KrumKeyboard()
@@ -276,22 +277,28 @@ void KrumKeyboard::updateKeysFromValueTree()
     currentlyAssignedKeys.clear();
     currentlyAssignedKeys.ensureStorageAllocated(MAX_NUM_MODULES);
 
-    auto krumModuleTree = valueTree.getChildWithName("KrumModules");
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
 
-    for (int i = 0; i < krumModuleTree.getNumChildren(); i++)
+    for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
-        auto modTree = krumModuleTree.getChildWithName("Module" + juce::String(i));
-        KrumModule::ModuleState state = static_cast<KrumModule::ModuleState>((int)modTree.getProperty(TreeIDs::paramModuleState_ID));
-        
-        if (state == KrumModule::ModuleState::active)
+        auto modTree = modulesTree.getChildWithName(TreeIDs::MODULE);
+        if ((int)modTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::active)
         {
-            KrumKey newKey((int)modTree.getProperty(TreeIDs::paramModuleMidiNote_ID), juce::Colour::fromString(modTree.getProperty(TreeIDs::paramModuleColor_ID).toString()));
+            KrumKey newKey((int)modTree.getProperty(TreeIDs::moduleMidiNote), juce::Colour::fromString(modTree.getProperty(TreeIDs::moduleColor).toString()));
             currentlyAssignedKeys.add(newKey);
         }
     }
 
     printCurrentlyAssignedMidiNotes();
     repaint();
+}
+
+void KrumKeyboard::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)
+{
+    if (treeWhoChanged.hasType(TreeIDs::MODULE) && (property == TreeIDs::moduleColor || property == TreeIDs::moduleMidiNote))
+    {
+        assignMidiNoteColor(treeWhoChanged.getProperty(TreeIDs::moduleMidiNote), juce::Colour::fromString(treeWhoChanged.getProperty(TreeIDs::moduleColor).toString()));
+    }
 }
 
 void KrumKeyboard::printCurrentlyAssignedMidiNotes()

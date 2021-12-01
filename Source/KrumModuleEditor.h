@@ -36,6 +36,8 @@
 * 
 */
 
+#define THUMBNAIL_RES 256
+
 class KrumModule;
 class KrumModuleProcessor;
 class KrumSamplerAudioProcessorEditor;
@@ -46,11 +48,13 @@ class KrumFileBrowser;
 class KrumModuleEditor  :   public juce::Component,
                             public juce::DragAndDropTarget,
                             public juce::FileDragAndDropTarget,
-                            public juce::DragAndDropContainer
+                            public juce::DragAndDropContainer,
+                            public juce::Timer,
+                            public juce::ValueTree::Listener
                            // public juce::ReferenceCountedObject
 {
 public:
-    KrumModuleEditor(KrumModule& o, KrumSamplerAudioProcessorEditor& e);
+    KrumModuleEditor(juce::ValueTree& moduleTree/*KrumModule& o*/, KrumSamplerAudioProcessorEditor& e, juce::AudioFormatManager& fm);
     ~KrumModuleEditor() override;
 
     void paint (juce::Graphics&) override;
@@ -62,7 +66,9 @@ public:
     void mouseEnter(const juce::MouseEvent& event) override;
     void mouseExit(const juce::MouseEvent& event) override;
     void mouseDown(const juce::MouseEvent& e) override;
-    void forceMouseUp();
+    
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+
     
     void buildModule();
     void setChildCompColors();
@@ -73,7 +79,6 @@ public:
     void removeSettingsOverlay(bool keepSettings);
 
     void showSettingsOverlay(bool selectOverlay = false);
-    void handleOverlayData(bool keepSettings);
     void setModuleButtonsClickState(bool isClickable);
     
     void hideModule();
@@ -82,10 +87,14 @@ public:
     int getModuleState();
      
     int getModuleSamplerIndex();
-    void setModuleIndex(int newIndex);
+
+    void setModuleState(int newState);
 
     int getModuleDisplayIndex();
     void setModuleDisplayIndex(int newDisplayIndex);
+
+    void setModuleName(juce::String& newName);
+
 
     void setModuleColor(juce::Colour newColor);
     juce::Colour getModuleColor();
@@ -103,16 +112,13 @@ public:
     void updateName();
     juce::String getModuleName();
     
-    //void reassignSliderAttachments();
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
 
     int getAudioFileLengthInMs();
-    void setKeyboardColor();
 
     bool doesEditorWantMidi();
     void handleMidi(int midiChannel, int midiNote);
     
-    void removeFromDisplay();
 
     void triggerNoteOnInParent();
     void triggerNoteOffInParent();
@@ -124,8 +130,6 @@ public:
     
     bool shouldCheckDroppedFile();
     void handleLastDroppedFile();
-    void setOldMidiNote(int midiNote);
-
     bool isMouseOverThumbnail();
     bool thumbnailHitTest(const juce::MouseEvent& mouseEvent);
     void setClipGainSliderVisibility(bool sliderShouldBeVisible);
@@ -147,6 +151,11 @@ public:
     
     bool shouldModuleAcceptFileDrop();
     
+    //void handleOverlayData(bool keepSettings);
+    //void setModuleIndex(int newIndex);
+    //void reassignSliderAttachments();
+    //void setOldMidiNote(int midiNote);
+
 //    bool operator<(KrumModuleEditor* other)
 //    {
 //        int firstMidi = getModuleMidiNote();
@@ -160,21 +169,29 @@ public:
 //        }
 //    }
 //
+
+    //void setKeyboardColor();
+    //void removeFromDisplay();
+    //void forceMouseUp();
+
 private:
 
     //using Ptr = juce::ReferenceCountedObjectPtr<KrumModuleEditor>;
     
     friend class DragAndDropThumbnail;
 
+    void timerCallback() override;
+
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
-    
-    KrumModule& parent;
+
+    juce::ValueTree moduleTree;
     KrumSamplerAudioProcessorEditor& editor;
     
     int oldMidiNote = 0;
+    bool modulePlaying = false;
 
-    juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
+    //juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour fontColor{ juce::Colours::white.darker() };
 
@@ -187,6 +204,8 @@ private:
     std::unique_ptr<SliderAttachment> panSliderAttachment;
     
     DragAndDropThumbnail thumbnail;
+
+    float buttonClickVelocity = 0.5f;
 
     class OneShotButton : public InfoPanelDrawableButton
     {

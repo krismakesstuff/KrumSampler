@@ -60,10 +60,10 @@ std::atomic<float>* KrumSound::getModuleClipGain() const
     return parentModule->getModuleClipGain();
 }
 
-void KrumSound::setModulePlaying(bool isPlaying)
-{
-    parentModule->setModulePlaying(isPlaying);
-}
+//void KrumSound::setModulePlaying(bool isPlaying)
+//{
+//    parentModule->setModulePlaying(isPlaying);
+//}
 
 bool KrumSound::isParent(KrumModule* moduleToTest)
 {
@@ -145,9 +145,6 @@ void KrumVoice::stopNote(float velocity, bool allowTailOff)
     }
 }
 
-
-
-
 void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples)
 {
     if (auto* playingSound = static_cast<KrumSound*> (getCurrentlyPlayingSound().get()))
@@ -204,7 +201,8 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 KrumSampler::KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o)
     :formatManager(fm), owner(o)
 {
-    initModules(valTree, apvts);
+    //initModules(valTree, apvts);
+    initVoices();
 }
 
 KrumSampler::~KrumSampler()
@@ -214,13 +212,17 @@ KrumSampler::~KrumSampler()
 
 void KrumSampler::initModules(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
 {
+    auto krumModulesTree = valTree->getChildWithName(TreeIDs::KRUMMODULES);
+
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
-        modules.add(new KrumModule(i, *this, valTree, apvts));
+        auto moduleTree = krumModulesTree.getChild(i);
+        moduleTree.setProperty(TreeIDs::moduleSamplerIndex, i, nullptr);
+        modules.add(new KrumModule(*this, moduleTree, apvts));
     }
     
     DBG("Modules Initialized: " + juce::String(modules.size()));
-    
+
     initVoices();
 }
 
@@ -244,9 +246,8 @@ void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const 
         if (sound->appliesToNote(midiNoteNumber) && sound->appliesToChannel(midiChannel))
         {
             auto krumSound = static_cast<KrumSound*>(sound);
-            krumSound->setModulePlaying(true);
-
             auto voice = findFreeVoice(sound, midiChannel, midiNoteNumber, true);
+
             startVoice(voice, sound, midiChannel, midiNoteNumber, velocity);
         }
     }
@@ -254,15 +255,15 @@ void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const 
 
 void KrumSampler::noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) 
 {
-    for (auto sound : sounds)
-    {
-        if (sound->appliesToNote(midiNoteNumber) && sound->appliesToChannel(midiChannel))
-        {
-            auto krumSound = static_cast<KrumSound*>(sound);
-            krumSound->setModulePlaying(false);
-            //the sampler only plays one shots, so no need to turn any voices off here.
-        }
-    }
+           //the sampler only plays one shots, so no need to turn any voices off here.
+    //for (auto sound : sounds)
+    //{
+    //    if (sound->appliesToNote(midiNoteNumber) && sound->appliesToChannel(midiChannel))
+    //    {
+    //       /* auto krumSound = static_cast<KrumSound*>(sound);
+    //        krumSound->setModulePlaying(false)*/
+    //    }
+    //}
 }
 
 KrumModule* KrumSampler::getModule(int index)
@@ -270,23 +271,14 @@ KrumModule* KrumSampler::getModule(int index)
     return modules[index];
 }
 
-//void KrumSampler::addModule(KrumModule* newModule, bool hasSample)
-//{
-//    if (voices.size() == 0)
-//    {
-//        initVoices();
-//    }
-//
-//    modules.insert(newModule->getModuleSamplerIndex(), std::move(newModule));
-//
-//    //in some cases you just want to add the module, but leave it with no sample
-//    if (hasSample)
-//    {
-//        addSample(newModule);
-//    }
-//}
+void KrumSampler::addModule(KrumModule* newModule)
+{
+    //modules.add(std::move(newModule));
+    modules.insert(newModule->getModuleSamplerIndex(), std::move(newModule));
+}
 
-void KrumSampler::removeModuleSound(KrumModule* moduleToDelete, bool updateTree)
+
+void KrumSampler::removeModuleSound(KrumModule* moduleToDelete/*, bool updateTree*/)
 {
 
     DBG("Module Index To Delete: " + juce::String(moduleToDelete->getModuleSamplerIndex()));
@@ -303,10 +295,10 @@ void KrumSampler::removeModuleSound(KrumModule* moduleToDelete, bool updateTree)
             sounds.removeObject(sound);
             DBG("sound removed");
             printSounds();
-            if (updateTree)
+            /*if (updateTree)
             {
                 owner.updateValueTreeState();
-            }
+            }*/
             return;
         }
         
@@ -319,9 +311,8 @@ void KrumSampler::removeModuleSound(KrumModule* moduleToDelete, bool updateTree)
 void KrumSampler::updateModuleSample(KrumModule* updatedModule)
 {
     //removes the currently assigned sound of the module, if none exist this function will do nothing
-    //we pass in false to NOT update the valueTree as we are about to add sample to it and we don't want the tree to set the module inactive
-    removeModuleSound(updatedModule, false); 
-
+    //we pass in false to NOT update the valueTree as we are about to add a sample to it and we don't want the tree to set the module inactive
+    removeModuleSound(updatedModule/*, false*/); 
     addSample(updatedModule);
 }
 
@@ -341,7 +332,6 @@ void KrumSampler::addSample(KrumModule* moduleToAddSound)
         printSounds();
     }
     
-
 }
 
 void KrumSampler::clearModules()
@@ -415,7 +405,6 @@ void KrumSampler::printSounds()
         //auto krumSound = static_cast<KrumSound*>(&sounds[i]);
         DBG("Sound: " + juce::String(i) + (sound ? " is valid" : " is NULL"));
     }
-
 }
 
 void KrumSampler::printVoices()
@@ -427,8 +416,6 @@ void KrumSampler::printVoices()
         //auto krumSound = static_cast<KrumSound*>(&sounds[i]);
         DBG("Voice: " + juce::String(i) + (voice ? " is valid" : " is NULL"));
     }
-
-
 }
 
 

@@ -61,42 +61,42 @@ void DragAndDropThumbnail::itemDropped(const SourceDetails& dragSourceDetails)
     auto filePath = description.substring(description.indexOf("-") + 1);
     DBG("File Path: " + filePath);
     juce::File newFile{ filePath };
-    addDroppedFile(newFile);
+    //addDroppedFile(newFile);
 }
 
 //This will check for validaty before adding
 void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
 {
-    canAcceptFile = false;
-    if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager()->findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
-    {
-        droppedFile = newFile;
-        if (parentEditor.parent.info.modulePlaying)
-        {
-            checkDroppedFile = true;
-            parentEditor.drawThumbnail = true;
-        }
-        else
-        {
-            moveDroppedFileToParent();
-        }
-    }
-    else
-    {
-        DBG("File Doesn't exist or invalid format::addDroppedFile()");
-    }
+    //canAcceptFile = false;
+    //if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager()->findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
+    //{
+    //    droppedFile = newFile;
+    //    if (parentEditor.isModulePlaying())
+    //    {
+    //        checkDroppedFile = true;
+    //        parentEditor.drawThumbnail = true;
+    //    }
+    //    else
+    //    {
+    //        moveDroppedFileToParent();
+    //    }
+    //}
+    //else
+    //{
+    //    DBG("File Doesn't exist or invalid format::addDroppedFile()");
+    //}
 }
 
 void DragAndDropThumbnail::moveDroppedFileToParent()
 {
-    auto& parent = parentEditor.parent;
+   /* auto& parent = parentEditor.parent;
 
     parent.setSampleFile(droppedFile);
     parent.sampler.updateModuleSample(&parent);
-    clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::paramModuleClipGain_ID + juce::String(parent.getModuleSamplerIndex()), clipGainSlider));
+    clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::moduleClipGain + juce::String(parent.getModuleSamplerIndex()), clipGainSlider));
 
     parentEditor.drawThumbnail = true;
-    checkDroppedFile = false;
+    checkDroppedFile = false;*/
 }
 
 void DragAndDropThumbnail::updateThumbnailClipGain(float newVerticalZoom)
@@ -108,7 +108,7 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    auto color = parentEditor.parent.info.moduleColor;
+    auto color = parentEditor.getModuleColor();
     g.setColour(juce::Colours::black);
     g.fillRect(area);
 

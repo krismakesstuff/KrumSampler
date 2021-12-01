@@ -23,7 +23,8 @@ class KrumModuleContainer;
 * 
 */
 
-class KrumKeyboard  :   public juce::MidiKeyboardComponent
+class KrumKeyboard  :   public juce::MidiKeyboardComponent,
+                        public juce::ValueTree::Listener
 {
 public:
     KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori, KrumModuleContainer& container, juce::ValueTree& valTree);
@@ -51,6 +52,8 @@ public:
     //void updateKeysFromContainer();
     void updateKeysFromValueTree();
     
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+
     void printCurrentlyAssignedMidiNotes();
     juce::Colour findColorFromMidiNote(int midiNote);
     //smallest to biggest

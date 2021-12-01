@@ -25,57 +25,52 @@ float gainToDB(float decibels)
 
 juce::ValueTree createValueTree()
 {
-    //add additional global settings here    
-    juce::ValueTree retValueTree
-    { "AppState" ,{},
-        {
-            {"GlobalSettings", {},
-                {
-                    {"PreviewerGain",       {{"value", "0.75"}}},
-                    {"PreviewerAutoPlay",   {{"value", "0"}}},
-                    {"BrowserHidden",       {{"value", "0"}}},
-                    {"InfoPanel",           {{"value", "1"}}}
-                }
-            }
-        }
-    };
+    juce::ValueTree appStateValueTree{ TreeIDs::APPSTATE };
+    
+    //--------------------------------------------
+    juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS };
 
-    juce::ValueTree krumModulesTree{ "KrumModules" };
+    globalSettingsTree.setProperty(TreeIDs::previewerGain, juce::var(0.75), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay, juce::var(0), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::fileBrowserHidden, juce::var(0), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::infoPanelToggle, juce::var(1), nullptr);
+
+    appStateValueTree.addChild(globalSettingsTree, -1, nullptr);
+    
+    //--------------------------------------------
+
+    juce::ValueTree krumModulesTree{ TreeIDs::KRUMMODULES };
     
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         juce::String index = juce::String(i);
-        juce::ValueTree newModule =
-        { "Module" + index, {{TreeIDs::paramModuleName_ID,""}},{} };
-        newModule.setProperty(TreeIDs::paramModuleState_ID, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::paramModuleFile_ID, juce::var(""), nullptr);
-        newModule.setProperty(TreeIDs::paramModuleMidiNote_ID, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::paramModuleMidiChannel_ID, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::paramModuleColor_ID, juce::var(""), nullptr);
-        newModule.setProperty(TreeIDs::paramModuleDisplayIndex_ID, juce::var(-1), nullptr);
-                /*{
-                    {"State", {{"id", TreeIDs::paramModuleState_ID},        {"value", "0"}}},
-                    {"State", {{"id", TreeIDs::paramModuleFile_ID},         {"value", ""}}},
-                    {"State", {{"id", TreeIDs::paramModuleMidiNote_ID},     {"value", "0"}}},
-                    {"State", {{"id", TreeIDs::paramModuleMidiChannel_ID},  {"value", "0"}}},
-                    {"State", {{"id", TreeIDs::paramModuleColor_ID},        {"value", ""}}},
-                    {"State", {{"id", TreeIDs::paramModuleDisplayIndex_ID}, {"value", ""}}}
-                }
-        };*/
+
+        juce::ValueTree newModule { TreeIDs::MODULE, {{TreeIDs::moduleName,""}},{} }; //we use the index in the Type of the valueTree for quick acces from the child component
+        newModule.setProperty(TreeIDs::moduleState, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleFile, juce::var(""), nullptr);
+        newModule.setProperty(TreeIDs::moduleMidiNote, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleMidiChannel, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleColor, juce::var(""), nullptr);
+        newModule.setProperty(TreeIDs::moduleDisplayIndex, juce::var(-1), nullptr);
+        newModule.setProperty(TreeIDs::moduleSamplerIndex, juce::var(i), nullptr);
+
         krumModulesTree.addChild(newModule, i, nullptr);
     }
+    //--------------------------------------------
 
-    retValueTree.addChild(krumModulesTree, -1, nullptr);
+    appStateValueTree.addChild(krumModulesTree, -1, nullptr);
+    
+    //--------------------------------------------
 
-    return retValueTree.createCopy();
+    return appStateValueTree.createCopy();
 }
 
 juce::ValueTree createFileBrowserTree()
 {
-    juce::ValueTree retValTree{ "FileBrowserTree", {}, };
-    juce::ValueTree recTree = { "Recent" ,{} };
-    juce::ValueTree favTree = { "Favorites", {} };
-    juce::ValueTree openTree = { "OpennessState", {} };
+    juce::ValueTree retValTree{ TreeIDs::FILEBROWSERTREE, {}, };
+    juce::ValueTree recTree = { TreeIDs::RECENT ,{} };
+    juce::ValueTree favTree = { TreeIDs::FAVORITES , {} };
+    juce::ValueTree openTree = { TreeIDs::OPENSTATE, {}};
 
     retValTree.addChild(recTree, FileBrowserSectionIds::recentFolders_Ids, nullptr);
     retValTree.addChild(favTree, FileBrowserSectionIds::favoritesFolders_Ids, nullptr);
@@ -105,21 +100,21 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         clipGainRange.setSkewForCentre(dBToGain(0.0f));
         //clipGainRange.symmetricSkew = true;
 
-        auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain_ID + index, "Module Gain" + index,
+        auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain + index, "Module Gain" + index,
                             gainRange, dBToGain(0.0f),
                             "Module" + index + " Gain",
                             juce::AudioProcessorParameter::genericParameter,
                             [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
                             [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
         
-        auto clipGainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleClipGain_ID + index, "Module ClipGain" + index,
+        auto clipGainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleClipGain + index, "Module ClipGain" + index,
                             clipGainRange, dBToGain(0.0f),
                             "Module" + index + " ClipGain",
                             juce::AudioProcessorParameter::genericParameter,
                             [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
                             [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
 
-        auto panParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePan_ID + index, "Module Pan" + index,
+        auto panParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePan + index, "Module Pan" + index,
                             juce::NormalisableRange<float>{0.01f, 1.0f, 0.001f}, 0.5f,
                             "Module" + index + " Pan",
                             juce::AudioProcessorParameter::genericParameter,
@@ -144,6 +139,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     juce::NormalisableRange<float> outGainRange{ dBToGain(-60.0f), dBToGain(2.0f), 0.0001f };
     outGainRange.setSkewForCentre(dBToGain(0.0f));
     outGainRange.symmetricSkew = true;
+
     auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam_ID, "Output Gain",
                             outGainRange, dBToGain(0.0f),
                             "OutputGain",
@@ -156,6 +152,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
 
     paramsGroup.push_back(std::move(globalGroup));
+
     return { paramsGroup.begin(), paramsGroup.end() };
 }
 
@@ -165,7 +162,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
      : AudioProcessor(  BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true))                        
-                                    ,parameters(*this, nullptr, "PARAMS", createParameterLayout())
+                                    ,parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
 
 {
     //juce::Logger::setCurrentLogger(Log::logger);
@@ -337,7 +334,7 @@ void KrumSamplerAudioProcessor::changeProgramName(int index, const juce::String&
 //==============================================================================
 void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-
+    //we attach our tree to the main appStateTree
     valueTree.appendChild(parameters.state, nullptr);
     valueTree.appendChild(fileBrowserValueTree, nullptr);
 
@@ -350,6 +347,7 @@ void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData
 
 }
 
+
 void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
@@ -359,11 +357,11 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
         if (xmlState->hasTagName(valueTree.getType()))
         {
             //Audio parameters
-            parameters.replaceState(juce::ValueTree::fromXml(*xmlState->getChildByName("PARAMS")));
-            xmlState->removeChildElement(xmlState->getChildByName("PARAMS"), true);
+            parameters.replaceState(juce::ValueTree::fromXml(*xmlState->getChildByName(TreeIDs::PARAMS)));
+            xmlState->removeChildElement(xmlState->getChildByName(TreeIDs::PARAMS), true);
 
             //File Browser
-            auto xmlFileBrowserTree = xmlState->getChildByName("FileBrowserTree");
+            auto xmlFileBrowserTree = xmlState->getChildByName(TreeIDs::FILEBROWSERTREE);
             if (xmlFileBrowserTree != nullptr)
             {
                 fileBrowserValueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlFileBrowserTree), nullptr);
@@ -373,7 +371,7 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
 
             //Remaining App/Modules Settings
             valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr);
-            makeModulesFromValueTree();
+            updateModulesFromValueTree();
             fileBrowser.getAudioPreviewer()->refreshSettings();
 
             DBG("---SET STATE---");
@@ -408,153 +406,124 @@ juce::MidiKeyboardState& KrumSamplerAudioProcessor::getMidiState()
     return midiState;
 }
 
-void KrumSamplerAudioProcessor::makeModulesFromValueTree()
+//builds the sampler based off the tree
+void KrumSamplerAudioProcessor::updateModulesFromValueTree()
 {
-    //sampler.clearModules();
-    auto modulesTree = valueTree.getChildWithName("KrumModules");
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
     
-    for (int i = 0; i < MAX_NUM_MODULES; i++)
+    for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
-        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
-        if (moduleTree.isValid())
-        {
-            //juce::var nameValue = moduleTree.getProperty("name");
-            
-            juce::ValueTree stateTree;
-            bool hasFile = false;
-            juce::var id;
-            juce::var val;
-
-            //stateTree = moduleTree.getChild(0); //we have the moduleState as the first index, probably not great to do it this way...
-            //id = stateTree.getProperty("id");
-            //val = stateTree.getProperty("value");
-            auto modState = moduleTree.getProperty(TreeIDs::paramModuleState_ID);
-
-            KrumModule::ModuleState state = static_cast<KrumModule::ModuleState>((int)modState);
-            hasFile = state == KrumModule::ModuleState::active || state == KrumModule::ModuleState::hasFile;
-
-
-            /*if(id.toString() == TreeIDs::paramModuleState_ID)
-            {
-                state = static_cast<KrumModule::ModuleState>((int)modState);
-                hasFile = state == KrumModule::ModuleState::active || state == KrumModule::ModuleState::hasFile;
-            }*/
-
-            if (hasFile)
-            {
-                auto mod = sampler.getModule(i);
-                mod->updateModuleFromTree();
-                //midiState.addListener(mod);
-                if(state == KrumModule::ModuleState::active)
-                {
-                    sampler.updateModuleSample(mod);
-                }
-            }
+        auto moduleTree = modulesTree.getChild(i);
+        int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
+        auto newMod = new KrumModule(sampler, moduleTree, &parameters);
+        sampler.addModule(newMod);
+        if (state > 0) 
+        {            
+            sampler.updateModuleSample(newMod);
         }
         else
         {
             DBG("ValueTree not Valid" + juce::String(i));
         }
     }
-    //juce::Logger::writeToLog("Modules made from ValueTree: " + juce::String(sampler.getNumModules()));
 }
 
-void KrumSamplerAudioProcessor::updateValueTreeState()
-{
-    auto modulesTree = valueTree.getChildWithName("KrumModules");
-
-    for (int i = 0; i < MAX_NUM_MODULES; i++)
-    {
-        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
-        auto mod = sampler.getModule(i);
-        if (mod != nullptr)
-        {
-            for (int j = 0; j < moduleTree.getNumChildren(); j++)
-            {
-                auto stateTree = moduleTree.getChild(j);
-                auto id = stateTree.getProperty("id");
-
-                if (id.toString() == TreeIDs::paramModuleState_ID)
-                {
-                    stateTree.setProperty("value", (int)mod->getModuleState(), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleFile_ID)
-                {
-                    stateTree.setProperty("value", juce::var(mod->getSampleFile().getFullPathName()), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
-                {
-                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerNote()), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
-                {
-                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerChannel()), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleColor_ID)
-                {
-                    stateTree.setProperty("value", juce::var(mod->getModuleColor().toDisplayString(true)), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
-                {
-                    stateTree.setProperty("value", juce::var(mod->getModuleDisplayIndex()), nullptr);
-                }
-            }
-        }
-        else //zero the state for this module
-        {
-            
-            auto gainParam = parameters.getParameter(TreeIDs::paramModuleGain_ID + juce::String(i));
-            auto clipGainParam = parameters.getParameter(TreeIDs::paramModuleClipGain_ID + juce::String(i));
-            auto panParam = parameters.getParameter(TreeIDs::paramModulePan_ID + juce::String(i));
-
-            auto zeroGain = gainParam->getNormalisableRange().convertTo0to1(dBToGain(0.0f));
-            gainParam->setValueNotifyingHost(zeroGain);
-            clipGainParam->setValueNotifyingHost(zeroGain);
-            panParam->setValueNotifyingHost(0.5f);
-
-            moduleTree.setProperty("name", juce::var(""), nullptr);
-
-            for (int j = 0; j < moduleTree.getNumChildren(); j++)
-            {
-                auto stateTree = moduleTree.getChild(j);
-                auto id = stateTree.getProperty("id");
-
-                if (id.toString() == TreeIDs::paramModuleState_ID)
-                {
-                    stateTree.setProperty("value", juce::var(0), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleFile_ID)
-                {
-                    stateTree.setProperty("value", juce::var(""), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
-                {
-                    stateTree.setProperty("value", juce::var(0), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
-                {
-                    stateTree.setProperty("value", juce::var(0), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleColor_ID)
-                {
-                    stateTree.setProperty("value", juce::var(""), nullptr);
-                }
-                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
-                {
-                    stateTree.setProperty("value", juce::var(""), nullptr);
-                }
-            }
-        }
-    }
-
-    //DBG("---Updated Tree State---");
-    //juce::Logger::writeToLog("---Updated Tree State---");
-    
-//    auto state = valueTree.createCopy();
-//    std::unique_ptr<juce::XmlElement> xml = state.createXml();
-//    DBG(xml->toString());
-
-}
+//void KrumSamplerAudioProcessor::updateValueTreeState()
+//{
+//    auto modulesTree = valueTree.getChildWithName("KrumModules");
+//
+//    for (int i = 0; i < MAX_NUM_MODULES; i++)
+//    {
+//        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
+//        auto mod = sampler.getModule(i);
+//        if (mod != nullptr)
+//        {
+//            for (int j = 0; j < moduleTree.getNumChildren(); j++)
+//            {
+//                auto stateTree = moduleTree.getChild(j);
+//                auto id = stateTree.getProperty("id");
+//
+//                if (id.toString() == TreeIDs::paramModuleState_ID)
+//                {
+//                    stateTree.setProperty("value", (int)mod->getModuleState(), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleFile_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(mod->getSampleFile().getFullPathName()), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerNote()), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerChannel()), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleColor_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(mod->getModuleColor().toDisplayString(true)), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(mod->getModuleDisplayIndex()), nullptr);
+//                }
+//            }
+//        }
+//        else //zero the state for this module
+//        {
+//            
+//            auto gainParam = parameters.getParameter(TreeIDs::paramModuleGain_ID + juce::String(i));
+//            auto clipGainParam = parameters.getParameter(TreeIDs::paramModuleClipGain_ID + juce::String(i));
+//            auto panParam = parameters.getParameter(TreeIDs::paramModulePan_ID + juce::String(i));
+//
+//            auto zeroGain = gainParam->getNormalisableRange().convertTo0to1(dBToGain(0.0f));
+//            gainParam->setValueNotifyingHost(zeroGain);
+//            clipGainParam->setValueNotifyingHost(zeroGain);
+//            panParam->setValueNotifyingHost(0.5f);
+//
+//            moduleTree.setProperty("name", juce::var(""), nullptr);
+//
+//            for (int j = 0; j < moduleTree.getNumChildren(); j++)
+//            {
+//                auto stateTree = moduleTree.getChild(j);
+//                auto id = stateTree.getProperty("id");
+//
+//                if (id.toString() == TreeIDs::paramModuleState_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(0), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleFile_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(""), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(0), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(0), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleColor_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(""), nullptr);
+//                }
+//                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
+//                {
+//                    stateTree.setProperty("value", juce::var(""), nullptr);
+//                }
+//            }
+//        }
+//    }
+//
+//    //DBG("---Updated Tree State---");
+//    //juce::Logger::writeToLog("---Updated Tree State---");
+//    
+////    auto state = valueTree.createCopy();
+////    std::unique_ptr<juce::XmlElement> xml = state.createXml();
+////    DBG(xml->toString());
+//
+//}
 
 
 //int KrumSamplerAudioProcessor::findFreeModuleIndex()

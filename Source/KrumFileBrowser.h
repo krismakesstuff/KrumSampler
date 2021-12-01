@@ -39,15 +39,17 @@ class KrumModuleContainer;
 //strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
 namespace FileBrowserValueTreeIds
 {
-    static const juce::String folderId{ "Folder" };
-    static const juce::String fileId{ "File" };
+    //static const juce::String folderId{ "Folder" };
+    //static const juce::String fileId{ "File" };
+   
+    //Probably should move these into the DECLARE_IDs section in Plugin processor.
     static const juce::String itemNameId{ "name" };
     static const juce::String pathId{ "path" };
     static const juce::String hiddenFilesId{ "hiddenFiles" };
 
-    static const juce::String recentFolderId{ "Recent" };
-    static const juce::String favoritesFolderId{ "Favorites" };
-    static const juce::String opennessId{ "OpennessState" };
+    //static const juce::String recentFolderId{ "Recent" };
+    //static const juce::String favoritesFolderId{ "Favorites" };
+    //static const juce::String opennessId{ "OpennessState" };
 }
 
 namespace FileBrowserInfoStrings

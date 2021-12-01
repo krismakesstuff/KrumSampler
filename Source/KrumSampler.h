@@ -41,7 +41,7 @@ public:
     std::atomic<float>* getModulePan()const;
     std::atomic<float>* getModuleClipGain()const;
 
-    void setModulePlaying(bool playing);
+    //void setModulePlaying(bool playing);
     bool isParent(KrumModule* moduleToTest);
 
 private:
@@ -101,10 +101,10 @@ public:
     void noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) override;
 
     KrumModule* getModule(int index);
-    void addModule(KrumModule* newModule, bool hasSample = false);
+    void addModule(KrumModule* newModule);
     
     //if there is no sound that has this module as a parent, nothing will happen
-    void removeModuleSound(KrumModule* moduleToDelete, bool updateTree = true);
+    void removeModuleSound(KrumModule* moduleToDelete/*, bool updateTree = true*/);
     //will remove the modules current sound(if it has one) and then add the sample set in the module
     void updateModuleSample(KrumModule* updatedModule);
     //makes a Krum Sound and adds it to the samplers sounds array, using the assigned file in the passed in module
