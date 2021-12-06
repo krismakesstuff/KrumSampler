@@ -19,7 +19,7 @@
 KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori , KrumModuleContainer& container, juce::ValueTree& valTree)
     : juce::MidiKeyboardComponent(midiState, ori), moduleContainer(container), valueTree(valTree)
 {
-    setColour(juce::MidiKeyboardComponent::ColourIds::shadowColourId, juce::Colours::black);
+    //setColour(juce::MidiKeyboardComponent::ColourIds::shadowColourId, juce::Colours::black);
     setColour(juce::MidiKeyboardComponent::ColourIds::upDownButtonBackgroundColourId, juce::Colours::darkgrey.darker());
     
     setScrollButtonsVisible(true);

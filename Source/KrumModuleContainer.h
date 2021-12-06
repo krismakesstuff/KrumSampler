@@ -57,7 +57,7 @@ public:
     void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
 
 
-    void addNewModuleEditor(KrumModuleEditor* newModuleEditor);
+    KrumModuleEditor* addNewModuleEditor(KrumModuleEditor* newModuleEditor);
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
 
     void setModuleSelected(KrumModuleEditor* moduleToMakeActive);
@@ -73,6 +73,7 @@ public:
     juce::OwnedArray<KrumModuleEditor>& getModuleDisplayOrder();
     
     int getNumActiveModules();
+    int getNumEmptyModules();
     int getNumModuleEditors();
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
@@ -103,7 +104,7 @@ void isIntersectingWithModules(KrumModuleEditor* editorToTest);
 
 private:
 
-    void addModuleEditor(KrumModuleEditor* moduleToAdd, bool refreshLayout = true);
+    KrumModuleEditor* addModuleEditor(KrumModuleEditor* moduleToAdd, bool refreshLayout = true);
 
     KrumModuleEditor* getEditorFromDisplayIndex(int displayIndex);
 

@@ -68,7 +68,7 @@ void KrumModuleContainer::paintLineUnderMouseDrag(juce::Graphics& g, juce::Point
 
 void KrumModuleContainer::refreshModuleLayout()
 {
-    int numModules = MAX_NUM_MODULES;
+    int numModules = moduleEditors.size();
     auto area = getLocalBounds();
     auto viewportBounds = editor->modulesViewport.getBounds();
     int viewportWidth = viewportBounds.getWidth();
@@ -80,15 +80,16 @@ void KrumModuleContainer::refreshModuleLayout()
         return;
     }
 
-    int newWidth = (getNumVisibleModules()) * (EditorDimensions::moduleW + EditorDimensions::extraShrinkage());
+    int newWidth = (/*getNumVisibleModules())*/numModules * (EditorDimensions::moduleW + EditorDimensions::extraShrinkage()));
 
     //MUST set this size before we reposition the modules. Otherwise viewport won't scroll!
     setSize(newWidth, viewportHeight);
 
-    for (int i = 0; i < moduleEditors.size(); i++)
+    for (int i = 0; i < numModules; i++)
     {
         auto modEd = moduleEditors[i];
         modEd->setTopLeftPosition((modEd->getModuleDisplayIndex() * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage(), EditorDimensions::shrinkage);
+        DBG("Module Editor " + juce::String(modEd->getModuleDisplayIndex()) +" set position to: " + juce::String(modEd->getBoundsInParent().toString()));
     }
 
 }
@@ -103,9 +104,9 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
         {
             removeModuleEditor(getEditorFromDisplayIndex(index));
         }
-        else if (state > 0 && index > -1)
+        else if (state > 0 && index > -1 && moduleEditors.size() > 0)
         {
-            moduleEditors[index]->repaint();
+            //moduleEditors[index]->repaint();
         }
     }
     else if (property == TreeIDs::moduleDisplayIndex)
@@ -214,7 +215,7 @@ void KrumModuleContainer::handleNoteOff(juce::MidiKeyboardState* source, int mid
     }
 }
 
-void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, bool refreshLayout) 
+KrumModuleEditor* KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, bool refreshLayout)
 {
     if (newModuleEditor != nullptr)
     {
@@ -227,12 +228,15 @@ void KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, boo
         }
 
         repaint();
+
+        return newModuleEditor;
     }
-    else
-    {
-       DBG("New Editor is NULL");
-        //juce::Log::postMessage(__func__, "New Editor is NULL");
-    }
+    DBG("New Editor is NULL");
+    return nullptr;
+    //else
+    //{
+    //    //juce::Log::postMessage(__func__, "New Editor is NULL");
+    //}
 }
 
 KrumModuleEditor* KrumModuleContainer::getEditorFromDisplayIndex(int displayIndex)
@@ -249,10 +253,11 @@ KrumModuleEditor* KrumModuleContainer::getEditorFromDisplayIndex(int displayInde
     return nullptr;
 }
 
-void KrumModuleContainer::addNewModuleEditor(KrumModuleEditor* newModuleEditor)
+KrumModuleEditor* KrumModuleContainer::addNewModuleEditor(KrumModuleEditor* newModuleEditor)
 {
      newModuleEditor->setModuleDisplayIndex(moduleEditors.size());
      addModuleEditor(newModuleEditor);
+     return newModuleEditor;
 }
 
 void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout)
@@ -338,16 +343,30 @@ juce::OwnedArray<KrumModuleEditor>& KrumModuleContainer::getModuleDisplayOrder()
 int KrumModuleContainer::getNumActiveModules()
 {
     int count = 0;
-    
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
     for(int i = 0; i < moduleEditors.size(); i++)
     {
-        if(moduleEditors[i]->getModuleState() == KrumModule::ModuleState::active)
+        if((int)modulesTree.getChild(i).getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::active)
         {
             ++count;
         }
     }
     return count;
     
+}
+
+int KrumModuleContainer::getNumEmptyModules()
+{
+    int count = 0;
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    for (int i = 0; i < modulesTree.getNumChildren(); i++)
+    {
+        if ((int)modulesTree.getChild(i).getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::empty)
+        {
+            count++;
+        }
+    }
+    return count;
 }
 
 int KrumModuleContainer::getNumModuleEditors()
@@ -416,9 +435,11 @@ void KrumModuleContainer::createModuleEditors()
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto moduleTree = modulesTree.getChild(i);
-        if (moduleTree.isValid() && ((int)moduleTree.getProperty(TreeIDs::moduleState) > 0)) //reference KrumModule::ModuleState, 0 is empty module
+        int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
+        if (moduleTree.isValid() && ( state > 0)) //reference KrumModule::ModuleState, 0 is empty module
         {
-            addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()));
+            auto modEd = addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()/*, state*/));
+            
         }
     }
 }

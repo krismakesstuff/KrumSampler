@@ -51,10 +51,9 @@ class KrumModuleEditor  :   public juce::Component,
                             public juce::DragAndDropContainer,
                             public juce::Timer,
                             public juce::ValueTree::Listener
-                           // public juce::ReferenceCountedObject
 {
 public:
-    KrumModuleEditor(juce::ValueTree& moduleTree/*KrumModule& o*/, KrumSamplerAudioProcessorEditor& e, juce::AudioFormatManager& fm);
+    KrumModuleEditor(juce::ValueTree& moduleTree, KrumSamplerAudioProcessorEditor& e, juce::AudioFormatManager& fm/*, int state = 0*/); 
     ~KrumModuleEditor() override;
 
     void paint (juce::Graphics&) override;
@@ -81,6 +80,8 @@ public:
     void showSettingsOverlay(bool selectOverlay = false);
     void setModuleButtonsClickState(bool isClickable);
     
+    //bool isModuleVisible();
+
     void hideModule();
     void showModule();
     
@@ -151,6 +152,7 @@ public:
     
     bool shouldModuleAcceptFileDrop();
     
+    void addFileToRecentsFolder(juce::File& file, juce::String name);
     //void handleOverlayData(bool keepSettings);
     //void setModuleIndex(int newIndex);
     //void reassignSliderAttachments();

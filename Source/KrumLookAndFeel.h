@@ -122,15 +122,13 @@ public:
         float cornerSize = 2.0f;
         juce::Line<float> line;
         juce::Point<int> dropPoint;
+
         int dropRad = 5;
-        int thumbX;
-        int thumbY;
-        int thumbH;
-        int thumbW;
+        int thumbX, thumbY, thumbH, thumbW;
         
         if (style == juce::Slider::LinearVertical)
         {
-            thumbH = 20;
+            thumbH = 15;
             thumbW = 40;
 
             thumbX = (x + width * 0.5f) - (thumbW * 0.5f);
@@ -166,7 +164,7 @@ public:
         g.fillRoundedRectangle(thumb.toFloat(),cornerSize);
 
         
-        g.setColour(thumbColor.darker());
+        g.setColour(thumbColor.darker().withAlpha(0.2f));
         g.drawLine(line);
 
     }

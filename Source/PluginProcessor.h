@@ -28,6 +28,7 @@
 * 
 */
 
+#define GUI_REFRESH_RATE_HZ const int 30
 #define MAX_NUM_MODULES 20
 #define MAX_VOICES 15
 #define MAX_FILE_LENGTH_SECS 3

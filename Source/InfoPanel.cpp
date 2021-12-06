@@ -24,7 +24,7 @@ void InfoPanel::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
     float cornerSize = 3.0f;
-    auto panelBG = area.reduced(5).toFloat();
+    auto panelBG = area/*.reduced(5)*/.toFloat();
     
     //bg fill
     g.setColour(bgColor);
@@ -36,7 +36,9 @@ void InfoPanel::paint (juce::Graphics& g)
     
     if (showText)
     {
-        
+        //g.setColour(juce::Colours::darkgrey.darker());
+        //g.fillRoundedRectangle(area.toFloat(), 3.0f);
+
         auto messageFont = g.getCurrentFont();
         
         //title
@@ -54,7 +56,7 @@ void InfoPanel::paint (juce::Graphics& g)
         
         //message
         juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight()).withTrimmedLeft(5).toNearestInt();
-        //g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::plain).withHeight(numLines));
+        g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::plain).withHeight(17.0f)); 
         g.drawFittedText(message, messageArea, juce::Justification::centredLeft, numLines);
         
         //keycommand
@@ -191,3 +193,21 @@ void InfoPanelLabel::mouseExit(const juce::MouseEvent& e)
     juce::Label::mouseExit(e);
 }
                                                          
+InfoPanelTextButton::InfoPanelTextButton(juce::String title, juce::String m, juce::String kc)
+    :compTitle(title), message(m), keycommand(kc)
+{}
+
+InfoPanelTextButton::~InfoPanelTextButton()
+{}
+
+void InfoPanelTextButton::mouseEnter(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().setInfoPanelText(compTitle, message, keycommand);
+    juce::TextButton::mouseEnter(e);
+}
+
+void InfoPanelTextButton::mouseExit(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().clearPanelText();
+    juce::TextButton::mouseExit(e);
+}

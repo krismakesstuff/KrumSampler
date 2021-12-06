@@ -670,6 +670,7 @@ void KrumTreeView::addFileToRecent(juce::File file, juce::String name)
 {
     auto recentNode = rootNode->getSubItem(recentFolders_Ids);
 
+    //checking to make sure you don't already have this file. 
     for (int i = 0; i < recentNode->getNumSubItems(); i++)
     {
         auto itItem = recentNode->getSubItem(i);
@@ -684,7 +685,7 @@ void KrumTreeView::addFileToRecent(juce::File file, juce::String name)
     recentNode->addSubItem(new KrumTreeItem(this, previewer, file, name));
 
     auto recentTree = fileBrowserValueTree.getChildWithName(TreeIDs::RECENT);
-    recentTree.addChild({ TreeIDs::File, {{"name", name}, {"path", file.getFullPathName()}} }, recentTree.getNumChildren() + 1, nullptr);
+    recentTree.addChild({ TreeIDs::File, {{"name", name}, {"path", file.getFullPathName()}} }, -1, nullptr);
 
 }
 
@@ -698,7 +699,7 @@ void KrumTreeView::createNewFavoriteFile(const juce::String& fullPathName)
         favNode->addSubItem(new KrumTreeItem(this, previewer, file, file.getFileName()));
 
         auto favTree = fileBrowserValueTree.getChildWithName(TreeIDs::FAVORITES);
-        favTree.addChild({ TreeIDs::File, {{"name", file.getFileName()}, {"path", file.getFullPathName()}} }, favTree.getNumChildren() + 1, nullptr);
+        favTree.addChild({ TreeIDs::File, {{"name", file.getFileName()}, {"path", file.getFullPathName()}} }, -1, nullptr);
     }
     else
     {
@@ -749,7 +750,7 @@ void KrumTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
 
         if (newFolderTree.getNumChildren() > 0)
         {
-            favTree.addChild(newFolderTree, favTree.getNumChildren() + 1, nullptr);
+            favTree.addChild(newFolderTree, -1, nullptr);
         }
         else
         {

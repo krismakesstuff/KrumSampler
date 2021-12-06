@@ -29,11 +29,16 @@
 
 namespace EditorDimensions
 {
-    const static int  topBar = 85;
+    const static int windowH = 650;
+    const static int windowW = 1200;
+    const static int windowWNoBrowser = 900;
+    
+    const static int  topBar = 65;
     const static int shrinkage = 5;
+    const juce::Rectangle<int> madeByArea{ 0, 0, 150, 35 };
 
-    const static int moduleH = 570;
-    const static int moduleW = 125;
+    const static int moduleH = 450;
+    const static int moduleW = 120;
 
     const static int addButtonH = 50;
     const static int addButtonW = 100;
@@ -50,16 +55,13 @@ namespace EditorDimensions
     const static int fileTreeH = 600;
     const static int fileTreeTitleH = 30;
 
-    const static int emptyAreaMinW = 350;
-    const static int fileTreeW = emptyAreaMinW;
+    //const static int emptyAreaMinW = 350;
+    const static int fileTreeW = 350;
 
     const static float cornerSize = 5.0f;
     const static float smallOutline = 1.0f;
     const static float bigOutline = 2.0f;
 
-    const static int windowH = 800;
-    const static int windowW = 1200;
-    const static int windowWNoBrowser = 900;
 
     static int extraShrinkage(int extraMultplier = 2)
     {
@@ -183,11 +185,11 @@ private:
 
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
-    juce::TextButton websiteButton;
-    
+    //juce::TextButton websiteButton;
+    InfoPanelTextButton websiteButton{"Website", "Clicking this will open my website. Go check it out yo!"};
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
     
-    juce::Rectangle<int> madeByArea{ 0, 0, 150, 50 };
+    
 
     //Not Using this font anymore, keeping this here incase I want to add a custom font later
     

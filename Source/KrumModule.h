@@ -36,8 +36,6 @@
 
 
 class KrumModule  : public juce::ValueTree::Listener
-                    //:  public juce::MidiKeyboardStateListener
-                    //public juce::DragAndDropContainer
 {
 public:
 
@@ -57,7 +55,7 @@ public:
         empty,      //0
         hasFile,    //1
         active,     //2
-        //numerical values are used for value tree saving
+        //numerical values are used in the value tree saving
     };
 
     

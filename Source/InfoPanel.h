@@ -67,6 +67,19 @@ private:
     juce::String compTitle, message, keycommand;
 };
 //==============================================================================
+class InfoPanelTextButton : public juce::TextButton
+{
+public:
+    InfoPanelTextButton(juce::String title, juce::String message, juce::String keycommand = juce::String());
+    ~InfoPanelTextButton() override;
+    void mouseEnter(const juce::MouseEvent& e) override;
+    void mouseExit(const juce::MouseEvent& e) override;
+private:
+    juce::String compTitle, message, keycommand;
+};
+
+
+//==============================================================================
 
 class InfoPanelDrawableButton : public juce::DrawableButton
 {

@@ -11,6 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "ColorPalette.h"
+#include "InfoPanel.h"
 
 class KrumModuleEditor;
 
@@ -25,14 +26,18 @@ class KrumModuleEditor;
 * 
 */
 
-class ModuleSettingsOverlay : public juce::Component
+class ModuleSettingsOverlay :   public juce::Component,
+                                public juce::Timer
 {
 public:
 
-    ModuleSettingsOverlay(juce::Rectangle<int> area, KrumModuleEditor& parent, bool isColorOnly = false);
+    ModuleSettingsOverlay(KrumModuleEditor& parent);
     ~ModuleSettingsOverlay() override;
     
     void paint(juce::Graphics& g) override;
+    void resized() override;
+    void mouseEnter(const juce::MouseEvent& e) override;
+    void mouseExit(const juce::MouseEvent& e) override;
 
     void handleMidiInput(int midiChannelNumber, int midiNoteNumber);
 
@@ -49,25 +54,46 @@ public:
     juce::Colour getSelectedColor();
     bool isModuleOverlaySelected();
 
+    void setMidiListen(bool shouldListen);
     void setMidi(int midiNote, int midiChannel);
     void setMidiLabels();
     bool hasMidi();
 
     void keepCurrentColor(bool keepColor);
     void colorWasChanged(bool colorWasChanged);
-    void setToOnlyShowColors(bool onlyShowColors);
+    //void setToOnlyShowColors(bool onlyShowColors);
 
 private:
 
-    juce::TextButton confirmButton;
-    juce::TextButton deleteButton;
-    juce::TextButton cancelButton;
-    juce::Label titleBox;
+    void timerCallback() override;
+    void midiListenButtonClicked();
 
-    juce::Label midiNoteNumberLabel;
-    juce::Label midiNoteTitleLabel{ "Midi Note", "Midi Note" };
-    juce::Label midiChannelNumberLabel;
-    juce::Label midiChannelTitleLabel{ "Midi Channel", "Midi Channel" };
+    //does not set confirm button visibility
+    void setButtonVisibilities(bool shouldBeVisible);
+
+    void setMidiLabelColors();
+    void visibilityChanged() override;
+
+
+    //juce::TextButton midiListenButton;
+    //juce::TextButton confirmButton;
+    //juce::TextButton deleteButton;
+    //juce::TextButton cancelButton;
+
+    InfoPanelTextButton midiListenButton{"Midi Listen", "Activate this to play or click a new midi assignment. NOTE: will turn red when listening"};
+    InfoPanelTextButton confirmButton{"Confirm Button", "This will confirm all changes and remove the settings overlay"};
+    InfoPanelTextButton deleteButton{"Delete", "This will delete your module!"};
+    InfoPanelTextButton cancelButton{ "Cancel", "This will exit the settings overlay without keeping any of the changes" };
+    
+    InfoPanelLabel titleBox{"Module Name", "Double-click to edit."};
+
+    InfoPanelLabel midiNoteNumberLabel{"Midi Note", "The currently assigned Midi Note. To change, enable the Midi Listen button"};
+    InfoPanelLabel midiNoteTitleLabel{ "Midi Note", "The currently assigned Midi Note. To change, enable the Midi Listen button" };
+    InfoPanelLabel midiChannelNumberLabel{ "Midi Channel", "The currently assigned Midi Channel. To change, enable the Midi Listen button" };
+    InfoPanelLabel midiChannelTitleLabel{ "Midi Channel", "The currently assigned Midi Channel. To change, enable the Midi Listen button" };
+
+
+    //InfoPanelLabel
 
     ColorPalette colorPalette;
     KrumModuleEditor& parentEditor;
@@ -87,7 +113,7 @@ private:
     bool showingConfirmButton = false;
 
     //Flags to set in different cases while using the overlay.. Needs a redesign
-    bool isColorOnly = false;
+    //bool isColorOnly = false;
     bool keepColorOnExit = false;
     bool colorChanged = false;
 
