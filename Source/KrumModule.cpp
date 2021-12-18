@@ -26,19 +26,24 @@ void KrumModule::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const
     if (treeWhoChanged.hasType(TreeIDs::MODULE) &&
         ((int)treeWhoChanged.getProperty(TreeIDs::moduleSamplerIndex) == getModuleSamplerIndex())) //check to make sure the module that changed is the same as this one
     {
-        if (property == TreeIDs::moduleFile)
+        if (property == TreeIDs::moduleFile && treeWhoChanged[property].toString().isNotEmpty())
         {
             //update module file in sampler
             updateSamplerSound();
         }
-        else if (property == TreeIDs::moduleMidiNote)
+        else if (property == TreeIDs::moduleMidiNote && (int)treeWhoChanged[property] > 0)
         {
             // update module sound in sampler
             updateSamplerSound();
         }
-        else if (property == TreeIDs::moduleMidiChannel)
+        else if (property == TreeIDs::moduleMidiChannel && (int)treeWhoChanged[property] > 0)
         {
             //update module sound in sampler
+            updateSamplerSound();
+        }
+        else if (property == TreeIDs::moduleState && (int)treeWhoChanged[property] == KrumModule::ModuleState::empty)
+        {
+            removeSamplerSound();
         }
     }
 }
@@ -122,6 +127,11 @@ std::atomic<float>* KrumModule::getModulePan()
 void KrumModule::updateSamplerSound()
 {
     sampler.updateModuleSample(this);
+}
+
+void KrumModule::removeSamplerSound()
+{
+    sampler.removeModuleSample(this);
 }
 
 juce::String KrumModule::getIndexString()

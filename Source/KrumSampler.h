@@ -101,14 +101,13 @@ public:
     void noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) override;
 
     KrumModule* getModule(int index);
+    //Only the processor should use this when rebuilding the sampler from the value tree
     void addModule(KrumModule* newModule);
     
     //if there is no sound that has this module as a parent, nothing will happen
-    void removeModuleSound(KrumModule* moduleToDelete/*, bool updateTree = true*/);
+    void removeModuleSample(KrumModule* moduleToDelete/*, bool updateTree = true*/);
     //will remove the modules current sound(if it has one) and then add the sample set in the module
     void updateModuleSample(KrumModule* updatedModule);
-    //makes a Krum Sound and adds it to the samplers sounds array, using the assigned file in the passed in module
-    void addSample(KrumModule* moduleToAddSound);
     
     void clearModules();
     int getNumModules();
@@ -119,6 +118,9 @@ public:
     juce::AudioFormatManager& getFormatManager();
 
 private:
+    
+    //makes a Krum Sound and adds it to the samplers sounds array, using the assigned file in the passed in module
+    void addSample(KrumModule* moduleToAddSound);
 
     void printSounds();
     void printVoices();

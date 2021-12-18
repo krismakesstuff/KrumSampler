@@ -173,7 +173,7 @@ public:
    #endif
 
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-    void processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents);
+    //void processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents);
     void addMidiKeyboardListener(juce::MidiKeyboardStateListener*);
     void removeMidiKeyboardListener(juce::MidiKeyboardStateListener*);
 

@@ -121,8 +121,8 @@ public:
     void handleMidi(int midiChannel, int midiNote);
     
 
-    void triggerNoteOnInParent();
-    void triggerNoteOffInParent();
+    void triggerNoteOnInParent(const juce::MouseEvent& e);
+    void triggerNoteOffInParent(const juce::MouseEvent& e);
 
     bool needsToBuildEditor();
     
@@ -153,6 +153,7 @@ public:
     bool shouldModuleAcceptFileDrop();
     
     void addFileToRecentsFolder(juce::File& file, juce::String name);
+    
     //void handleOverlayData(bool keepSettings);
     //void setModuleIndex(int newIndex);
     //void reassignSliderAttachments();
@@ -181,8 +182,12 @@ private:
     //using Ptr = juce::ReferenceCountedObjectPtr<KrumModuleEditor>;
     
     friend class DragAndDropThumbnail;
-
+    void zeroModuleTree();
     void timerCallback() override;
+
+    bool isMouseOverAnyChildren();
+
+    void printValueAndPositionOfSlider();
 
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
@@ -218,8 +223,8 @@ private:
         void mouseDown(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
 
-        std::function<void()> onMouseUp;
-        std::function<void()> onMouseDown;
+        std::function<void(const juce::MouseEvent& e)> onMouseUp;
+        std::function<void(const juce::MouseEvent& e)> onMouseDown;
     };
 
     class ModalManager : public juce::ModalComponentManager::Callback

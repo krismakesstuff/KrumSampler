@@ -23,6 +23,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     auto& laf = getLookAndFeel();
     laf.setDefaultLookAndFeel(&kLaf);
     laf.setDefaultSansSerifTypefaceName("Calibri");
+    //static_cast<KrumLookAndFeel*>(&laf)->outputGainSlider = &outputGainSlider;
     InfoPanel::shared_instance().getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(2000);
 
@@ -185,10 +186,14 @@ void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, 
     int spaceBetweenLines = bounds.getHeight() / numLines;
 
     g.setColour(outputTrackColor/*.withAlpha(0.5f)*/);
-    juce::Line<float> firstLine{ {bounds.getX(), bounds.getY()}, {bounds.getCentreX(), bounds.getY()} };
+    juce::Line<float> firstLine{ {bounds.getX(), bounds.getY() - 16}, {bounds.getCentreX(), bounds.getY() - 16} };
 
     g.drawLine(firstLine);
-    juce::Point<int> zeroLine;
+
+    float zerodBY = outputGainSlider.getPositionOfValue(1.0f) - 22;
+    juce::Line<float> zeroLine{ {bounds.getX() - 0, bounds.getY() + zerodBY}, {bounds.getCentreX() - 5 ,  bounds.getY() + zerodBY} };
+    g.drawLine(zeroLine, 2.0f);
+
     juce::Line<float> line;
 
     for (int i = 1; i < numLines; i++)
@@ -201,17 +206,13 @@ void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, 
             endX -= 6;
         }
 
-        line.setStart({ startX, bounds.getY() + (i * spaceBetweenLines) });
-        line.setEnd({ endX,  bounds.getY() + (i * spaceBetweenLines) });
+        line.setStart({ startX, firstLine.getStartY() + (i * spaceBetweenLines) });
+        line.setEnd({ endX,  firstLine.getStartY() + (i * spaceBetweenLines) });
         g.drawLine(line);
 
-        if (i == 16)
-        {
-            zeroLine = line.getStart().toInt();
-        }
     }
 
-    g.drawFittedText("0", { zeroLine.getX() - 5, zeroLine.getY() + 4 , 15, 15 }, juce::Justification::centredLeft, 1);
+    g.drawFittedText("0", { (int)zeroLine.getStartX() - 8, (int)zeroLine.getStartY() - 7, 15, 15 }, juce::Justification::centredLeft, 1);
 }
 
 void KrumSamplerAudioProcessorEditor::resized()
@@ -228,34 +229,26 @@ void KrumSamplerAudioProcessorEditor::resized()
         //File Browser is Visible
         InfoPanel::shared_instance().setBounds(area.getX() + EditorDimensions::shrinkage, area.getY() + EditorDimensions::shrinkage, EditorDimensions::fileTreeW, EditorDimensions::topBar);
         
-        modulesBG = area.withTop(EditorDimensions::topBar).withLeft(area.getX()  + EditorDimensions::fileTreeW/* - dimensions.outputW*/).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
+        modulesBG = area.withTop(EditorDimensions::topBar).withLeft(area.getX()  + EditorDimensions::fileTreeW).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
         
-        //fileDrop.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).withBottom(area.getBottom() - EditorDimensions::fileTreeH).reduced(EditorDimensions::extraShrinkage()));
         fileBrowser.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).reduced(EditorDimensions::extraShrinkage(3)));
-       
-        modulesViewport.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH)/*.withLeft(modulesBG.getX() + dimensions.shrinkage)*/.withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
-        moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH)/*.withLeft(modulesBG.getX() + dimensions.shrinkage)*/.withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
-        moduleContainer.refreshModuleLayout();
-
-        outputGainSlider.setBounds(area.withTop(modulesBG.getY()).withBottom(area.getBottom() - EditorDimensions::extraShrinkage(10)).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(area.getRight() - EditorDimensions::extraShrinkage()));
-        keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
-        
-        collapseBrowserButton.setBounds(area.withTop(area.getHeight()/2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
     }
     else
     {
         //File Browser is Hidden
         modulesBG = area.withTop(EditorDimensions::topBar).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
-
-        modulesViewport.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH)/*.withLeft(modulesBG.getX() + dimensions.shrinkage)*/.withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
-        moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH)/*.withLeft(modulesBG.getX() + dimensions.shrinkage)*/.withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
-        moduleContainer.refreshModuleLayout();
-
-        outputGainSlider.setBounds(area.withTop(modulesBG.getY()).withBottom(area.getBottom() - EditorDimensions::extraShrinkage(10)).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(area.getRight() - EditorDimensions::extraShrinkage()));
-        keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
-
-        collapseBrowserButton.setBounds(area.withTop(area.getHeight()/ 2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
     }
+
+    modulesViewport.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
+    moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
+    moduleContainer.refreshModuleLayout();
+
+    outputGainSlider.setBounds(area.withTop(modulesBG.getY()).withBottom(area.getBottom() - EditorDimensions::extraShrinkage(10)).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage(3)).withRight(area.getRight() - EditorDimensions::extraShrinkage(3)));
+    keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
+
+    collapseBrowserButton.setBounds(area.withTop(area.getHeight() / 2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
+
+
 }
 
 void KrumSamplerAudioProcessorEditor::visibilityChanged()
@@ -468,10 +461,10 @@ void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component
     outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue()));
 }
 
-void KrumSamplerAudioProcessorEditor::setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote)
-{
-    keyboard.assignMidiNoteColor(midiNoteNumber, color, oldNote);
-}
+//void KrumSamplerAudioProcessorEditor::setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote)
+//{
+//    keyboard.assignMidiNoteColor(midiNoteNumber, color, oldNote);
+//}
 
 void KrumSamplerAudioProcessorEditor::removeKeyboardNoteColor(int midiNoteNumber)
 {

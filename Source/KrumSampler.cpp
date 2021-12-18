@@ -273,12 +273,10 @@ KrumModule* KrumSampler::getModule(int index)
 
 void KrumSampler::addModule(KrumModule* newModule)
 {
-    //modules.add(std::move(newModule));
     modules.insert(newModule->getModuleSamplerIndex(), std::move(newModule));
 }
 
-
-void KrumSampler::removeModuleSound(KrumModule* moduleToDelete/*, bool updateTree*/)
+void KrumSampler::removeModuleSample(KrumModule* moduleToDelete/*, bool updateTree*/)
 {
 
     DBG("Module Index To Delete: " + juce::String(moduleToDelete->getModuleSamplerIndex()));
@@ -288,7 +286,6 @@ void KrumSampler::removeModuleSound(KrumModule* moduleToDelete/*, bool updateTre
     for (int i = 0; i < sounds.size(); i++)
     {
         auto sound = sounds.getObjectPointer(i);
-        //cast to juce::samplersound first? 
         ksound = static_cast<KrumSound*>(sound);
         if (ksound && ksound->isParent(moduleToDelete))
         {
@@ -312,7 +309,7 @@ void KrumSampler::updateModuleSample(KrumModule* updatedModule)
 {
     //removes the currently assigned sound of the module, if none exist this function will do nothing
     //we pass in false to NOT update the valueTree as we are about to add a sample to it and we don't want the tree to set the module inactive
-    removeModuleSound(updatedModule/*, false*/); 
+    removeModuleSample(updatedModule/*, false*/);
     addSample(updatedModule);
 }
 

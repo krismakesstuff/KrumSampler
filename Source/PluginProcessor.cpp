@@ -27,7 +27,7 @@ juce::ValueTree createValueTree()
 {
     juce::ValueTree appStateValueTree{ TreeIDs::APPSTATE };
     
-    //--------------------------------------------
+    //---------------- Global Settings ----------------------------
     juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS };
 
     globalSettingsTree.setProperty(TreeIDs::previewerGain, juce::var(0.75), nullptr);
@@ -37,7 +37,7 @@ juce::ValueTree createValueTree()
 
     appStateValueTree.addChild(globalSettingsTree, -1, nullptr);
     
-    //--------------------------------------------
+    //----------------- Module Settings ---------------------------
 
     juce::ValueTree krumModulesTree{ TreeIDs::KRUMMODULES };
     
@@ -203,6 +203,8 @@ void KrumSamplerAudioProcessor::releaseResources()
 
 void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
     if (previewer.wantsToPlayFile())
@@ -211,16 +213,15 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     }
     
     buffer.applyGain(*outputGainParameter);
-    midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
     
     //this does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
     midiMessages.clear();
 }
 
-void KrumSamplerAudioProcessor::processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents)
-{
-    //midiState.processMidi(midiMessages, startSample, numSamples, injectDirectEvents);
-}
+//void KrumSamplerAudioProcessor::processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents)
+//{
+//    //midiState.processMidi(midiMessages, startSample, numSamples, injectDirectEvents);
+//}
 
 void KrumSamplerAudioProcessor::addMidiKeyboardListener(juce::MidiKeyboardStateListener* newListener)
 {

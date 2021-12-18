@@ -113,7 +113,7 @@ public:
     
     void updateOutputGainBubbleComp(juce::Component*);
 
-    void setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote = 0);
+    //void setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote = 0);
     void removeKeyboardNoteColor(int midiNoteNumber);
 
     void addKeyboardListener(juce::MidiKeyboardStateListener* listener);
@@ -185,7 +185,6 @@ private:
 
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
-    //juce::TextButton websiteButton;
     InfoPanelTextButton websiteButton{"Website", "Clicking this will open my website. Go check it out yo!"};
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
     

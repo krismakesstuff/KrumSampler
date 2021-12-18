@@ -28,6 +28,7 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool co
     addAndMakeVisible(midiNoteNumberLabel);
     midiNoteNumberLabel.setFont({ 40.0f });
     midiNoteNumberLabel.setEditable(false, false, false);
+    midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
     midiNoteNumberLabel.setJustificationType(juce::Justification::centred);
 
     addAndMakeVisible(midiNoteTitleLabel);
@@ -39,6 +40,7 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool co
     addAndMakeVisible(midiChannelNumberLabel);
     midiChannelNumberLabel.setFont({ 20.0f });
     midiChannelNumberLabel.setEditable(false, false, false);
+    midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
     midiChannelNumberLabel.setJustificationType(juce::Justification::centred);
 
     addAndMakeVisible(midiChannelTitleLabel);
@@ -111,16 +113,6 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
         g.drawFittedText("Click to Select", botTextArea, juce::Justification::centred, 1);
         g.setColour(juce::Colours::darkgrey.darker());
     }
-   /* else if (!midiListenButton.getToggleState())
-    {
-        g.setFont(18.0f);
-        g.drawFittedText("Click \"Midi Listen\" to assign a new note", botTextArea, juce::Justification::centred, 2);
-    }
-    else
-    {
-        g.setFont(18.0f);
-        g.drawFittedText("Play A Midi Note!", botTextArea, juce::Justification::centred, 1);
-    }*/
 
     g.drawRoundedRectangle(area.toFloat(), cornerSize, outlineSize);
 }
@@ -152,7 +144,7 @@ void ModuleSettingsOverlay::resized()
     
     midiListenButton.setBounds(area.getX() + spacer, midiChannelTitleLabel.getBottom() + (spacer * 3), area.getWidth() - (spacer * 2), midiListenButtonH);
 
-    colorPalette.setBounds(area.getX(), midiListenButton.getBottom() + (spacer /** 3*/), area.getWidth() - spacer, paletteH);
+    colorPalette.setBounds(area.getX(), midiListenButton.getBottom() , area.getWidth() - spacer, paletteH);
 
     confirmButton.setBounds(area.getCentreX() - confirmButtonWidth / 2, colorPalette.getBottom() + (spacer /** 2*/), confirmButtonWidth, confirmButtonHeight);
     deleteButton.setBounds(area.getX() + spacer, confirmButton.getBottom() + (spacer * 3), cancelButtonWidth - spacer, cancelButtonHeight);

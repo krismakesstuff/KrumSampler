@@ -168,6 +168,7 @@ public:
 private:
 
     void updateSamplerSound();
+    void removeSamplerSound();
     juce::String getIndexString();
 
     bool needsToUpdateTree = false;

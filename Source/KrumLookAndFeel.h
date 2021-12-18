@@ -23,6 +23,7 @@ class KrumLookAndFeel : public juce::LookAndFeel_V4
 public:
     KrumLookAndFeel() {}
 
+    //~KrumLookAndFeel() override { outputGainSlider = nullptr; }
 
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
@@ -30,7 +31,7 @@ public:
         {
             g.setColour(slider.findColour(juce::Slider::trackColourId));
             g.fillRect(slider.isHorizontal() ? juce::Rectangle<float>(static_cast<float> (x), (float)y + 0.5f, sliderPos - (float)x, (float)height - 1.0f)
-                : juce::Rectangle<float>((float)x + 0.5f, sliderPos, (float)width - 1.0f, (float)y + ((float)height - sliderPos)));
+                 /*vertical*/ : juce::Rectangle<float>((float)x + 0.5f, sliderPos, (float)width - 1.0f, (float)y + ((float)height - sliderPos)));
         }
         else
         {
@@ -40,13 +41,11 @@ public:
     }
 
     void drawLinearSliderBackground(juce::Graphics& g, int x, int y, int width, int height,
-                                    float sliderPos,
-                                    float minSliderPos,
-                                    float maxSliderPos,
+                                    float sliderPos, float minSliderPos, float maxSliderPos,
                                     const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
-        const float sliderThumbRadius = (float)(getSliderThumbRadius(slider) - 2);
-
+        //const float sliderThumbRadius = (float)(getSliderThumbRadius(slider) - 2);
+        juce::Rectangle<int> bounds{ x, y, width, height };
 
         float sliderPorp;
         if (slider.isHorizontal())
@@ -77,7 +76,7 @@ public:
         if (slider.isHorizontal())
         {
             auto iy = height * 0.25f;
-            juce::Rectangle<float> trackRect ((float)x - 2, iy, (float)width , height * 0.50f);
+            juce::Rectangle<float> trackRect ((float)x, iy, (float)width , height * 0.50f);
 
             juce::ColourGradient horzRGrade (gradCol1, trackRect.getCentreX(), iy, gradCol2, trackRect.getRight()-2, iy, false);
             juce::ColourGradient horzLGrade (gradCol2, trackRect.getX(), iy, gradCol1, trackRect.getCentreX(), iy, false);
@@ -95,10 +94,12 @@ public:
             g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);
             
         }
-        else
+        else //vertical 
         {
-            auto ix = (float)x + (float)width * 0.5f - (sliderThumbRadius * 0.5f);
-            juce::Rectangle<float> trackRect (ix, (float)y, sliderThumbRadius, (float)height/* + sliderThumbRadius*/);
+            float trackWidth = width * 0.35f;
+            //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
+            float ix = bounds.getCentreX() - (trackWidth / 2);
+            juce::Rectangle<float> trackRect (ix, (float)y - 5, trackWidth, (float)height);
 
             juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
             vertGrade.addColour(sliderPorp, gradCol1);
@@ -128,8 +129,8 @@ public:
         
         if (style == juce::Slider::LinearVertical)
         {
-            thumbH = 15;
-            thumbW = 40;
+            thumbH = 13; //height * 0.07;// : height * 0.085f;
+            thumbW = 33; //width * 0.65f;
 
             thumbX = (x + width * 0.5f) - (thumbW * 0.5f);
             thumbY = sliderPos - 7;
@@ -141,8 +142,8 @@ public:
         }
         else // horizontal
         {
-            thumbH = height - 2;
-            thumbW = 10;
+            thumbH = height - 3;
+            thumbW = 9;
 
             thumbX = sliderPos - 5;
             thumbY = y ;
@@ -164,25 +165,43 @@ public:
         g.fillRoundedRectangle(thumb.toFloat(),cornerSize);
 
         
-        g.setColour(thumbColor.darker().withAlpha(0.2f));
+        g.setColour(thumbColor.darker(0.9f)/*.withAlpha(0.2f)*/);
         g.drawLine(line);
 
     }
 
-    int getSliderThumbRadius(juce::Slider& slider) override
+    juce::Slider::SliderLayout getSliderLayout(juce::Slider& slider) override
     {
+        juce::Slider::SliderLayout layout;
+        auto bounds = slider.getLocalBounds();
         if (slider.isHorizontal())
         {
-            return 10;
+            layout.sliderBounds = bounds.reduced(5, 0);
         }
-
-        return 20; // thumbW for now
-
+        else if (slider.isBar())
+        {
+            layout.sliderBounds = bounds;
+        }
+        else
+        {
+            layout.sliderBounds = bounds.reduced(0, 10); //thumbnail height
+        }
+        return layout;
     }
+
+    //int getSliderThumbRadius(juce::Slider& slider) override
+    //{
+    //    if (slider.isHorizontal())
+    //    {
+    //        return 10;
+    //    }
+
+    //    return 20; // thumbW for now
+
+    //}
 
     int getScrollbarButtonSize(juce::ScrollBar& scrollbar) override
     {
-
         return 20;
     }
 
@@ -417,6 +436,6 @@ public:
 
     }*/
 
-
+    //juce::Slider* outputGainSlider = nullptr;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumLookAndFeel)
 };

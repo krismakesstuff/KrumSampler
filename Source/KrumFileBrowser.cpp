@@ -19,7 +19,7 @@ class KrumTreeHeaderItem;
 
 
 KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name)
-        : previewer(preview), parentTree(parentTreeView), InfoPanelComponent("File", "Files can be renames or removed from this browser. NOTE: these aren't you're actual files, so any changes made aren't making changes to the actual file.")
+        : previewer(preview), parentTree(parentTreeView), InfoPanelComponent("File", "Files can be renamed or removed from this browser. NOTE: these aren't you're actual files, so any changes made aren't making changes to the actual file.")
 {
     file = fullPathName;
     itemName = name;

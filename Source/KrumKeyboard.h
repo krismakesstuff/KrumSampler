@@ -32,9 +32,16 @@ public:
 
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
+    //void mouseMove(const juce::MouseEvent& e) override;
 
     bool mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
     void mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
+
+    void scrollToKey(int midiNoteNumber);
+
+    void setHighlightKey(int midiNoteNumber, bool showHighlight);
+   // void resetHighlightedKey();
+    bool isKeyHighlighted(int midiNoteToTest);
 
     void drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
                         bool isDown, bool isOver, juce::Colour lineColour, juce::Colour textColour) override;
@@ -44,7 +51,7 @@ public:
 
     //void drawUpDownButton(juce::Graphics& g, int w, int h, bool isMouseOver, bool isButtonPressed, bool movesOctavesUp) override;
     
-    void assignMidiNoteColor(int midiNote, juce::Colour moduleColor, int oldNote = 0);
+    void assignMidiNoteColor(int midiNote, juce::Colour moduleColor/*, bool deleteOld*/);
     void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
     void updateMidiNoteColor(int noteToUpdate, juce::Colour newColor);
     bool isMidiNoteAssigned(int midiNote);
@@ -81,6 +88,11 @@ private:
         juce::Colour color = juce::Colour{};
     };
 
+    int autoscrollOffset = 35;
+
+    int keyToHighlight = -1;
+    juce::Colour highlightKeyColor{ juce::Colours::yellow.darker() };
+    float highlightThickness = 2.0f;
 
     juce::Array<KrumKey> currentlyAssignedKeys;
 
