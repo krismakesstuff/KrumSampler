@@ -18,7 +18,8 @@
 * This Class plays the audio file that is selected in the file browser
 */
 class SimpleAudioPreviewer  :   public juce::Component,
-                                public juce::SettableTooltipClient
+                                public juce::SettableTooltipClient,
+                                public juce::Timer
                                 //public InfoPanelComponent
 {
 public:
@@ -55,12 +56,21 @@ public:
 
     void refreshSettings();
 
+    juce::File& getCurrentFile();
     bool wantsToPlayFile();
     void setWantsToPlayFile(bool wantsToPlay);
+    void reloadCurrentFile();
+
 
 private:
 
+    void timerCallback() override;
+    void updateFormatReader();
+
+
     bool readyToPlayFile = false;
+    std::atomic<bool> rendering = false;
+    bool newFileWaiting = false;
 
     int playBackSampleRate;
 

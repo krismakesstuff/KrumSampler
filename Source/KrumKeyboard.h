@@ -63,18 +63,13 @@ public:
 
     void printCurrentlyAssignedMidiNotes();
     juce::Colour findColorFromMidiNote(int midiNote);
-    //smallest to biggest
-    //juce::Array<int> getMidiAssignmentsInOrder();
+
+    bool hasAssignedKeys();
+    int getLowestKey();
+    int getHighestKey();
 
 private:
 
-    //std::map<int, juce::Colour> currentlyAssignedMidiNotes{};
-
-
-    //struct KrumKeyboardLayout
-  /*  {
-        
-    };*/
     struct KrumKey
     {
         KrumKey() = default;

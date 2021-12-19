@@ -56,16 +56,18 @@ void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::
 
 void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
 {
-    if (previewer->isAutoPlayActive() /*&& !previewer->wantsToPlayFile()*/)
+    if (previewer->isAutoPlayActive())
     {
-        previewer->loadFile(file);
+        if (file != previewer->getCurrentFile())
+        {
+            previewer->loadFile(file);
+        }
+        else
+        {
+            previewer->reloadCurrentFile();
+        }
         previewer->setWantsToPlayFile(true);
     }
-//        else if (!previewer->isAutoPlayActive())
-//        {
-//            previewer->setWantsToPlayFile(false);
-//        }
-
 
 }
 
@@ -73,7 +75,14 @@ void KrumTreeItem::itemDoubleClicked(const juce::MouseEvent& e)
 {
     if (!previewer->isAutoPlayActive())
     {
-        previewer->loadFile(file);
+        if (file != previewer->getCurrentFile())
+        {
+            previewer->loadFile(file);
+        }
+        else
+        {
+            previewer->reloadCurrentFile();
+        }
         previewer->setWantsToPlayFile(true);
     }
 }
@@ -236,7 +245,7 @@ void KrumTreeItem::EditableComp::mouseDown(const juce::MouseEvent& e)
     }
     else if(!itemSelected) //with no mods
     {
-        owner.itemClicked(e);
+        //owner.itemClicked(e);
         owner.setSelected(true, true);
         DBG("Index in parent: " + juce::String(owner.getIndexInParent()));
     }

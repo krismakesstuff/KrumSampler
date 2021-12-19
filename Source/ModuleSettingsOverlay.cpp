@@ -10,6 +10,7 @@
 
 #include "ModuleSettingsOverlay.h"
 #include "KrumModuleEditor.h"
+#include "KrumModule.h"
 
 
 
@@ -21,9 +22,14 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool co
     titleBox.setText(parentEditor.getModuleName(), juce::dontSendNotification);
     titleBox.setFont(18.0f);
     titleBox.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
+    titleBox.setColour(juce::Label::ColourIds::textWhenEditingColourId, juce::Colours::black);
+    titleBox.setColour(juce::Label::ColourIds::backgroundWhenEditingColourId, juce::Colours::grey);
+    titleBox.setColour(juce::TextEditor::ColourIds::highlightColourId, juce::Colours::lightgrey);
+    titleBox.setColour(juce::TextEditor::ColourIds::highlightedTextColourId, juce::Colours::black);
+    titleBox.setColour(juce::CaretComponent::ColourIds::caretColourId, juce::Colours::black);
     titleBox.setJustificationType(juce::Justification::centred);
     titleBox.setEditable(false, true, false);
-    titleBox.onTextChange = [this] {parentEditor.setModuleName(titleBox.getText()); };
+    //titleBox.onTextChange = [this] {parentEditor.setModuleName(titleBox.getText()); };
 
     addAndMakeVisible(midiNoteNumberLabel);
     midiNoteNumberLabel.setFont({ 40.0f });
@@ -32,6 +38,7 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool co
     midiNoteNumberLabel.setJustificationType(juce::Justification::centred);
 
     addAndMakeVisible(midiNoteTitleLabel);
+    midiNoteTitleLabel.setText("Midi Note", juce::dontSendNotification);
     midiNoteTitleLabel.setFont({ 13.0f });
     midiNoteTitleLabel.setEditable(false, false, false);
     midiNoteTitleLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
@@ -44,6 +51,7 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool co
     midiChannelNumberLabel.setJustificationType(juce::Justification::centred);
 
     addAndMakeVisible(midiChannelTitleLabel);
+    midiChannelTitleLabel.setText("Midi Channel", juce::dontSendNotification);
     midiChannelTitleLabel.setFont({ 13.0f });
     midiChannelTitleLabel.setEditable(false, false, false);
     midiChannelTitleLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
@@ -76,7 +84,7 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool co
     confirmButton.setButtonText("Confirm");
     confirmButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     confirmButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);
-    confirmButton.onClick = [this] { confirmMidi(); };
+    confirmButton.onClick = [this] { confirmButtonClicked(); };
     
 
     addChildComponent(&colorPalette);
@@ -190,12 +198,19 @@ bool ModuleSettingsOverlay::isOverlaySelected()
     return moduleOverlaySelected;
 }
 
-void ModuleSettingsOverlay::confirmMidi()
+void ModuleSettingsOverlay::confirmButtonClicked()
 {
     juce::Colour color;
 
     //this logic works out the context of leaving the moduleSettingsOverlay, 
     //essentially we only want to change moduleColor if a new one has been selected or if the module was just made, then we get a random color
+    parentEditor.setModuleName(titleBox.getText(true));
+    
+    if (parentEditor.getModuleState() != KrumModule::ModuleState::active)
+    {
+        parentEditor.setModuleState(KrumModule::ModuleState::active);
+    }
+    
     if (colorChanged)
     {
         color = colorPalette.getSelectedColor();
@@ -209,7 +224,6 @@ void ModuleSettingsOverlay::confirmMidi()
 
     parentEditor.setModuleMidiNote(midiNoteNum);
     parentEditor.setModuleMidiChannel(midiChanNum);
-    parentEditor.setModuleName(titleBox.getText(true));
     parentEditor.removeSettingsOverlay(true);
 }
 
@@ -288,8 +302,8 @@ void ModuleSettingsOverlay::setMidiLabels()
 
     if (midiNoteNum == 0)
     {
-        midiNoteString = "None Selected";
-        midiChanString = "None Selected";
+        midiNoteString = "None";
+        midiChanString = "None";
         midiNoteNumberLabel.setFont(20.0f);
     }
     else
@@ -314,6 +328,11 @@ void ModuleSettingsOverlay::setMidiLabels()
 bool ModuleSettingsOverlay::hasMidi()
 {
     return midiNoteNum > 0;
+}
+
+void ModuleSettingsOverlay::setTitle(juce::String& newTitle)
+{
+    titleBox.setText(newTitle, juce::dontSendNotification);
 }
 
 void ModuleSettingsOverlay::keepCurrentColor(bool keepColor)
@@ -361,8 +380,10 @@ void ModuleSettingsOverlay::setMidiLabelColors()
 {
     if (midiListenButton.getToggleState())
     {
-        midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
-        midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
+        auto color = juce::Colours::white;
+            
+        midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, color);
+        midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, color);
     }
     else
     {

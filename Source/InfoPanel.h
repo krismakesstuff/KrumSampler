@@ -43,7 +43,7 @@ private:
     juce::String title;
     juce::String keycommand;
     
-    juce::Colour fontColor {juce::Colours::white};
+    juce::Colour fontColor {juce::Colours::grey.brighter(0.2f)};
     juce::Colour bgColor {juce::Colours::black};
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InfoPanel)

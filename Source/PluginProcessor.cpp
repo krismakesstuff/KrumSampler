@@ -30,7 +30,7 @@ juce::ValueTree createValueTree()
     //---------------- Global Settings ----------------------------
     juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS };
 
-    globalSettingsTree.setProperty(TreeIDs::previewerGain, juce::var(0.75), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::previewerGain, juce::var(dBToGain(-6.0f)), nullptr);
     globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::fileBrowserHidden, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::infoPanelToggle, juce::var(1), nullptr);
@@ -179,8 +179,10 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     juce::Logger::writeToLog("Sampler Processor Constructed");
     juce::Logger::writeToLog("MaxNumModules: " + juce::String(MAX_NUM_MODULES));
     juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
-    juce::Logger::writeToLog("MaxFileLengthInSeconds: " +       juce::String(MAX_FILE_LENGTH_SECS));
+    juce::Logger::writeToLog("MaxFileLengthInSeconds: " + juce::String(MAX_FILE_LENGTH_SECS));
     juce::Logger::writeToLog("----------------------------");
+
+    updateModulesFromValueTree();
 
 }
 

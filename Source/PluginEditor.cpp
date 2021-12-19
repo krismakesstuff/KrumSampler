@@ -31,8 +31,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     websiteButton.setButtonText(websiteURL.getDomain());
     websiteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     websiteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
-    websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
-    websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::grey.brighter(0.2f));
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::grey.brighter(0.2f));
     websiteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     websiteButton.onClick = [this] { websiteURL.launchInDefaultBrowser(); };
 
@@ -51,11 +51,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     outputGainSlider.onValueChange = [this] { updateOutputGainBubbleComp(outputGainSlider.getCurrentPopupDisplay()); };
     
     outputGainAttachment.reset(new SliderAttachment(parameters, TreeIDs::outputGainParam_ID, outputGainSlider));
-
-//    addAndMakeVisible(fileDrop);
-//    fileDrop.setRepaintsOnMouseActivity(true);
-
-
     
     addAndMakeVisible(keyboard);
     
@@ -106,6 +101,12 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     moduleContainer.createModuleEditors();
     moduleContainer.showFirstEmptyModule();
     keyboard.updateKeysFromValueTree();
+    
+    if (keyboard.hasAssignedKeys())
+    {
+        keyboard.scrollToKey(keyboard.getLowestKey());
+    }
+    
     setPaintingIsUnclipped(true);
     
     if (getSavedInfoButtonState())
@@ -158,7 +159,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour(juce::Colours::black);
     g.fillRoundedRectangle(modulesViewport.getBounds().toFloat(), EditorDimensions::cornerSize);
     
-    g.setColour(outlineColor);
+    g.setColour(juce::Colours::grey.brighter(0.2f));
     g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centred, 1);
     g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
 

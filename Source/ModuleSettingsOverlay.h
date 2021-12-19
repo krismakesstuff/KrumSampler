@@ -45,7 +45,7 @@ public:
     bool isOverlaySelected();
 
     void showConfirmButton();
-    void confirmMidi();
+    void confirmButtonClicked();
 
     void showButtons();
     void cancelSettings();
@@ -58,6 +58,8 @@ public:
     void setMidi(int midiNote, int midiChannel);
     void setMidiLabels();
     bool hasMidi();
+
+    void setTitle(juce::String& newTitle);
 
     void keepCurrentColor(bool keepColor);
     void colorWasChanged(bool colorWasChanged);

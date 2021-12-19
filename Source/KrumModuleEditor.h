@@ -72,13 +72,14 @@ public:
     void buildModule();
     void setChildCompColors();
 
-    void showSettingsMenu();
-
+    //void showSettingsMenu();
     void setModuleSelected(bool isModuleSelected);
+    void setModuleButtonsClickState(bool isClickable);
+    
+    void showNewSettingsOverlay();
+    void showSettingsOverlay(bool keepCurrentColorOnExit ,bool selectOverlay = false);
     void removeSettingsOverlay(bool keepSettings);
 
-    void showSettingsOverlay(bool selectOverlay = false);
-    void setModuleButtonsClickState(bool isClickable);
     
     //bool isModuleVisible();
 
@@ -95,6 +96,8 @@ public:
     void setModuleDisplayIndex(int newDisplayIndex);
 
     void setModuleName(juce::String& newName);
+    //void updateName();
+    juce::String getModuleName();
 
 
     void setModuleColor(juce::Colour newColor);
@@ -109,9 +112,6 @@ public:
 
     void setModulePlaying(bool isPlaying);
     bool isModulePlaying();
-
-    void updateName();
-    juce::String getModuleName();
     
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
 
@@ -121,10 +121,10 @@ public:
     void handleMidi(int midiChannel, int midiNote);
     
 
-    void triggerNoteOnInParent(const juce::MouseEvent& e);
-    void triggerNoteOffInParent(const juce::MouseEvent& e);
+    void triggerMouseDownOnNote(const juce::MouseEvent& e);
+    void triggerMouseUpOnNote(const juce::MouseEvent& e);
 
-    bool needsToBuildEditor();
+    //bool needsToBuildEditor();
     
     bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
@@ -138,8 +138,7 @@ public:
     bool canThumbnailAcceptFile();
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
 
-    void handleSettingsMenuResult(int result);
-    
+   
     void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
     
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
@@ -148,12 +147,14 @@ public:
     bool isInterestedInFileDrag(const juce::StringArray& files) override;
     void filesDropped(const juce::StringArray& files, int x, int y) override;
     
-    void updateModuleFile(juce::File& newFile);
+    void handleNewFile(juce::File& file, bool overlayShouldListen);
+    void setModuleFile(juce::File& newFile);
     
     bool shouldModuleAcceptFileDrop();
     
     void addFileToRecentsFolder(juce::File& file, juce::String name);
     
+   // void handleSettingsMenuResult(int result)
     //void handleOverlayData(bool keepSettings);
     //void setModuleIndex(int newIndex);
     //void reassignSliderAttachments();
@@ -189,6 +190,11 @@ private:
 
     void printValueAndPositionOfSlider();
 
+    void handleOneShotButtonMouseDown(const juce::MouseEvent& e);
+    void handleOneShotButtonMouseUp(const juce::MouseEvent& e);
+
+    
+
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
 
@@ -200,7 +206,7 @@ private:
 
     //juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
-    juce::Colour fontColor{ juce::Colours::white.darker() };
+    juce::Colour titleFontColor{ juce::Colours::black };
 
     InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
     InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};

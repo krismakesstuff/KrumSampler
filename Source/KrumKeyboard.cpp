@@ -426,6 +426,40 @@ juce::Colour KrumKeyboard::findColorFromMidiNote(int midiNote)
     }
 }
 
+bool KrumKeyboard::hasAssignedKeys()
+{
+    return currentlyAssignedKeys.size() > 0;
+}
+
+int KrumKeyboard::getLowestKey()
+{
+    int lowest = -1;
+    for (int i = 0; i < currentlyAssignedKeys.size(); i++)
+    {
+        auto key = currentlyAssignedKeys[i];
+        if (lowest == -1 || key.midiNote < lowest)
+        {
+            lowest = key.midiNote;
+        }
+    }
+    return lowest;
+}
+
+int KrumKeyboard::getHighestKey()
+{
+    int highest = -1;
+    for (int i = 0; i < currentlyAssignedKeys.size(); i++)
+    {
+        auto key = currentlyAssignedKeys[i];
+        if (highest == -1 || key.midiNote > highest)
+        {
+            highest = key.midiNote;
+        }
+    }
+
+    return highest;
+}
+
 //juce::Array<int> KrumKeyboard::getMidiAssignmentsInOrder()
 //{
 //    juce::Array<int> retArray;

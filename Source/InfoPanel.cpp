@@ -42,8 +42,8 @@ void InfoPanel::paint (juce::Graphics& g)
         auto messageFont = g.getCurrentFont();
         
         //title
-        float titleTextH = panelBG.getHeight() / 4;
-        int numLines = panelBG.getHeight() / 5;
+        float titleTextH = panelBG.getHeight() / 3.7;
+        int numLines = panelBG.getHeight() / 4;
         juce::Path titleBG;
         titleBG.addRoundedRectangle(panelBG.getX() + 5, panelBG.getY(), panelBG.getWidth(), titleTextH, cornerSize, cornerSize, true, true, false, false);
 
@@ -55,9 +55,9 @@ void InfoPanel::paint (juce::Graphics& g)
         g.drawFittedText(title, titleBG.getBounds().toNearestInt(), juce::Justification::centredLeft, 1);
         
         //message
-        juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight()).withTrimmedLeft(5).toNearestInt();
+        juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight() + 2).withTrimmedLeft(5).withTrimmedRight(10).toNearestInt();
         g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::plain).withHeight(17.0f)); 
-        g.drawFittedText(message, messageArea, juce::Justification::centredLeft, numLines);
+        g.drawFittedText(message, messageArea, juce::Justification::topLeft, numLines);
         
         //keycommand
         g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::italic).withHeight(numLines * 0.85f));

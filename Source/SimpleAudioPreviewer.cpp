@@ -44,6 +44,8 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::V
     volumeSlider.textFromValueFunction = [this](double value) { return toText(value); };
 
     setPaintingIsUnclipped(true);
+
+    startTimerHz(10);
 }
 
 SimpleAudioPreviewer::~SimpleAudioPreviewer()
@@ -90,6 +92,7 @@ void SimpleAudioPreviewer::renderPreviewer(juce::AudioBuffer<float>& outputBuffe
 {
     if (currentAudioFileSource)
     {
+        rendering = true;
         juce::AudioBuffer<float> tempBuffer{ outputBuffer.getNumChannels(), outputBuffer.getNumSamples() };
         const juce::AudioSourceChannelInfo tempChannelInfo{ tempBuffer };
 
@@ -106,8 +109,9 @@ void SimpleAudioPreviewer::renderPreviewer(juce::AudioBuffer<float>& outputBuffe
 
         if (currentAudioFileSource->getNextReadPosition() >= currentAudioFileSource->getTotalLength())
         {
-            readyToPlayFile = false;
+             readyToPlayFile = false;
         }
+        rendering = false;
     }
 }
 
@@ -185,19 +189,15 @@ void SimpleAudioPreviewer::updateBubbleComp(juce::Slider* slider, juce::Componen
 
 void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
 {
-    if (fileToPreview.existsAsFile())
+    currentAudioFile = fileToPreview;
+    
+    if (rendering)
     {
-        currentFormatReader.reset(formatManager->createReaderFor(fileToPreview));
-    }
-
-    if (currentFormatReader)
-    {
-        currentAudioFileSource.reset(new juce::AudioFormatReaderSource(currentFormatReader.get(), false));
-        currentAudioFile = fileToPreview;
+        newFileWaiting = true;
     }
     else
     {
-        DBG("reader is NULL");
+        updateFormatReader();
     }
 }
 
@@ -238,6 +238,11 @@ void SimpleAudioPreviewer::refreshSettings()
     autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
 }
 
+juce::File& SimpleAudioPreviewer::getCurrentFile()
+{
+    return currentAudioFile;
+}
+
 bool SimpleAudioPreviewer::wantsToPlayFile()
 {
     return readyToPlayFile;
@@ -246,4 +251,38 @@ bool SimpleAudioPreviewer::wantsToPlayFile()
 void SimpleAudioPreviewer::setWantsToPlayFile(bool wantsToPlay)
 {
     readyToPlayFile = wantsToPlay;
+}
+
+void SimpleAudioPreviewer::reloadCurrentFile()
+{
+    if (currentFormatReader)
+    {
+        currentAudioFileSource->setNextReadPosition(0);
+    }
+}
+
+void SimpleAudioPreviewer::timerCallback()
+{
+    if (newFileWaiting && (!rendering))
+    {
+        updateFormatReader();
+        newFileWaiting = false;
+    }
+}
+
+void SimpleAudioPreviewer::updateFormatReader()
+{
+    if (currentAudioFile.existsAsFile())
+    {
+        currentFormatReader.reset(formatManager->createReaderFor(currentAudioFile));
+    }
+
+    if (currentFormatReader)
+    {
+        currentAudioFileSource.reset(new juce::AudioFormatReaderSource(currentFormatReader.get(), false));
+    }
+    else
+    {
+        DBG("reader is NULL");
+    }
 }
