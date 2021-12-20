@@ -14,8 +14,8 @@
 
 
 //==============================================================================
-SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::ValueTree& vt)
-    :   formatManager(fm), valueTree(vt)
+SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::ValueTree& vt, juce::AudioProcessorValueTreeState& a)
+    :   formatManager(fm), valueTree(vt), apvts(a)
         //InfoPanelComponent("Audio Previewer", "Double-Click files to preview them, if auto-play is active they will play on a single click. Volume is sepearte from the rest of the sampler")
 {
     addAndMakeVisible(autoPlayToggle);
@@ -39,13 +39,19 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::V
     volumeSlider.setTooltip("double-click files to preview, auto-play will preview as it's selected");
     
     volumeSlider.onValueChange = [this] { updateBubbleComp(&volumeSlider, volumeSlider.getCurrentPopupDisplay()); };
-    volumeSlider.onDragEnd = [this] { setGain(); };
+
+    volumeSliderAttachment.reset(new SliderAttachment(apvts, TreeIDs::previewerGainParam.toString(), volumeSlider));
+
+
+    /*volumeSlider.onDragEnd = [this] { setCurrentGain(); };
     volumeSlider.valueFromTextFunction = [this](juce::String(text)) { return fromText(text); };
-    volumeSlider.textFromValueFunction = [this](double value) { return toText(value); };
+    volumeSlider.textFromValueFunction = [this](double value) { return toText(value); };*/
+
+    //currentAudioFileSource.reset(new juce::AudioFormatReaderSource(currentFormatReader.get(), false));
 
     setPaintingIsUnclipped(true);
 
-    startTimerHz(10);
+    //startTimerHz(10);
 }
 
 SimpleAudioPreviewer::~SimpleAudioPreviewer()
@@ -88,45 +94,45 @@ bool SimpleAudioPreviewer::isAutoPlayActive()
     return autoPlayToggle.getToggleState();
 }
 
-void SimpleAudioPreviewer::renderPreviewer(juce::AudioBuffer<float>& outputBuffer)
+//void SimpleAudioPreviewer::renderPreviewer(juce::AudioBuffer<float>& outputBuffer)
+//{
+//    if (currentAudioFileSource!= nullptr && currentFormatReader != nullptr && outputBuffer.getNumSamples() > 0)
+//    {
+//        rendering = true;
+//        juce::AudioBuffer<float> tempBuffer{ outputBuffer.getNumChannels(), outputBuffer.getNumSamples() };
+//        const juce::AudioSourceChannelInfo tempChannelInfo{ tempBuffer };
+//
+//        currentAudioFileSource->getNextAudioBlock(tempChannelInfo);
+//
+//        const juce::AudioSourceChannelInfo channelInfo{ outputBuffer };
+//
+//        //auto gain = getGain();
+//
+//        for (int i = 0; i < outputBuffer.getNumChannels(); i++)
+//        {
+//            channelInfo.buffer->addFrom(i, 0, tempBuffer, i, 0, tempBuffer.getNumSamples(), currentGain);
+//        }
+//
+//        if (currentAudioFileSource->getNextReadPosition() >= currentAudioFileSource->getTotalLength())
+//        {
+//             readyToPlayFile = false;
+//        }
+//        rendering = false;
+//    }
+//}
+
+void SimpleAudioPreviewer::setCurrentGain()
 {
-    if (currentAudioFileSource)
-    {
-        rendering = true;
-        juce::AudioBuffer<float> tempBuffer{ outputBuffer.getNumChannels(), outputBuffer.getNumSamples() };
-        const juce::AudioSourceChannelInfo tempChannelInfo{ tempBuffer };
-
-        currentAudioFileSource->getNextAudioBlock(tempChannelInfo);
-
-        const juce::AudioSourceChannelInfo channelInfo{ outputBuffer };
-
-        auto gain = getGain();
-
-        for (int i = 0; i < outputBuffer.getNumChannels(); i++)
-        {
-            channelInfo.buffer->addFrom(i, 0, tempBuffer, i, 0, tempBuffer.getNumSamples(), gain);
-        }
-
-        if (currentAudioFileSource->getNextReadPosition() >= currentAudioFileSource->getTotalLength())
-        {
-             readyToPlayFile = false;
-        }
-        rendering = false;
-    }
-}
-
-void SimpleAudioPreviewer::setGain()
-{
-    double newGain = volumeSlider.getValue();
+    currentGain = volumeSlider.getValue();
     
     savePreviewerGainState();
     
-    DBG("Previewer Gain: " + juce::String(newGain));
+    DBG("Previewer Gain: " + juce::String(currentGain));
 }
 
-double SimpleAudioPreviewer::getGain()
+std::atomic<float>* SimpleAudioPreviewer::getCurrentGain()
 {
-    return volumeSlider.getValue();
+    return apvts.getRawParameterValue(TreeIDs::previewerGainParam);
 }
 
 juce::String SimpleAudioPreviewer::toText(double value)
@@ -189,16 +195,23 @@ void SimpleAudioPreviewer::updateBubbleComp(juce::Slider* slider, juce::Componen
 
 void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
 {
-    currentAudioFile = fileToPreview;
-    
-    if (rendering)
+
+    if (sampler != nullptr && fileToPreview.existsAsFile())
+    {
+        currentAudioFile = fileToPreview;
+        sampler->addPreviewFile(fileToPreview);
+    }
+
+    /*if (rendering)
     {
         newFileWaiting = true;
     }
     else
     {
         updateFormatReader();
-    }
+    }*/
+
+
 }
 
 juce::AudioFormatManager* SimpleAudioPreviewer::getFormatManager()
@@ -221,15 +234,15 @@ bool SimpleAudioPreviewer::getSavedToggleState()
 
 void SimpleAudioPreviewer::savePreviewerGainState()
 {
+    /*
     auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
-    globalTree.setProperty(TreeIDs::previewerGain, juce::var(volumeSlider.getValue()), nullptr);
+    globalTree.setProperty(TreeIDs::previewerGain, juce::var(volumeSlider.getValue()), nullptr);*/
+    apvts.state.setProperty(TreeIDs::previewerGainParam, juce::var(volumeSlider.getValue()), nullptr);
 }
 
 float SimpleAudioPreviewer::getSavedPreviewerGainState()
 {
-    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
-
-    return (float)globalTree.getProperty(TreeIDs::previewerGain);
+    return *apvts.getRawParameterValue(TreeIDs::previewerGainParam);
 }
 
 void SimpleAudioPreviewer::refreshSettings()
@@ -252,23 +265,27 @@ void SimpleAudioPreviewer::setWantsToPlayFile(bool wantsToPlay)
 {
     readyToPlayFile = wantsToPlay;
 }
-
-void SimpleAudioPreviewer::reloadCurrentFile()
+void SimpleAudioPreviewer::assignSampler(KrumSampler* samplerToAssign)
 {
-    if (currentFormatReader)
-    {
-        currentAudioFileSource->setNextReadPosition(0);
-    }
+    sampler = samplerToAssign;
 }
+//
+//void SimpleAudioPreviewer::reloadCurrentFile()
+//{
+//    if (currentFormatReader)
+//    {
+//        currentAudioFileSource->setNextReadPosition(0);
+//    }
+//}
 
-void SimpleAudioPreviewer::timerCallback()
-{
-    if (newFileWaiting && (!rendering))
-    {
-        updateFormatReader();
-        newFileWaiting = false;
-    }
-}
+//void SimpleAudioPreviewer::timerCallback()
+//{
+//    if (newFileWaiting && (!rendering))
+//    {
+//        updateFormatReader();
+//        newFileWaiting = false;
+//    }
+//}
 
 void SimpleAudioPreviewer::updateFormatReader()
 {

@@ -948,6 +948,7 @@ void KrumModuleEditor::timerCallback()
 
 bool KrumModuleEditor::isMouseOverAnyChildren()
 {
+    //coudl probably use juce methods for this.... anyways, here we are
     return (titleBox.isMouseOver(true)      ||
             midiLabel.isMouseOver(true)     ||
             panSlider.isMouseOver(true)     ||

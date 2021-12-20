@@ -21,8 +21,7 @@
 * The KrumSampler(juce::Synthesizer) handles the incoming midi and triggers the rendering of the KrumVoice.
 * 
 * TODO:
-* - Need a solution to reliably delete modules and not have it affect other modules sliderattachments
-*    - Reassigning slider attachments makes automation tricky/impossible. 
+* 
 */
 
 class KrumSound : public juce::SamplerSound
@@ -77,50 +76,124 @@ private:
     friend class juce::SamplerSound;
 
     double pitchRatio = 0;
-    double sourceSamplePosition = 0;
     std::atomic<float> lgain = 0, rgain = 0, clipGain = 0;
     
+    double sourceSamplePosition = 0;
     juce::ADSR adsr;
 
     JUCE_LEAK_DETECTOR(KrumVoice)
 };
 
-class KrumSamplerAudioProcessor;
+//====================================================================================
+class SimpleAudioPreviewer;
+class PreviewVoice;
 
-class KrumSampler : public juce::Synthesiser
+class PreviewSound : public juce::SamplerSound
 {
 public:
-    KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o);
+    PreviewSound(SimpleAudioPreviewer* previewer, const juce::String& name,
+        juce::AudioFormatReader& source,
+        const juce::BigInteger& midiNotes,
+        int midiNoteForNormalPitch,
+        double attackTimeSecs,
+        double releaseTimeSecs,
+        double maxSampleLengthSeconds);
+    ~PreviewSound() override;
+
+    std::atomic<float>* getPreviewerGain() const;
+
+private:
+    friend class PreviewVoice;
+
+    //juce::String name;
+    std::unique_ptr<juce::AudioBuffer<float>> data;
+    double sourceSampleRate;
+    int length = 0;
+
+    juce::ADSR::Parameters params;
+
+    SimpleAudioPreviewer* previewer = nullptr;
+
+    JUCE_LEAK_DETECTOR(PreviewSound)
+};
+
+class PreviewVoice : public juce::SamplerVoice 
+{
+public: 
+    PreviewVoice();
+    ~PreviewVoice() override;
+
+    bool canPlaySound(juce::SynthesiserSound* sound) override;
+    bool isVoiceActive() const override;
+    void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound*, int pitchWheel) override;
+    void stopNote(float velocity, bool allowTailOff) override;
+
+    void renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override;
+
+private:
+
+    friend class SamplerSound;
+
+    std::atomic<float> gain = 0;
+
+    //std::atomic<bool> voiceActive = false;
+    double sourceSamplePosition = 0;
+    juce::ADSR adsr;
+
+    JUCE_LEAK_DETECTOR(PreviewVoice)
+};
+
+//====================================================================================
+
+class KrumSamplerAudioProcessor;
+
+class KrumSampler : public juce::Synthesiser,
+                    public juce::Timer
+{
+public:
+    KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, 
+                KrumSamplerAudioProcessor& o, SimpleAudioPreviewer& filePreviewer);
     ~KrumSampler() override;
 
     void initModules(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
-    
     void initVoices();
 
     void noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) override;
     void noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) override;
 
+    //juce::SynthesiserVoice* findFreeVoice(juce::SynthesiserSound* soundToPlay, int midiChannel, int midiNoteNumber, const bool stealIfNoneAvailable) const override;
+
     KrumModule* getModule(int index);
     //Only the processor should use this when rebuilding the sampler from the value tree
     void addModule(KrumModule* newModule);
-    
     //if there is no sound that has this module as a parent, nothing will happen
     void removeModuleSample(KrumModule* moduleToDelete/*, bool updateTree = true*/);
     //will remove the modules current sound(if it has one) and then add the sample set in the module
     void updateModuleSample(KrumModule* updatedModule);
     
     void clearModules();
-    int getNumModules();
 
+    int getNumModules();
     void getNumFreeModules(int& totalFreeModules, int& firstFreeIndex);
     
+    void addPreviewFile(juce::File& file);
+    void playPreviewFile();
+
     bool isFileAcceptable(const juce::File& file);
     juce::AudioFormatManager& getFormatManager();
 
 private:
     
+    void timerCallback()override;
+
+
     //makes a Krum Sound and adds it to the samplers sounds array, using the assigned file in the passed in module
     void addSample(KrumModule* moduleToAddSound);
+
+    void removePreviewSound();
+
+    //does the same thing as isFileAcceptable(), except returns the reader or nullptr if not acceptable
+    std::unique_ptr<juce::AudioFormatReader> getFormatReader(juce::File& file);
 
     void printSounds();
     void printVoices();
@@ -132,6 +205,9 @@ private:
     KrumSamplerAudioProcessor& owner;
 
     juce::OwnedArray<KrumModule> modules;
+
+    SimpleAudioPreviewer& filePreviewer;
+    juce::File currentPreviewFile;
 
     JUCE_LEAK_DETECTOR(KrumSampler)
 };

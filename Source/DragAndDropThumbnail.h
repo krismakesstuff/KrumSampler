@@ -23,8 +23,8 @@ class KrumModuleEditor;
 
 class DragAndDropThumbnail :    public InfoPanelComponent,
                                 public juce::AudioThumbnail,
-                                public juce::DragAndDropTarget,
-                                public juce::FileDragAndDropTarget
+                                public juce::DragAndDropTarget/*,
+                                public juce::FileDragAndDropTarget*/
 
 {
 public:
@@ -34,8 +34,8 @@ public:
 
     ~DragAndDropThumbnail() override;
 
-    bool isInterestedInFileDrag(const juce::StringArray& files) override;
-    void filesDropped(const juce::StringArray& files, int x, int y) override;
+    //bool isInterestedInFileDrag(const juce::StringArray& files) override;
+    //void filesDropped(const juce::StringArray& files, int x, int y) override;
 
     bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;
     void itemDropped(const SourceDetails& dragSourceDetails) override;

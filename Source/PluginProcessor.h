@@ -20,17 +20,18 @@
 * 
 * A JUCE generated class that represents the audio engine of the app. This will handle all audio and midi calls to and from the DAW, as well as state changes on startup and exit. 
 * 
-* In PluginProcessoer.cpp, there function defined to create the AudioProcessorValueTreeState. This is defined by JUCE, and is reffered to as "APVTS". 
+* In PluginProcessoer.cpp, there are functions defined to create the AudioProcessorValueTreeState. This is defined by JUCE, and is reffered to as "APVTS". 
 * 
 * There is really only one large ValueTree that holds the state and settings of the app. That Tree then has other trees for specific sections of the app. 
-* When loading and saving the ValueTree, it peels the children trees on and off in their respective contexts. see getStateInformation() and setStateInformation() for implementation. 
+* When loading and saving the ValueTree, the children trees append or peel off in their respective contexts. see getStateInformation() and setStateInformation() for implementation. 
 * 
 * 
 */
 
 #define GUI_REFRESH_RATE_HZ const int 30
 #define MAX_NUM_MODULES 20
-#define MAX_VOICES 15
+#define MAX_VOICES 14
+#define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 3
 #define KRUM_BUILD_VERSION "1.1.0-Beta" //Module Re-work
 
@@ -43,7 +44,6 @@ namespace TreeIDs
 
         DECLARE_ID(GLOBALSETTINGS) //GlobaalSettings tree
 
-            DECLARE_ID(previewerGain)
             DECLARE_ID(previewerAutoPlay)
             DECLARE_ID(fileBrowserHidden)
             DECLARE_ID(infoPanelToggle)
@@ -68,6 +68,9 @@ namespace TreeIDs
             DECLARE_ID(paramModuleOutputChannel)
             DECLARE_ID(paramModuleClipGain)
         
+            DECLARE_ID(outputGainParam)
+            DECLARE_ID(previewerGainParam)
+
         DECLARE_ID(FILEBROWSERTREE) //File Browser Tree    
 
             DECLARE_ID(RECENT)
@@ -81,40 +84,11 @@ namespace TreeIDs
 #undef DECLARE_ID
 
     //Should I make these all preprocessor define instead?
-    //Globals
     static const float defaultGain = 0.85f;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
-    static juce::String outputGainParam_ID{"outputGain"};
+    //static juce::String outputGainParam_ID{"outputGain"};
 
-    //APVTS
-   /* const static juce::String paramModuleGain_ID{"moduleGain"};
-    const static juce::String paramModulePan_ID{"modulePan"};
-    const static juce::String paramModuleOutputChannels_ID{"moduleOutputChannel"};
-    const static juce::String paramModuleClipGain_ID{ "moduleClipGain" };*/
-
-
-    //ValueTree Nodes
-    //const static juce::String APPSTATE{ "AppState" };
-//    const static juce::String GLOBALSETTINGS{ "GlobalSettings" };
- //   const static juce::String KRUMMODULES{ "KrumModules" };
- //   const static juce::String MODULE{ "Module" };
-    
-    //ValueTree - module's state parameters
-    //const static juce::String moduleName_ID{ "name" };
-    //const static juce::String moduleState_ID{"moduleState"};
-    //const static juce::String moduleFile_ID{"moduleFilePath"};
-    //const static juce::String moduleMidiNote_ID{"moduleMidiNote"};
-    //const static juce::String moduleMidiChannel_ID{"moduleMidiChannel"};
-    //const static juce::String moduleColor_ID{ "moduleColor" };
-    //const static juce::String moduleDisplayIndex_ID{ "moduleDisplayIndex" };
-    //const static juce::String moduleSamplerIndex_ID{ "moduleSamplerIndex" };
-
-    //ValueTree - global settings
-    /*const static juce::String previewerGain_ID {"PreviewerGain"};
-    const static juce::String previewerAutoPlay_ID{ "PreviewerAutoPlay" };
-    const static juce::String fileBrowserHidden_ID{ "BrowserHidden" };
-    const static juce::String infoPanelToggle_ID{ "InfoPanelToggle" };*/
 
 }
 
@@ -216,6 +190,7 @@ public:
 private:
     
     void registerFormats();
+    void initSampler();
 
     juce::ValueTree valueTree{"AppState"};
     juce::AudioProcessorValueTreeState parameters; 
@@ -223,6 +198,7 @@ private:
 
     std::atomic<float>* outputGainParameter = nullptr;
     juce::MidiKeyboardState midiState;
+
 
     class ThumbnailCache : public juce::AudioThumbnailCache
     {
@@ -237,8 +213,8 @@ private:
     
     juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
   
-    KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this };
-    SimpleAudioPreviewer previewer{formatManager, valueTree};
+    SimpleAudioPreviewer previewer{formatManager, valueTree, parameters};
+    KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this, previewer };
     KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree};
     
     //==============================================================================

@@ -249,7 +249,7 @@ private:
 class DummyTreeItem : public juce::TreeViewItem
 {
 public:
-    DummyTreeItem() {}
+    DummyTreeItem() { }
 
     bool mightContainSubItems() override { return false;}
 

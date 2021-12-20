@@ -62,10 +62,7 @@ void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
         {
             previewer->loadFile(file);
         }
-        else
-        {
-            previewer->reloadCurrentFile();
-        }
+
         previewer->setWantsToPlayFile(true);
     }
 
@@ -78,10 +75,6 @@ void KrumTreeItem::itemDoubleClicked(const juce::MouseEvent& e)
         if (file != previewer->getCurrentFile())
         {
             previewer->loadFile(file);
-        }
-        else
-        {
-            previewer->reloadCurrentFile();
         }
         previewer->setWantsToPlayFile(true);
     }
@@ -245,9 +238,8 @@ void KrumTreeItem::EditableComp::mouseDown(const juce::MouseEvent& e)
     }
     else if(!itemSelected) //with no mods
     {
-        //owner.itemClicked(e);
+
         owner.setSelected(true, true);
-        DBG("Index in parent: " + juce::String(owner.getIndexInParent()));
     }
 
     //right click menu
@@ -357,7 +349,7 @@ void KrumTreeHeaderItem::itemClicked(const juce::MouseEvent& e)
 void KrumTreeHeaderItem::itemDoubleClicked(const juce::MouseEvent& e)
 {
     setOpen(!isOpen());
-    DBG("HeaderItem Double Clicked:" + juce::String(isOpen() ? "is Open" : "is NOT Open"));
+    //DBG("HeaderItem Double Clicked:" + juce::String(isOpen() ? "is Open" : "is NOT Open"));
 }
 
 juce::File& KrumTreeHeaderItem::getFile() { return file; }
@@ -589,7 +581,7 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
     
     rootNode->addSubItem(recentNode, FileBrowserSectionIds::recentFolders_Ids);
     rootNode->addSubItem(favNode, FileBrowserSectionIds::favoritesFolders_Ids);
-    addDummyChild();
+    //addDummyChild();
 
 
     if (fileBrowserValueTree.getChildWithName(favNode->getItemHeaderName()).getNumChildren() > 0)

@@ -29,28 +29,28 @@ DragAndDropThumbnail::~DragAndDropThumbnail()
 {
 }
 
-bool DragAndDropThumbnail::isInterestedInFileDrag(const juce::StringArray& files)
-{
-    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-    return false;
-}
-
-void DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, int y)
-{
-    if (!(files.size() > 1))
-    {
-        for (auto file : files)
-        {
-            juce::File newFile{ file };
-            addDroppedFile(newFile);
-        }
-    }
-}
+//bool DragAndDropThumbnail::isInterestedInFileDrag(const juce::StringArray& files)
+//{
+//    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
+//    return false;
+//}
+//
+//void DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, int y)
+//{
+//    if (files.size() == 1)
+//    {
+//        for (auto file : files)
+//        {
+//            juce::File newFile{ file };
+//            addDroppedFile(newFile);
+//        }
+//    }
+//}
 
 bool DragAndDropThumbnail::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
 {
     //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-    return false;
+    return true;
 }
 
 void DragAndDropThumbnail::itemDropped(const SourceDetails& dragSourceDetails)
@@ -61,42 +61,47 @@ void DragAndDropThumbnail::itemDropped(const SourceDetails& dragSourceDetails)
     auto filePath = description.substring(description.indexOf("-") + 1);
     DBG("File Path: " + filePath);
     juce::File newFile{ filePath };
-    //addDroppedFile(newFile);
+    addDroppedFile(newFile);
 }
 
 //This will check for validaty before adding
 void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
 {
-    //canAcceptFile = false;
-    //if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager()->findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
-    //{
-    //    droppedFile = newFile;
-    //    if (parentEditor.isModulePlaying())
-    //    {
-    //        checkDroppedFile = true;
-    //        parentEditor.drawThumbnail = true;
-    //    }
-    //    else
-    //    {
-    //        moveDroppedFileToParent();
-    //    }
-    //}
-    //else
-    //{
-    //    DBG("File Doesn't exist or invalid format::addDroppedFile()");
-    //}
+    canAcceptFile = false;
+    if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager()->findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
+    {
+        droppedFile = newFile;
+        moveDroppedFileToParent();
+        /*if (parentEditor.isModulePlaying())
+        {
+            checkDroppedFile = true;
+            parentEditor.drawThumbnail = true;
+        }
+        else
+        {
+        }
+        */
+    }
+    else
+    {
+        DBG("File Doesn't exist or invalid format::addDroppedFile()");
+    }
 }
 
 void DragAndDropThumbnail::moveDroppedFileToParent()
 {
+    //use tree to set this
    /* auto& parent = parentEditor.parent;
 
     parent.setSampleFile(droppedFile);
-    parent.sampler.updateModuleSample(&parent);
-    clipGainSliderAttachment.reset(new SliderAttachment(*parent.parameters, TreeIDs::moduleClipGain + juce::String(parent.getModuleSamplerIndex()), clipGainSlider));
+    parent.sampler.updateModuleSample(&parent);*/
+
+    parentEditor.moduleTree.setProperty(TreeIDs::moduleFile, droppedFile.getFullPathName(), nullptr);
+
+    clipGainSliderAttachment.reset(new SliderAttachment(parentEditor.editor.parameters, TreeIDs::paramModuleClipGain + juce::String(parentEditor.getModuleSamplerIndex()), clipGainSlider));
 
     parentEditor.drawThumbnail = true;
-    checkDroppedFile = false;*/
+    checkDroppedFile = false;
 }
 
 void DragAndDropThumbnail::updateThumbnailClipGain(float newVerticalZoom)

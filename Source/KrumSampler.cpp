@@ -10,6 +10,7 @@
 
 #include "KrumSampler.h"
 #include "PluginProcessor.h"
+#include "SimpleAudioPreviewer.h"
 
 
 KrumSound::KrumSound    (KrumModule* pModule, 
@@ -81,7 +82,8 @@ KrumVoice::~KrumVoice()
 
 bool KrumVoice::canPlaySound(juce::SynthesiserSound* sound)
 {
-    if (sound)
+    auto* krumSound = dynamic_cast<KrumSound*>(sound);
+    if (krumSound != nullptr)
     {
         return true;
     }
@@ -198,11 +200,150 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 
 //====================================================================================//
 
-KrumSampler::KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o)
-    :formatManager(fm), owner(o)
+PreviewSound::PreviewSound(SimpleAudioPreviewer* prev,const juce::String& name,
+                            juce::AudioFormatReader& source,
+                            const juce::BigInteger& midiNotes,
+                            int midiNoteForNormalPitch,
+                            double attackTimeSecs,
+                            double releaseTimeSecs,
+                            double maxSampleLengthSeconds)
+    : SamplerSound(name, source, 0, midiNoteForNormalPitch, attackTimeSecs, releaseTimeSecs, maxSampleLengthSeconds),
+     previewer(prev), sourceSampleRate(source.sampleRate)
+{
+    if (sourceSampleRate > 0 && source.lengthInSamples > 0)
+    {
+        length = juce::jmin((int)source.lengthInSamples,
+            (int)(maxSampleLengthSeconds * sourceSampleRate));
+
+        data.reset(new juce::AudioBuffer<float>(juce::jmin(2, (int)source.numChannels), length + 4));
+
+        source.read(data.get(), 0, length + 4, 0, true, true);
+
+        params.attack = static_cast<float> (attackTimeSecs);
+        params.release = static_cast<float> (releaseTimeSecs);
+    }
+
+}
+
+PreviewSound::~PreviewSound()
+{
+}
+
+std::atomic<float>* PreviewSound::getPreviewerGain() const
+{
+    return previewer->getCurrentGain();
+}
+
+//====================================================================================//
+
+PreviewVoice::PreviewVoice()
+{
+}
+
+PreviewVoice::~PreviewVoice()
+{
+}
+
+bool PreviewVoice::canPlaySound(juce::SynthesiserSound* sound)
+{
+    auto previewSound = dynamic_cast<PreviewSound*>(sound);
+    if (previewSound != nullptr)
+    {
+        return true;
+    }
+    
+    return false;
+}
+
+bool PreviewVoice::isVoiceActive() const
+{
+    return adsr.isActive();
+}
+
+void PreviewVoice::startNote(int /*midiNoteNumber*/, float /*velocity*/, juce::SynthesiserSound* s, int /*pitchWheel*/)
+{
+    //voiceActive = true;
+    if (auto* sound = dynamic_cast<const PreviewSound*> (s))
+    {
+        sourceSamplePosition = 0.0;
+
+        gain.store(*sound->getPreviewerGain());
+        //gain = newGain;
+
+        adsr.setSampleRate(sound->sourceSampleRate);
+        adsr.setParameters(sound->params);
+
+        adsr.noteOn();
+    }
+}
+
+void PreviewVoice::stopNote(float velocity, bool allowTailOff)
+{
+    if (allowTailOff)
+    {
+        adsr.noteOff();
+    }
+    else
+    {
+        clearCurrentNote();
+        adsr.reset();
+    }
+}
+
+void PreviewVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples)
+{
+    if (auto* playingSound = static_cast<PreviewSound*> (getCurrentlyPlayingSound().get()))
+    {
+        auto& data = *playingSound->getAudioData();
+        const float* const inL = data.getReadPointer(0);
+        const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer(1) : nullptr;
+
+        float* outL = outputBuffer.getWritePointer(0, startSample);
+        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
+
+        while (--numSamples >= 0)
+        {
+            auto pos = (int)sourceSamplePosition;
+            auto alpha = (float)(sourceSamplePosition - pos);
+            auto invAlpha = 1.0f - alpha;
+
+            // just using a very simple linear interpolation here..
+            float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
+            float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha) : l;
+
+            auto envelopeValue = adsr.getNextSample();
+
+            //gain is set in PreviewVoice::startNote()
+            l *= gain * envelopeValue;
+            r *= gain * envelopeValue;
+
+            if (outR != nullptr)
+            {
+                *outL++ += l;
+                *outR++ += r;
+            }
+            else
+            {
+                *outL++ += (l + r) * 0.5f;
+            }
+
+            if (++sourceSamplePosition > playingSound->length)
+            {
+                stopNote(0.0f, false);
+                break;
+            }
+        }
+    }
+}
+
+
+//====================================================================================//
+KrumSampler::KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o, SimpleAudioPreviewer& fp)
+    :formatManager(fm), owner(o), filePreviewer(fp)
 {
     //initModules(valTree, apvts);
-    initVoices();
+    //initVoices();
+    startTimerHz(30);
 }
 
 KrumSampler::~KrumSampler()
@@ -234,6 +375,13 @@ void KrumSampler::initVoices()
         newVoice->setCurrentPlaybackSampleRate(getSampleRate());
     }
 
+    for (int i = 0; i < NUM_PREVIEW_VOICES; i++)
+    {
+        auto newVoice = voices.add(new PreviewVoice());
+        newVoice->setCurrentPlaybackSampleRate(getSampleRate());
+    }
+    
+
     juce::Logger::writeToLog("Voices Initialized: " + juce::String(voices.size()));
     printVoices();
     
@@ -241,15 +389,20 @@ void KrumSampler::initVoices()
 
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 
 {
-    for (auto sound : sounds)
+    for (auto* sound : sounds)
     {
         if (sound->appliesToNote(midiNoteNumber) && sound->appliesToChannel(midiChannel))
         {
-            auto krumSound = static_cast<KrumSound*>(sound);
-            auto voice = findFreeVoice(sound, midiChannel, midiNoteNumber, true);
-
-            startVoice(voice, sound, midiChannel, midiNoteNumber, velocity);
+            if (KrumSound* krumSound = dynamic_cast<KrumSound*>(sound))
+            {
+                auto voice = findFreeVoice(krumSound, midiChannel, midiNoteNumber, true);
+                startVoice(voice, krumSound, midiChannel, midiNoteNumber, velocity);
+            }
         }
+        //else if(auto previewSound = static_cast<PreviewSound*>(sound))
+        //{
+        //    //make custom voice stealing? 
+        //}
     }
 }
 
@@ -266,6 +419,41 @@ void KrumSampler::noteOff(const int midiChannel, const int midiNoteNumber, const
     //}
 }
 
+//juce::SynthesiserVoice* KrumSampler::findFreeVoice(juce::SynthesiserSound* soundToPlay, int midiChannel, int midiNoteNumber, const bool stealIfNoneAvailable) const
+//{
+//    //copied from Juce findFreeVoice implementation mostly
+//    const juce::ScopedLock sl(lock);
+//
+//    /*for (auto* voice : voices)
+//        if ((!voice->isVoiceActive()) && voice->canPlaySound(soundToPlay))
+//            return voice;*/
+//
+//
+//
+//    if (auto sound = static_cast<PreviewSound*>(soundToPlay))
+//    {
+//
+//    }
+//
+//
+//    for (int i = 0; i < voices.size() - NUM_PREVIEW_VOICES; i++)
+//    {
+//        auto* voice = voices[i];
+//        if ((!voice->isVoiceActive()) && voice->canPlaySound(soundToPlay))
+//        {
+//            return voice;
+//        }
+//    }
+//
+//    
+//
+//
+//    if (stealIfNoneAvailable)
+//        return findVoiceToSteal(soundToPlay, midiChannel, midiNoteNumber);
+//
+//    return nullptr;
+//}
+
 KrumModule* KrumSampler::getModule(int index)
 {
     return modules[index];
@@ -278,10 +466,7 @@ void KrumSampler::addModule(KrumModule* newModule)
 
 void KrumSampler::removeModuleSample(KrumModule* moduleToDelete/*, bool updateTree*/)
 {
-
-    DBG("Module Index To Delete: " + juce::String(moduleToDelete->getModuleSamplerIndex()));
-    DBG("Module Sample: " + moduleToDelete->getSampleFile().getFullPathName());
-
+    
     KrumSound* ksound = nullptr;
     for (int i = 0; i < sounds.size(); i++)
     {
@@ -292,10 +477,6 @@ void KrumSampler::removeModuleSample(KrumModule* moduleToDelete/*, bool updateTr
             sounds.removeObject(sound);
             DBG("sound removed");
             printSounds();
-            /*if (updateTree)
-            {
-                owner.updateValueTreeState();
-            }*/
             return;
         }
         
@@ -308,16 +489,16 @@ void KrumSampler::removeModuleSample(KrumModule* moduleToDelete/*, bool updateTr
 void KrumSampler::updateModuleSample(KrumModule* updatedModule)
 {
     //removes the currently assigned sound of the module, if none exist this function will do nothing
-    //we pass in false to NOT update the valueTree as we are about to add a sample to it and we don't want the tree to set the module inactive
-    removeModuleSample(updatedModule/*, false*/);
+    removeModuleSample(updatedModule);
     addSample(updatedModule);
 }
 
 void KrumSampler::addSample(KrumModule* moduleToAddSound)
 {
-    if (isFileAcceptable(moduleToAddSound->getSampleFile()))
+    //if (isFileAcceptable(moduleToAddSound->getSampleFile()))
+    if(auto reader = getFormatReader(moduleToAddSound->getSampleFile()))
     {
-        std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(moduleToAddSound->getSampleFile()));
+        //std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(moduleToAddSound->getSampleFile()));
         juce::BigInteger range;
         range.setBit(moduleToAddSound->getMidiTriggerNote());
 
@@ -370,6 +551,119 @@ void KrumSampler::getNumFreeModules(int& totalFreeModules, int& firstFreeIndex)
     DBG("Free Modules: " + juce::String(totalFreeModules) + ", First Index " + juce::String(firstFreeIndex));
 }
 
+//----------------------------------------------------------------
+
+void KrumSampler::addPreviewFile(juce::File& file)
+{
+    if (std::unique_ptr<juce::AudioFormatReader> reader = getFormatReader(file))
+    {
+
+        currentPreviewFile = file;
+        removePreviewSound();
+
+        sounds.add(new PreviewSound(&filePreviewer, file.getFullPathName(), *reader, {}, 0, 0.001, 0.001, MAX_FILE_LENGTH_SECS));
+        
+    }
+    else
+    {
+        DBG("Preview Reader NULL");
+    }
+
+}
+
+void KrumSampler::playPreviewFile()
+{
+    PreviewSound* soundToPlay = nullptr;
+
+    for (auto* sound : sounds)
+    {
+        if (PreviewSound* previewSound = dynamic_cast<PreviewSound*>(sound))
+        {
+            if (previewSound->getName().compare(currentPreviewFile.getFullPathName()) == 0)
+            {
+                soundToPlay = previewSound;
+                break;
+            }
+        }
+    }
+
+    for (auto* voice : voices)
+    {
+        PreviewVoice* previewVoice = dynamic_cast<PreviewVoice*>(voice);
+        if (previewVoice != nullptr)
+        {
+            if (/*!previewVoice->isVoiceActive() && */previewVoice->canPlaySound(soundToPlay))
+            {
+                startVoice(previewVoice, soundToPlay, 0, 0, 1);
+                //previewVoice->startNote(0, 1, soundToPlay, 0);  // midiNote = 0, velocity = 1, pitchwheel = 0 
+                break;
+            }
+        }
+    }
+
+}
+
+void KrumSampler::removePreviewSound()
+{
+    //this is basically a voice stealing function
+
+    //PreviewVoice* v1 = nullptr;
+    //PreviewVoice* v2 = nullptr;
+
+    //for (auto* voice : voices)
+    //{
+    //    auto* previewVoice = dynamic_cast<PreviewVoice*>(voice);
+    //    if (previewVoice != nullptr/* && previewVoice->isVoiceActive()*/)
+    //    {
+    //        if (v1 == nullptr)
+    //        {
+    //            v1 = previewVoice;
+    //        }
+    //        else if (v2 == nullptr)
+    //        {
+    //            v2 = previewVoice;
+    //        }
+    //    }
+    //}
+
+    //juce::SynthesiserSound::Ptr sound = nullptr;
+
+    //if (v1 != nullptr && v2 != nullptr)
+    //{
+    //    if (v1->wasStartedBefore(*v2))
+    //    {
+    //        v1->stopNote(0, false);
+    //        sound = v1->getCurrentlyPlayingSound();
+    //    }
+    //    else
+    //    {
+    //        v2->stopNote(0, false);
+    //        sound = v2->getCurrentlyPlayingSound();
+    //    }
+    //}
+    
+
+    for (auto* voice : voices)
+    {
+        if (auto* previewVoice = dynamic_cast<PreviewVoice*>(voice))
+        {
+            previewVoice->stopNote(0, false);
+            sounds.removeObject(previewVoice->getCurrentlyPlayingSound());
+            break;
+        }
+    }
+
+ /*   for (auto* sound : sounds)
+    {
+        if (auto* preveiwSound = dynamic_cast<PreviewSound*>(sound))
+        {
+            sounds.removeObject(sound);
+        }
+    }*/
+
+
+}
+
 bool KrumSampler::isFileAcceptable(const juce::File& file)
 {
     std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(file));
@@ -388,9 +682,36 @@ bool KrumSampler::isFileAcceptable(const juce::File& file)
     return true;
 }
 
+std::unique_ptr<juce::AudioFormatReader> KrumSampler::getFormatReader(juce::File& file)
+{
+    std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(file));
+    if (reader == nullptr)
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "File type not supported!", "The current supported file types are: " + formatManager.getWildcardForAllFormats() + ".");
+        return nullptr;
+    }
+
+    if (reader->lengthInSamples / reader->sampleRate >= MAX_FILE_LENGTH_SECS)
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "File Too Long!", "The maximum file length is " + juce::String(MAX_FILE_LENGTH_SECS) + " seconds.");
+        return nullptr;
+    }
+
+    return std::move(reader);
+}
+
 juce::AudioFormatManager& KrumSampler::getFormatManager()
 {
     return formatManager;
+}
+
+void KrumSampler::timerCallback()
+{
+    if (filePreviewer.wantsToPlayFile())
+    {
+        playPreviewFile();
+        filePreviewer.setWantsToPlayFile(false);
+    }
 }
 
 void KrumSampler::printSounds()
@@ -414,5 +735,4 @@ void KrumSampler::printVoices()
         DBG("Voice: " + juce::String(i) + (voice ? " is valid" : " is NULL"));
     }
 }
-
 

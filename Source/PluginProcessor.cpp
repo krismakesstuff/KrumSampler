@@ -30,7 +30,7 @@ juce::ValueTree createValueTree()
     //---------------- Global Settings ----------------------------
     juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS };
 
-    globalSettingsTree.setProperty(TreeIDs::previewerGain, juce::var(dBToGain(-6.0f)), nullptr);
+    //globalSettingsTree.setProperty(TreeIDs::previewerGain, juce::var(dBToGain(-6.0f)), nullptr); //moved to APVTS
     globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::fileBrowserHidden, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::infoPanelToggle, juce::var(1), nullptr);
@@ -45,7 +45,7 @@ juce::ValueTree createValueTree()
     {
         juce::String index = juce::String(i);
 
-        juce::ValueTree newModule { TreeIDs::MODULE, {{TreeIDs::moduleName,""}},{} }; //we use the index in the Type of the valueTree for quick acces from the child component
+        juce::ValueTree newModule { TreeIDs::MODULE, {{TreeIDs::moduleName,""}},{} }; 
         newModule.setProperty(TreeIDs::moduleState, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleFile, juce::var(""), nullptr);
         newModule.setProperty(TreeIDs::moduleMidiNote, juce::var(0), nullptr);
@@ -136,20 +136,28 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         paramsGroup.push_back(std::move(moduleGroup));
     }
     
+    //================================== Global Gain(s) ==============================================================
+
     juce::NormalisableRange<float> outGainRange{ dBToGain(-60.0f), dBToGain(2.0f), 0.0001f };
     outGainRange.setSkewForCentre(dBToGain(0.0f));
     outGainRange.symmetricSkew = true;
 
-    auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam_ID, "Output Gain",
+    auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam.toString(), "Output Gain",
                             outGainRange, dBToGain(0.0f),
                             "OutputGain",
                             juce::AudioProcessorParameter::genericParameter,
                             [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
                             [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
 
+    auto previewerGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::previewerGainParam.toString(), "Previewer Gain",
+                            outGainRange, dBToGain(0.0f),
+                            "PreviewerGain",
+                            juce::AudioProcessorParameter::genericParameter,
+                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
+                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+   
     auto globalGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Globals", "Global Parameters",
-                            "|", std::move(outputGainParameter));
-
+                            "|", std::move(outputGainParameter), std::move(previewerGainParameter));
 
     paramsGroup.push_back(std::move(globalGroup));
 
@@ -171,6 +179,10 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
     
+    //value is blank here
+    initSampler();
+    previewer.assignSampler(&sampler);
+
 #if JucePlugin_Build_Standalone
     fileBrowser.buildDemoKit();
 #endif
@@ -182,7 +194,6 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     juce::Logger::writeToLog("MaxFileLengthInSeconds: " + juce::String(MAX_FILE_LENGTH_SECS));
     juce::Logger::writeToLog("----------------------------");
 
-    updateModulesFromValueTree();
 
 }
 
@@ -194,7 +205,7 @@ KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 
 void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam_ID);
+    outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam);
     sampler.setCurrentPlaybackSampleRate(sampleRate);
     //juce::Logger::writeToLog("Processor prepared to play, sampleRate: " + juce::String(sampleRate) + ", samplesPerBlock: " +                      juce::String(samplesPerBlock));
 }
@@ -209,11 +220,11 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
-    if (previewer.wantsToPlayFile())
+ /*   if (previewer.wantsToPlayFile())
     {
         previewer.renderPreviewer(buffer);
     }
-    
+    */
     buffer.applyGain(*outputGainParameter);
     
     //this does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
@@ -409,24 +420,31 @@ juce::MidiKeyboardState& KrumSamplerAudioProcessor::getMidiState()
     return midiState;
 }
 
-//builds the sampler based off the tree
+//updates the sampler based off the tree
 void KrumSamplerAudioProcessor::updateModulesFromValueTree()
 {
+    initSampler();
+
+    DBG("---- Updating Modules using this Tree vvvvv ----");
+    DBG(valueTree.toXmlString());
+
     auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
     
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto moduleTree = modulesTree.getChild(i);
         int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
-        auto newMod = new KrumModule(sampler, moduleTree, &parameters);
-        sampler.addModule(newMod);
+
+        //auto newMod = new KrumModule(sampler, moduleTree, &parameters);
+        //sampler.addModule(newMod);
         if (state > 0) 
         {            
-            sampler.updateModuleSample(newMod);
+            auto mod = sampler.getModule(moduleTree.getProperty(TreeIDs::moduleSamplerIndex));
+            sampler.updateModuleSample(mod);
         }
         else
         {
-            DBG("ValueTree not Valid" + juce::String(i));
+            //DBG("ValueTree not Valid " + juce::String(i));
         }
     }
 }
@@ -570,6 +588,17 @@ KrumFileBrowser& KrumSamplerAudioProcessor::getFileBrowser()
 void KrumSamplerAudioProcessor::registerFormats()
 {
     formatManager->registerBasicFormats();
+}
+
+void KrumSamplerAudioProcessor::initSampler()
+{
+    if (sampler.getNumModules() > 0)
+    {
+        sampler.clearModules();
+    }
+
+    sampler.initModules(&valueTree, &parameters);
+
 }
 
 //==============================================================================
