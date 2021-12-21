@@ -38,8 +38,8 @@
 ### - notes
 - I envision only one instance of the plugin running per session and housing all your samples for easy mixing and file management. 
   - That being said, there's nothing stopping you from having multiple instances running (Although, I haven't tested this scenario much)
-- Currently only the VST3 on Windows is running BUT  
-  - This is a plug-in that comes in AU and VST3 formats, and will run on Windows and MacOS. (AAX coming soon!!)
+- Currently only the VST3 and AU builds are available
+  - This plug-in comes in AU and VST3 formats, and will run on Windows and MacOS. (AAX coming soon!!)
   - I will update this ReadMe and the release as I update this which will be very soon.
   
 - THIS IS IN BETA!! It runs fine in most cases, BUT testing is still on-going. Please let me know if you run into any issues!
@@ -53,10 +53,10 @@
 
 ## How To Download
 - Check out [releases](https://github.com/krismakesstuff/KrumSampler/releases) for the latest download. 
-  - I'm not currently using installers, so you'll have to put the appropraite plug-in into it's appropriate folder. (Once I update all the builds to the latest version I will make the installers)
+  - I'm not currently using installers, so you'll have to put the appropriate plug-in into it's appropriate folder. (Once I update all the builds to the latest version I will make the installers)
 
 ## How To Build
-- If you would like to build the plug-in to work on it yourself, you will need the [JUCE](https://github.com/juce-framework/JUCE) framework installed and up to date. 
+- If you would like to build the plug-in and work on it yourself, you will need the [JUCE](https://github.com/juce-framework/JUCE) framework installed and up to date. 
 - Once you have that installed you can then open the krumsampler.jucer file in the projucer.  
   - Make sure the Resources folder can be found by the projucer. You might have to remove the ones in the projucer and re-add the folder. 
   - Click the "save and open IDE" button icon towards the top of the projucer window. 
