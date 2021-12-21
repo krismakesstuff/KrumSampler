@@ -33,7 +33,7 @@
 #define MAX_VOICES 14
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 3
-#define KRUM_BUILD_VERSION "1.1.0-Beta" //Module Re-work
+#define KRUM_BUILD_VERSION "1.1.0-Beta"
 
 
 namespace TreeIDs

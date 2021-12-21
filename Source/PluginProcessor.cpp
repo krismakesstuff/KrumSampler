@@ -216,15 +216,12 @@ void KrumSamplerAudioProcessor::releaseResources()
 
 void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    //Aux output channels are Next!!
+    //getBusBuffer
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
     
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
- /*   if (previewer.wantsToPlayFile())
-    {
-        previewer.renderPreviewer(buffer);
-    }
-    */
     buffer.applyGain(*outputGainParameter);
     
     //this does not output midi, some hosts will freak out if you send them midi when you said you wouldn't

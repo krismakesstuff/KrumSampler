@@ -23,7 +23,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     auto& laf = getLookAndFeel();
     laf.setDefaultLookAndFeel(&kLaf);
     laf.setDefaultSansSerifTypefaceName("Calibri");
-    //static_cast<KrumLookAndFeel*>(&laf)->outputGainSlider = &outputGainSlider;
+
     InfoPanel::shared_instance().getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(2000);
 
