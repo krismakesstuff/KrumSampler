@@ -6,7 +6,8 @@
               cppLanguageStandard="17" pluginManufacturer="Kris Crawford" pluginDesc="KrumSampler"
               pluginVST3Category="Sampler,Synth" pluginFormats="buildAAX,buildAU,buildStandalone,buildVST3"
               pluginAAXCategory="0" companyName="Kris Crawford" pluginAUMainType="'aumu'"
-              version="0.1.1.0" companyWebsite="www.krismakesmusic.com" companyEmail="kris@krismakesmusic.com">
+              version="0.1.1.0" companyWebsite="www.krismakesmusic.com" companyEmail="kris@krismakesmusic.com"
+              pluginManufacturerCode="Kris" pluginCode="Krum">
   <MAINGROUP id="NTQyMJ" name="KrumSampler">
     <GROUP id="{EB4A4C0D-C950-9DF2-E178-9C3B37C020B8}" name="Resources">
       <GROUP id="{743F7E78-4475-25FE-A20F-6371AAABE9A3}" name="DemoKit">

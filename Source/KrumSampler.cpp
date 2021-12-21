@@ -496,7 +496,8 @@ void KrumSampler::updateModuleSample(KrumModule* updatedModule)
 void KrumSampler::addSample(KrumModule* moduleToAddSound)
 {
     //if (isFileAcceptable(moduleToAddSound->getSampleFile()))
-    if(auto reader = getFormatReader(moduleToAddSound->getSampleFile()))
+    juce::File sampleFile = moduleToAddSound->getSampleFile();
+    if(auto reader = getFormatReader(sampleFile))
     {
         //std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(moduleToAddSound->getSampleFile()));
         juce::BigInteger range;

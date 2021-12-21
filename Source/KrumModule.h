@@ -66,10 +66,10 @@ public:
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
     ModuleState getModuleState();
-    juce::File& getSampleFile();
+    juce::File getSampleFile();
     int getMidiTriggerNote();
     int getMidiTriggerChannel();
-    juce::String& getModuleName();
+    juce::String getModuleName();
     int getModuleSamplerIndex();
     int getModuleDisplayIndex();
     juce::Colour getModuleColor();

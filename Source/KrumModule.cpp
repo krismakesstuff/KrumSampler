@@ -53,7 +53,7 @@ KrumModule::ModuleState KrumModule::getModuleState()
     return static_cast<KrumModule::ModuleState>((int)moduleTree.getProperty(TreeIDs::moduleState));
 }
 
-juce::File& KrumModule::getSampleFile()
+juce::File KrumModule::getSampleFile()
 {
     return juce::File(moduleTree.getProperty(TreeIDs::moduleFile).toString());
 }
@@ -68,7 +68,7 @@ int KrumModule::getMidiTriggerChannel()
     return  moduleTree.getProperty(TreeIDs::moduleMidiChannel);
 }
 
-juce::String& KrumModule::getModuleName()
+juce::String KrumModule::getModuleName()
 {
     return moduleTree.getProperty(TreeIDs::moduleName).toString();
 }

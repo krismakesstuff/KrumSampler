@@ -299,8 +299,12 @@ void KrumModuleEditor::buildModule()
     titleBox.setJustificationType(juce::Justification::centred);
     titleBox.setEditable(false, true, false);
     titleBox.setTooltip("double-click to change name");
-
-    titleBox.onTextChange = [this] { setModuleName(titleBox.getText(true)); };
+    
+    titleBox.onTextChange = [this]
+    {
+        juce::String newName = titleBox.getText(true); //compiler reasons
+        setModuleName(newName);
+    };
 
     addAndMakeVisible(volumeSlider);
     volumeSlider.setScrollWheelEnabled(false);
@@ -440,7 +444,8 @@ void KrumModuleEditor::showSettingsOverlay(bool keepCurrentColorOnExit, bool sel
     settingsOverlay->setVisible(true);
     settingsOverlay->setMidi(getModuleMidiNote(), getModuleMidiChannel());
     settingsOverlay->keepCurrentColor(keepCurrentColorOnExit);
-    settingsOverlay->setTitle(getModuleName());
+    juce::String name = getModuleName(); //compiler reasons
+    settingsOverlay->setTitle(name); 
     
     if (selectOverlay)
     {
@@ -890,7 +895,8 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
 void KrumModuleEditor::handleNewFile(juce::File& file, bool overlayShouldListen)
 {
     DBG("Item: " + file.getFullPathName());
-    setModuleName(file.getFileName());
+    juce::String name = file.getFileName(); //compiler reasons
+    setModuleName(name);
     setModuleFile(file);
     setModuleState(KrumModule::ModuleState::hasFile);
     settingsOverlay->setMidiListen(overlayShouldListen);

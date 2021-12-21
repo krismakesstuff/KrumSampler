@@ -204,7 +204,8 @@ void ModuleSettingsOverlay::confirmButtonClicked()
 
     //this logic works out the context of leaving the moduleSettingsOverlay, 
     //essentially we only want to change moduleColor if a new one has been selected or if the module was just made, then we get a random color
-    parentEditor.setModuleName(titleBox.getText(true));
+    juce::String name = titleBox.getText(true); //compiler reasons
+    parentEditor.setModuleName(name);
     
     if (parentEditor.getModuleState() != KrumModule::ModuleState::active)
     {
