@@ -14,8 +14,9 @@
 /*
 * This draws the thumbnail of the audioFile that the KrumModuleEditor (parentEditor) gives to it. 
 * It can also accept a file that is dragged onto it and will "hot swap" the audio file out with the dropped one, and boy is it hot! 
-*       - This feature was one that I have been wanting to make since the start, it was one of the main interactions I wanted in my worflow. 
-*       - That being said, it does not handle the hot swap very well when the current audio file is trying to be played as the new one is trying to replace the original. Working on it...
+* 
+*
+* On a personal note - this feature was one that I have been wanting to make since the start, it was one of the main interactions I wanted in my worflow. 
 *
 */
 
@@ -34,6 +35,7 @@ public:
 
     ~DragAndDropThumbnail() override;
 
+    //For External D&D, still not sure if I should add this or not.
     //bool isInterestedInFileDrag(const juce::StringArray& files) override;
     //void filesDropped(const juce::StringArray& files, int x, int y) override;
 

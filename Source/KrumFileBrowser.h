@@ -16,7 +16,7 @@
 * 
 * The File Browser holds folders and files chosen by the user for quick access. These file paths will save with the plugin as well as any custom names that are given to them. 
 * This holds the file path of the file and has a separate display name which can be changed by the user, but does not rename any actual files. 
-* There are two sections, the "Recent" and "Favorites" sections. The Recent section gets automatically updated when a file is dropped on the FileDrop component. It will only hold files.
+* There are two sections, the "Recent" and "Favorites" sections. The Recent section gets automatically updated when a file is dropped on a new module. It will only hold files.
 * The Favorites section is user selected and can be chosen from the "AddFavoriteButton", which will pull up a browser to choose files from. 
 * 
 * This class is a bit confusing... The KrumFileBrowser holds a KrumTreeView. The KrumTreeView holds TreeViewItems. There are two types of TreeViewItems, KrumTreeHeaderItem and KrumTreeItem. 
@@ -25,8 +25,9 @@
 * This browser also connnects to the AudioPreviewer to preview files. 
 * 
 * TODO:
+* - Rebuild this whole thing. It could probably use it's own thread. This is one of the first things I built like 8 months ago and I hate it.
 * - Add "Drives" section, that would make it a little bit easier to add favorite folders. It would just always have your drives shown.
-* 
+* - Fix the DemoKit building
 * 
 */
 
@@ -39,17 +40,11 @@ class KrumModuleContainer;
 //strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
 namespace FileBrowserValueTreeIds
 {
-    //static const juce::String folderId{ "Folder" };
-    //static const juce::String fileId{ "File" };
-   
     //Probably should move these into the DECLARE_IDs section in Plugin processor.
     static const juce::String itemNameId{ "name" };
     static const juce::String pathId{ "path" };
     static const juce::String hiddenFilesId{ "hiddenFiles" };
 
-    //static const juce::String recentFolderId{ "Recent" };
-    //static const juce::String favoritesFolderId{ "Favorites" };
-    //static const juce::String opennessId{ "OpennessState" };
 }
 
 namespace FileBrowserInfoStrings
@@ -57,6 +52,7 @@ namespace FileBrowserInfoStrings
     static const juce::String compTitle {"File Browser"};
     static const juce::String message {"This holds your favorite samples. You can drop samples and/or folders into the 'Favorites' section for easy access. You can also manually add files and folders by clicking the plus sign."};
 }
+
 //Ids for navigating the TreeView
 enum FileBrowserSectionIds
 {
@@ -102,7 +98,6 @@ public:
     void itemClicked(const juce::MouseEvent& e) override;
     void itemDoubleClicked(const juce::MouseEvent& e) override;
 
-    //void itemSelectionChanged(bool isNowSelected) override;
     void closeLabelEditor(juce::Label* label);
 
     juce::String getUniqueName() const override;
@@ -129,7 +124,7 @@ private:
     KrumTreeView* parentTree;
     SimpleAudioPreviewer* previewer;
 
-    //============================================================================================================//
+    //-------------------------------------
 
     class EditableComp : public juce::Label
     {
@@ -216,7 +211,7 @@ private:
     bool editing = false;
     int numFilesExcluded;
 
-//=================================================================================================================================//
+    //-------------------------------------
     
     class EditableHeaderComp : public juce::Label
     {
@@ -429,9 +424,6 @@ public:
     void paint(juce::Graphics& g) override;
     void resized() override;
 
-//    void mouseEnter(const juce::MouseEvent& e) override;
-//    void mouseExit(const juce::MouseEvent& e) override;
-//
     int getNumSelectedItems();
     KrumTreeItem* getSelectedItem(int index);
 
@@ -449,8 +441,7 @@ private:
     KrumTreeView fileTree;
 
     SimpleAudioPreviewer& audioPreviewer;
-    //juce::DrawableButton addFavoriteButton{ "Add Favorite", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground };
-
+  
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Click this to open a browser and select Folders and Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
     juce::Colour fontColor{ juce::Colours::lightgrey };

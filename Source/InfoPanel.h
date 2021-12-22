@@ -14,6 +14,11 @@
 
 //==============================================================================
 /*
+* This InfoPanel has a static instance which is used by all the components that want to display text.
+* 
+* There are some classes that override their components mouse movements so I don't have to worry about that when handling other functionality in those classes
+* There's probably a template way of handling this.. (?)
+* 
 */
 
 
@@ -66,7 +71,9 @@ private:
 
     juce::String compTitle, message, keycommand;
 };
+
 //==============================================================================
+
 class InfoPanelTextButton : public juce::TextButton
 {
 public:
@@ -77,7 +84,6 @@ public:
 private:
     juce::String compTitle, message, keycommand;
 };
-
 
 //==============================================================================
 
@@ -92,6 +98,7 @@ private:
     
     juce::String compTitle, message, keycommand;
 };
+
 //==============================================================================
 
 class InfoPanelToggleButton : public juce::ToggleButton
@@ -106,6 +113,7 @@ private:
     juce::String compTitle, message, keycommand;
     
 };
+
 //==============================================================================
 
 class InfoPanelSlider : public juce::Slider
@@ -120,6 +128,7 @@ private:
 
     juce::String compTitle, message, keycommand;
 };
+
 //==============================================================================
 
 class InfoPanelLabel : public juce::Label

@@ -26,30 +26,10 @@ DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sour
 }
 
 DragAndDropThumbnail::~DragAndDropThumbnail()
-{
-}
-
-//bool DragAndDropThumbnail::isInterestedInFileDrag(const juce::StringArray& files)
-//{
-//    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-//    return false;
-//}
-//
-//void DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, int y)
-//{
-//    if (files.size() == 1)
-//    {
-//        for (auto file : files)
-//        {
-//            juce::File newFile{ file };
-//            addDroppedFile(newFile);
-//        }
-//    }
-//}
+{}
 
 bool DragAndDropThumbnail::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
 {
-    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
     return true;
 }
 
@@ -72,15 +52,6 @@ void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
     {
         droppedFile = newFile;
         moveDroppedFileToParent();
-        /*if (parentEditor.isModulePlaying())
-        {
-            checkDroppedFile = true;
-            parentEditor.drawThumbnail = true;
-        }
-        else
-        {
-        }
-        */
     }
     else
     {
@@ -90,12 +61,6 @@ void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
 
 void DragAndDropThumbnail::moveDroppedFileToParent()
 {
-    //use tree to set this
-   /* auto& parent = parentEditor.parent;
-
-    parent.setSampleFile(droppedFile);
-    parent.sampler.updateModuleSample(&parent);*/
-
     parentEditor.moduleTree.setProperty(TreeIDs::moduleFile, droppedFile.getFullPathName(), nullptr);
 
     clipGainSliderAttachment.reset(new SliderAttachment(parentEditor.editor.parameters, TreeIDs::paramModuleClipGain + juce::String(parentEditor.getModuleSamplerIndex()), clipGainSlider));
@@ -165,15 +130,12 @@ void DragAndDropThumbnail::paintIfFileLoaded(juce::Graphics& g, const juce::Rect
 
 void DragAndDropThumbnail::mouseEnter(const juce::MouseEvent& e)
 {
-    //const juce::MessageManagerLock mm;
     parentEditor.editor.moduleContainer.showModuleClipGainSlider(&parentEditor);
     InfoPanelComponent::mouseEnter(e);
-    //repaint();
 }
 
 void DragAndDropThumbnail::mouseExit(const juce::MouseEvent& e)
 {
-    //const juce::MessageManagerLock mm;
     if (isMouseOver(true))
     {
         return;
@@ -182,10 +144,28 @@ void DragAndDropThumbnail::mouseExit(const juce::MouseEvent& e)
     clipGainSlider.setVisible(false);
     canAcceptFile = false;
     InfoPanelComponent::mouseExit(e);
-    //repaint();
 }
 
 void DragAndDropThumbnail::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)
 {
     clipGainSlider.mouseWheelMove(e, wheel);
 }
+
+
+//bool DragAndDropThumbnail::isInterestedInFileDrag(const juce::StringArray& files)
+//{
+//    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
+//    return false;
+//}
+//
+//void DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, int y)
+//{
+//    if (files.size() == 1)
+//    {
+//        for (auto file : files)
+//        {
+//            juce::File newFile{ file };
+//            addDroppedFile(newFile);
+//        }
+//    }
+//}

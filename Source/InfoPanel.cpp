@@ -29,15 +29,9 @@ void InfoPanel::paint (juce::Graphics& g)
     //bg fill
     g.setColour(bgColor);
     g.fillRoundedRectangle(panelBG, cornerSize);
-    
-//    //outline
-//    g.setColour(fontColor.withAlpha(0.5f));
-//    g.drawRoundedRectangle(panelBG, cornerSize, 1.0f);
-    
+
     if (showText)
     {
-        //g.setColour(juce::Colours::darkgrey.darker());
-        //g.fillRoundedRectangle(area.toFloat(), 3.0f);
 
         auto messageFont = g.getCurrentFont();
         
@@ -46,9 +40,6 @@ void InfoPanel::paint (juce::Graphics& g)
         int numLines = panelBG.getHeight() / 4;
         juce::Path titleBG;
         titleBG.addRoundedRectangle(panelBG.getX() + 5, panelBG.getY(), panelBG.getWidth(), titleTextH, cornerSize, cornerSize, true, true, false, false);
-
-//        g.setColour(bgColor.brighter(0.2f));
-//        g.fillPath(titleBG);
 
         g.setColour(fontColor);
         g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::bold).withHeight(titleTextH));

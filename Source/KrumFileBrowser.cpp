@@ -1551,23 +1551,6 @@ void KrumFileBrowser::resized()
 
 }
 
-//void KrumFileBrowser::mouseEnter(const juce::MouseEvent& e)
-//{
-//    InfoPanel::shared_instance().setInfoPanelText(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message);
-//    juce::Component::mouseEnter(e);
-//}
-//
-//void KrumFileBrowser::mouseExit(const juce::MouseEvent& e)
-//{
-//    if(!isMouseOver(true))
-//    {
-//        InfoPanel::shared_instance().clearPanelText();
-//    }
-//
-//    juce::Component::mouseExit(e);
-//}
-//
-
 int KrumFileBrowser::getNumSelectedItems()
 {
     return fileTree.getNumSelectedItems();

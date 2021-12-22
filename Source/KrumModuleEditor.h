@@ -30,8 +30,8 @@
 * TODO:
 * - Redisgn the ModuleSettingsOverlay GUI
 *   - Better Color Pallette
-*   - Maybe even have seperate ModuleSettingsOverlays for each settings change
 *   - Should be simple and quick to use
+*   - Icons for buttons?
 * 
 * 
 */
@@ -80,8 +80,6 @@ public:
     void showSettingsOverlay(bool keepCurrentColorOnExit ,bool selectOverlay = false);
     void removeSettingsOverlay(bool keepSettings);
 
-    
-    //bool isModuleVisible();
 
     void hideModule();
     void showModule();
@@ -96,9 +94,7 @@ public:
     void setModuleDisplayIndex(int newDisplayIndex);
 
     void setModuleName(juce::String& newName);
-    //void updateName();
     juce::String getModuleName();
-
 
     void setModuleColor(juce::Colour newColor);
     juce::Colour getModuleColor();
@@ -112,23 +108,22 @@ public:
 
     void setModulePlaying(bool isPlaying);
     bool isModulePlaying();
-    
-    void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
 
     int getAudioFileLengthInMs();
 
     bool doesEditorWantMidi();
     void handleMidi(int midiChannel, int midiNote);
-    
 
     void triggerMouseDownOnNote(const juce::MouseEvent& e);
     void triggerMouseUpOnNote(const juce::MouseEvent& e);
-
-    //bool needsToBuildEditor();
     
     bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
     
+    void handleNewFile(juce::File& file, bool overlayShouldListen);
+    void setModuleFile(juce::File& newFile);
+    void addFileToRecentsFolder(juce::File& file, juce::String name);
+
     bool shouldCheckDroppedFile();
     void handleLastDroppedFile();
     bool isMouseOverThumbnail();
@@ -138,7 +133,6 @@ public:
     bool canThumbnailAcceptFile();
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
 
-   
     void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
     
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
@@ -147,41 +141,14 @@ public:
     bool isInterestedInFileDrag(const juce::StringArray& files) override;
     void filesDropped(const juce::StringArray& files, int x, int y) override;
     
-    void handleNewFile(juce::File& file, bool overlayShouldListen);
-    void setModuleFile(juce::File& newFile);
-    
     bool shouldModuleAcceptFileDrop();
     
-    void addFileToRecentsFolder(juce::File& file, juce::String name);
-    
-   // void handleSettingsMenuResult(int result)
-    //void handleOverlayData(bool keepSettings);
-    //void setModuleIndex(int newIndex);
-    //void reassignSliderAttachments();
-    //void setOldMidiNote(int midiNote);
-
-//    bool operator<(KrumModuleEditor* other)
-//    {
-//        int firstMidi = getModuleMidiNote();
-//        if(firstMidi == 0)
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            return firstMidi < other->getModuleMidiNote();
-//        }
-//    }
-//
-
-    //void setKeyboardColor();
-    //void removeFromDisplay();
-    //void forceMouseUp();
 
 private:
 
-    //using Ptr = juce::ReferenceCountedObjectPtr<KrumModuleEditor>;
-    
+    void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
+
+
     friend class DragAndDropThumbnail;
     void zeroModuleTree();
     void timerCallback() override;
@@ -194,7 +161,6 @@ private:
     void handleOneShotButtonMouseUp(const juce::MouseEvent& e);
 
     
-
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
 

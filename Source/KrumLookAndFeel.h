@@ -13,7 +13,7 @@
 
 /*
 * 
-* Handles the drawing of many objects as defined by JUCE.
+* Handles the drawing of many objects.
 * 
 */
 
@@ -436,6 +436,5 @@ public:
 
     }*/
 
-    //juce::Slider* outputGainSlider = nullptr;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumLookAndFeel)
 };

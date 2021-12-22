@@ -15,15 +15,18 @@
 
 //==============================================================================
 /*
-* This Class plays the audio file that is selected in the file browser
+* This Class plays the audio file that is selected in the file browser. 
+* You MUST assign this the sampler using assignSampler() before it will work.
+* There is a dedicated voice in the sampler for rendering the file. 
+* To give a file to the sampler, simply use loadFile(juce::File), then call setWantsToPlayFile(true);
+* The sampler will check if this wants to play in it's timerCallback().
+* 
 */
 
 class KrumSampler;
 
 class SimpleAudioPreviewer  :   public juce::Component,
-                                public juce::SettableTooltipClient/*,
-                                public juce::Timer*/
-                                //public InfoPanelComponent
+                                public juce::SettableTooltipClient
 {
 public:
 
@@ -33,21 +36,14 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-//    void mouseEnter(const juce::MouseEvent& e) override;
-//    void mouseExit(const juce::MouseEvent& e) override;
-//
     bool isAutoPlayActive();
-
-    //void renderPreviewer(juce::AudioBuffer<float>& outputBuffer);
 
     void setCurrentGain();
     std::atomic<float>* getCurrentGain();
-    //std::atomic<float>* getGainSlider();
 
     juce::String toText(double value);
     float fromText(juce::String text);
 
-    void updateBubbleComp(juce::Slider* slider, juce::Component* bubble);
 
     void loadFile(juce::File& fileToPreview);
     juce::AudioFormatManager* getFormatManager();
@@ -63,16 +59,12 @@ public:
     juce::File& getCurrentFile();
     bool wantsToPlayFile();
     void setWantsToPlayFile(bool wantsToPlay);
-    //void playCurrentFile();
 
     void assignSampler(KrumSampler* samplerToAssign);
 
-
 private:
 
-    //void timerCallback() override;
-    void updateFormatReader();
-
+    void updateBubbleComp(juce::Slider* slider, juce::Component* bubble);
 
     std::atomic<bool> readyToPlayFile = false;
     std::atomic<bool> rendering = false;
@@ -81,8 +73,6 @@ private:
 
     int playBackSampleRate;
 
-    //juce::ToggleButton autoPlayToggle;
-    //juce::Slider volumeSlider;
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
     InfoPanelToggleButton autoPlayToggle {"Auto-Play", "If unchecked, files will play when they are double-clicked. If this is checked, the will play as they are selected"};
@@ -97,10 +87,6 @@ private:
     std::unique_ptr<juce::AudioFormatReaderSource> currentAudioFileSource = nullptr;
     juce::AudioFormatManager* formatManager = nullptr;
     KrumSampler* sampler = nullptr;
-    
-    //juce::String compTitle {"Audio Previewer"};
-    //juce::String message {"Double-Click files to preview them, if auto-play is active they will play on a single click. Volume is sepearte from the rest of the sampler"};
-    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleAudioPreviewer)
 };

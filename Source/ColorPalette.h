@@ -20,7 +20,7 @@
 * 
 * TODO: 
 * - Fix getRandomColor() and make sure the color is not the same as the color before it. 
-* - Redesign with ModuleSettingsOverlay, bigger color buttons? 
+* - bigger/different color buttons? 
 */
 
 namespace ColorPaletteColors
@@ -114,7 +114,6 @@ public:
 private:
     ModuleSettingsOverlay& parent;
 
-    //bool colorOnly = false;
     juce::Colour selectedColor{ juce::Colours::white };
     juce::Colour* lastRandomColor = nullptr;
     juce::OwnedArray<juce::ShapeButton> colorButtons;

@@ -17,12 +17,10 @@ class KrumModuleEditor;
 
 /*
 * This class represents the overlay that lives on top of the modules when settings are being changed. 
-* Midi and color can be changed from this overlay and it is shown by default when a module is created. 
-* You can also access it from the settings menu on the module. 
+* Midi and color can be changed from this overlay and it is shown by default when a module is created.  
 * 
 * TODO:
-* - Redeisgn GUI
-* - Maybe even reconsider the KrumModule's settings menu, and it's interactions with this class
+* - Redeisgn GUI (feels crowded)
 * 
 */
 
@@ -63,7 +61,6 @@ public:
 
     void keepCurrentColor(bool keepColor);
     void colorWasChanged(bool colorWasChanged);
-    //void setToOnlyShowColors(bool onlyShowColors);
 
 private:
 
@@ -75,12 +72,6 @@ private:
 
     void setMidiLabelColors();
     void visibilityChanged() override;
-
-
-    //juce::TextButton midiListenButton;
-    //juce::TextButton confirmButton;
-    //juce::TextButton deleteButton;
-    //juce::TextButton cancelButton;
 
     InfoPanelTextButton midiListenButton{"Midi Listen", "Activate this to play or click a new midi assignment. NOTE: will turn red when listening"};
     InfoPanelTextButton confirmButton{"Confirm Button", "This will confirm all changes and remove the settings overlay"};

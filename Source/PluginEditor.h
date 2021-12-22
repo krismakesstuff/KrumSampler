@@ -14,7 +14,6 @@
 #include "KrumModule.h"
 #include "KrumKeyboard.h"
 #include "KrumLookAndFeel.h"
-#include "KrumFileDrop.h"
 #include "KrumModuleContainer.h"
 #include "InfoPanel.h"
 
@@ -22,8 +21,9 @@
 //==============================================================================
 /*
 * 
-* A JUCE generated class that represents the GUI. This is created and owned by the host app. 
-* This holds all of the Krum GUI elements.
+* A class that represents the GUI. This is created and owned by the host app. 
+* This holds all of the Krum GUI elements and draws the base component for the plugin.
+* It's important to keep in mind that this can be created and deleted at any time!
 * 
 */
 
@@ -48,14 +48,11 @@ namespace EditorDimensions
     const static int outputW = 80;
     const static int keyboardH = 90;
 
-    //const static int titleImageH;
     const static int titleImageW = 420; //nice
     
-    //const static int infoH = 650;
     const static int fileTreeH = 600;
     const static int fileTreeTitleH = 30;
 
-    //const static int emptyAreaMinW = 350;
     const static int fileTreeW = 350;
 
     const static float cornerSize = 5.0f;
@@ -70,11 +67,10 @@ namespace EditorDimensions
 };
 
 class KrumSamplerAudioProcessorEditor  :    public juce::AudioProcessorEditor,
-                                            public juce::MidiKeyboardStateListener,
                                             public juce::DragAndDropContainer
 {
 public:
-    KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor&, KrumSampler&,/* KrumModuleContainer* contain,*/ 
+    KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor&, KrumSampler&,
                                     juce::AudioProcessorValueTreeState& vts,
                                     juce::ValueTree& valueTree, juce::ValueTree& fileBrowserTree);
     ~KrumSamplerAudioProcessorEditor() override;
@@ -84,19 +80,11 @@ public:
     void paintOutputVolumeLines(juce::Graphics& g, juce::Rectangle<float> bounds);
     void resized() override;
 
-    void visibilityChanged() override;
-
-    void handleNoteOn(juce::MidiKeyboardState*, int midiChannel, int midiNote, float velocity) override;
-    void handleNoteOff(juce::MidiKeyboardState*, int midiChannel, int midiNote, float velocity) override;
-    
     static juce::String getMidiInfo(const juce::MidiMessage&);
 
-    //bool createModule(juce::String& moduleName, int index, juce::File& file);
-    //void createModuleEditors();
     void addNextModuleEditor();
     KrumModuleContainer& getModuleContainer();
 
-    void reconstructModuleDisplay(juce::ValueTree& moduleDisplayTree);
     void printModules();
 
     void hideFileBrowser();
@@ -110,16 +98,9 @@ public:
     bool getSavedInfoButtonState();
     void saveInfoButtonState();
     
-    
-    void updateOutputGainBubbleComp(juce::Component*);
-
-    //void setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote = 0);
-    void removeKeyboardNoteColor(int midiNoteNumber);
 
     void addKeyboardListener(juce::MidiKeyboardStateListener* listener);
     void removeKeyboardListener(juce::MidiKeyboardStateListener* listenerToRemove);
-
-    //void cleanUpEmptyModuleTrees();
 
     juce::AudioFormatManager* getAudioFormatManager();
     juce::AudioThumbnailCache& getThumbnailCache();
@@ -132,11 +113,10 @@ public:
 
     juce::SharedResourcePointer<juce::TooltipWindow> toolTipWindow;
 
-    //void updateThumbnails();
-    
-    
 
 private:
+
+    void updateOutputGainBubbleComp(juce::Component*);
 
 
     bool needsToUpdateThumbs = false;
@@ -149,7 +129,6 @@ private:
 
     juce::Image titleImage;
 
-    //juce::DrawableButton collapseBrowserButton {"Collapse", juce::DrawableButton::ButtonStyle::ImageStretched};
     InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore"};
     const juce::Font defaultFont{ "Calibri", 11.0f, juce::Font::FontStyleFlags::plain };
 
@@ -159,10 +138,8 @@ private:
     juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
     juce::Colour bgColor{ juce::Colours::black };
-
     juce::Colour outputThumbColor{ juce::Colours::cadetblue };
     juce::Colour outputTrackColor{ juce::Colours::darkgrey };
-
     juce::Colour mainFontColor{ juce::Colours::white };
     juce::Colour backFontColor{ juce::Colours::darkgrey };
 
@@ -188,7 +165,6 @@ private:
     InfoPanelTextButton websiteButton{"Website", "Clicking this will open my website. Go check it out yo!"};
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
     
-    
 
     //Not Using this font anymore, keeping this here incase I want to add a custom font later
     
@@ -198,11 +174,6 @@ private:
 //                                                                    BinaryData::MONOGLYCERIDE_TTFSize)));
 //        return wacky;
 //    }
-
-    
-    
-
-    
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessorEditor)
 };

@@ -14,8 +14,8 @@
 
 
 
-ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool colorOnly*/)
-    : parentEditor(parent), colorPalette(*this)/* isColorOnly(colorOnly)*/
+ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent)
+    : parentEditor(parent), colorPalette(*this)
 {
 
     addAndMakeVisible(titleBox);
@@ -29,7 +29,6 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent/*, bool co
     titleBox.setColour(juce::CaretComponent::ColourIds::caretColourId, juce::Colours::black);
     titleBox.setJustificationType(juce::Justification::centred);
     titleBox.setEditable(false, true, false);
-    //titleBox.onTextChange = [this] {parentEditor.setModuleName(titleBox.getText()); };
 
     addAndMakeVisible(midiNoteNumberLabel);
     midiNoteNumberLabel.setFont({ 40.0f });
@@ -106,10 +105,6 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
 
     juce::Rectangle<int> botTextArea = area.withTop(area.getBottom() - 75).reduced(3);
 
-    //g.setColour(juce::Colours::darkgrey.darker());
-    //g.fillRoundedRectangle(botTextArea.toFloat(), cornerSize);
-    //g.fillRect(botTextArea);
-
     moduleSelectedColor = colorPalette.getSelectedColor();
 
     g.setColour(moduleSelectedColor);
@@ -162,12 +157,14 @@ void ModuleSettingsOverlay::resized()
 
 void ModuleSettingsOverlay::mouseEnter(const juce::MouseEvent& e)
 {
+    //Probably could get rid of this but I think I might use them.. 
     //InfoPanel::shared_instance().setInfoPanelText("Settings Overlay", "To assign a new midi note, enable midi listen, and play/click your note. You can also change the color or delte the module");
     juce::Component::mouseEnter(e);
 }
 
 void ModuleSettingsOverlay::mouseExit(const juce::MouseEvent& e)
 {
+    //Probably could get rid of this but I think I might use them.. 
     //InfoPanel::shared_instance().clearPanelText();
     juce::Component::mouseExit(e);
 }
@@ -202,14 +199,15 @@ void ModuleSettingsOverlay::confirmButtonClicked()
 {
     juce::Colour color;
 
-    //this logic works out the context of leaving the moduleSettingsOverlay, 
+    //this logic works out the context of leaving the moduleSettingsOverlay.
     //essentially we only want to change moduleColor if a new one has been selected or if the module was just made, then we get a random color
+    
     juce::String name = titleBox.getText(true); //compiler reasons
     parentEditor.setModuleName(name);
     
     if (parentEditor.getModuleState() != KrumModule::ModuleState::active)
     {
-        parentEditor.setModuleState(KrumModule::ModuleState::active);
+        parentEditor.setModuleState(KrumModule::ModuleState::active); //important to set the state before setting the color and midiNote
     }
     
     if (colorChanged)
@@ -271,7 +269,6 @@ void ModuleSettingsOverlay::cancelSettings()
     }
 
 }
-
 
 juce::Colour ModuleSettingsOverlay::getSelectedColor()
 {
@@ -347,12 +344,6 @@ void ModuleSettingsOverlay::colorWasChanged(bool colorWasChanged)
     midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
     midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
 }
-
-//void ModuleSettingsOverlay::setToOnlyShowColors(bool onlyShowColors)
-//{
-//    isColorOnly = onlyShowColors;
-//    colorPalette.setVisible(isColorOnly);
-//}
 
 void ModuleSettingsOverlay::timerCallback()
 {

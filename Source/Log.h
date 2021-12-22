@@ -11,6 +11,9 @@
 #pragma once
 #include <JuceHeader.h>
 
+//Currently not using this class. But I want to implement better logging. Something simple.
+
+
 namespace Log
 {
     static juce::String logFolderName {"KrumSampler"};

@@ -8,7 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Log.h"
+//#include "Log.h"
 
 //==============================================================================
 
@@ -23,6 +23,7 @@ float gainToDB(float decibels)
     return juce::Decibels::gainToDecibels<float>(decibels);
 }
 
+//creates a blank ValueTree
 juce::ValueTree createValueTree()
 {
     juce::ValueTree appStateValueTree{ TreeIDs::APPSTATE };
@@ -30,7 +31,6 @@ juce::ValueTree createValueTree()
     //---------------- Global Settings ----------------------------
     juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS };
 
-    //globalSettingsTree.setProperty(TreeIDs::previewerGain, juce::var(dBToGain(-6.0f)), nullptr); //moved to APVTS
     globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::fileBrowserHidden, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::infoPanelToggle, juce::var(1), nullptr);
@@ -79,7 +79,6 @@ juce::ValueTree createFileBrowserTree()
     return retValTree.createCopy();
 
 }
-
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -199,8 +198,7 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
 
 KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 {
-    //juce::Logger::setCurrentLogger(nullptr);
-    //delete Log::logger;
+
 }
 
 void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
@@ -228,11 +226,6 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     midiMessages.clear();
 }
 
-//void KrumSamplerAudioProcessor::processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents)
-//{
-//    //midiState.processMidi(midiMessages, startSample, numSamples, injectDirectEvents);
-//}
-
 void KrumSamplerAudioProcessor::addMidiKeyboardListener(juce::MidiKeyboardStateListener* newListener)
 {
     midiState.addListener(newListener);
@@ -242,105 +235,6 @@ void KrumSamplerAudioProcessor::removeMidiKeyboardListener(juce::MidiKeyboardSta
 {
     midiState.removeListener(listenerToRemove);
 }
-
-
-//==============================================================================
-#ifndef JucePlugin_PreferredChannelConfigurations
-bool KrumSamplerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
-{
-  #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused (layouts);
-    return true;
-  #else
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
-
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-   #endif
-
-    return true;
-  #endif
-}
-#endif
-
-bool KrumSamplerAudioProcessor::hasEditor() const
-{
-    return true; 
-}
-
-juce::AudioProcessorEditor* KrumSamplerAudioProcessor::createEditor()
-{
-    return new KrumSamplerAudioProcessorEditor(*this, sampler, parameters, valueTree, fileBrowserValueTree);
-}
-
-//=======================================================================================//
-const juce::String KrumSamplerAudioProcessor::getName() const
-{
-    return JucePlugin_Name;
-}
-
-bool KrumSamplerAudioProcessor::acceptsMidi() const
-{
-#if JucePlugin_WantsMidiInput
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool KrumSamplerAudioProcessor::producesMidi() const
-{
-#if JucePlugin_ProducesMidiOutput
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool KrumSamplerAudioProcessor::isMidiEffect() const
-{
-#if JucePlugin_IsMidiEffect
-    return true;
-#else
-    return false;
-#endif
-}
-
-double KrumSamplerAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int KrumSamplerAudioProcessor::getNumPrograms()
-{
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
-}
-
-int KrumSamplerAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void KrumSamplerAudioProcessor::setCurrentProgram(int index)
-{
-}
-
-const juce::String KrumSamplerAudioProcessor::getProgramName(int index)
-{
-    return {};
-}
-
-void KrumSamplerAudioProcessor::changeProgramName(int index, const juce::String& newName)
-{
-}
-
-//==============================================================================
-
 
 //==============================================================================
 void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
@@ -432,8 +326,6 @@ void KrumSamplerAudioProcessor::updateModulesFromValueTree()
         auto moduleTree = modulesTree.getChild(i);
         int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
 
-        //auto newMod = new KrumModule(sampler, moduleTree, &parameters);
-        //sampler.addModule(newMod);
         if (state > 0) 
         {            
             auto mod = sampler.getModule(moduleTree.getProperty(TreeIDs::moduleSamplerIndex));
@@ -445,127 +337,6 @@ void KrumSamplerAudioProcessor::updateModulesFromValueTree()
         }
     }
 }
-
-//void KrumSamplerAudioProcessor::updateValueTreeState()
-//{
-//    auto modulesTree = valueTree.getChildWithName("KrumModules");
-//
-//    for (int i = 0; i < MAX_NUM_MODULES; i++)
-//    {
-//        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
-//        auto mod = sampler.getModule(i);
-//        if (mod != nullptr)
-//        {
-//            for (int j = 0; j < moduleTree.getNumChildren(); j++)
-//            {
-//                auto stateTree = moduleTree.getChild(j);
-//                auto id = stateTree.getProperty("id");
-//
-//                if (id.toString() == TreeIDs::paramModuleState_ID)
-//                {
-//                    stateTree.setProperty("value", (int)mod->getModuleState(), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleFile_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(mod->getSampleFile().getFullPathName()), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerNote()), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(mod->getMidiTriggerChannel()), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleColor_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(mod->getModuleColor().toDisplayString(true)), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(mod->getModuleDisplayIndex()), nullptr);
-//                }
-//            }
-//        }
-//        else //zero the state for this module
-//        {
-//            
-//            auto gainParam = parameters.getParameter(TreeIDs::paramModuleGain_ID + juce::String(i));
-//            auto clipGainParam = parameters.getParameter(TreeIDs::paramModuleClipGain_ID + juce::String(i));
-//            auto panParam = parameters.getParameter(TreeIDs::paramModulePan_ID + juce::String(i));
-//
-//            auto zeroGain = gainParam->getNormalisableRange().convertTo0to1(dBToGain(0.0f));
-//            gainParam->setValueNotifyingHost(zeroGain);
-//            clipGainParam->setValueNotifyingHost(zeroGain);
-//            panParam->setValueNotifyingHost(0.5f);
-//
-//            moduleTree.setProperty("name", juce::var(""), nullptr);
-//
-//            for (int j = 0; j < moduleTree.getNumChildren(); j++)
-//            {
-//                auto stateTree = moduleTree.getChild(j);
-//                auto id = stateTree.getProperty("id");
-//
-//                if (id.toString() == TreeIDs::paramModuleState_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(0), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleFile_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(""), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(0), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(0), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleColor_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(""), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(""), nullptr);
-//                }
-//            }
-//        }
-//    }
-//
-//    //DBG("---Updated Tree State---");
-//    //juce::Logger::writeToLog("---Updated Tree State---");
-//    
-////    auto state = valueTree.createCopy();
-////    std::unique_ptr<juce::XmlElement> xml = state.createXml();
-////    DBG(xml->toString());
-//
-//}
-
-
-//int KrumSamplerAudioProcessor::findFreeModuleIndex()
-//{
-//    auto modulesTree = valueTree.getChildWithName("KrumModules");
-//
-//    for (int i = 0; i < MAX_NUM_MODULES; i++)
-//    {
-//        auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
-//
-//        juce::ValueTree stateTree;
-//        juce::var id;
-//        juce::var val;
-//
-//        stateTree = moduleTree.getChild(0);             //index of ModuleActive parameter in ValueTree.
-//        id = stateTree.getProperty("id");
-//        val = stateTree.getProperty("value");
-//        if (id.toString() == TreeIDs::paramModuleState_ID && int(val) == 0)
-//        {
-//            return i;
-//        }
-//    }
-//
-//}
 
 int KrumSamplerAudioProcessor::getNumModulesInSampler()
 {
@@ -599,6 +370,102 @@ void KrumSamplerAudioProcessor::initSampler()
 }
 
 //==============================================================================
+
+#ifndef JucePlugin_PreferredChannelConfigurations
+bool KrumSamplerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+{
+#if JucePlugin_IsMidiEffect
+    juce::ignoreUnused(layouts);
+    return true;
+#else
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+
+    // This checks if the input layout matches the output layout
+#if ! JucePlugin_IsSynth
+    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+        return false;
+#endif
+
+    return true;
+#endif
+}
+#endif
+
+bool KrumSamplerAudioProcessor::hasEditor() const
+{
+    return true;
+}
+
+juce::AudioProcessorEditor* KrumSamplerAudioProcessor::createEditor()
+{
+    return new KrumSamplerAudioProcessorEditor(*this, sampler, parameters, valueTree, fileBrowserValueTree);
+}
+
+const juce::String KrumSamplerAudioProcessor::getName() const
+{
+    return JucePlugin_Name;
+}
+
+bool KrumSamplerAudioProcessor::acceptsMidi() const
+{
+#if JucePlugin_WantsMidiInput
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool KrumSamplerAudioProcessor::producesMidi() const
+{
+#if JucePlugin_ProducesMidiOutput
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool KrumSamplerAudioProcessor::isMidiEffect() const
+{
+#if JucePlugin_IsMidiEffect
+    return true;
+#else
+    return false;
+#endif
+}
+
+double KrumSamplerAudioProcessor::getTailLengthSeconds() const
+{
+    return 0.0;
+}
+
+int KrumSamplerAudioProcessor::getNumPrograms()
+{
+    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
+                // so this should be at least 1, even if you're not really implementing programs.
+}
+
+int KrumSamplerAudioProcessor::getCurrentProgram()
+{
+    return 0;
+}
+
+void KrumSamplerAudioProcessor::setCurrentProgram(int index)
+{
+}
+
+const juce::String KrumSamplerAudioProcessor::getProgramName(int index)
+{
+    return {};
+}
+
+void KrumSamplerAudioProcessor::changeProgramName(int index, const juce::String& newName)
+{
+}
+
+//==============================================================================
+
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {

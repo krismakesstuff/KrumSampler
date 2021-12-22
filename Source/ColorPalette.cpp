@@ -12,11 +12,10 @@
 #include "ColorPalette.h"
 #include "ModuleSettingsOverlay.h"
 
-//FIX MEE
-// Need to set the bounds in a resized method instead of in the ctor.... 
 //==============================================================================
-ColorPalette::ColorPalette(/*juce::Rectangle<int> bounds, */ModuleSettingsOverlay& pm/*, bool isColorOnly*/)
-    : parent(pm)/*, colorOnly(isColorOnly)*/
+
+ColorPalette::ColorPalette(ModuleSettingsOverlay& pm)
+    : parent(pm)
 {
     setInterceptsMouseClicks(false, true);
     setPaintingIsUnclipped(true);
@@ -46,9 +45,8 @@ ColorPalette::~ColorPalette()
 void ColorPalette::resized()
 {
     auto area = getLocalBounds();
-    //int buttonW = colorOnly ? 30 : 15;
     int buttonW = area.getWidth() * 0.18f;
-    int buttonH = buttonW/* colorOnly ? 30 : 15*/;
+    int buttonH = buttonW;
     int space = area.getWidth() * 0.10f;
     int displayIndex = 0;                   //using as second row x placement
 
@@ -62,7 +60,7 @@ void ColorPalette::resized()
         if (bx + buttonW  > area.getWidth())
         {
             by *= 2;
-            bx = (displayIndex++ * buttonW) + (space /** 2*/); //we increment the index because we are no longer using the for loop i index to get our x position
+            bx = (displayIndex++ * buttonW) + (space /** 2*/); //we increment the displayIndex because we are no longer using the for loop i index to get our x position
         }
 
         juce::Rectangle<int> buttonArea{ bx,  by, buttonW, buttonH };

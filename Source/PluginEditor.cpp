@@ -15,7 +15,7 @@
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valTree, juce::ValueTree& fileBrowserTree)
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(audioProcessor.getFileBrowser()), valueTree(valTree)
 {
-    //change this to the resource folder in "CommonFiles", that is put there by the download installer
+    //TODO: change this to the resource folder in "CommonFiles", that is put there by the download installer
     int titleImageSize;
     auto titleImageData = BinaryData::getNamedResource("KrumSamplerTitle_png", titleImageSize);
     titleImage = juce::ImageFileFormat::loadFrom(titleImageData, titleImageSize);
@@ -115,10 +115,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     }
     else
     {
-        //infoButton.onClick();
         infoButtonClicked();
     }
-
 
     if (collapseBrowserButton.getToggleState())
     {
@@ -134,7 +132,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
 KrumSamplerAudioProcessorEditor::~KrumSamplerAudioProcessorEditor()
 {
-    audioProcessor.removeMidiKeyboardListener(this);
 }
 
 //==============================================================================
@@ -144,13 +141,10 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     auto area = getLocalBounds();
 
     g.setColour(bgColor);
-    //g.setGradientFill(ColorPaletteColors::makeGradientFromAllColors(false, {(float)area.getCentreX(), (float)area.getY()}, {(float)area.getCentreX(), (float)area.getBottom()}));
     g.fillRect(area);
     
     auto titleRect = area.withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).withCentre({area.getCentreX(), EditorDimensions::topBar / 2}).toFloat();
-    //juce::Rectangle<int> titleRect { 5 , 50, EditorDimensions::topBar, EditorDimensions::titleImageW};
-//    g.setColour(juce::Colours::red);
-//    g.drawRect(titleRect);
+
     g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xMid );
 
     g.setColour(modulesBGColor);
@@ -186,7 +180,7 @@ void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, 
     int numLines = 40;
     int spaceBetweenLines = bounds.getHeight() / numLines;
 
-    g.setColour(outputTrackColor/*.withAlpha(0.5f)*/);
+    g.setColour(outputTrackColor);
     juce::Line<float> firstLine{ {bounds.getX(), bounds.getY() - 16}, {bounds.getCentreX(), bounds.getY() - 16} };
 
     g.drawLine(firstLine);
@@ -229,9 +223,7 @@ void KrumSamplerAudioProcessorEditor::resized()
     {
         //File Browser is Visible
         InfoPanel::shared_instance().setBounds(area.getX() + EditorDimensions::shrinkage, area.getY() + EditorDimensions::shrinkage, EditorDimensions::fileTreeW, EditorDimensions::topBar);
-        
         modulesBG = area.withTop(EditorDimensions::topBar).withLeft(area.getX()  + EditorDimensions::fileTreeW).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
-        
         fileBrowser.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).reduced(EditorDimensions::extraShrinkage(3)));
     }
     else
@@ -252,119 +244,14 @@ void KrumSamplerAudioProcessorEditor::resized()
 
 }
 
-void KrumSamplerAudioProcessorEditor::visibilityChanged()
-{
-    if (needsToUpdateThumbs)
-    {
-        //updateThumbnails();
-    }
-
-    juce::Component::visibilityChanged();
-}
-
-void KrumSamplerAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState* keyState, int midiChannel, int midiNote, float velocity)
-{
-    //auto m = juce::MidiMessage::noteOn(midiChannel, midiNote, velocity);
-    //postMessageToList(m, juce::String());
-}
-
-void KrumSamplerAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState* keyState, int midiChannel, int midiNote, float velocity)
-{
-    //auto m = juce::MidiMessage::noteOff(midiChannel, midiNote, velocity);
-    //postMessageToList(m, juce::String());
-}
-
-//called when we create a new module from the editor
-//bool KrumSamplerAudioProcessorEditor::createModule(juce::String& moduleName, int index, juce::File& file)
-//{
-//    if (sampler.getNumModules() >= MAX_NUM_MODULES)
-//    {
-//        juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,"Too many samples!",
-//            "Right now this only supports " + juce::String(MAX_NUM_MODULES) + " samples.");
-//        return false;
-//    }
-//
-//    if (sampler.isFileAcceptable(file))
-//    {
-//        auto mod = new KrumModule(moduleName, index, file, sampler, audioProcessor.getValueTree(), &parameters);
-//        auto modEd = mod->createModuleEditor(*this);
-//
-//        if (mod != nullptr && modEd != nullptr)
-//        {
-//            addKeyboardListener(mod);
-//            sampler.addModule(mod, false);
-//            moduleContainer.addModuleEditor(modEd);
-//            modulesViewport.setViewPositionProportionately(1, 0);
-//            modEd->setWantsKeyboardFocus(true);
-//            return true;
-//        }
-//        else
-//        {
-//            DBG("Module Creation failed");
-//            return false;
-//        }
-//    }
-//    else
-//    {
-//        DBG("File is unacceptable");
-//        return false;
-//    }
-//}
-
-
 void KrumSamplerAudioProcessorEditor::addNextModuleEditor()
 {
     moduleContainer.showFirstEmptyModule();
-    //It through valueTree instead!
-  /*  for (int i = 0; i < sampler.getNumModules(); i++)
-    {
-        auto mod = sampler.getModule(i);
-        if(mod->isModuleEmpty() && (!mod->hasEditor()))
-        {
-            moduleContainer.addModuleEditor(mod->createModuleEditor(*this));
-            return;
-        }
-    }*/
-
-
-    //auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
-    //for (int i = 0; i < modulesTree.getNumChildren(); i++)
-    //{
-    //    auto moduleTree = modulesTree.getChild(i);
-    //    if ((int)moduleTree.getProperty(TreeIDs::moduleState) == 0)
-    //    {
-    //        moduleContainer.addModuleEditor(new KrumModuleEditor(moduleTree, *this, sampler.getFormatManager()));
-    //        return; //we only want to show one more empty module
-    //    }
-    //}
-
 }
 
 KrumModuleContainer& KrumSamplerAudioProcessorEditor::getModuleContainer()
 {
     return moduleContainer;
-}
-
-void KrumSamplerAudioProcessorEditor::reconstructModuleDisplay(juce::ValueTree& moduleDisplayTree)
-{
-    if (moduleDisplayTree.isValid() && !moduleDisplayTree.getProperty("value").isVoid())
-    {
-        auto modArray = moduleDisplayTree.getProperty("value");
-        
-        //if (modArray != nullptr && modArray.isArray())
-        //{
-        //    /*for (int i = 0; i < modArray->size(); i++)
-        //    {
-        //        auto modIndex = (int)modArray->getUnchecked(i); 
-        //        moduleDisplayOrder.add(modIndex);
-        //    }*/
-        //}
-        //else if (modArray != nullptr)
-        //{
-
-        //}
-
-    }
 }
 
 void KrumSamplerAudioProcessorEditor::printModules()
@@ -380,7 +267,6 @@ void KrumSamplerAudioProcessorEditor::printModules()
     }
 }
 
-
 void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 {
     //fileDrop.setVisible(false);
@@ -395,7 +281,6 @@ void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 
 void KrumSamplerAudioProcessorEditor::showFileBrowser()
 {
-    //fileDrop.setVisible(true);
     fileBrowser.setVisible(true);
     
     InfoPanel::shared_instance().setVisible(getSavedInfoButtonState());
@@ -408,15 +293,12 @@ void KrumSamplerAudioProcessorEditor::showFileBrowser()
 void KrumSamplerAudioProcessorEditor::saveFileBrowserHiddenState()
 {
     auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);
- //   auto hiddenTree = globalTree.getChildWithName(TreeIDs::fileBrowserHidden);
     globalTree.setProperty(TreeIDs::fileBrowserHidden, collapseBrowserButton.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
 }
 
 bool KrumSamplerAudioProcessorEditor::getSavedFileBrowserHiddenState()
 {
     auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);
-    //auto hiddenTree = globalTree.getChildWithName(TreeIDs::fileBrowserHidden);
-
     return (int)globalTree.getProperty(TreeIDs::fileBrowserHidden) > 0;
 }
 
@@ -462,16 +344,6 @@ void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component
     outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue()));
 }
 
-//void KrumSamplerAudioProcessorEditor::setKeyboardNoteColor(int midiNoteNumber, juce::Colour color, int oldNote)
-//{
-//    keyboard.assignMidiNoteColor(midiNoteNumber, color, oldNote);
-//}
-
-void KrumSamplerAudioProcessorEditor::removeKeyboardNoteColor(int midiNoteNumber)
-{
-    keyboard.removeMidiNoteColorAssignment(midiNoteNumber);
-}
-
 void KrumSamplerAudioProcessorEditor::addKeyboardListener(juce::MidiKeyboardStateListener* listener)
 {
     audioProcessor.addMidiKeyboardListener(listener);
@@ -486,55 +358,6 @@ juce::String KrumSamplerAudioProcessorEditor::getMidiInfo(const juce::MidiMessag
 {
     return midiMessage.getDescription() + " Note Number: " + juce::String(midiMessage.getNoteNumber());
 }
-
-//void KrumSamplerAudioProcessorEditor::cleanUpEmptyModuleTrees(/*int numModules*/)
-//{
-//    int numModules = audioProcessor.getNumModulesInSampler();
-//    auto valueTree = getValueTree();
-//
-//    if (numModules < MAX_NUM_MODULES)
-//    {
-//        auto modulesTree = valueTree->getChildWithName("KrumModules");
-//
-//        for (int i = numModules; i < MAX_NUM_MODULES; i++)
-//        {
-//            auto moduleTree = modulesTree.getChildWithName("Module" + juce::String(i));
-//
-//            moduleTree.setProperty("name", juce::var(""), nullptr);
-//
-//            for (int j = 0; j < moduleTree.getNumChildren(); j++)
-//            {
-//                auto stateTree = moduleTree.getChild(j);
-//                auto id = stateTree.getProperty("id");
-//
-//                if (id.toString() == TreeIDs::paramModuleState_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(0), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleFile_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(""), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleMidiNote_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(0), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleMidiChannel_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(0), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleColor_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(""), nullptr);
-//                }
-//                else if (id.toString() == TreeIDs::paramModuleDisplayIndex_ID)
-//                {
-//                    stateTree.setProperty("value", juce::var(""), nullptr);
-//                }
-//            }
-//        }
-//    }
-//}
 
 KrumSampler& KrumSamplerAudioProcessorEditor::getSampler()
 {
@@ -570,18 +393,6 @@ juce::Viewport* KrumSamplerAudioProcessorEditor::getModuleViewport()
 {
     return &modulesViewport; 
 }
-
-//void KrumSamplerAudioProcessorEditor::updateThumbnails()
-//{
-//    for (int i = 0; i < moduleContainer.getModuleDisplayOrder().size(); i++)
-//    {
-//        //auto modEd = moduleContainer.getEditorFromModule(sampler.getModule(i));
-//        modEd->setAndDrawThumbnail();
-//    }
-//    needsToUpdateThumbs = false;
-//}
-
-
 
 //=========================================================================================
 

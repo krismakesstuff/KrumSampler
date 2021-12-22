@@ -17,7 +17,7 @@ class KrumModuleContainer;
 //==============================================================================
 /*
 * 
-* This is the keyboard you see at the bottom of the app,
+* This is the keyboard you see at the bottom of the plug-in,
 * it draws a normal keyboard but also holds color assignments of choosen notes. 
 * This handles drawing the correct notes, but also can be clicked, and triggers the sample file, if any exist for that note. 
 * 
@@ -32,15 +32,15 @@ public:
 
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
-    //void mouseMove(const juce::MouseEvent& e) override;
 
     bool mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
     void mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
 
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+    
     void scrollToKey(int midiNoteNumber);
 
     void setHighlightKey(int midiNoteNumber, bool showHighlight);
-   // void resetHighlightedKey();
     bool isKeyHighlighted(int midiNoteToTest);
 
     void drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
@@ -49,17 +49,13 @@ public:
     void drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
                         bool isDown, bool isOver, juce::Colour noteFillColour) override;
 
-    //void drawUpDownButton(juce::Graphics& g, int w, int h, bool isMouseOver, bool isButtonPressed, bool movesOctavesUp) override;
-    
     void assignMidiNoteColor(int midiNote, juce::Colour moduleColor/*, bool deleteOld*/);
     void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
     void updateMidiNoteColor(int noteToUpdate, juce::Colour newColor);
     bool isMidiNoteAssigned(int midiNote);
 
-    //void updateKeysFromContainer();
     void updateKeysFromValueTree();
     
-    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
     void printCurrentlyAssignedMidiNotes();
     juce::Colour findColorFromMidiNote(int midiNote);

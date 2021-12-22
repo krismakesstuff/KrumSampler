@@ -20,9 +20,10 @@
 * 
 * A JUCE generated class that represents the audio engine of the app. This will handle all audio and midi calls to and from the DAW, as well as state changes on startup and exit. 
 * 
-* In PluginProcessoer.cpp, there are functions defined to create the AudioProcessorValueTreeState. This is defined by JUCE, and is reffered to as "APVTS". 
+* In PluginProcessoer.cpp, there are functions defined to create the AudioProcessorValueTreeState. This is defined by JUCE, and is reffered to as "APVTS". This ValueTree connects to your
+* sliders to parameters. 
 * 
-* There is really only one large ValueTree that holds the state and settings of the app. That Tree then has other trees for specific sections of the app. 
+* There is really only one large ValueTree that holds the state and settings of the app. That Tree then has other sub-trees for specific sections of the app. 
 * When loading and saving the ValueTree, the children trees append or peel off in their respective contexts. see getStateInformation() and setStateInformation() for implementation. 
 * 
 * 
@@ -35,7 +36,7 @@
 #define MAX_FILE_LENGTH_SECS 3
 #define KRUM_BUILD_VERSION "1.1.0-Beta"
 
-
+//The general Tree structure
 namespace TreeIDs
 {
 #define DECLARE_ID(name) const juce::Identifier name(#name);
@@ -87,8 +88,6 @@ namespace TreeIDs
     static const float defaultGain = 0.85f;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
-    //static juce::String outputGainParam_ID{"outputGain"};
-
 
 }
 
@@ -179,9 +178,7 @@ public:
     juce::MidiKeyboardState& getMidiState();
 
     void updateModulesFromValueTree();
-    //void updateValueTreeState();
-    
-    //int findFreeModuleIndex();
+
     int getNumModulesInSampler();
 
     juce::AudioThumbnailCache& getThumbnailCache();

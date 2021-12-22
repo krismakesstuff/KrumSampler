@@ -16,11 +16,12 @@
 * 
 * The Sampler is comprised of three classes: juce::SamplerSound, juce::SamplerVoice and juce::Synthesizer.
 * 
-* The KrumSound(juce::SamplerSound) is responsible for holding the audio file that is to be played back.
-* The KrumVoice(juce::SamplerVoice) is responsible for rendering the audio from the SamplerSound into the audio buffer. 
+* The KrumSound(juce::SamplerSound) is responsible for holding the audio data that is to be played back.
+* The KrumVoice(juce::SamplerVoice) is responsible for rendering the audio from the KrumSound into the audio buffer. 
 * The KrumSampler(juce::Synthesizer) handles the incoming midi and triggers the rendering of the KrumVoice.
 * 
-* TODO:
+* There is also a dedicated voice for rendering the preview file. PreviewSound and PreviewVoice use slightly different methods of rendering then the it's Krum siblings
+* see PreviewSound and PreviewVoice
 * 
 */
 
@@ -105,7 +106,6 @@ public:
 private:
     friend class PreviewVoice;
 
-    //juce::String name;
     std::unique_ptr<juce::AudioBuffer<float>> data;
     double sourceSampleRate;
     int length = 0;
@@ -161,13 +161,14 @@ public:
     void noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) override;
     void noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) override;
 
-    //juce::SynthesiserVoice* findFreeVoice(juce::SynthesiserSound* soundToPlay, int midiChannel, int midiNoteNumber, const bool stealIfNoneAvailable) const override;
-
     KrumModule* getModule(int index);
+
     //Only the processor should use this when rebuilding the sampler from the value tree
     void addModule(KrumModule* newModule);
+
     //if there is no sound that has this module as a parent, nothing will happen
-    void removeModuleSample(KrumModule* moduleToDelete/*, bool updateTree = true*/);
+    void removeModuleSample(KrumModule* moduleToDelete);
+
     //will remove the modules current sound(if it has one) and then add the sample set in the module
     void updateModuleSample(KrumModule* updatedModule);
     
@@ -180,12 +181,12 @@ public:
     void playPreviewFile();
 
     bool isFileAcceptable(const juce::File& file);
+
     juce::AudioFormatManager& getFormatManager();
 
 private:
     
     void timerCallback()override;
-
 
     //makes a Krum Sound and adds it to the samplers sounds array, using the assigned file in the passed in module
     void addSample(KrumModule* moduleToAddSound);
