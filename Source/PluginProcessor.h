@@ -34,7 +34,7 @@
 #define MAX_VOICES 14
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 3
-#define KRUM_BUILD_VERSION "1.1.0-Beta"
+#define KRUM_BUILD_VERSION "1.2.0-Beta" //aux outputs
 
 //The general Tree structure
 namespace TreeIDs
@@ -88,6 +88,8 @@ namespace TreeIDs
     static const float defaultGain = 0.85f;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
+    static const juce::StringArray outputStrings{ "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14", "15-16", "17-18", "19-20" };
+
 
 }
 

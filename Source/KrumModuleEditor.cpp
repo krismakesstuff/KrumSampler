@@ -163,10 +163,13 @@ void KrumModuleEditor::resized()
     int panSliderH = area.getHeight() * 0.05f;
     int panSliderW = area.getWidth() * 0.9f;
 
-    int volumeSliderH = area.getHeight() * 0.48f;
+    int volumeSliderH = area.getHeight() * 0.45f;
     int volumeSliderW = area.getWidth() * 0.4;
 
-    int buttonH = area.getHeight() * 0.085f;
+    int buttonH = area.getHeight() * 0.075f;
+    int buttonW = area.getWidth() * 0.48f;
+
+    int outputComboH = area.getHeight() * 0.073f;
 
     settingsOverlay->setBounds(area);
 
@@ -177,8 +180,10 @@ void KrumModuleEditor::resized()
     panSlider.setBounds(area.getX() + spacer, midiLabel.getBottom() + (spacer * 2), panSliderW, panSliderH);
     volumeSlider.setBounds(area.getCentreX() - (volumeSliderW / 2), panSlider.getBottom() + (spacer * 3), volumeSliderW, volumeSliderH);
     
-    playButton.setBounds(area.withTop(volumeSlider.getBottom() /*- (spacer * 2)*/).withHeight(buttonH).withWidth(area.getWidth() / 2).reduced(spacer));
-    editButton.setBounds(area.withTop(volumeSlider.getBottom() /*- (spacer * 2)*/).withHeight(buttonH).withLeft(playButton.getRight() + spacer).withWidth(area.getWidth() / 2).reduced(spacer));
+    playButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(buttonH).withLeft(area.getX() + (spacer * 0.5f)).withWidth(buttonW).reduced(spacer));
+    editButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(buttonH).withLeft(playButton.getRight() + spacer).withWidth(buttonW).reduced(spacer));
+
+    outputCombo.setBounds(area.withTop(playButton.getBottom() + spacer).withHeight(outputComboH).reduced(spacer * 1.75, spacer));
 
 //    if (dragHandle != nullptr)
 //    {
@@ -341,6 +346,13 @@ void KrumModuleEditor::buildModule()
 
     editButton.onClick = [this] { showSettingsOverlay(true, true); };
 
+
+    addAndMakeVisible(outputCombo);
+    outputCombo.addItemList(TreeIDs::outputStrings, 1);
+    outputComboAttachment.reset(new ComboBoxAttachment(editor.parameters, TreeIDs::paramModuleOutputChannel + i, outputCombo));
+
+
+
     setAndDrawThumbnail();
     setChildCompColors();
 
@@ -380,6 +392,18 @@ void KrumModuleEditor::setChildCompColors()
 
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker().withAlpha(0.7f));
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::textBoxOutlineColourId, moduleColor.brighter().withAlpha(0.5f));
+
+    outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, moduleColor.darker(0.55f).withAlpha(0.5f));
+    outputCombo.setColour(juce::ComboBox::ColourIds::textColourId, moduleColor);
+    outputCombo.setColour(juce::ComboBox::ColourIds::arrowColourId, moduleColor);
+    outputCombo.setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.8f));
+
+    outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
+    outputCombo.setColour(juce::PopupMenu::ColourIds::textColourId, moduleColor.darker());
+    outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, moduleColor.darker());
+    outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedTextColourId, moduleColor);
+    
+    //getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
 
 }
 

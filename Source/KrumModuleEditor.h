@@ -178,9 +178,15 @@ private:
     InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
     InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
     
+    InfoPanelComboBox outputCombo{ "Output Channel", "Select which output bus you would like this module to go to. Default is the Main Bus (1-2)" };
+
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+    typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
+
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
+
+    std::unique_ptr<ComboBoxAttachment> outputComboAttachment;
     
     DragAndDropThumbnail thumbnail;
 

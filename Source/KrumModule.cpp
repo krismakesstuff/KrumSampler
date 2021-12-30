@@ -119,6 +119,18 @@ std::atomic<float>* KrumModule::getModulePan()
     return parameters->getRawParameterValue(TreeIDs::paramModulePan + getIndexString());
 }
 
+std::atomic<float>* KrumModule::getModuleOutputChannel()
+{
+    return parameters->getRawParameterValue(TreeIDs::paramModuleOutputChannel + getIndexString());
+}
+
+int KrumModule::getModuleOutputChannelNumber()
+{
+    auto outputString = TreeIDs::outputStrings.getReference((int)*getModuleOutputChannel());
+
+    return outputString.dropLastCharacters(2).getIntValue();
+}
+
 void KrumModule::updateSamplerSound()
 {
     sampler.updateModuleSample(this);

@@ -40,7 +40,9 @@ public:
     std::atomic<float>* getModuleGain()const;
     std::atomic<float>* getModulePan()const;
     std::atomic<float>* getModuleClipGain()const;
+    int getModuleOutputNumber() const;
 
+    //std::atomic<float>* getModuleOutputChan()const;
     //void setModulePlaying(bool playing);
     bool isParent(KrumModule* moduleToTest);
 
@@ -52,7 +54,7 @@ private:
     double sourceSampleRate;
     juce::BigInteger midiNotes;
     int length = 0, midiRootNote = 0, midiChannel = 0;
-
+    
     juce::ADSR::Parameters params;
     KrumModule* parentModule = nullptr;
 
@@ -80,6 +82,8 @@ private:
     std::atomic<float> lgain = 0, rgain = 0, clipGain = 0;
     
     double sourceSamplePosition = 0;
+
+    int outputChan = 0;
     juce::ADSR adsr;
 
     JUCE_LEAK_DETECTOR(KrumVoice)

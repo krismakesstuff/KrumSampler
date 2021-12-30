@@ -61,6 +61,16 @@ std::atomic<float>* KrumSound::getModuleClipGain() const
     return parentModule->getModuleClipGain();
 }
 
+int KrumSound::getModuleOutputNumber() const
+{
+    return parentModule->getModuleOutputChannelNumber();
+}
+
+//std::atomic<float>* KrumSound::getModuleOutputChan() const
+//{
+//    return parentModule->getModuleOutputChannel();
+//}
+
 //void KrumSound::setModulePlaying(bool isPlaying)
 //{
 //    parentModule->setModulePlaying(isPlaying);
@@ -102,6 +112,8 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
         //Pitchshifting will be a thing at some point.
         /*pitchRatio = std::pow(2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
             * sound->sourceSampleRate / getSampleRate();*/
+
+        outputChan = sound->getModuleOutputNumber() - 1; //index offset
 
         sourceSamplePosition = 0.0;
 
@@ -155,8 +167,23 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
         const float* const inL = data.getReadPointer(0);
         const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer(1) : nullptr;
 
-        float* outL = outputBuffer.getWritePointer(0, startSample);
-        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
+        int numChannels = outputBuffer.getNumChannels();
+
+        float* outL = nullptr;
+        float* outR = nullptr;
+
+        
+        if (numChannels >= outputChan + 1) // accounts for stereo pair
+        {
+            outL = outputBuffer.getWritePointer(outputChan, startSample);
+            outR = outputBuffer.getWritePointer(outputChan + 1, startSample);
+        }
+
+        if(outL == nullptr || outR == nullptr) // just use main output bus if we don't have enough busses
+        {
+            outL = outputBuffer.getWritePointer(0, startSample);
+            outR = numChannels > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
+        }
 
         while (--numSamples >= 0)
         {

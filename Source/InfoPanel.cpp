@@ -183,7 +183,9 @@ void InfoPanelLabel::mouseExit(const juce::MouseEvent& e)
     InfoPanel::shared_instance().clearPanelText();
     juce::Label::mouseExit(e);
 }
-                                                         
+                              
+//=============================================================================
+
 InfoPanelTextButton::InfoPanelTextButton(juce::String title, juce::String m, juce::String kc)
     :compTitle(title), message(m), keycommand(kc)
 {}
@@ -202,3 +204,26 @@ void InfoPanelTextButton::mouseExit(const juce::MouseEvent& e)
     InfoPanel::shared_instance().clearPanelText();
     juce::TextButton::mouseExit(e);
 }
+
+//=============================================================================
+
+InfoPanelComboBox::InfoPanelComboBox(juce::String title, juce::String m, juce::String kc)
+    :compTitle(title), message(m), keycommand(kc)
+{}
+
+InfoPanelComboBox::~InfoPanelComboBox()
+{}
+
+void InfoPanelComboBox::mouseEnter(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().setInfoPanelText(compTitle, message, keycommand);
+    juce::ComboBox::mouseEnter(e);
+}
+
+void InfoPanelComboBox::mouseExit(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().setInfoPanelText(compTitle, message, keycommand);
+    juce::ComboBox::mouseExit(e);
+}
+
+//=============================================================================

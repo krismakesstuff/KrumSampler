@@ -85,7 +85,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
     
     //Not currently using aux outputs but would like to add these soon
-    //const juce::StringArray outputStrings {"1 & 2", "3 & 4", "5 & 6"};
 
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
@@ -120,17 +119,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             [](float value, int) {return panRangeFrom0To1(value); },
                             [](juce::String text) {return panRangeTo0to1(text); });
 
-        /*auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannels_ID + index,
-                            "Module Ouput" + index,
-                            outputStrings, 1);*/
+        auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannel + index,
+                            "Module "+ index + " OuputChannel",
+                            TreeIDs::outputStrings, 0);
 
         auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
                             "Module" + juce::String(i),
                             "|",
                             std::move(gainParam),
                             std::move(clipGainParam),
-                            std::move(panParam)
-                          /*, std::move(outputParam)*/);
+                            std::move(panParam),
+                            std::move(outputParam));
 
         paramsGroup.push_back(std::move(moduleGroup));
     }
@@ -168,7 +167,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 //===================================================================================================================================
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
-     : AudioProcessor(  BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true))                        
+     : AudioProcessor(  BusesProperties().withOutput("Output 1-2", juce::AudioChannelSet::stereo(), true)
+                                         .withOutput("Output 3-4", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 5-6", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 7-8", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 9-10", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 11-12", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 13-14", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
+                                         .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false))
                                     ,parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
 
 {
@@ -214,8 +222,6 @@ void KrumSamplerAudioProcessor::releaseResources()
 
 void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    //Aux output channels are Next!!
-    //getBusBuffer
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
     
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
@@ -372,24 +378,31 @@ void KrumSamplerAudioProcessor::initSampler()
 //==============================================================================
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool KrumSamplerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool KrumSamplerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout) const
 {
-#if JucePlugin_IsMidiEffect
-    juce::ignoreUnused(layouts);
-    return true;
-#else
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
+//#if JucePlugin_IsMidiEffect
+//    juce::ignoreUnused(layouts);
+//    return true;
+//#else
+//    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+//        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+//        return false;
+//
+//    // This checks if the input layout matches the output layout
+//#if ! JucePlugin_IsSynth
+//    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+//        return false;
+//#endif
+//
+//    return true;
+//#endif
 
-    // This checks if the input layout matches the output layout
-#if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-#endif
+    /*for (const auto& bus : layout.outputBuses)
+        if (bus != juce::AudioChannelSet::stereo())
+            return false;*/
 
     return true;
-#endif
+    //return layout.inputBuses.isEmpty() && layout.outputBuses.size() >= 1;
 }
 #endif
 

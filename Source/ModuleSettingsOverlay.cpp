@@ -125,17 +125,17 @@ void ModuleSettingsOverlay::resized()
     auto area = getLocalBounds();
 
     int spacer = 5;
-    int titleBoxH = area.getHeight() * 0.11f;//55;
-    int midiListenButtonH = area.getHeight() * 0.056f;//25;
-    int paletteH = area.getHeight() * 0.18; // 80;
-    int noteNumberH = area.getHeight() * 0.145f;//65;
-    int noteTitleH = area.getHeight() * 0.078f;//35;
+    int titleBoxH = area.getHeight() * 0.11f;
+    int midiListenButtonH = area.getHeight() * 0.056f;
+    int paletteH = area.getHeight() * 0.18; 
+    int noteNumberH = area.getHeight() * 0.145f;
+    int noteTitleH = area.getHeight() * 0.078f;
 
     int confirmButtonWidth = area.getWidth() / 1.25;
-    int confirmButtonHeight = area.getHeight() * 0.078f; // 35;
+    int confirmButtonHeight = area.getHeight() * 0.078f; 
 
     int cancelButtonWidth = (area.getWidth() - (spacer * 2)) / 2;
-    int cancelButtonHeight = area.getHeight() * 0.056f;// 25;
+    int cancelButtonHeight = area.getHeight() * 0.056f;
 
     titleBox.setBounds(area.withBottom(titleBoxH));
 
@@ -150,7 +150,7 @@ void ModuleSettingsOverlay::resized()
     colorPalette.setBounds(area.getX(), midiListenButton.getBottom() , area.getWidth() - spacer, paletteH);
 
     confirmButton.setBounds(area.getCentreX() - confirmButtonWidth / 2, colorPalette.getBottom() + (spacer /** 2*/), confirmButtonWidth, confirmButtonHeight);
-    deleteButton.setBounds(area.getX() + spacer, confirmButton.getBottom() + (spacer * 3), cancelButtonWidth - spacer, cancelButtonHeight);
+    deleteButton.setBounds(area.getX() + spacer, confirmButton.getBottom() + (spacer * 2), cancelButtonWidth - spacer, cancelButtonHeight);
     cancelButton.setBounds(deleteButton.getRight() + spacer, deleteButton.getY(), cancelButtonWidth, cancelButtonHeight);
 
 }

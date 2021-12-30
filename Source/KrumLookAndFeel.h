@@ -265,8 +265,55 @@ public:
         }
     }
 
+
+    void drawComboBox(juce::Graphics& g, int width, int height, bool,
+        int, int, int, int, juce::ComboBox& box)
+    {
+        auto cornerSize = box.findParentComponentOfClass<juce::ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
+        juce::Rectangle<int> boxBounds(0, 0, width, height);
+
+        g.setColour(box.findColour(juce::ComboBox::backgroundColourId));
+        g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+
+        g.setColour(box.findColour(juce::ComboBox::outlineColourId));
+        g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+
+        bool popUp = box.isPopupActive();
+
+        int arrowW = width * 0.2f;
+        juce::Rectangle<int> arrowZone(width - arrowW, 0, arrowW, height);
+        juce::Path path;
+        path.startNewSubPath((float)arrowZone.getX() + 3.0f, (float)arrowZone.getCentreY() - 2.0f);
+        path.lineTo((float)arrowZone.getCentreX(), (float)arrowZone.getCentreY() + 3.0f);
+        path.lineTo((float)arrowZone.getRight() - 3.0f, (float)arrowZone.getCentreY() - 2.0f);
+
+        g.setColour(box.findColour(juce::ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
+
+        if (popUp)
+        {
+            auto pathCentre = path.getBounds().getCentre();
+            float rotation = juce::MathConstants<float>::pi;
+
+            g.fillPath(path, juce::AffineTransform::rotation(rotation, pathCentre.getX(), pathCentre.getY()));
+        }
+        else
+        {
+            g.fillPath(path);
+        }
+
+    }
+
+
+    void positionComboBoxText(juce::ComboBox& box, juce::Label& label)
+    {
+        label.setJustificationType(juce::Justification::centred);
+        label.setBounds(1, 1, box.getWidth() - 30, box.getHeight() - 2);
+        label.setFont(getComboBoxFont(box));
+    }
+
     void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
     {
+        //g.setColour(findColour(juce::ComboBox::ColourIds::backgroundColourId));
         g.setColour(juce::Colours::black);
         g.fillRect(0, 0, width, height);
 

@@ -75,6 +75,8 @@ public:
     std::atomic<float>* getModuleGain();
     std::atomic<float>* getModuleClipGain();
     std::atomic<float>* getModulePan();
+    std::atomic<float>* getModuleOutputChannel();
+    int getModuleOutputChannelNumber();
 
 private:
 
