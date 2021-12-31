@@ -173,13 +173,13 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
         float* outR = nullptr;
 
         
-        if (numChannels >= outputChan + 1) // accounts for stereo pair
+        if (numChannels >= outputChan + 1) // + 1 accounts for stereo pair
         {
             outL = outputBuffer.getWritePointer(outputChan, startSample);
             outR = outputBuffer.getWritePointer(outputChan + 1, startSample);
         }
 
-        if(outL == nullptr || outR == nullptr) // just use main output bus if we don't have enough busses
+        if(outL == nullptr || outR == nullptr) // just use main output bus if we can't get the busses we want
         {
             outL = outputBuffer.getWritePointer(0, startSample);
             outR = numChannels > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
