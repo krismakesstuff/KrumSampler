@@ -15,6 +15,7 @@
 #include "ModuleSettingsOverlay.h"
 #include "DragAndDropThumbnail.h"
 #include "InfoPanel.h"
+#include "TimeHandle.h"
 
 //==============================================================================
 
@@ -150,6 +151,8 @@ private:
 
 
     friend class DragAndDropThumbnail;
+    friend class TimeHandle;
+
     void zeroModuleTree();
     void timerCallback() override;
 
@@ -189,6 +192,7 @@ private:
     std::unique_ptr<ComboBoxAttachment> outputComboAttachment;
     
     DragAndDropThumbnail thumbnail;
+    TimeHandle timeHandle;
 
     float buttonClickVelocity = 0.5f;
 

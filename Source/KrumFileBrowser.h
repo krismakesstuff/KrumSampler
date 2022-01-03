@@ -113,6 +113,8 @@ public:
     void tellParentToRemoveMe();
     void setBGColor(juce::Colour newColor);
 
+    void dragInParentTree(const juce::MouseEvent& e);
+
 private:
 
     juce::File file;
@@ -120,8 +122,8 @@ private:
 
     bool editing = false;
     
-    juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     KrumTreeView* parentTree;
+    juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     SimpleAudioPreviewer* previewer;
 
     //-------------------------------------
@@ -142,7 +144,8 @@ private:
         void mouseDown(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
         void mouseDoubleClick(const juce::MouseEvent& e) override;
-        
+        void mouseDrag(const juce::MouseEvent& e) override;
+
         static void handleResult(int result, EditableComp* comp);
 
     private:
@@ -153,6 +156,7 @@ private:
         JUCE_LEAK_DETECTOR(EditableComp)
 
     };
+
     
     JUCE_LEAK_DETECTOR(KrumTreeItem)
 };
@@ -227,6 +231,7 @@ private:
         void mouseExit(const juce::MouseEvent& e) override;
         
         void mouseDown(const juce::MouseEvent& e) override;
+        void mouseDoubleClick(const juce::MouseEvent& e) override;
 
         static void handleResult(int result, EditableHeaderComp* comp);
 

@@ -144,6 +144,11 @@ void KrumTreeItem::setBGColor(juce::Colour newColor)
     bgColor = newColor;
 }
 
+void KrumTreeItem::dragInParentTree(const juce::MouseEvent& e)
+{
+    parentTree->mouseDrag(e);
+}
+
 //-----------------------------------------------------------------------
 
 KrumTreeItem::EditableComp::EditableComp (KrumTreeItem& o, juce::String itemName, juce::Colour backColor)
@@ -267,6 +272,11 @@ void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)
 void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
     owner.itemDoubleClicked(e);
+}
+
+void KrumTreeItem::EditableComp::mouseDrag(const juce::MouseEvent& e)
+{
+    owner.dragInParentTree(e);
 }
 
 void KrumTreeItem::EditableComp::handleResult(int result, EditableComp* comp)
@@ -532,6 +542,11 @@ void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e
     }
 }
 
+void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
+{
+    owner.itemDoubleClicked(e);
+}
+
 void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
 {
     if (result == RightClickMenuIds::rename_Id)
@@ -558,7 +573,7 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
 {
 
     setMultiSelectEnabled(true);
-    addMouseListener(this, true);
+    //addMouseListener(this, true);
 
     rootNode.reset(new KrumTreeHeaderItem(this, juce::File(), "User Folders"));
     rootNode->setLinesDrawnForSubItems(true);

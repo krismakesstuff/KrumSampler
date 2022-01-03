@@ -29,6 +29,7 @@ juce::ValueTree createValueTree()
     juce::ValueTree appStateValueTree{ TreeIDs::APPSTATE };
     
     //---------------- Global Settings ----------------------------
+
     juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS };
 
     globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay, juce::var(0), nullptr);
@@ -53,9 +54,12 @@ juce::ValueTree createValueTree()
         newModule.setProperty(TreeIDs::moduleColor, juce::var(""), nullptr);
         newModule.setProperty(TreeIDs::moduleDisplayIndex, juce::var(-1), nullptr);
         newModule.setProperty(TreeIDs::moduleSamplerIndex, juce::var(i), nullptr);
+        newModule.setProperty(TreeIDs::moduleStartSample, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleEndSample, juce::var(0), nullptr);
 
         krumModulesTree.addChild(newModule, i, nullptr);
     }
+
     //--------------------------------------------
 
     appStateValueTree.addChild(krumModulesTree, -1, nullptr);

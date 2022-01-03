@@ -19,7 +19,7 @@
 //===============================================================================================//
 
 KrumModuleEditor::KrumModuleEditor(juce::ValueTree& modTree, KrumSamplerAudioProcessorEditor& e, juce::AudioFormatManager& fm/*, int state*/)
-    : moduleTree(modTree), editor(e),
+    : moduleTree(modTree), editor(e), timeHandle(*this),
     thumbnail(*this, THUMBNAIL_RES, fm, e.getThumbnailCache())
 {
     setPaintingIsUnclipped(true);
@@ -157,6 +157,7 @@ void KrumModuleEditor::resized()
 
     int spacer = 5;
     int thumbnailH = area.getHeight() * 0.25f;
+    int timeHandleH = 15;
 
     int midiLabelH = area.getHeight() * 0.093f;
 
@@ -175,9 +176,11 @@ void KrumModuleEditor::resized()
 
     titleBox.setBounds(area.withBottom(titleHeight).reduced(spacer));
     thumbnail.setBounds(area.withBottom(thumbnailH).withTop(titleBox.getBottom()).reduced(spacer));
-    midiLabel.setBounds(area.withTrimmedTop(thumbnail.getBottom() - spacer).withHeight(midiLabelH).reduced(spacer));
+    timeHandle.setBounds(thumbnail.getX(), thumbnail.getBottom(), thumbnail.getWidth(), timeHandleH);
 
-    panSlider.setBounds(area.getX() + spacer, midiLabel.getBottom() + (spacer * 2), panSliderW, panSliderH);
+    midiLabel.setBounds(area.withTrimmedTop(timeHandle.getBottom()).withHeight(midiLabelH).reduced(spacer));
+
+    panSlider.setBounds(area.getX() + spacer, midiLabel.getBottom() + (spacer), panSliderW, panSliderH);
     volumeSlider.setBounds(area.getCentreX() - (volumeSliderW / 2), panSlider.getBottom() + (spacer * 3), volumeSliderW, volumeSliderH);
     
     playButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(buttonH).withLeft(area.getX() + (spacer * 0.5f)).withWidth(buttonW).reduced(spacer));
@@ -275,9 +278,6 @@ void KrumModuleEditor::buildModule()
     //    addAndMakeVisible(dragHandle.get());
     //    dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");
     //
-    addAndMakeVisible(thumbnail);
-    thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModuleClipGain + i, thumbnail.clipGainSlider));
-
     addAndMakeVisible(titleBox);
     titleBox.setText(moduleTree.getProperty(TreeIDs::moduleName).toString(), juce::NotificationType::dontSendNotification);
     titleBox.setFont({ 17.0f });
@@ -294,7 +294,14 @@ void KrumModuleEditor::buildModule()
         juce::String newName = titleBox.getText(true); //compiler reasons
         setModuleName(newName);
     };
+   
+    addAndMakeVisible(thumbnail);
+    thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModuleClipGain + i, thumbnail.clipGainSlider));
 
+    addAndMakeVisible(timeHandle);
+   /* timeHandle.setStartPosition(moduleTree.getProperty(TreeIDs::moduleStartSample));
+    timeHandle.setEndPosition(moduleTree.getProperty(TreeIDs::moduleEndSample));*/
+    
     addAndMakeVisible(volumeSlider);
     volumeSlider.setScrollWheelEnabled(false);
     volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
@@ -461,25 +468,43 @@ void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
 void KrumModuleEditor::hideModule()
 {
     //set child components to not visible
-    titleBox.setVisible(false);
+    /*titleBox.setVisible(false);
     midiLabel.setVisible(false);
     panSlider.setVisible(false);
     volumeSlider.setVisible(false);
     playButton.setVisible(false);
     editButton.setVisible(false);
-    thumbnail.setVisible(false);
+    thumbnail.setVisible(false);*/
+
+    for (int i = 0; i < getNumChildComponents(); i++)
+    {
+        auto child = getChildComponent(i);
+        if (child != settingsOverlay.get())
+        {
+            child->setVisible(false);
+        }
+    }
 }
 
 void KrumModuleEditor::showModule()
 {
     //set child components to visible
-    titleBox.setVisible(true);
+    /*titleBox.setVisible(true);
     midiLabel.setVisible(true);
     panSlider.setVisible(true);
     volumeSlider.setVisible(true);
     playButton.setVisible(true);
     editButton.setVisible(true);
-    thumbnail.setVisible(true);
+    thumbnail.setVisible(true);*/
+
+    for (int i = 0; i < getNumChildComponents(); i++)
+    {
+        auto child = getChildComponent(i);
+        if (child != settingsOverlay.get())
+        {
+            child->setVisible(true);
+        }
+    }
 }
 
 int KrumModuleEditor::getModuleState()
@@ -651,7 +676,16 @@ bool KrumModuleEditor::needsToDrawThumbnail()
 void KrumModuleEditor::setAndDrawThumbnail()
 {
     juce::File file{ moduleTree.getProperty(TreeIDs::moduleFile) };
+    
+    //auto inSource = new juce::FileInputSource(file);
     thumbnail.setSource (new juce::FileInputSource(file));
+    
+    timeHandle.setStartPosition(0);
+    timeHandle.setEndPosition(thumbnail.getNumSamplesFinished());
+
+    moduleTree.setProperty(TreeIDs::moduleStartSample, timeHandle.getStartPosition(), nullptr);
+    moduleTree.setProperty(TreeIDs::moduleEndSample, timeHandle.getEndPosition(), nullptr);
+    
     auto newFileName = file.getFileName();
 
     setModuleName(newFileName);
@@ -801,7 +835,6 @@ void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceD
 //EXTERNAL File Drag and Drop Target
 bool KrumModuleEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
-    //TODO: check if file format is supported?
     return shouldModuleAcceptFileDrop();
 }
 

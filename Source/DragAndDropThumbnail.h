@@ -20,6 +20,7 @@
 *
 */
 
+
 class KrumModuleEditor;
 
 class DragAndDropThumbnail :    public InfoPanelComponent,
@@ -69,4 +70,7 @@ public:
     std::unique_ptr<SliderAttachment> clipGainSliderAttachment;
 
     KrumModuleEditor& parentEditor;
+
 };
+
+

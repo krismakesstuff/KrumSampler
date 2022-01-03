@@ -34,7 +34,7 @@
 #define MAX_VOICES 14
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 3
-#define KRUM_BUILD_VERSION "1.2.0-Beta" //aux outputs
+#define KRUM_BUILD_VERSION "1.2.0-Beta" //aux outputs & sample trim handles
 
 //The general Tree structure
 namespace TreeIDs
@@ -43,7 +43,7 @@ namespace TreeIDs
 
     DECLARE_ID(APPSTATE)
 
-        DECLARE_ID(GLOBALSETTINGS) //GlobaalSettings tree
+        DECLARE_ID(GLOBALSETTINGS) //GlobalSettings tree
 
             DECLARE_ID(previewerAutoPlay)
             DECLARE_ID(fileBrowserHidden)
@@ -61,8 +61,10 @@ namespace TreeIDs
                 DECLARE_ID(moduleColor)
                 DECLARE_ID(moduleDisplayIndex)
                 DECLARE_ID(moduleSamplerIndex)
-         
-        DECLARE_ID(PARAMS) //APVTS
+                DECLARE_ID(moduleStartSample)
+                DECLARE_ID(moduleEndSample)
+
+        DECLARE_ID(PARAMS) //APVTS, these are parameters exposed to the DAW for Automation
             
             DECLARE_ID(paramModuleGain)
             DECLARE_ID(paramModulePan)

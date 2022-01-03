@@ -14,8 +14,9 @@
 #include "KrumModule.h"
 
 
+
 DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sourceSamplesPerThumbnailSample, juce::AudioFormatManager& formatManagerToUse, juce::AudioThumbnailCache& cacheToUse)
-    : juce::AudioThumbnail(sourceSamplesPerThumbnailSample, formatManagerToUse, cacheToUse), parentEditor(modEditor),
+    : juce::AudioThumbnail(sourceSamplesPerThumbnailSample, formatManagerToUse, cacheToUse), parentEditor(modEditor), /*timeHandle(0, getNumSamplesFinished(), *this),*/
         InfoPanelComponent("Waveform Thumbnail", "Displays the current sample. Also provides clip gain. With the mouse over the thumbnail, use the scroll wheel to set the gain, or use the slider that appears.")// You can also drop new samples on this and it will 'hot swap' to the new sample")
 {
     setRepaintsOnMouseActivity(true);
@@ -23,6 +24,8 @@ DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sour
     clipGainSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
     clipGainSlider.onValueChange = [this] { updateThumbnailClipGain(clipGainSlider.getValue()); };
     addChildComponent(clipGainSlider);
+
+    //addAndMakeVisible(timeHandle);
 }
 
 DragAndDropThumbnail::~DragAndDropThumbnail()
@@ -63,6 +66,7 @@ void DragAndDropThumbnail::moveDroppedFileToParent()
 {
     parentEditor.moduleTree.setProperty(TreeIDs::moduleFile, droppedFile.getFullPathName(), nullptr);
 
+    //reset the clipgain value to 0?
     clipGainSliderAttachment.reset(new SliderAttachment(parentEditor.editor.parameters, TreeIDs::paramModuleClipGain + juce::String(parentEditor.getModuleSamplerIndex()), clipGainSlider));
 
     parentEditor.drawThumbnail = true;
@@ -105,8 +109,10 @@ void DragAndDropThumbnail::resized()
 
     int sliderW = 15;
     int spacer = 5;
+    int handleH = 15;
 
     clipGainSlider.setBounds(area.getRight() - sliderW - (spacer * 2), area.getY() + spacer, sliderW, area.getHeight() - (spacer * 2));
+    //timeHandle.setBounds(area.getX(), )
 }
 
 void DragAndDropThumbnail::paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor)
@@ -151,21 +157,11 @@ void DragAndDropThumbnail::mouseWheelMove(const juce::MouseEvent& e, const juce:
     clipGainSlider.mouseWheelMove(e, wheel);
 }
 
+//----------------------------------------------------------------------------------------------------------------
 
-//bool DragAndDropThumbnail::isInterestedInFileDrag(const juce::StringArray& files)
-//{
-//    //parentEditor.editor.moduleContainer.showModuleCanAcceptFile(&parentEditor);
-//    return false;
-//}
-//
-//void DragAndDropThumbnail::filesDropped(const juce::StringArray& files, int x, int y)
-//{
-//    if (files.size() == 1)
-//    {
-//        for (auto file : files)
-//        {
-//            juce::File newFile{ file };
-//            addDroppedFile(newFile);
-//        }
-//    }
-//}
+
+
+
+
+
+
