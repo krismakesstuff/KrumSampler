@@ -112,6 +112,8 @@ public:
 
     int getAudioFileLengthInMs();
 
+    void setTimeHandles();
+
     bool doesEditorWantMidi();
     void handleMidi(int midiChannel, int midiNote);
 

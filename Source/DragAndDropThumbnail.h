@@ -25,7 +25,8 @@ class KrumModuleEditor;
 
 class DragAndDropThumbnail :    public InfoPanelComponent,
                                 public juce::AudioThumbnail,
-                                public juce::DragAndDropTarget/*,
+                                public juce::DragAndDropTarget,
+                                public juce::ValueTree::Listener/*,
                                 public juce::FileDragAndDropTarget*/
 
 {
@@ -35,6 +36,10 @@ public:
         juce::AudioThumbnailCache& cacheToUse);
 
     ~DragAndDropThumbnail() override;
+
+
+    void valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property) override;
+
 
     //For External D&D, still not sure if I should add this or not.
     //bool isInterestedInFileDrag(const juce::StringArray& files) override;
@@ -48,6 +53,9 @@ public:
 
     void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
     void paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
+
+    void paintStartBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
+    void paintEndBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
 
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
@@ -70,7 +78,7 @@ public:
     std::unique_ptr<SliderAttachment> clipGainSliderAttachment;
 
     KrumModuleEditor& parentEditor;
-
+    
 };
 
 

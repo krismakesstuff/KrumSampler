@@ -23,20 +23,33 @@ TimeHandle::TimeHandle(KrumModuleEditor& e)
     : InfoPanelComponent("Time Handle", "Lets you adjust where the playback starts and ends when this sample is triggered"),
         editor(e)
 {
-    editor.moduleTree.addListener(this);
+    auto& tree = editor.moduleTree;
+    tree.addListener(this);
+    
+    if (editor.getModuleState() > KrumModule::ModuleState::empty)
+    {
+        setHandles(tree.getProperty(TreeIDs::moduleStartSample), tree.getProperty(TreeIDs::moduleEndSample));
+    }
 }
 
 TimeHandle::~TimeHandle()
 {}
 
-void TimeHandle::valueTreePropertyChanged(juce::ValueTree & treeWhosePropertyHasChanged, const juce::Identifier & property)
+void TimeHandle::valueTreePropertyChanged(juce::ValueTree & treeWhoChanged, const juce::Identifier & property)
 {
-    if (treeWhosePropertyHasChanged == editor.moduleTree)
+    if (treeWhoChanged == editor.moduleTree)
     {
-        if (property == TreeIDs::moduleStartSample || property == TreeIDs::moduleEndSample)
+        if (property == TreeIDs::moduleStartSample)
         {
+            startSamplePosition = treeWhoChanged[property];
             repaint();
         }
+        else if (property == TreeIDs::moduleEndSample)
+        {
+            endSamplePosition = treeWhoChanged[property];
+            repaint();
+        }
+
     }
 }
 
@@ -48,28 +61,30 @@ void TimeHandle::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
     int spacer = 5;
-    int handleSize = area.getHeight() * 0.7f;
+    int handleH = area.getHeight()/* * 0.7f*/;
+    int handleW = (int)(handleH * 0.65f);
+
+    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    g.fillRect(area);
 
     g.setColour(juce::Colours::white.withAlpha(0.5f));
 
-    juce::Rectangle<int> startRect{ getXFromSample(startSamplePosition), area.getY() + spacer, handleSize, handleSize };
-    drawStartPositionBar(g, startRect);
+    juce::Rectangle<int> startRect{ getXFromSample(startSamplePosition), area.getY(), handleW, handleH };
+    drawStartPosition(g, startRect);
 
-    juce::Rectangle<int> endRect{ getXFromSample(endSamplePosition), area.getY() + spacer, handleSize, handleSize };
-    drawEndPositionBar(g, endRect);
+    juce::Rectangle<int> endRect{ getXFromSample(endSamplePosition) - handleW, area.getY(), handleW, handleH };
+    drawEndPosition(g, endRect);
 
 }
 
-void TimeHandle::drawStartPositionBar(juce::Graphics& g, juce::Rectangle<int>& area)
+void TimeHandle::drawStartPosition(juce::Graphics& g, juce::Rectangle<int>& area)
 {
     juce::Path path;
     path.addTriangle(area.getTopLeft().toFloat(), area.getBottomLeft().toFloat(), { (float)area.getRight(), (float)area.getCentreY() });
-
-
     g.fillPath(path);
 }
 
-void TimeHandle::drawEndPositionBar(juce::Graphics& g, juce::Rectangle<int>& area)
+void TimeHandle::drawEndPosition(juce::Graphics& g, juce::Rectangle<int>& area)
 {
     juce::Path path;
     path.addTriangle({ (float)area.getX(), (float)area.getCentreY() }, area.getTopRight().toFloat(), area.getBottomRight().toFloat());
@@ -110,6 +125,18 @@ int TimeHandle::getEndPosition()
     return endSamplePosition;
 }
 
+void TimeHandle::setHandles(int startSample, int endSample)
+{
+    setStartPosition(startSample);
+    setEndPosition(endSample);
+}
+
+void TimeHandle::resetHandles()
+{
+    setStartPosition(0);
+    setEndPosition(0);
+}
+
 void TimeHandle::setStartPosition(int startPositionInSamples)
 {
     startSamplePosition = startPositionInSamples;
@@ -122,25 +149,32 @@ void TimeHandle::setEndPosition(int endPositionInSamples)
 
 int TimeHandle::getSampleFromXPos(int x)
 {
-    juce::NormalisableRange<float> sampleRange{ 0, (float)editor.thumbnail.getNumSamplesFinished() };
-    juce::NormalisableRange<float> widthRange{ 0, (float)editor.thumbnail.getWidth() };
+    auto& thumbnail = editor.thumbnail;
+    juce::NormalisableRange<float> sampleRange{ 0, (float)thumbnail.getNumSamplesFinished() };
+    juce::NormalisableRange<float> widthRange{ 0, (float)thumbnail.getWidth() };
     int limitedX = juce::jlimit<int>(0, widthRange.end, x);
 
     auto normalledX = widthRange.convertTo0to1(limitedX);
     int returnSample = (int)sampleRange.convertFrom0to1(normalledX);
-    DBG("Returned Sample: " + juce::String(returnSample));
+    //DBG("Returned Sample: " + juce::String(returnSample));
 
     return returnSample;
 }
 
 int TimeHandle::getXFromSample(int sample)
 {
-    juce::NormalisableRange<float> sampleRange{ 0, (float)editor.thumbnail.getNumSamplesFinished() };
-    juce::NormalisableRange<float> widthRange{ 0, (float)editor.thumbnail.getWidth() };
+    if (sample < 0)
+    {
+        return 0;
+    }
+
+    auto& thumbnail = editor.thumbnail;
+    juce::NormalisableRange<float> sampleRange{ 0, (float)thumbnail.getNumSamplesFinished() };
+    juce::NormalisableRange<float> widthRange{ 0, (float)thumbnail.getWidth() };
 
     auto normalledSample = sampleRange.convertTo0to1(sample);
-    int returnX = widthRange.convertFrom0to1(normalledSample);
-    DBG("Returned X: " + juce::String(returnX));
+    int returnX = juce::jlimit<int>(0, widthRange.end, widthRange.convertFrom0to1(normalledSample));
+    //DBG("Returned X: " + juce::String(returnX));
 
     return returnX;
 }
@@ -148,16 +182,18 @@ int TimeHandle::getXFromSample(int sample)
 void TimeHandle::setPositionsFromMouse(const juce::MouseEvent& event)
 {
     auto mouseX = event.getPosition().getX();
-    int centerX = (endSamplePosition - startSamplePosition) / 2;
-
-    if (mouseX > centerX)
+    
+    int samplePos = getSampleFromXPos(mouseX);
+    int startX = getXFromSample(startSamplePosition);
+    int endX = getXFromSample(endSamplePosition);
+    
+    if (mouseX - startX < endX - mouseX) //checks which position the mouse is closest to
     {
-        //set endPosition
-        endSamplePosition = getSampleFromXPos(mouseX);
+            startSamplePosition = samplePos;
     }
-    else
+    else 
     {
-        //set startPosition
-        startSamplePosition = getSampleFromXPos(mouseX);
+        endSamplePosition = samplePos;
     }
+    
 }

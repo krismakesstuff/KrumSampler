@@ -157,14 +157,14 @@ void KrumModuleEditor::resized()
 
     int spacer = 5;
     int thumbnailH = area.getHeight() * 0.25f;
-    int timeHandleH = 15;
+    int timeHandleH = 13;
 
     int midiLabelH = area.getHeight() * 0.093f;
 
     int panSliderH = area.getHeight() * 0.05f;
     int panSliderW = area.getWidth() * 0.9f;
 
-    int volumeSliderH = area.getHeight() * 0.45f;
+    int volumeSliderH = area.getHeight() * 0.44f;
     int volumeSliderW = area.getWidth() * 0.4;
 
     int buttonH = area.getHeight() * 0.075f;
@@ -178,7 +178,7 @@ void KrumModuleEditor::resized()
     thumbnail.setBounds(area.withBottom(thumbnailH).withTop(titleBox.getBottom()).reduced(spacer));
     timeHandle.setBounds(thumbnail.getX(), thumbnail.getBottom(), thumbnail.getWidth(), timeHandleH);
 
-    midiLabel.setBounds(area.withTrimmedTop(timeHandle.getBottom()).withHeight(midiLabelH).reduced(spacer));
+    midiLabel.setBounds(area.withTrimmedTop(timeHandle.getBottom() - spacer).withHeight(midiLabelH).reduced(spacer));
 
     panSlider.setBounds(area.getX() + spacer, midiLabel.getBottom() + (spacer), panSliderW, panSliderH);
     volumeSlider.setBounds(area.getCentreX() - (volumeSliderW / 2), panSlider.getBottom() + (spacer * 3), volumeSliderW, volumeSliderH);
@@ -299,8 +299,6 @@ void KrumModuleEditor::buildModule()
     thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModuleClipGain + i, thumbnail.clipGainSlider));
 
     addAndMakeVisible(timeHandle);
-   /* timeHandle.setStartPosition(moduleTree.getProperty(TreeIDs::moduleStartSample));
-    timeHandle.setEndPosition(moduleTree.getProperty(TreeIDs::moduleEndSample));*/
     
     addAndMakeVisible(volumeSlider);
     volumeSlider.setScrollWheelEnabled(false);
@@ -357,8 +355,6 @@ void KrumModuleEditor::buildModule()
     addAndMakeVisible(outputCombo);
     outputCombo.addItemList(TreeIDs::outputStrings, 1);
     outputComboAttachment.reset(new ComboBoxAttachment(editor.parameters, TreeIDs::paramModuleOutputChannel + i, outputCombo));
-
-
 
     setAndDrawThumbnail();
     setChildCompColors();
@@ -639,6 +635,15 @@ int KrumModuleEditor::getAudioFileLengthInMs()
     return thumbnail.getTotalLength() * 1000;
 }
 
+void KrumModuleEditor::setTimeHandles()
+{
+    if (timeHandle.getStartPosition() == 0 && timeHandle.getEndPosition() == 0)
+    {
+        moduleTree.setProperty(TreeIDs::moduleEndSample, thumbnail.getNumSamplesFinished(), nullptr);
+    }
+
+}
+
 //the editor should only want midi if it's being assigned
 bool KrumModuleEditor::doesEditorWantMidi()
 {
@@ -676,20 +681,14 @@ bool KrumModuleEditor::needsToDrawThumbnail()
 void KrumModuleEditor::setAndDrawThumbnail()
 {
     juce::File file{ moduleTree.getProperty(TreeIDs::moduleFile) };
-    
-    //auto inSource = new juce::FileInputSource(file);
     thumbnail.setSource (new juce::FileInputSource(file));
     
-    timeHandle.setStartPosition(0);
-    timeHandle.setEndPosition(thumbnail.getNumSamplesFinished());
+    setTimeHandles();
 
-    moduleTree.setProperty(TreeIDs::moduleStartSample, timeHandle.getStartPosition(), nullptr);
-    moduleTree.setProperty(TreeIDs::moduleEndSample, timeHandle.getEndPosition(), nullptr);
-    
     auto newFileName = file.getFileName();
-
     setModuleName(newFileName);
     
+
     drawThumbnail = false;
     repaint();
 }

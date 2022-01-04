@@ -13,6 +13,7 @@
 #include "InfoPanel.h"
 
 class KrumModuleEditor;
+class DragAndDropThumbnail;
 
 class TimeHandle :  public InfoPanelComponent,
                     public juce::ValueTree::Listener
@@ -26,8 +27,8 @@ public:
 
     void resized() override;
     void paint(juce::Graphics& g) override;
-    void drawStartPositionBar(juce::Graphics& g, juce::Rectangle<int>& area);
-    void drawEndPositionBar(juce::Graphics& g, juce::Rectangle<int>& area);
+    void drawStartPosition(juce::Graphics& g, juce::Rectangle<int>& area);
+    void drawEndPosition(juce::Graphics& g, juce::Rectangle<int>& area);
 
     void mouseDown(const juce::MouseEvent& event) override;
     void mouseDrag(const juce::MouseEvent& event) override;
@@ -36,17 +37,22 @@ public:
     int getStartPosition();
     int getEndPosition();
 
-    void setStartPosition(int startPositionInSamples);
-    void setEndPosition(int endPositionInSamples);
+    void setHandles(int startSample, int endSample);
+    void resetHandles();
+
 
 private:
+
+    friend class DragAndDropThumbnail;
+    void setStartPosition(int startPositionInSamples);
+    void setEndPosition(int endPositionInSamples);
 
     int getSampleFromXPos(int x);
     int getXFromSample(int sample);
     void setPositionsFromMouse(const juce::MouseEvent& event);
 
-    int startSamplePosition;
-    int endSamplePosition;
+    int startSamplePosition = 0;
+    int endSamplePosition = 0;
 
     KrumModuleEditor& editor;
 };

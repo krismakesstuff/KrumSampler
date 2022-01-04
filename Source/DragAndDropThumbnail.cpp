@@ -12,6 +12,7 @@
 #include "KrumModuleEditor.h"
 #include "PluginEditor.h"
 #include "KrumModule.h"
+#include "TimeHandle.h"
 
 
 
@@ -25,11 +26,21 @@ DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sour
     clipGainSlider.onValueChange = [this] { updateThumbnailClipGain(clipGainSlider.getValue()); };
     addChildComponent(clipGainSlider);
 
+    parentEditor.moduleTree.addListener(this);
+
     //addAndMakeVisible(timeHandle);
 }
 
 DragAndDropThumbnail::~DragAndDropThumbnail()
 {}
+
+void DragAndDropThumbnail::valueTreePropertyChanged(juce::ValueTree & treeWhoChanged, const juce::Identifier & property)
+{
+    if (treeWhoChanged == parentEditor.moduleTree && (property == TreeIDs::moduleStartSample || property == TreeIDs::moduleEndSample))
+    {
+        repaint();
+    }
+}
 
 bool DragAndDropThumbnail::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
 {
@@ -95,6 +106,12 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
         paintIfFileLoaded(g, area, color);
     }
 
+    auto barColor = juce::Colours::white.withAlpha(0.5f);
+    int barWidth = 1;
+
+    paintStartBar(g, area, barColor, barWidth);
+    paintEndBar(g, area, barColor, barWidth);
+
     if (canAcceptFile)
     {
         g.setColour(juce::Colours::red);
@@ -131,6 +148,24 @@ void DragAndDropThumbnail::paintIfFileLoaded(juce::Graphics& g, const juce::Rect
     g.setColour(moduleColor);
 
     drawChannels(g, thumbnailBounds, 0.0, getTotalLength(), verticalZoom);
+}
+
+void DragAndDropThumbnail::paintStartBar(juce::Graphics& g, juce::Rectangle<int>& area, juce::Colour barColor, int barWidth)
+{
+    int startX = parentEditor.timeHandle.getXFromSample(parentEditor.moduleTree.getProperty(TreeIDs::moduleStartSample));
+    juce::Rectangle<int> barRect{ startX, area.getY(), barWidth, area.getHeight() };
+    
+    g.setColour(barColor);
+    g.fillRect(barRect);
+}
+
+void DragAndDropThumbnail::paintEndBar(juce::Graphics& g, juce::Rectangle<int>& area, juce::Colour barColor, int barWidth)
+{
+    int endX = parentEditor.timeHandle.getXFromSample(parentEditor.moduleTree.getProperty(TreeIDs::moduleEndSample));
+    juce::Rectangle<int> barRect{ endX - barWidth, area.getY(), barWidth, area.getHeight() };
+
+    g.setColour(barColor);
+    g.fillRect(barRect);
 }
 
 

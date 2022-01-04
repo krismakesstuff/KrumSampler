@@ -22,7 +22,7 @@
 * 
 * 
 * TODO:
-* - Make the module draggable to move display order on screen. Use DragHandle
+* 
 * 
 */
 
