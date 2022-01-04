@@ -40,6 +40,10 @@ public:
     std::atomic<float>* getModuleGain()const;
     std::atomic<float>* getModulePan()const;
     std::atomic<float>* getModuleClipGain()const;
+    
+    std::atomic<int> getModuleStartSample() const;
+    std::atomic<int> getModuleEndSample() const;
+
     int getModuleOutputNumber() const;
 
     //std::atomic<float>* getModuleOutputChan()const;
@@ -81,6 +85,8 @@ private:
     double pitchRatio = 0;
     std::atomic<float> lgain = 0, rgain = 0, clipGain = 0;
     
+    std::atomic<int> startSample, endSample;
+
     double sourceSamplePosition = 0;
 
     int outputChan = 0;

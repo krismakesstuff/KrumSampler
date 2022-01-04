@@ -61,20 +61,20 @@ std::atomic<float>* KrumSound::getModuleClipGain() const
     return parentModule->getModuleClipGain();
 }
 
+std::atomic<int> KrumSound::getModuleStartSample() const
+{
+    return parentModule->getModuleStartSample();
+}
+
+std::atomic<int> KrumSound::getModuleEndSample() const
+{
+    return parentModule->getModuleEndSample();
+}
+
 int KrumSound::getModuleOutputNumber() const
 {
     return parentModule->getModuleOutputChannelNumber();
 }
-
-//std::atomic<float>* KrumSound::getModuleOutputChan() const
-//{
-//    return parentModule->getModuleOutputChannel();
-//}
-
-//void KrumSound::setModulePlaying(bool isPlaying)
-//{
-//    parentModule->setModulePlaying(isPlaying);
-//}
 
 bool KrumSound::isParent(KrumModule* moduleToTest)
 {
@@ -115,7 +115,11 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
 
         outputChan = sound->getModuleOutputNumber() - 1; //index offset
 
-        sourceSamplePosition = 0.0;
+        startSample = sound->getModuleStartSample().load();
+        endSample = sound->getModuleEndSample().load();
+
+        sourceSamplePosition = startSample;
+        //sourceSamplePosition = 0.0;
 
         //only storing this, it will be applied in the render block
         clipGain = sound->getModuleClipGain()->load();
@@ -215,8 +219,8 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
             }
 
             //sourceSamplePosition += pitchRatio;
-
-            if (++sourceSamplePosition > playingSound->length)
+            ++sourceSamplePosition;
+            if (sourceSamplePosition > playingSound->length || sourceSamplePosition > endSample)
             {
                 stopNote(0.0f, false);
                 break;
