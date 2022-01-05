@@ -12,6 +12,14 @@
 #include <JuceHeader.h>
 #include "InfoPanel.h"
 
+/*
+* This class is the two handles that live underneath the DragAndDropThumbnail. This will change the start and stop sample that the module's file will play from and to. 
+* Changes are made and stored locally within this class and then updated to the valueTree where the KrumModule will handle the change as needed.
+* 
+* TODO:
+* - Handle drag and drop
+*/
+
 class KrumModuleEditor;
 class DragAndDropThumbnail;
 
@@ -19,13 +27,11 @@ class TimeHandle :  public InfoPanelComponent,
                     public juce::ValueTree::Listener
 {
 public:
-    //TimeHandle(int startPosition, int endPosition, KrumModuleEditor& editor);
     TimeHandle(KrumModuleEditor& editor);
     ~TimeHandle() override;
 
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
-    void resized() override;
     void paint(juce::Graphics& g) override;
     void drawStartPosition(juce::Graphics& g, juce::Rectangle<int>& area);
     void drawEndPosition(juce::Graphics& g, juce::Rectangle<int>& area);
@@ -42,6 +48,8 @@ public:
 
 
 private:
+
+    void updateValueTree();
 
     friend class DragAndDropThumbnail;
     void setStartPosition(int startPositionInSamples);

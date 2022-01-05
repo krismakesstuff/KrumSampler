@@ -158,8 +158,6 @@ private:
     void zeroModuleTree();
     void timerCallback() override;
 
-    bool isMouseOverAnyChildren();
-
     void printValueAndPositionOfSlider();
 
     void handleOneShotButtonMouseDown(const juce::MouseEvent& e);
@@ -175,22 +173,19 @@ private:
     int oldMidiNote = 0;
     bool modulePlaying = false;
 
-    //juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour titleFontColor{ juce::Colours::black };
 
     InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
     InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
     InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
-    
-    InfoPanelComboBox outputCombo{ "Output Channel", "Select which output bus you would like this module to go to. Default is the Main Bus (1-2)" };
+    InfoPanelComboBox outputCombo{ "Output Channel", "Select which output bus you would like this module to go to. Default is Main Bus (1-2)" };
 
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
-
     std::unique_ptr<ComboBoxAttachment> outputComboAttachment;
     
     DragAndDropThumbnail thumbnail;
@@ -211,20 +206,20 @@ private:
         std::function<void(const juce::MouseEvent& e)> onMouseDown;
     };
 
-    class ModalManager : public juce::ModalComponentManager::Callback
-    {
-    public:
-        ModalManager(std::function<void(int)> menuResult)
-            : handleSettingsResult(menuResult)
-        {}
-        
-        void modalStateFinished(int returnValue) override
-        {
-            handleSettingsResult(returnValue);
-        }
-        
-        std::function<void(int)> handleSettingsResult;
-    };
+    //class ModalManager : public juce::ModalComponentManager::Callback
+    //{
+    //public:
+    //    ModalManager(std::function<void(int)> menuResult)
+    //        : handleSettingsResult(menuResult)
+    //    {}
+    //    
+    //    void modalStateFinished(int returnValue) override
+    //    {
+    //        handleSettingsResult(returnValue);
+    //    }
+    //    
+    //    std::function<void(int)> handleSettingsResult;
+    //};
     
     class MidiLabel :   public juce::Component,
                         public juce::SettableTooltipClient

@@ -259,6 +259,8 @@ void KrumTreeItem::EditableComp::mouseDown(const juce::MouseEvent& e)
 
         menu.showMenuAsync(menuOptions.withTargetScreenArea(showPoint), juce::ModalCallbackFunction::create(handleResult, this));
     }
+
+    owner.itemClicked(e);
 }
 
 void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)

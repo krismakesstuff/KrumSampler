@@ -149,7 +149,7 @@ void ModuleSettingsOverlay::resized()
 
     colorPalette.setBounds(area.getX(), midiListenButton.getBottom() , area.getWidth() - spacer, paletteH);
 
-    confirmButton.setBounds(area.getCentreX() - confirmButtonWidth / 2, colorPalette.getBottom() + (spacer /** 2*/), confirmButtonWidth, confirmButtonHeight);
+    confirmButton.setBounds(area.getCentreX() - confirmButtonWidth / 2, colorPalette.getBottom() + (spacer * 2), confirmButtonWidth, confirmButtonHeight);
     deleteButton.setBounds(area.getX() + spacer, confirmButton.getBottom() + (spacer * 2), cancelButtonWidth - spacer, cancelButtonHeight);
     cancelButton.setBounds(deleteButton.getRight() + spacer, deleteButton.getY(), cancelButtonWidth, cancelButtonHeight);
 

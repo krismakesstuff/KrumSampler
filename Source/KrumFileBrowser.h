@@ -77,8 +77,8 @@ enum RightClickMenuIds
     clear_Id,
 };
 
-//---------------------------------
-//---------------------------------
+//---------------------------------------
+//---------------------------------------
 
 //Represents a file in the File Browser. Contains a private subclass that responds to mouse clicks
 class KrumTreeItem :    public juce::TreeViewItem,
@@ -126,7 +126,7 @@ private:
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     SimpleAudioPreviewer* previewer;
 
-    //-------------------------------------
+    //-----------------------------------------
 
     class EditableComp : public juce::Label
     {
@@ -447,7 +447,7 @@ private:
 
     SimpleAudioPreviewer& audioPreviewer;
   
-    InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Click this to open a browser and select Folders and Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
+    InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
     juce::Colour fontColor{ juce::Colours::lightgrey };
     

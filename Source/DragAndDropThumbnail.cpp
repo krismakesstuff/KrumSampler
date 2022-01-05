@@ -27,8 +27,6 @@ DragAndDropThumbnail::DragAndDropThumbnail(KrumModuleEditor& modEditor, int sour
     addChildComponent(clipGainSlider);
 
     parentEditor.moduleTree.addListener(this);
-
-    //addAndMakeVisible(timeHandle);
 }
 
 DragAndDropThumbnail::~DragAndDropThumbnail()
@@ -76,9 +74,8 @@ void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
 void DragAndDropThumbnail::moveDroppedFileToParent()
 {
     parentEditor.moduleTree.setProperty(TreeIDs::moduleFile, droppedFile.getFullPathName(), nullptr);
-
-    //reset the clipgain value to 0?
-    clipGainSliderAttachment.reset(new SliderAttachment(parentEditor.editor.parameters, TreeIDs::paramModuleClipGain + juce::String(parentEditor.getModuleSamplerIndex()), clipGainSlider));
+    clipGainSlider.setValue(juce::Decibels::decibelsToGain(0.0));
+    parentEditor.timeHandle.resetHandles();
 
     parentEditor.drawThumbnail = true;
     checkDroppedFile = false;
@@ -106,7 +103,7 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
         paintIfFileLoaded(g, area, color);
     }
 
-    auto barColor = juce::Colours::white.withAlpha(0.5f);
+    auto barColor = juce::Colours::white.withAlpha(0.3f);
     int barWidth = 1;
 
     paintStartBar(g, area, barColor, barWidth);
@@ -129,7 +126,6 @@ void DragAndDropThumbnail::resized()
     int handleH = 15;
 
     clipGainSlider.setBounds(area.getRight() - sliderW - (spacer * 2), area.getY() + spacer, sliderW, area.getHeight() - (spacer * 2));
-    //timeHandle.setBounds(area.getX(), )
 }
 
 void DragAndDropThumbnail::paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor)
@@ -168,6 +164,16 @@ void DragAndDropThumbnail::paintEndBar(juce::Graphics& g, juce::Rectangle<int>& 
     g.fillRect(barRect);
 }
 
+
+void DragAndDropThumbnail::mouseDown(const juce::MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+    {
+        //add two
+    }
+
+    InfoPanelComponent::mouseDown(e);
+}
 
 void DragAndDropThumbnail::mouseEnter(const juce::MouseEvent& e)
 {

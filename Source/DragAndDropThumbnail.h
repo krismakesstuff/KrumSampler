@@ -11,6 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "InfoPanel.h"
+
 /*
 * This draws the thumbnail of the audioFile that the KrumModuleEditor (parentEditor) gives to it. 
 * It can also accept a file that is dragged onto it and will "hot swap" the audio file out with the dropped one, and boy is it hot! 
@@ -57,6 +58,7 @@ public:
     void paintStartBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
     void paintEndBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
 
+    void mouseDown(const juce::MouseEvent& e) override;
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
 

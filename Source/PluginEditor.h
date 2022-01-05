@@ -29,15 +29,15 @@
 
 namespace EditorDimensions
 {
-    const static int windowH = 650;
+    const static int windowH = 600;
     const static int windowW = 1200;
     const static int windowWNoBrowser = 900;
     
-    const static int  topBar = 65;
+    const static int  topBar = 60;
     const static int shrinkage = 5;
     const juce::Rectangle<int> madeByArea{ 0, 0, 150, 35 };
 
-    const static int moduleH = 450;
+    const static int moduleH = windowH * 0.68f;
     const static int moduleW = 120;
 
     const static int addButtonH = 50;

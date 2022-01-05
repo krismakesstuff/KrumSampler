@@ -18,11 +18,9 @@
 * 
 * There are some classes that override their components mouse movements so I don't have to worry about that when handling other functionality in those classes
 * There's probably a template way of handling this.. (?)
-* Also, I think I can just use InfoPanel as a base class and inherit? There was a reason I didn't do this but I can't really remember..
-* 
 */
 
-
+//static instance
 class InfoPanel  : public juce::Component
 {
 public:
@@ -49,7 +47,8 @@ private:
     juce::String title;
     juce::String keycommand;
     
-    juce::Colour fontColor {juce::Colours::grey.brighter(0.2f)};
+    juce::Colour fontColor {juce::Colours::grey.brighter(0.4f)};
+    //juce::Colour bgColor {juce::Colours::darkgrey.darker(0.99f)};
     juce::Colour bgColor {juce::Colours::black};
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InfoPanel)

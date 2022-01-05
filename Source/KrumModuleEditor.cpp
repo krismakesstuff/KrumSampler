@@ -641,7 +641,6 @@ void KrumModuleEditor::setTimeHandles()
     {
         moduleTree.setProperty(TreeIDs::moduleEndSample, thumbnail.getNumSamplesFinished(), nullptr);
     }
-
 }
 
 //the editor should only want midi if it's being assigned
@@ -930,6 +929,7 @@ void KrumModuleEditor::zeroModuleTree()
     moduleTree.setProperty(TreeIDs::moduleMidiNote, juce::var(0), nullptr);
     moduleTree.setProperty(TreeIDs::moduleMidiChannel, juce::var(0), nullptr);
     moduleTree.setProperty(TreeIDs::moduleColor, juce::var(""), nullptr);
+    
 
     DBG("Module " + juce::String(getModuleSamplerIndex()) + " zeroed");
 }
@@ -952,19 +952,6 @@ void KrumModuleEditor::timerCallback()
     {
         keyboard.setHighlightKey(currentMidiNote, false);
     }
-}
-
-bool KrumModuleEditor::isMouseOverAnyChildren()
-{
-    //coudl probably use juce methods for this.... anyways, here we are
-    return (titleBox.isMouseOver(true)      ||
-            midiLabel.isMouseOver(true)     ||
-            panSlider.isMouseOver(true)     ||
-            volumeSlider.isMouseOver(true)  ||
-            playButton.isMouseOver(true)    ||
-            editButton.isMouseOver(true)    ||
-            thumbnail.isMouseOver(true));
-    
 }
 
 void KrumModuleEditor::printValueAndPositionOfSlider()

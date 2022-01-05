@@ -56,6 +56,9 @@ juce::ValueTree createValueTree()
         newModule.setProperty(TreeIDs::moduleSamplerIndex, juce::var(i), nullptr);
         newModule.setProperty(TreeIDs::moduleStartSample, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleEndSample, juce::var(0), nullptr);
+        /*newModule.setProperty(TreeIDs::moduleFadeIn, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleReverse, juce::var(0), nullptr);*/
 
         krumModulesTree.addChild(newModule, i, nullptr);
     }
@@ -87,8 +90,6 @@ juce::ValueTree createFileBrowserTree()
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
-    
-    //Not currently using aux outputs but would like to add these soon
 
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {

@@ -20,7 +20,7 @@
 //{}
 
 TimeHandle::TimeHandle(KrumModuleEditor& e)
-    : InfoPanelComponent("Time Handle", "Lets you adjust where the playback starts and ends when this sample is triggered"),
+    : InfoPanelComponent("Time Handle", "Lets you adjust the playback start and end when this sample is triggered"),
         editor(e)
 {
     auto& tree = editor.moduleTree;
@@ -53,9 +53,6 @@ void TimeHandle::valueTreePropertyChanged(juce::ValueTree & treeWhoChanged, cons
     }
 }
 
-void TimeHandle::resized()
-{
-}
 
 void TimeHandle::paint(juce::Graphics& g)
 {
@@ -67,7 +64,7 @@ void TimeHandle::paint(juce::Graphics& g)
     g.setColour(juce::Colours::black.withAlpha(0.3f));
     g.fillRect(area);
 
-    g.setColour(juce::Colours::white.withAlpha(0.5f));
+    g.setColour(juce::Colours::white.withAlpha(0.3f));
 
     juce::Rectangle<int> startRect{ getXFromSample(startSamplePosition), area.getY(), handleW, handleH };
     drawStartPosition(g, startRect);
@@ -94,22 +91,19 @@ void TimeHandle::drawEndPosition(juce::Graphics& g, juce::Rectangle<int>& area)
 void TimeHandle::mouseDown(const juce::MouseEvent& event)
 {
     setPositionsFromMouse(event);
+    updateValueTree();
 }
 
 void TimeHandle::mouseDrag(const juce::MouseEvent& event)
 {
     setPositionsFromMouse(event);
+    updateValueTree();
 }
 
 void TimeHandle::mouseUp(const juce::MouseEvent& event)
 {
-    //set Positions
     setPositionsFromMouse(event);
-
-    //update value tree with position so sampler can adjust
-    auto& moduleTree = editor.moduleTree;
-    moduleTree.setProperty(TreeIDs::moduleStartSample, startSamplePosition, nullptr);
-    moduleTree.setProperty(TreeIDs::moduleEndSample, endSamplePosition, nullptr);
+    updateValueTree();
 
     DBG("Start Position: " + juce::String(startSamplePosition));
     DBG("End Position: " + juce::String(endSamplePosition));
@@ -135,6 +129,14 @@ void TimeHandle::resetHandles()
 {
     setStartPosition(0);
     setEndPosition(0);
+    updateValueTree();
+}
+
+void TimeHandle::updateValueTree()
+{
+    auto& moduleTree = editor.moduleTree;
+    moduleTree.setProperty(TreeIDs::moduleStartSample, startSamplePosition, nullptr);
+    moduleTree.setProperty(TreeIDs::moduleEndSample, endSamplePosition, nullptr);
 }
 
 void TimeHandle::setStartPosition(int startPositionInSamples)

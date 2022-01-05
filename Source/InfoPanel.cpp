@@ -32,7 +32,6 @@ void InfoPanel::paint (juce::Graphics& g)
 
     if (showText)
     {
-
         auto messageFont = g.getCurrentFont();
         
         //title
@@ -46,7 +45,7 @@ void InfoPanel::paint (juce::Graphics& g)
         g.drawFittedText(title, titleBG.getBounds().toNearestInt(), juce::Justification::centredLeft, 1);
         
         //message
-        juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight() + 2).withTrimmedLeft(5).withTrimmedRight(10).toNearestInt();
+        juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight() + 2).withTrimmedLeft(5).withTrimmedRight(12).toNearestInt();
         g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::plain).withHeight(17.0f)); 
         g.drawFittedText(message, messageArea, juce::Justification::topLeft, numLines);
         

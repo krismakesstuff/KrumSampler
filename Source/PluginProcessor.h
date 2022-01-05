@@ -63,6 +63,9 @@ namespace TreeIDs
                 DECLARE_ID(moduleSamplerIndex)
                 DECLARE_ID(moduleStartSample)
                 DECLARE_ID(moduleEndSample)
+           /*     DECLARE_ID(moduleFadeIn)
+                DECLARE_ID(moduleFadeOut)
+                DECLARE_ID(moduleReverse)*/
 
         DECLARE_ID(PARAMS) //APVTS, these are parameters exposed to the DAW for Automation
             
