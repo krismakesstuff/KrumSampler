@@ -637,10 +637,7 @@ int KrumModuleEditor::getAudioFileLengthInMs()
 
 void KrumModuleEditor::setTimeHandles()
 {
-    if (timeHandle.getStartPosition() == 0 && timeHandle.getEndPosition() == 0)
-    {
-        moduleTree.setProperty(TreeIDs::moduleEndSample, thumbnail.getNumSamplesFinished(), nullptr);
-    }
+    timeHandle.setHandles(0, thumbnail.getNumSamplesFinished());
 }
 
 //the editor should only want midi if it's being assigned
@@ -682,7 +679,11 @@ void KrumModuleEditor::setAndDrawThumbnail()
     juce::File file{ moduleTree.getProperty(TreeIDs::moduleFile) };
     thumbnail.setSource (new juce::FileInputSource(file));
     
-    setTimeHandles();
+    //if this is new file, or being reloaded from the tree
+    if (timeHandle.getEndPosition() == 0)
+    {
+        setTimeHandles();
+    }
 
     auto newFileName = file.getFileName();
     setModuleName(newFileName);
@@ -929,6 +930,7 @@ void KrumModuleEditor::zeroModuleTree()
     moduleTree.setProperty(TreeIDs::moduleMidiNote, juce::var(0), nullptr);
     moduleTree.setProperty(TreeIDs::moduleMidiChannel, juce::var(0), nullptr);
     moduleTree.setProperty(TreeIDs::moduleColor, juce::var(""), nullptr);
+    timeHandle.resetHandles();
     
 
     DBG("Module " + juce::String(getModuleSamplerIndex()) + " zeroed");

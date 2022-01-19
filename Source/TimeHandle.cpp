@@ -13,12 +13,6 @@
 #include "PluginEditor.h"
 
 
-//TimeHandle::TimeHandle(int startPos, int endPos, KrumModuleEditor& e)
-//    : InfoPanelComponent("Time Handle", "Lets you adjust where the playback starts and ends when this sample is triggered"),
-//    startSamplePosition(startPos),
-//    endSamplePosition(endPos), editor(e)
-//{}
-
 TimeHandle::TimeHandle(KrumModuleEditor& e)
     : InfoPanelComponent("Time Handle", "Lets you adjust the playback start and end when this sample is triggered"),
         editor(e)
@@ -39,20 +33,16 @@ void TimeHandle::valueTreePropertyChanged(juce::ValueTree & treeWhoChanged, cons
 {
     if (treeWhoChanged == editor.moduleTree)
     {
-        if (property == TreeIDs::moduleStartSample)
+        /*if (property == TreeIDs::moduleFile)
         {
-            startSamplePosition = treeWhoChanged[property];
-            repaint();
+            setHandles(0, editor.thumbnail.getNumSamplesFinished());
         }
-        else if (property == TreeIDs::moduleEndSample)
+        else*/ /*if (property == TreeIDs::moduleStartSample || property == TreeIDs::moduleEndSample)
         {
-            endSamplePosition = treeWhoChanged[property];
             repaint();
-        }
-
+        }*/
     }
 }
-
 
 void TimeHandle::paint(juce::Graphics& g)
 {
@@ -66,10 +56,10 @@ void TimeHandle::paint(juce::Graphics& g)
 
     g.setColour(juce::Colours::white.withAlpha(0.3f));
 
-    juce::Rectangle<int> startRect{ getXFromSample(startSamplePosition), area.getY(), handleW, handleH };
+    juce::Rectangle<int> startRect{ getXFromSample(getStartPosition()), area.getY(), handleW, handleH };
     drawStartPosition(g, startRect);
 
-    juce::Rectangle<int> endRect{ getXFromSample(endSamplePosition) - handleW, area.getY(), handleW, handleH };
+    juce::Rectangle<int> endRect{ getXFromSample(getEndPosition()) - handleW, area.getY(), handleW, handleH };
     drawEndPosition(g, endRect);
 
 }
@@ -91,32 +81,26 @@ void TimeHandle::drawEndPosition(juce::Graphics& g, juce::Rectangle<int>& area)
 void TimeHandle::mouseDown(const juce::MouseEvent& event)
 {
     setPositionsFromMouse(event);
-    updateValueTree();
 }
 
 void TimeHandle::mouseDrag(const juce::MouseEvent& event)
 {
     setPositionsFromMouse(event);
-    updateValueTree();
 }
 
 void TimeHandle::mouseUp(const juce::MouseEvent& event)
 {
     setPositionsFromMouse(event);
-    updateValueTree();
-
-    DBG("Start Position: " + juce::String(startSamplePosition));
-    DBG("End Position: " + juce::String(endSamplePosition));
 }
 
 int TimeHandle::getStartPosition()
 {
-    return startSamplePosition;
+    return editor.moduleTree.getProperty(TreeIDs::moduleStartSample);
 }
 
 int TimeHandle::getEndPosition()
 {
-    return endSamplePosition;
+    return editor.moduleTree.getProperty(TreeIDs::moduleEndSample);
 }
 
 void TimeHandle::setHandles(int startSample, int endSample)
@@ -129,24 +113,16 @@ void TimeHandle::resetHandles()
 {
     setStartPosition(0);
     setEndPosition(0);
-    updateValueTree();
-}
-
-void TimeHandle::updateValueTree()
-{
-    auto& moduleTree = editor.moduleTree;
-    moduleTree.setProperty(TreeIDs::moduleStartSample, startSamplePosition, nullptr);
-    moduleTree.setProperty(TreeIDs::moduleEndSample, endSamplePosition, nullptr);
 }
 
 void TimeHandle::setStartPosition(int startPositionInSamples)
 {
-    startSamplePosition = startPositionInSamples;
+    editor.moduleTree.setProperty(TreeIDs::moduleStartSample, startPositionInSamples, nullptr);
 }
 
 void TimeHandle::setEndPosition(int endPositionInSamples)
 {
-    endSamplePosition = endPositionInSamples;
+    editor.moduleTree.setProperty(TreeIDs::moduleEndSample, endPositionInSamples, nullptr);
 }
 
 int TimeHandle::getSampleFromXPos(int x)
@@ -158,7 +134,6 @@ int TimeHandle::getSampleFromXPos(int x)
 
     auto normalledX = widthRange.convertTo0to1(limitedX);
     int returnSample = (int)sampleRange.convertFrom0to1(normalledX);
-    //DBG("Returned Sample: " + juce::String(returnSample));
 
     return returnSample;
 }
@@ -176,7 +151,6 @@ int TimeHandle::getXFromSample(int sample)
 
     auto normalledSample = sampleRange.convertTo0to1(sample);
     int returnX = juce::jlimit<int>(0, widthRange.end, widthRange.convertFrom0to1(normalledSample));
-    //DBG("Returned X: " + juce::String(returnX));
 
     return returnX;
 }
@@ -186,16 +160,16 @@ void TimeHandle::setPositionsFromMouse(const juce::MouseEvent& event)
     auto mouseX = event.getPosition().getX();
     
     int samplePos = getSampleFromXPos(mouseX);
-    int startX = getXFromSample(startSamplePosition);
-    int endX = getXFromSample(endSamplePosition);
+    int startX = getXFromSample(getStartPosition());
+    int endX = getXFromSample(getEndPosition());
     
     if (mouseX - startX < endX - mouseX) //checks which position the mouse is closest to
     {
-            startSamplePosition = samplePos;
+        setStartPosition(samplePos);
     }
     else 
     {
-        endSamplePosition = samplePos;
+        setEndPosition(samplePos);
     }
     
 }

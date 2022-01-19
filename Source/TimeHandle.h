@@ -17,7 +17,7 @@
 * Changes are made and stored locally within this class and then updated to the valueTree where the KrumModule will handle the change as needed.
 * 
 * TODO:
-* - Handle drag and drop
+*   - make a fade in and fade out
 */
 
 class KrumModuleEditor;
@@ -49,8 +49,6 @@ public:
 
 private:
 
-    void updateValueTree();
-
     friend class DragAndDropThumbnail;
     void setStartPosition(int startPositionInSamples);
     void setEndPosition(int endPositionInSamples);
@@ -58,9 +56,6 @@ private:
     int getSampleFromXPos(int x);
     int getXFromSample(int sample);
     void setPositionsFromMouse(const juce::MouseEvent& event);
-
-    int startSamplePosition = 0;
-    int endSamplePosition = 0;
 
     KrumModuleEditor& editor;
 };
