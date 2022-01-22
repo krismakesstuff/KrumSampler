@@ -140,14 +140,16 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    g.setColour(bgColor);
+    auto bgGrade = juce::ColourGradient::vertical(bgColor, bgColor.brighter(0.1f), area);
+    g.setGradientFill(bgGrade);
     g.fillRect(area);
     
     auto titleRect = area.withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).withCentre({area.getCentreX(), EditorDimensions::topBar / 2}).toFloat();
 
     g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xMid );
 
-    g.setColour(modulesBGColor);
+    auto moduleBGGrade = juce::ColourGradient::vertical(modulesBGColor.darker(0.2f), modulesBGColor, modulesBG);
+    g.setGradientFill(moduleBGGrade);
     g.fillRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize);
 
     g.setColour(juce::Colours::black);

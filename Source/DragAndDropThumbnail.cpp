@@ -155,6 +155,7 @@ void DragAndDropThumbnail::paintEndBar(juce::Graphics& g, juce::Rectangle<int>& 
 {
     auto& timeHandle = parentEditor.timeHandle;
     int endX = timeHandle.getXFromSample(timeHandle.getEndPosition());
+
     juce::Rectangle<int> barRect{ endX - barWidth, area.getY(), barWidth, area.getHeight() };
     juce::Rectangle<int> endToBarRect = barRect.withWidth(area.getWidth() - endX);
 
