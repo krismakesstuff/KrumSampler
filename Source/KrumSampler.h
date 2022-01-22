@@ -190,7 +190,7 @@ public:
     void addPreviewFile(juce::File& file);
     void playPreviewFile();
 
-    bool isFileAcceptable(const juce::File& file);
+    bool isFileAcceptable(const juce::File& file, juce::int64& numSamplesOfFile);
 
     juce::AudioFormatManager& getFormatManager();
 
@@ -203,7 +203,7 @@ private:
 
     void removePreviewSound();
 
-    //does the same thing as isFileAcceptable(), except returns the reader or nullptr if not acceptable
+    //does the same thing as isFileAcceptable(), except returns the reader, will be nullptr if not acceptable
     std::unique_ptr<juce::AudioFormatReader> getFormatReader(juce::File& file);
 
     void printSounds();

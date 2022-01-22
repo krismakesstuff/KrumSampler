@@ -81,6 +81,8 @@ public:
 
     int getModuleOutputChannelNumber();
 
+    void setNumSamplesInFile(int numSamples);
+
 private:
 
     void updateSamplerSound();

@@ -477,6 +477,7 @@ void KrumSampler::addSample(KrumModule* moduleToAddSound)
     juce::File sampleFile = moduleToAddSound->getSampleFile();
     if(auto reader = getFormatReader(sampleFile))
     {
+        moduleToAddSound->setNumSamplesInFile(reader->lengthInSamples);
         juce::BigInteger range;
         range.setBit(moduleToAddSound->getMidiTriggerNote());
 
@@ -585,8 +586,9 @@ void KrumSampler::removePreviewSound()
     }
 }
 
-bool KrumSampler::isFileAcceptable(const juce::File& file)
+bool KrumSampler::isFileAcceptable(const juce::File& file, juce::int64& numSamplesOfFile)
 {
+    numSamplesOfFile = 0;
     std::unique_ptr<juce::AudioFormatReader> reader(formatManager.createReaderFor(file));
     if (reader == nullptr)
     {
@@ -600,6 +602,7 @@ bool KrumSampler::isFileAcceptable(const juce::File& file)
         return false;
     }
 
+    numSamplesOfFile = reader->lengthInSamples;
     return true;
 }
 

@@ -117,16 +117,6 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
 
 }
 
-void DragAndDropThumbnail::resized()
-{
-    auto area = getLocalBounds();
-
-    int sliderW = 15;
-    int spacer = 5;
-    int handleH = 15;
-
-    clipGainSlider.setBounds(area.getRight() - sliderW - (spacer * 2), area.getY() + spacer, sliderW, area.getHeight() - (spacer * 2));
-}
 
 void DragAndDropThumbnail::paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor)
 {
@@ -150,8 +140,13 @@ void DragAndDropThumbnail::paintStartBar(juce::Graphics& g, juce::Rectangle<int>
 {
     auto& timeHandle = parentEditor.timeHandle;
     int startX = timeHandle.getXFromSample(timeHandle.getStartPosition());
+
     juce::Rectangle<int> barRect{ startX, area.getY(), barWidth, area.getHeight() };
-    
+    juce::Rectangle<int> startToBarRect { area.getX(), area.getY(), startX, area.getHeight() };
+
+    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    g.fillRect(startToBarRect);
+
     g.setColour(barColor);
     g.fillRect(barRect);
 }
@@ -161,11 +156,25 @@ void DragAndDropThumbnail::paintEndBar(juce::Graphics& g, juce::Rectangle<int>& 
     auto& timeHandle = parentEditor.timeHandle;
     int endX = timeHandle.getXFromSample(timeHandle.getEndPosition());
     juce::Rectangle<int> barRect{ endX - barWidth, area.getY(), barWidth, area.getHeight() };
+    juce::Rectangle<int> endToBarRect = barRect.withWidth(area.getWidth() - endX);
+
+    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    g.fillRect(endToBarRect);
 
     g.setColour(barColor);
     g.fillRect(barRect);
 }
 
+void DragAndDropThumbnail::resized()
+{
+    auto area = getLocalBounds();
+
+    int sliderW = 15;
+    int spacer = 5;
+    int handleH = 15;
+
+    clipGainSlider.setBounds(area.getRight() - sliderW - (spacer * 2), area.getY() + spacer, sliderW, area.getHeight() - (spacer * 2));
+}
 
 void DragAndDropThumbnail::mouseDown(const juce::MouseEvent& e)
 {

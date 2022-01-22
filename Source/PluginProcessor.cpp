@@ -56,6 +56,7 @@ juce::ValueTree createValueTree()
         newModule.setProperty(TreeIDs::moduleSamplerIndex, juce::var(i), nullptr);
         newModule.setProperty(TreeIDs::moduleStartSample, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleEndSample, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleNumSamplesLength, juce::var(0), nullptr);
         /*newModule.setProperty(TreeIDs::moduleFadeIn, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleReverse, juce::var(0), nullptr);*/

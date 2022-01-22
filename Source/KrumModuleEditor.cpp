@@ -463,15 +463,6 @@ void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
 
 void KrumModuleEditor::hideModule()
 {
-    //set child components to not visible
-    /*titleBox.setVisible(false);
-    midiLabel.setVisible(false);
-    panSlider.setVisible(false);
-    volumeSlider.setVisible(false);
-    playButton.setVisible(false);
-    editButton.setVisible(false);
-    thumbnail.setVisible(false);*/
-
     for (int i = 0; i < getNumChildComponents(); i++)
     {
         auto child = getChildComponent(i);
@@ -484,15 +475,6 @@ void KrumModuleEditor::hideModule()
 
 void KrumModuleEditor::showModule()
 {
-    //set child components to visible
-    /*titleBox.setVisible(true);
-    midiLabel.setVisible(true);
-    panSlider.setVisible(true);
-    volumeSlider.setVisible(true);
-    playButton.setVisible(true);
-    editButton.setVisible(true);
-    thumbnail.setVisible(true);*/
-
     for (int i = 0; i < getNumChildComponents(); i++)
     {
         auto child = getChildComponent(i);
@@ -593,6 +575,16 @@ bool KrumModuleEditor::isModulePlaying()
     return modulePlaying;
 }
 
+void KrumModuleEditor::setNumSamplesOfFile(int numSamplesInFile)
+{
+    moduleTree.setProperty(TreeIDs::moduleNumSamplesLength, numSamplesInFile, nullptr);
+}
+
+int KrumModuleEditor::getNumSamplesInFile()
+{
+    return moduleTree.getProperty(TreeIDs::moduleNumSamplesLength);
+}
+
 //updates the postion of the "dB" readout of the sliders
 void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* comp)
 {
@@ -637,7 +629,7 @@ int KrumModuleEditor::getAudioFileLengthInMs()
 
 void KrumModuleEditor::setTimeHandles()
 {
-    timeHandle.setHandles(0, thumbnail.getNumSamplesFinished());
+    timeHandle.setHandles(0, getNumSamplesInFile());
 }
 
 //the editor should only want midi if it's being assigned
@@ -759,12 +751,13 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
                 {
                     auto file = krumItem->getFile();
                     auto itemName = krumItem->getItemName();
-                    if (!krumItem->mightContainSubItems() && sampler.isFileAcceptable(file))
+                    juce::int64 numSamples = 0;
+                    if (!krumItem->mightContainSubItems() && sampler.isFileAcceptable(file, numSamples))
                     {
                         if (i == 0)
                         {
                             //we set this module with the first dropped file and then create the rest, if we need to
-                            handleNewFile(file, numDroppedItems == 1);
+                            handleNewFile(file, numDroppedItems == 1, numSamples);
 
                             addNextModule = true;
                             continue;
@@ -780,7 +773,7 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
                                 if ((int)itTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::empty)
                                 {
                                     auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                                    newModEd->handleNewFile(file, false);
+                                    newModEd->handleNewFile(file, false, numSamples);
                                         
                                     addNextModule = true;
                                         
@@ -849,11 +842,12 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
         for (int i = 0; i < files.size(); i++)
         {
             juce::File audioFile {files[i]};
-            if(!audioFile.isDirectory() && sampler.isFileAcceptable(audioFile))
+            juce::int64 numSamples = 0;
+            if(!audioFile.isDirectory() && sampler.isFileAcceptable(audioFile, numSamples))
             {
                 if (i == 0)
                 {
-                    handleNewFile(audioFile, numFilesDropped == 1);
+                    handleNewFile(audioFile, numFilesDropped == 1, numSamples);
                     addNextModule = true;
                     continue;
                 }
@@ -867,7 +861,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
                         if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
                         {
                             auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                            newModEd->handleNewFile(audioFile, false);
+                            newModEd->handleNewFile(audioFile, false, numSamples);
                             addNextModule = true;
 
                             DBG("-------");
@@ -894,12 +888,13 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
     }
 }
 
-void KrumModuleEditor::handleNewFile(juce::File& file, bool overlayShouldListen)
+void KrumModuleEditor::handleNewFile(juce::File& file, bool overlayShouldListen, int numSamples)
 {
     DBG("Item: " + file.getFullPathName());
     juce::String name = file.getFileName(); //compiler reasons
     setModuleName(name);
     setModuleFile(file);
+    setNumSamplesOfFile(numSamples);
     setModuleState(KrumModule::ModuleState::hasFile);
     settingsOverlay->setMidiListen(overlayShouldListen);
     addFileToRecentsFolder(file, file.getFileName());

@@ -128,8 +128,9 @@ void TimeHandle::setEndPosition(int endPositionInSamples)
 int TimeHandle::getSampleFromXPos(int x)
 {
     auto& thumbnail = editor.thumbnail;
-    juce::NormalisableRange<float> sampleRange{ 0, (float)thumbnail.getNumSamplesFinished() };
+    juce::NormalisableRange<float> sampleRange{ 0, (float)editor.getNumSamplesInFile() };
     juce::NormalisableRange<float> widthRange{ 0, (float)thumbnail.getWidth() };
+
     int limitedX = juce::jlimit<int>(0, widthRange.end, x);
 
     auto normalledX = widthRange.convertTo0to1(limitedX);
@@ -146,7 +147,7 @@ int TimeHandle::getXFromSample(int sample)
     }
 
     auto& thumbnail = editor.thumbnail;
-    juce::NormalisableRange<float> sampleRange{ 0, (float)thumbnail.getNumSamplesFinished() };
+    juce::NormalisableRange<float> sampleRange{ 0, (float)editor.getNumSamplesInFile() };
     juce::NormalisableRange<float> widthRange{ 0, (float)thumbnail.getWidth() };
 
     auto normalledSample = sampleRange.convertTo0to1(sample);

@@ -141,6 +141,11 @@ int KrumModule::getModuleOutputChannelNumber()
     return outputString.dropLastCharacters(2).getIntValue();
 }
 
+void KrumModule::setNumSamplesInFile(int numSamples)
+{
+    moduleTree.setProperty(TreeIDs::moduleNumSamplesLength, numSamples, nullptr);
+}
+
 
 void KrumModule::updateSamplerSound()
 {

@@ -78,7 +78,7 @@ public:
     void setModuleButtonsClickState(bool isClickable);
     
     void showNewSettingsOverlay();
-    void showSettingsOverlay(bool keepCurrentColorOnExit ,bool selectOverlay = false);
+    void showSettingsOverlay(bool keepCurrentColorOnExit, bool selectOverlay = false);
     void removeSettingsOverlay(bool keepSettings);
 
 
@@ -110,6 +110,9 @@ public:
     void setModulePlaying(bool isPlaying);
     bool isModulePlaying();
 
+    void setNumSamplesOfFile(int numSampleInFile);
+    int getNumSamplesInFile();
+
     int getAudioFileLengthInMs();
 
     void setTimeHandles();
@@ -123,7 +126,7 @@ public:
     bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
     
-    void handleNewFile(juce::File& file, bool overlayShouldListen);
+    void handleNewFile(juce::File& file, bool overlayShouldListen, int numSamplesInFile);
     void setModuleFile(juce::File& newFile);
     void addFileToRecentsFolder(juce::File& file, juce::String name);
 
@@ -170,7 +173,7 @@ private:
     juce::ValueTree moduleTree;
     KrumSamplerAudioProcessorEditor& editor;
     
-    int oldMidiNote = 0;
+    //int numSamplesOfFile = 0;
     bool modulePlaying = false;
 
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
@@ -230,7 +233,7 @@ private:
         
         void paint(juce::Graphics& g) override;
         //juce::String getTooltip() override;
-        void setStrings(juce::String note, juce::String channel);
+        //void setStrings(juce::String note, juce::String channel);
         
         
         juce::String noteNumber;
