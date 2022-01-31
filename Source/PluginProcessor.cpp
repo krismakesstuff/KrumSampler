@@ -170,20 +170,21 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
 //===================================================================================================================================
 
+
 //===================================================================================================================================
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
-     : AudioProcessor(  BusesProperties().withOutput("Output 1-2", juce::AudioChannelSet::stereo(), true)
-                                         .withOutput("Output 3-4", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 5-6", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 7-8", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 9-10", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 11-12", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 13-14", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
-                                         .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false))
-                                    ,parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
+     : AudioProcessor( BusesProperties().withOutput("Output 1-2", juce::AudioChannelSet::stereo(), true)
+                                      .withOutput("Output 3-4", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 5-6", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 7-8", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 9-10", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 11-12", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 13-14", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
+                                      .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false)),
+                                      parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
 
 {
     //juce::Logger::setCurrentLogger(Log::logger);
@@ -251,7 +252,8 @@ void KrumSamplerAudioProcessor::removeMidiKeyboardListener(juce::MidiKeyboardSta
 //==============================================================================
 void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    ////we attach our tree to the main appStateTree
+#if SAVE_RELOAD_STATE
+    //we attach our tree to the main appStateTree
     valueTree.appendChild(parameters.state, nullptr);
     valueTree.appendChild(fileBrowserValueTree, nullptr);
 
@@ -261,12 +263,13 @@ void KrumSamplerAudioProcessor::getStateInformation (juce::MemoryBlock& destData
 
     DBG("---SAVED STATE---");
     DBG(xml->toString());
-
+#endif
 }
 
 
 void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
+#if SAVE_RELOAD_STATE
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
     if (xmlState.get() != nullptr)
@@ -305,7 +308,7 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
         DBG("XML state is null");
         DBG("Data Size = " + juce::String(sizeInBytes));
     }
-
+#endif
 }
 
 juce::AudioFormatManager* KrumSamplerAudioProcessor::getFormatManager()
@@ -383,32 +386,23 @@ void KrumSamplerAudioProcessor::initSampler()
 
 //==============================================================================
 
+
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool KrumSamplerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout) const
 {
-//#if JucePlugin_IsMidiEffect
-//    juce::ignoreUnused(layouts);
-//    return true;
-//#else
-//    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-//        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-//        return false;
-//
-//    // This checks if the input layout matches the output layout
-//#if ! JucePlugin_IsSynth
-//    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-//        return false;
-//#endif
-//
-//    return true;
-//#endif
 
-    /*for (const auto& bus : layout.outputBuses)
+//    int numOutputBuses = layout.outputBuses.size();
+//
+//    if(numOutputBuses > 1 && numOutputBuses <= 20)
+//        return true;
+//
+//    return false;
+    
+    for (const auto& bus : layout.outputBuses)
         if (bus != juce::AudioChannelSet::stereo())
-            return false;*/
+            return false;
 
-    return true;
-    //return layout.inputBuses.isEmpty() && layout.outputBuses.size() >= 1;
+    return layout.inputBuses.isEmpty() && 1 <= layout.outputBuses.size();
 }
 #endif
 

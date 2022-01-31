@@ -126,12 +126,15 @@ std::atomic<float>* KrumModule::getModuleOutputChannel()
 
 std::atomic<int> KrumModule::getModuleStartSample()
 {
-    return moduleTree.getProperty(TreeIDs::moduleStartSample);
+    int startSample = (int)moduleTree.getProperty(TreeIDs::moduleStartSample);
+    return startSample;
 }
-
+    
 std::atomic<int> KrumModule::getModuleEndSample()
 {
-    return moduleTree.getProperty(TreeIDs::moduleEndSample);
+    int endSample = (int)moduleTree.getProperty(TreeIDs::moduleEndSample);
+    return endSample;
+    
 }
 
 int KrumModule::getModuleOutputChannelNumber()

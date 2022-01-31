@@ -34,7 +34,10 @@
 #define MAX_VOICES 14
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 3
-#define KRUM_BUILD_VERSION "1.2.0-Beta" //aux outputs & sample trim handles
+#define NUM_AUX_OUTS 20                     //mono channels
+#define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
+#define KRUM_BUILD_VERSION "1.2.0-Beta"     //added aux outputs & sample trim handles
+
 
 //The general Tree structure
 namespace TreeIDs
@@ -153,6 +156,7 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif
 
+    
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     //void processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents);
     void addMidiKeyboardListener(juce::MidiKeyboardStateListener*);
