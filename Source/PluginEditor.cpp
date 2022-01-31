@@ -175,6 +175,12 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
 
     paintOutputVolumeLines(g, linesBounds.toFloat());
+    
+    //Version
+    g.setColour(juce::Colours::red.darker());
+    juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
+    int versionW = g.getCurrentFont().getStringWidth(versionString);
+    g.drawFittedText(versionString, { area.getRight() - 350, 10, versionW + 10, 35 }, juce::Justification::centred, 1);
 }
 
 void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, juce::Rectangle<float> bounds)

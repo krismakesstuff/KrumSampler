@@ -391,13 +391,6 @@ void KrumSamplerAudioProcessor::initSampler()
 bool KrumSamplerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout) const
 {
 
-//    int numOutputBuses = layout.outputBuses.size();
-//
-//    if(numOutputBuses > 1 && numOutputBuses <= 20)
-//        return true;
-//
-//    return false;
-    
     for (const auto& bus : layout.outputBuses)
         if (bus != juce::AudioChannelSet::stereo())
             return false;

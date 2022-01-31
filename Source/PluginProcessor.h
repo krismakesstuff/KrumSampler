@@ -36,7 +36,7 @@
 #define MAX_FILE_LENGTH_SECS 3
 #define NUM_AUX_OUTS 20                     //mono channels
 #define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
-#define KRUM_BUILD_VERSION "1.2.0-Beta"     //added aux outputs & sample trim handles
+#define KRUM_BUILD_VERSION "1.3.0-Beta"     //added aux outputs & sample trim handles
 
 
 //The general Tree structure
@@ -94,6 +94,7 @@ namespace TreeIDs
 #undef DECLARE_ID
 
     //Should I make these all preprocessor define instead?
+    //These should be in their own namespace atleast
     static const float defaultGain = 0.85f;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
