@@ -149,6 +149,7 @@ public:
     
     bool shouldModuleAcceptFileDrop();
     
+    bool getMouseOver();
 
 private:
 
@@ -169,6 +170,7 @@ private:
     
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
+    bool mouseOver = false;
 
     juce::ValueTree moduleTree;
     KrumSamplerAudioProcessorEditor& editor;

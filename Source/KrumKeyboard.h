@@ -42,6 +42,7 @@ public:
 
     void setHighlightKey(int midiNoteNumber, bool showHighlight);
     bool isKeyHighlighted(int midiNoteToTest);
+    void clearHighlightedKey();
 
     void drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
                         bool isDown, bool isOver, juce::Colour lineColour, juce::Colour textColour) override;
@@ -49,35 +50,47 @@ public:
     void drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Rectangle< float > area,
                         bool isDown, bool isOver, juce::Colour noteFillColour) override;
 
-    void assignMidiNoteColor(int midiNote, juce::Colour moduleColor/*, bool deleteOld*/);
-    void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
-    void updateMidiNoteColor(int noteToUpdate, juce::Colour newColor);
+    //void assignMidiNoteColor(int midiNote, juce::Colour moduleColor/*, bool deleteOld*/);
+    //void removeMidiNoteColorAssignment(int midiNote, bool repaint = true);
+    //void updateMidiNoteColor(int noteToUpdate, juce::Colour newColor);
     bool isMidiNoteAssigned(int midiNote);
 
-    void updateKeysFromValueTree();
+    //void updateKeysFromValueTree();
     
 
-    void printCurrentlyAssignedMidiNotes();
-    juce::Colour findColorFromMidiNote(int midiNote);
+    //void printCurrentlyAssignedMidiNotes();
+    //juce::OwnedArray<juce::Colour>& getColorsFromMidiNote(int midiNote);
+    
 
-    bool hasAssignedKeys();
+    //bool hasAssignedKeys();
     int getLowestKey();
-    int getHighestKey();
+    //int getHighestKey();
 
 private:
 
-    struct KrumKey
-    {
-        KrumKey() = default;
-        KrumKey(int midi, juce::Colour& c)
-            : midiNote(midi), color(c) {}
+    //struct KrumKey
+    //{
+    //    KrumKey() = default;
+    //    ~KrumKey() = default;
 
-        bool hasColor() { return color != juce::Colour(); }
-        bool hasMidiNote() { return midiNote > 0; }
+    //    //bool hasAnyColor() { return colors.size() > 0; }
+    //    //bool hasMidiNote() { return midiNote > 0; }
 
-        int midiNote = 0;
-        juce::Colour color = juce::Colour{};
-    };
+    //    void addColor(juce::Colour& newColor) { colors.add(std::move(&newColor)); }
+    //    void clearColors() { colors.clear(); }
+    //
+
+    //    int midiNote = 0;
+    //    juce::OwnedArray<juce::Colour> colors{};
+
+    //};
+
+    //unchecked, returns nullptr if not found
+   // KrumKey* getKeyFromMidiNote(int midiNote);
+
+    juce::Array<juce::Colour> getColorsForKey(int midiNote);
+
+    //void updateKey(int midiNote, juce::Colour color)
 
     int autoscrollOffset = 35;
 
@@ -85,7 +98,7 @@ private:
     juce::Colour highlightKeyColor{ juce::Colours::yellow.darker() };
     float highlightThickness = 2.0f;
 
-    juce::Array<KrumKey> currentlyAssignedKeys;
+    //juce::OwnedArray<KrumKey, juce::CriticalSection> currentlyAssignedKeys;
 
     KrumModuleContainer& moduleContainer;
 

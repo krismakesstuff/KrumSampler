@@ -326,6 +326,23 @@ void KrumModuleContainer::hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor
 
 void KrumModuleContainer::timerCallback()
 {
+    bool mouseOver = false;
+
+    for (int i = 0; i < moduleEditors.size(); ++i)
+    {
+        auto modEd = moduleEditors[i];
+        if (modEd->getMouseOver())
+        {
+            mouseOver = true;
+            break;
+        }
+    }
+
+    if (editor && (!(mouseOver)))
+    {
+        editor->keyboard.clearHighlightedKey();
+    }
+
     repaint();
 }
 

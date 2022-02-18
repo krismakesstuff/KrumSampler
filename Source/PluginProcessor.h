@@ -36,7 +36,7 @@
 #define MAX_FILE_LENGTH_SECS 3
 #define NUM_AUX_OUTS 20                     //mono channels
 #define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
-#define KRUM_BUILD_VERSION "1.3.0-Beta"     //added aux outputs & sample trim handles
+#define KRUM_BUILD_VERSION "1.4.0-Beta"     //
 
 
 //The general Tree structure

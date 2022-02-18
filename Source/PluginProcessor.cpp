@@ -49,7 +49,7 @@ juce::ValueTree createValueTree()
         juce::ValueTree newModule { TreeIDs::MODULE, {{TreeIDs::moduleName,""}},{} }; 
         newModule.setProperty(TreeIDs::moduleState, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleFile, juce::var(""), nullptr);
-        newModule.setProperty(TreeIDs::moduleMidiNote, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleMidiNote, juce::var(-1), nullptr);
         newModule.setProperty(TreeIDs::moduleMidiChannel, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleColor, juce::var(""), nullptr);
         newModule.setProperty(TreeIDs::moduleDisplayIndex, juce::var(-1), nullptr);

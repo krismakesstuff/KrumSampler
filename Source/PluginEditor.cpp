@@ -100,12 +100,13 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     moduleContainer.createModuleEditors();
     moduleContainer.showFirstEmptyModule();
-    keyboard.updateKeysFromValueTree();
+    keyboard.repaint();
     
-    if (keyboard.hasAssignedKeys())
+   /* if (keyboard.hasAssignedKeys())
     {
-        keyboard.scrollToKey(keyboard.getLowestKey());
-    }
+    }*/
+    
+    keyboard.scrollToKey(keyboard.getLowestKey());
     
     setPaintingIsUnclipped(true);
     

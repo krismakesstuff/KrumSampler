@@ -913,6 +913,11 @@ bool KrumModuleEditor::shouldModuleAcceptFileDrop()
     return state == 0;
 }
 
+bool KrumModuleEditor::getMouseOver()
+{
+    return mouseOver;
+}
+
 void KrumModuleEditor::addFileToRecentsFolder(juce::File& file, juce::String name)
 {
     editor.fileBrowser.addFileToRecent(file, name);
@@ -941,13 +946,15 @@ void KrumModuleEditor::timerCallback()
     auto& keyboard = editor.keyboard;
     int currentMidiNote = getModuleMidiNote();
 
-    if (getLocalBounds().contains(getMouseXYRelative())) //if mouse is over component
+    if (getLocalBounds().contains(getMouseXYRelative()) && getModuleState() > 0) //if mouse is over module and module is active
     {
+        mouseOver = true;
         keyboard.setHighlightKey(currentMidiNote, true);
     }
-    else if (keyboard.isKeyHighlighted(currentMidiNote)) //if mouse is NOT over component and the current is being highlighted
+    else
     {
-        keyboard.setHighlightKey(currentMidiNote, false);
+        //module container will use this to clear the highlighted keys
+        mouseOver = false;
     }
 }
 
