@@ -156,8 +156,9 @@ void KrumKeyboard::drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     }
     else if (keyColors.size() == 1)
     {
-        grade.addColour(0.0, keyColors[0].withLightness(lightness));
-        grade.addColour(1.0, keyColors[0].withLightness(lightness - 0.01f));
+        auto keyColor = keyColors[0];
+        grade.addColour(0.0, keyColor.withLightness(lightness));
+        grade.addColour(1.0, keyColor.withLightness(lightness - 0.01f));
     }
     else 
     {
@@ -249,8 +250,9 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     }
     else if (keyColors.size() == 1)
     {
-        grade.addColour(0.0, keyColors[0].withLightness(lightness).withAlpha(alpha));
-        grade.addColour(1.0, keyColors[0].withLightness(lightness - 0.01f));
+        auto keyColor = keyColors[0];
+        grade.addColour(0.0, keyColor.withLightness(lightness).withAlpha(alpha));
+        grade.addColour(1.0, keyColor.withLightness(lightness - 0.01f));
     }
     else
     {

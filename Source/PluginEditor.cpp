@@ -61,7 +61,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     modulesViewport.setInterceptsMouseClicks(true, true);
     modulesViewport.setScrollBarsShown(false, true, false, false);
     
-    
     fileBrowser.assignModuleContainer(&moduleContainer);
     addAndMakeVisible(InfoPanel::shared_instance());
     addAndMakeVisible(fileBrowser);
@@ -97,16 +96,11 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     infoButton.onClick = [this] { infoButtonClicked();  };
     addAndMakeVisible(infoButton);
 
-    
     moduleContainer.createModuleEditors();
     moduleContainer.showFirstEmptyModule();
-    keyboard.repaint();
-    
-   /* if (keyboard.hasAssignedKeys())
-    {
-    }*/
     
     keyboard.scrollToKey(keyboard.getLowestKey());
+    keyboard.repaint();
     
     setPaintingIsUnclipped(true);
     
@@ -157,7 +151,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillRoundedRectangle(modulesViewport.getBounds().toFloat(), EditorDimensions::cornerSize);
     
     g.setColour(juce::Colours::grey.brighter(0.2f));
-    g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centred, 1);
+    g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centredRight, 1);
     g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
 
     g.setColour(backOutlineColor);
@@ -181,7 +175,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour(juce::Colours::red.darker());
     juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
     int versionW = g.getCurrentFont().getStringWidth(versionString);
-    g.drawFittedText(versionString, { area.getRight() - 350, 10, versionW + 10, 35 }, juce::Justification::centred, 1);
+    g.drawFittedText(versionString, { area.getRight() - 160, websiteButton.getBottom() - 12, versionW + 10, 35 }, juce::Justification::centred, 1);
 }
 
 void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, juce::Rectangle<float> bounds)
@@ -224,9 +218,8 @@ void KrumSamplerAudioProcessorEditor::resized()
     auto area = getLocalBounds();
     int infoButtonSize = 21;
     
-    websiteButton.setBounds(EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY() + (EditorDimensions::madeByArea.getHeight() / 2) + 5).withHeight(EditorDimensions::madeByArea.getHeight() * 0.8f).withWidth(EditorDimensions::madeByArea.getWidth() + 10));
-    infoButton.setBounds(websiteButton.getBounds().getCentreX() - (infoButtonSize /2), websiteButton.getBottom(), infoButtonSize, infoButtonSize);
-    
+    websiteButton.setBounds(EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY() + (EditorDimensions::madeByArea.getHeight() / 2) + 5).withHeight(EditorDimensions::madeByArea.getHeight() * 0.75f).withWidth(EditorDimensions::madeByArea.getWidth() + 10));
+    infoButton.setBounds(area.getRight() - (websiteButton.getWidth() + (infoButtonSize * 2)), EditorDimensions::madeByArea.getY() + 20, infoButtonSize, infoButtonSize);
     
     if (!collapseBrowserButton.getToggleState())
     {
@@ -249,7 +242,6 @@ void KrumSamplerAudioProcessorEditor::resized()
     keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
 
     collapseBrowserButton.setBounds(area.withTop(area.getHeight() / 2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
-
 
 }
 
