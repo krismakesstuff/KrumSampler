@@ -21,9 +21,22 @@
 class KrumLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    KrumLookAndFeel() {}
+    KrumLookAndFeel() 
+    {
+        juce::Typeface::Ptr tface = juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratLight_ttf, BinaryData::MontserratLight_ttfSize);
+        setDefaultSansSerifTypeface(tface);
+    }
 
-    //~KrumLookAndFeel() override { outputGainSlider = nullptr; }
+  /*  juce::Typeface::Ptr getTypefaceForFont(const juce::Font& f) override
+    {
+        static juce::Typeface::Ptr tface = juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratRegular_ttf,
+                                            BinaryData::MontserratRegular_ttfSize);
+
+        DBG("Font: " + juce::String(wacky.get() ? "valid" : "null"));
+        
+        return wacky;
+    }*/
+
 
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
@@ -54,7 +67,7 @@ public:
         }
         else
         {
-           sliderPorp = sliderPos / (maxSliderPos - y);
+           sliderPorp = sliderPos / (maxSliderPos - (y + 10));
         }
 
         if (sliderPorp < 0.0f)
@@ -71,14 +84,14 @@ public:
         juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
         juce::Path indent;
 
-        float cornerSize = 2.0f;
+        float cornerSize = 4.0f;
 
         if (slider.isHorizontal())
         {
             auto iy = height * 0.25f;
             juce::Rectangle<float> trackRect ((float)x, iy, (float)width , height * 0.50f);
 
-            juce::ColourGradient horzRGrade (gradCol1, trackRect.getCentreX(), iy, gradCol2, trackRect.getRight()-2, iy, false);
+            /*juce::ColourGradient horzRGrade (gradCol1, trackRect.getCentreX(), iy, gradCol2, trackRect.getRight()-2, iy, false);
             juce::ColourGradient horzLGrade (gradCol2, trackRect.getX(), iy, gradCol1, trackRect.getCentreX(), iy, false);
             
             indent.addRoundedRectangle(trackRect, cornerSize);
@@ -91,27 +104,32 @@ public:
 
             horzLGrade.addColour(sliderPorp, gradCol1);
             g.setGradientFill(horzLGrade);
-            g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);
+            g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);*/
             
+            g.setColour(gradCol1);
+            g.fillRoundedRectangle(trackRect, cornerSize);
+
         }
         else //vertical 
         {
-            float trackWidth = width * 0.35f;
+            float trackWidth = width;// * 0.35f;
             //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
             float ix = bounds.getCentreX() - (trackWidth / 2);
-            juce::Rectangle<float> trackRect (ix, (float)y - 5, trackWidth, (float)height);
+            juce::Rectangle<float> trackRect (x + 5, (float)y - 5, trackWidth, (float)height + 5);
 
-            juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
+            /*juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
             vertGrade.addColour(sliderPorp, gradCol1);
             
             g.setGradientFill(vertGrade);
             indent.addRoundedRectangle(trackRect, cornerSize);
-            g.fillPath(indent);
+            g.fillPath(indent);*/
 
+            g.setColour(gradCol1);
+            g.fillRoundedRectangle(trackRect, cornerSize);
         }
 
-        g.setColour(trackColour.contrasting(0.6f));
-        g.strokePath(indent, juce::PathStrokeType(0.5f));
+        //g.setColour(trackColour.contrasting(0.6f));
+        //g.strokePath(indent, juce::PathStrokeType(0.5f));
 
     }
 
@@ -129,11 +147,11 @@ public:
         
         if (style == juce::Slider::LinearVertical)
         {
-            thumbH = 13; //height * 0.07;// : height * 0.085f;
+            thumbH = 7; //height * 0.07;// : height * 0.085f;
             thumbW = 33; //width * 0.65f;
 
             thumbX = (x + width * 0.5f) - (thumbW * 0.5f);
-            thumbY = sliderPos - 7;
+            thumbY = sliderPos;
 
             line.setStart({ (float)thumbX , (float)thumbY +(thumbH / 2) });
             line.setEnd({ (float)thumbX + thumbW , (float)thumbY + (thumbH / 2) });
@@ -142,11 +160,11 @@ public:
         }
         else // horizontal
         {
-            thumbH = height - 3;
-            thumbW = 9;
+            thumbH = height * 0.7f; //height - 3;
+            thumbW = 5;
 
             thumbX = sliderPos - 5;
-            thumbY = y ;
+            thumbY = y + 5;
 
             line.setStart({ (float)thumbX + (thumbW / 2), (float)thumbY });
             line.setEnd({ (float)thumbX + (thumbW / 2), (float)thumbY + thumbH });
@@ -176,7 +194,7 @@ public:
         auto bounds = slider.getLocalBounds();
         if (slider.isHorizontal())
         {
-            layout.sliderBounds = bounds.reduced(5, 0);
+            layout.sliderBounds = bounds;//bounds.reduced(5, 0);
         }
         else if (slider.isBar())
         {
@@ -184,7 +202,7 @@ public:
         }
         else
         {
-            layout.sliderBounds = bounds.reduced(0, 10); //thumbnail height
+            layout.sliderBounds = bounds;// .reduced(0, 10); //thumbnail height
         }
         return layout;
     }
@@ -306,8 +324,8 @@ public:
 
     void positionComboBoxText(juce::ComboBox& box, juce::Label& label)
     {
-        label.setJustificationType(juce::Justification::centred);
-        label.setBounds(1, 1, box.getWidth() - 30, box.getHeight() - 2);
+        label.setJustificationType(juce::Justification::centredLeft);
+        label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
         label.setFont(getComboBoxFont(box));
     }
 
@@ -424,6 +442,36 @@ public:
 
     }
 
+    void drawDrawableButton(juce::Graphics& g, juce::DrawableButton& button, bool highlighted, bool down) override
+    {
+        bool toggleState = button.getToggleState();
+
+        float cornerSize = 3.0f;
+
+        auto color = button.findColour(toggleState ? juce::DrawableButton::backgroundOnColourId
+            : juce::DrawableButton::backgroundColourId);
+
+        g.setColour(color);
+        g.fillRoundedRectangle(button.getBounds().toFloat(), cornerSize);
+        //g.fillAll();
+
+        const int textH = (button.getStyle() == juce::DrawableButton::ImageAboveTextLabel)
+                            ? juce::jmin(16, button.proportionOfHeight(0.25f)) : 0;
+
+        if (textH > 0)
+        {
+            g.setFont((float)textH);
+
+            g.setColour(button.findColour(toggleState ? juce::DrawableButton::textColourOnId
+                : juce::DrawableButton::textColourId)
+                .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.4f));
+
+            g.drawFittedText(button.getButtonText(),
+                2, button.getHeight() - textH - 1,
+                button.getWidth() - 4, textH,
+                juce::Justification::centred, 1);
+        }
+    }
 
    /* void drawButtonBackground(juce::Graphics& g, juce::Button& button, const juce::Colour& backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {

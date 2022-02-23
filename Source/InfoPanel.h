@@ -94,6 +94,23 @@ public:
     ~InfoPanelDrawableButton() override;
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
+
+private:
+    
+    juce::String compTitle, message, keycommand;
+};
+
+//==============================================================================
+
+class InfoPanelButton : public juce::Button
+{
+public:
+    InfoPanelButton(juce::String title, juce::String message, juce::String keycommand = juce::String(), juce::DrawableButton::ButtonStyle buttonStyle = juce::DrawableButton::ButtonStyle::ImageStretched);
+    ~InfoPanelButton() override;
+
+    void mouseEnter(const juce::MouseEvent& e) override;
+    void mouseExit(const juce::MouseEvent& e) override;
+
 private:
     
     juce::String compTitle, message, keycommand;
@@ -157,3 +174,38 @@ private:
 
     juce::String compTitle, message, keycommand;
 };
+
+//For classes that inher
+//template<class T>
+//class InfoPaneller : public T
+//{
+//public:
+//    InfoPaneller(const char* Title, const char* Message, const char* Keycommand = "") 
+//        : compTitle(Title), message(Message), keycommand(Keycommand)
+//    {}
+//    ~InfoPaneller()
+//    {}
+//
+//    //lets you contextual change this components Info Panel text
+//    void setNewPanelMessage(juce::String newTitle, juce::String newMessage, juce::String newKeycommand)
+//    {
+//        compTitle = newTitle;
+//        message = newMessage;
+//        keycommand = newKeycommand;
+//    }
+//
+//    void mouseEnter(const juce::MouseEvent& e) override
+//    {
+//        InfoPanel::shared_instance().setInfoPanelText(compTitle, message, keycommand);
+//        T::mouseEnter(e);
+//    }
+//    void mouseExit(const juce::MouseEvent& e) override
+//    {
+//        InfoPanel::shared_instance().clearPanelText();
+//        T::mouseExit(e);
+//    }
+//
+//private:
+//    juce::String compTitle, message, keycommand;
+//
+//};

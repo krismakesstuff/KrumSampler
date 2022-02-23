@@ -20,11 +20,15 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     auto titleImageData = BinaryData::getNamedResource("KrumSamplerTitle_png", titleImageSize);
     titleImage = juce::ImageFileFormat::loadFrom(titleImageData, titleImageSize);
 
+    //kLaf.setDefaultSansSerifTypeface(getWackyFont().getTypefacePtr());
+
     auto& laf = getLookAndFeel();
     laf.setDefaultLookAndFeel(&kLaf);
-    laf.setDefaultSansSerifTypefaceName("Calibri");
+    //laf.setDefaultSansSerifTypefaceName("Calibri");
+    //laf.setDefaultSansSerifTypefaceName(getWackyFont().getTypefaceName());
+    //laf.setDefaultSansSerifTypeface(getWackyFont().getTypefacePtr());
 
-    InfoPanel::shared_instance().getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
+    //InfoPanel::shared_instance().getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(2000);
 
     addAndMakeVisible(websiteButton);

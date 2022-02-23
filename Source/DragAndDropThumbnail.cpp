@@ -103,7 +103,8 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
         paintIfFileLoaded(g, area, color);
     }
 
-    auto barColor = juce::Colours::white.withAlpha(0.3f);
+    //auto barColor = juce::Colours::white.withAlpha(0.3f);
+    auto barColor = color.withAlpha(0.3f);
     int barWidth = 1;
 
     paintStartBar(g, area, barColor, barWidth);

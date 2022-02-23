@@ -166,14 +166,7 @@ private:
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
     
 
-    //Not Using this font anymore, keeping this here incase I want to add a custom font later
-    
-//    static const juce::Font& getWackyFont()
-//    {
-//        static juce::Font wacky(juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::MONOGLYCERIDE_TTF,
-//                                                                    BinaryData::MONOGLYCERIDE_TTFSize)));
-//        return wacky;
-//    }
+   
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessorEditor)
 };

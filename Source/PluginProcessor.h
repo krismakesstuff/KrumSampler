@@ -68,8 +68,7 @@ namespace TreeIDs
                 DECLARE_ID(moduleEndSample)
                 DECLARE_ID(moduleNumSamplesLength)
            /*     DECLARE_ID(moduleFadeIn)
-                DECLARE_ID(moduleFadeOut)
-                DECLARE_ID(moduleReverse)*/
+                DECLARE_ID(moduleFadeOut) */
 
         DECLARE_ID(PARAMS) //APVTS, these are parameters exposed to the DAW for Automation
             
@@ -77,7 +76,10 @@ namespace TreeIDs
             DECLARE_ID(paramModulePan)
             DECLARE_ID(paramModuleOutputChannel)
             DECLARE_ID(paramModuleClipGain)
-        
+            DECLARE_ID(paramModulePitchShift)
+            DECLARE_ID(paramModuleReverse)
+            DECLARE_ID(paramModuleMute)
+
             DECLARE_ID(outputGainParam)
             DECLARE_ID(previewerGainParam)
 
@@ -137,6 +139,7 @@ static juce::String panRangeFrom0To1(float value)
     {
         returnString = "< 0 >";
     }
+
     return returnString;
 }
 

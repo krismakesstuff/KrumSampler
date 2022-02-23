@@ -71,6 +71,8 @@ public:
     bool isModuleActive();
     bool isModuleEmpty();
     bool isModuleActiveOrHasFile();    
+    //bool isModuleMuted();
+    //bool isModuleReversed();
 
     std::atomic<float>* getModuleGain();
     std::atomic<float>* getModuleClipGain();
@@ -78,6 +80,8 @@ public:
     std::atomic<float>* getModuleOutputChannel();
     std::atomic<int> getModuleStartSample();
     std::atomic<int> getModuleEndSample();
+    std::atomic<float>* getModuleMute();
+    std::atomic<float>* getModuleReverse();
 
     int getModuleOutputChannelNumber();
 

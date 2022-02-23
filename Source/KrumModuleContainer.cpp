@@ -231,18 +231,22 @@ void KrumModuleContainer::deselectAllModules()
     }
 }
 
-KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
+juce::Array<KrumModuleEditor*> KrumModuleContainer::getModulesFromMidiNote(int midiNote)
 {
+    juce::Array<KrumModuleEditor*>retArray{};
+
     for (int i = 0; i < moduleEditors.size(); i++)
     {
         auto modEd = moduleEditors[i];
         if (modEd->getModuleMidiNote() == midiNote)
         {
-            return modEd;
+            retArray.add(modEd);
+            //return modEd;
         }
     }
     
-    return nullptr;
+    //return nullptr;
+    return retArray;
 }
 
 

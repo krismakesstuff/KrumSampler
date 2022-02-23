@@ -54,7 +54,8 @@ void TimeHandle::paint(juce::Graphics& g)
     g.setColour(juce::Colours::black.withAlpha(0.3f));
     g.fillRect(area);
 
-    g.setColour(juce::Colours::white.withAlpha(0.3f));
+    //g.setColour(juce::Colours::white.withAlpha(0.3f));
+    g.setColour(juce::Colours::black);
 
     juce::Rectangle<int> startRect{ getXFromSample(getStartPosition()), area.getY(), handleW, handleH };
     drawStartPosition(g, startRect);

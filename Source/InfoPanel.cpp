@@ -101,7 +101,7 @@ void InfoPanelComponent::setNewPanelMessage(juce::String newTitle, juce::String 
     compTitle = newTitle;
     message = newMessage;
     keycommand = newKeycommand;
-    
+
 }
 
 //=============================================================================

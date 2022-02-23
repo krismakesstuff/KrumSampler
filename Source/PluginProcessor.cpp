@@ -58,8 +58,7 @@ juce::ValueTree createValueTree()
         newModule.setProperty(TreeIDs::moduleEndSample, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleNumSamplesLength, juce::var(0), nullptr);
         /*newModule.setProperty(TreeIDs::moduleFadeIn, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleReverse, juce::var(0), nullptr);*/
+        newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);*/
 
         krumModulesTree.addChild(newModule, i, nullptr);
     }
@@ -126,8 +125,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             [](juce::String text) {return panRangeTo0to1(text); });
 
         auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannel + index,
-                            "Module "+ index + " OuputChannel",
+                            "Module " + index + " OuputChannel",
                             TreeIDs::outputStrings, 0);
+
+        auto pitchParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePitchShift + index, "Module PitchShift" + index,
+                            juce::NormalisableRange<float>{-12, 12, 1}, 0,   
+                            "Module " + index + " Pitch Shift",
+                            juce::AudioProcessorParameter::genericParameter);
+
+        auto reverseParam = std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleReverse + index, "Module Reverse" + index,
+                            false, "Module " + index + " Reverse");
+
+        auto muteParam =    std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleMute + index, "Module Mute" + index,
+                            false, "Module " + index + " Mute");
 
         auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
                             "Module" + juce::String(i),
@@ -135,7 +145,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             std::move(gainParam),
                             std::move(clipGainParam),
                             std::move(panParam),
-                            std::move(outputParam));
+                            std::move(outputParam),
+                            std::move(pitchParam),
+                            std::move(reverseParam),
+                            std::move(muteParam));
 
         paramsGroup.push_back(std::move(moduleGroup));
     }
@@ -159,7 +172,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             juce::AudioProcessorParameter::genericParameter,
                             [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
                             [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
-   
+  
+
     auto globalGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Globals", "Global Parameters",
                             "|", std::move(outputGainParameter), std::move(previewerGainParameter));
 

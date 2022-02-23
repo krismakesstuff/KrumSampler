@@ -46,6 +46,8 @@ class DragHandle;
 class ModuleSettingsOverlay;
 class KrumFileBrowser;
 
+
+
 class KrumModuleEditor  :   public juce::Component,
                             public juce::DragAndDropTarget,
                             public juce::FileDragAndDropTarget,
@@ -109,6 +111,10 @@ public:
 
     void setModulePlaying(bool isPlaying);
     bool isModulePlaying();
+
+    bool isModuleMuted();
+
+    bool getModuleReverseState();
 
     void setNumSamplesOfFile(int numSampleInFile);
     int getNumSamplesInFile();
@@ -175,7 +181,6 @@ private:
     juce::ValueTree moduleTree;
     KrumSamplerAudioProcessorEditor& editor;
     
-    //int numSamplesOfFile = 0;
     bool modulePlaying = false;
 
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
@@ -183,16 +188,27 @@ private:
 
     InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
     InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
+    //InfoPanelSender <juce::Slider> volumeSlider{ "Module Gain", "Sliders can be double-clicked to zero out, or CMD + click" };
     InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
     InfoPanelComboBox outputCombo{ "Output Channel", "Select which output bus you would like this module to go to. Default is Main Bus (1-2)" };
+   
+    InfoPanelSlider pitchSlider{"Pitch Shift", "Change the pitch of this sample in semi-tone increments"};
+    InfoPanelTextButton reverseButton{"Reverse Button", "Plays the sample in reverse, active when highlighted"};
+    InfoPanelTextButton muteButton{"Mute", "Mutes this sample from being played."};
 
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
+    typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
     std::unique_ptr<SliderAttachment> volumeSliderAttachment;
     std::unique_ptr<SliderAttachment> panSliderAttachment;
     std::unique_ptr<ComboBoxAttachment> outputComboAttachment;
+
+    std::unique_ptr<SliderAttachment> pitchSliderAttachment;
+    std::unique_ptr<ButtonAttachment> reverseButtonAttachment;
+    std::unique_ptr<ButtonAttachment> muteButtonAttachment;
     
+
     DragAndDropThumbnail thumbnail;
     TimeHandle timeHandle;
 
@@ -201,16 +217,45 @@ private:
     class OneShotButton : public InfoPanelDrawableButton
     {
     public:
-        OneShotButton();
+        OneShotButton(KrumModuleEditor&);
         ~OneShotButton() override;
+
+        void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
+                            const bool shouldDrawButtonAsDown) override;
 
         void mouseDown(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
 
         std::function<void(const juce::MouseEvent& e)> onMouseUp;
         std::function<void(const juce::MouseEvent& e)> onMouseDown;
+    private:
+        KrumModuleEditor& editor;
     };
 
+    class MenuButton : public InfoPanelDrawableButton
+    {
+    public:
+        MenuButton(KrumModuleEditor& e);
+        ~MenuButton() override;
+
+        void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
+                            const bool shouldDrawButtonAsDown) override;
+    private:
+        KrumModuleEditor& editor;
+    };
+
+    /*class PitchSlider : public InfoPanelSlider
+    {
+    public:
+        PitchSlider();
+        ~PitchSlider();
+
+        
+
+    private:
+    };*/
+    
+    
     //class ModalManager : public juce::ModalComponentManager::Callback
     //{
     //public:
@@ -242,12 +287,16 @@ private:
         juce::String channelNumber;
         
         KrumModuleEditor* moduleEditor = nullptr;
+    //private:
+        float fontSize = 12.0f;
+        juce::Colour textColor = juce::Colours::white;
     };
     
     MidiLabel midiLabel{this};
     
-    OneShotButton playButton;
-    InfoPanelDrawableButton editButton {"Settings", "Provides a list of actions to change the settings of the module", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize };
+    OneShotButton playButton{ *this };
+    MenuButton editButton { *this};
+    
     friend class ColorPalette;
     
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;

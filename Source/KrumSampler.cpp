@@ -71,6 +71,16 @@ std::atomic<int> KrumSound::getModuleEndSample() const
     return parentModule->getModuleEndSample();
 }
 
+std::atomic<float>* KrumSound::getModuleMute() const
+{
+    return parentModule->getModuleMute();
+}
+
+std::atomic<float>* KrumSound::getModuleReverse() const
+{
+    return parentModule->getModuleReverse();
+}
+
 int KrumSound::getModuleOutputNumber() const
 {
     return parentModule->getModuleOutputChannelNumber();
@@ -109,44 +119,58 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
 {
     if (auto* sound = static_cast<const KrumSound*> (s))
     {
-        //Pitchshifting will be a thing at some point.
-        /*pitchRatio = std::pow(2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
-            * sound->sourceSampleRate / getSampleRate();*/
-
-        outputChan = sound->getModuleOutputNumber() - 1; //index offset
-
-        startSample = sound->getModuleStartSample().load();
-        endSample = sound->getModuleEndSample().load();
-
-        sourceSamplePosition = startSample;
-        //sourceSamplePosition = 0.0;
-
-        //only storing this, it will be applied in the render block
-        clipGain = sound->getModuleClipGain()->load();
-
-        float moduleGain = *sound->getModuleGain();
-        float modulePan = *sound->getModulePan();
-
-        //module gain
-        lgain = velocity * (moduleGain);
-        rgain = velocity * (moduleGain);
-
-        //panned right
-        if (modulePan > 0.5f)
+        if (*sound->getModuleMute() < 0.5f)
         {
-            lgain = lgain * (1 - modulePan);
-        }
+            //Pitchshifting will be a thing at some point.
+            /*pitchRatio = std::pow(2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
+                * sound->sourceSampleRate / getSampleRate();*/
 
-        //panned left
-        if(modulePan < 0.5f)
+            outputChan = sound->getModuleOutputNumber() - 1; //index offset
+
+            startSample = sound->getModuleStartSample().load();
+            endSample = sound->getModuleEndSample().load();
+
+            if (*sound->getModuleReverse() < 0.5f)
+            {
+                sourceSamplePosition = startSample;
+            }
+            else
+            {
+                sourceSamplePosition = endSample;
+            }
+            //sourceSamplePosition = 0.0;
+
+            //only storing this, it will be applied in the render block
+            clipGain = sound->getModuleClipGain()->load();
+
+            float moduleGain = *sound->getModuleGain();
+            float modulePan = *sound->getModulePan();
+
+            //module gain
+            lgain = velocity * (moduleGain);
+            rgain = velocity * (moduleGain);
+
+            //panned right
+            if (modulePan > 0.5f)
+            {
+                lgain = lgain * (1 - modulePan);
+            }
+
+            //panned left
+            if(modulePan < 0.5f)
+            {
+                rgain = rgain * (modulePan);
+            }
+
+            adsr.setSampleRate(sound->sourceSampleRate);
+            adsr.setParameters(sound->params);
+
+            adsr.noteOn();
+        }
+        else
         {
-            rgain = rgain * (modulePan);
+            stopNote(velocity, true);
         }
-
-        adsr.setSampleRate(sound->sourceSampleRate);
-        adsr.setParameters(sound->params);
-
-        adsr.noteOn();
     }
 }
 
@@ -175,7 +199,6 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
 
         float* outL = nullptr;
         float* outR = nullptr;
-
         
         if (numChannels >= outputChan + 1) // + 1 accounts for stereo pair
         {
@@ -189,41 +212,86 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
             outR = numChannels > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
         }
 
-        while (--numSamples >= 0)
+        if (*playingSound->getModuleReverse() > 0.5f)
         {
-            auto pos = (int)sourceSamplePosition;
-            auto alpha = (float)(sourceSamplePosition - pos);
-            auto invAlpha = 1.0f - alpha;
-
-            // just using a very simple linear interpolation here..
-            float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
-            float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha) : l;
-
-            l = clipGain * l;
-            r = clipGain * r;
-
-            auto envelopeValue = adsr.getNextSample();
-
-            //lgain and rgain are set by our volume and panning sliders in KrumVoice::startNote()
-            l *= lgain * envelopeValue;
-            r *= rgain * envelopeValue;
-
-            if (outR != nullptr)
+            while (--numSamples >= 0)
             {
-                *outL++ += l;
-                *outR++ += r;
+                auto pos = (int)sourceSamplePosition;
+                auto alpha = (float)(sourceSamplePosition - pos);
+                auto invAlpha = 1.0f - alpha;
+
+                // just using a very simple linear interpolation here..
+                float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
+                float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha) : l;
+
+                l = clipGain * l;
+                r = clipGain * r;
+
+                auto envelopeValue = adsr.getNextSample();
+
+                //lgain and rgain are set by our volume and panning sliders in KrumVoice::startNote()
+                l *= lgain * envelopeValue;
+                r *= rgain * envelopeValue;
+
+                if (outR != nullptr)
+                {
+                    *outL++ += l;
+                    *outR++ += r;
+                }
+                else
+                {
+                    *outL++ += (l + r) * 0.5f;
+                }
+
+                //sourceSamplePosition += pitchRatio;
+                --sourceSamplePosition;
+                if (sourceSamplePosition > playingSound->length || sourceSamplePosition < startSample)
+                {
+                    stopNote(0.0f, false);
+                    break;
+                }
             }
-            else
-            {
-                *outL++ += (l + r) * 0.5f;
-            }
+        }
+        else
+        {
 
-            //sourceSamplePosition += pitchRatio;
-            ++sourceSamplePosition;
-            if (sourceSamplePosition > playingSound->length || sourceSamplePosition > endSample)
+
+            while (--numSamples >= 0)
             {
-                stopNote(0.0f, false);
-                break;
+                auto pos = (int)sourceSamplePosition;
+                auto alpha = (float)(sourceSamplePosition - pos);
+                auto invAlpha = 1.0f - alpha;
+
+                // just using a very simple linear interpolation here..
+                float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
+                float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha) : l;
+
+                l = clipGain * l;
+                r = clipGain * r;
+
+                auto envelopeValue = adsr.getNextSample();
+
+                //lgain and rgain are set by our volume and panning sliders in KrumVoice::startNote()
+                l *= lgain * envelopeValue;
+                r *= rgain * envelopeValue;
+
+                if (outR != nullptr)
+                {
+                    *outL++ += l;
+                    *outR++ += r;
+                }
+                else
+                {
+                    *outL++ += (l + r) * 0.5f;
+                }
+
+                //sourceSamplePosition += pitchRatio;
+                ++sourceSamplePosition;
+                if (sourceSamplePosition > playingSound->length || sourceSamplePosition > endSample)
+                {
+                    stopNote(0.0f, false);
+                    break;
+                }
             }
         }
     }

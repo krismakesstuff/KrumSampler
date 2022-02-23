@@ -54,8 +54,12 @@ bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
         }
         else
         {
-            auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
-            mod->setModulePlaying(true);
+            auto modules = moduleContainer.getModulesFromMidiNote(midiNoteNumber);
+            for (int i = 0; i < modules.size(); ++i)
+            {
+                auto mod = modules[i];
+                mod->setModulePlaying(true);
+            }
         }
     }
     
@@ -66,8 +70,14 @@ void KrumKeyboard::mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e)
 {
     if (isMidiNoteAssigned(midiNoteNumber))
     {
-        auto mod = moduleContainer.getModuleFromMidiNote(midiNoteNumber);
-        mod->setModulePlaying(false);
+        auto modules = moduleContainer.getModulesFromMidiNote(midiNoteNumber);
+        for (int i = 0; i < modules.size(); ++i)
+        {
+            auto mod = modules[i];
+            mod->setModulePlaying(false);
+        }
+
+        //mod->setModulePlaying(false);
     }
 }
 
