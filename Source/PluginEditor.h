@@ -126,6 +126,8 @@ private:
     friend class DragAndDropThumbnail;
 
     KrumLookAndFeel kLaf{};
+    VolumeLookAndFeel vLaf{};
+    PanLookAndFeel pLaf{};
 
     juce::Image titleImage;
 

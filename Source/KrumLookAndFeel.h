@@ -365,7 +365,7 @@ public:
         }
         else
         {
-            auto textColour = (textColourToUse == nullptr ? findColour(juce::PopupMenu::textColourId) : *textColourToUse);
+            auto textColour = findColour(juce::PopupMenu::textColourId);
 
             auto r = area.reduced(1);
             if (isHighlighted && isActive)
@@ -399,8 +399,13 @@ public:
             }
             else if (isTicked)
             {
-                auto tick = getTickShape(1.0f);
-                g.fillPath(tick, tick.getTransformToScaleToFit(iconArea.reduced(iconArea.getWidth() / 5, 0).toFloat(), true));
+                //auto tick = getTickShape(1.0f);
+                juce::Path circlePath;
+                iconArea.reduce(3, 3);
+                circlePath.addEllipse(iconArea.getX() - 3, iconArea.getY() + 1.5f, iconArea.getWidth(), iconArea.getWidth());
+                
+                g.fillPath(circlePath);
+                //g.fillPath(tick, tick.getTransformToScaleToFit(iconArea.reduced(iconArea.getWidth() / 5, 0).toFloat(), true));
             }
 
             if (hasSubMenu)
@@ -541,4 +546,298 @@ public:
     }*/
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumLookAndFeel)
+};
+
+
+class VolumeLookAndFeel : public KrumLookAndFeel
+{
+    void drawLinearSliderBackground(juce::Graphics& g, int x, int y, int width, int height,
+        float sliderPos, float minSliderPos, float maxSliderPos,
+        const juce::Slider::SliderStyle style, juce::Slider& slider) override
+    {
+        //const float sliderThumbRadius = (float)(getSliderThumbRadius(slider) - 2);
+        juce::Rectangle<int> bounds{ x, y, width, height };
+
+        float sliderPorp;
+        if (slider.isHorizontal())
+        {
+            sliderPorp = sliderPos / (width);
+        }
+        else
+        {
+            sliderPorp = sliderPos / (maxSliderPos - (y + 10));
+        }
+
+        if (sliderPorp < 0.0f)
+        {
+            sliderPorp = 0.01f;
+        }
+        else if (sliderPorp > 1.0f)
+        {
+            sliderPorp = 0.9999f;
+        }
+
+        const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
+        juce::Colour gradCol1(juce::Colours::black);
+        //juce::Colour gradCol1(juce::Colours::blue);
+        juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
+        juce::Path indent;
+
+        float cornerSize = 4.0f;
+
+        if (slider.isHorizontal())
+        {
+            auto iy = height * 0.25f;
+            juce::Rectangle<float> trackRect((float)x, iy, (float)width, height * 0.50f);
+
+            /*juce::ColourGradient horzRGrade (gradCol1, trackRect.getCentreX(), iy, gradCol2, trackRect.getRight()-2, iy, false);
+            juce::ColourGradient horzLGrade (gradCol2, trackRect.getX(), iy, gradCol1, trackRect.getCentreX(), iy, false);
+
+            indent.addRoundedRectangle(trackRect, cornerSize);
+            g.setColour(gradCol1);
+            g.fillPath(indent);
+
+            horzRGrade.addColour(sliderPorp, gradCol1);
+            g.setGradientFill(horzRGrade);
+            g.fillRoundedRectangle(trackRect.withLeft(trackRect.getCentreX()), cornerSize);
+
+            horzLGrade.addColour(sliderPorp, gradCol1);
+            g.setGradientFill(horzLGrade);
+            g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);*/
+
+            g.setColour(gradCol1);
+            g.fillRoundedRectangle(trackRect, cornerSize);
+
+        }
+        else //vertical 
+        {
+            float trackWidth = width;// * 0.35f;
+            //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
+            float ix = bounds.getCentreX() - (trackWidth / 2);
+            juce::Rectangle<float> trackRect(x + 5, (float)y - 5, trackWidth, (float)height + 5);
+
+            juce::ColourGradient vertGrade(trackColour, ix, y, gradCol1, ix, trackRect.getBottom(), false);
+            //vertGrade.addColour(sliderPorp, gradCol1);
+
+            g.setGradientFill(vertGrade);
+            indent.addRoundedRectangle(trackRect, cornerSize);
+            g.fillPath(indent);
+
+            //g.setColour(gradCol1);
+            //g.fillRoundedRectangle(trackRect, cornerSize);
+        }
+
+        //g.setColour(trackColour.contrasting(0.6f));
+        //g.strokePath(indent, juce::PathStrokeType(0.5f));
+
+    }
+
+
+    void drawLinearSliderThumb(juce::Graphics& g, int x, int y, int width, int height,
+        float sliderPos, float minSliderPos, float maxSliderPos,
+        const juce::Slider::SliderStyle style, juce::Slider& slider) override
+    {
+        float cornerSize = 2.0f;
+        juce::Line<float> line;
+        juce::Point<int> dropPoint;
+
+        int dropRad = 5;
+        int thumbX, thumbY, thumbH, thumbW;
+
+        if (style == juce::Slider::LinearVertical)
+        {
+            thumbH = 7; //height * 0.07;// : height * 0.085f;
+            thumbW = 33; //width * 0.65f;
+
+            thumbX = (x + width * 0.5f) - (thumbW * 0.5f);
+            thumbY = sliderPos;
+
+            line.setStart({ (float)thumbX , (float)thumbY + (thumbH / 2) });
+            line.setEnd({ (float)thumbX + thumbW , (float)thumbY + (thumbH / 2) });
+
+            dropPoint.setXY(2, 2);
+        }
+        else // horizontal
+        {
+            thumbH = height * 0.7f; //height - 3;
+            thumbW = 5;
+
+            thumbX = sliderPos - 5;
+            thumbY = y + 5;
+
+            line.setStart({ (float)thumbX + (thumbW / 2), (float)thumbY });
+            line.setEnd({ (float)thumbX + (thumbW / 2), (float)thumbY + thumbH });
+
+            dropPoint.setXY(1, 1);
+            dropRad = 3;
+        }
+
+        auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
+        juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
+
+        juce::DropShadow ds{ juce::Colours::black, dropRad, dropPoint };
+        ds.drawForRectangle(g, thumb/*.withBottom(thumb.getBottom() + 3)*/);
+
+        g.setColour(thumbColor);
+        g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
+
+
+        g.setColour(thumbColor.darker(0.9f)/*.withAlpha(0.2f)*/);
+        g.drawLine(line);
+
+    }
+};
+
+class PanLookAndFeel : public KrumLookAndFeel
+{
+    void drawLinearSliderBackground(juce::Graphics& g, int x, int y, int width, int height,
+                                    float sliderPos, float minSliderPos, float maxSliderPos,
+                                    const juce::Slider::SliderStyle style, juce::Slider& slider) override
+    {
+        //const float sliderThumbRadius = (float)(getSliderThumbRadius(slider) - 2);
+        juce::Rectangle<int> bounds{ x, y, width, height };
+
+        float sliderPorp;
+        if (slider.isHorizontal())
+        {
+            sliderPorp = sliderPos / (width);
+        }
+        else
+        {
+            sliderPorp = sliderPos / (maxSliderPos - (y + 10));
+        }
+
+        if (sliderPorp < 0.0f)
+        {
+            sliderPorp = 0.01f;
+        }
+        else if (sliderPorp > 1.0f)
+        {
+            sliderPorp = 0.9999f;
+        }
+
+        const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
+        juce::Colour textColor = slider.findColour(juce::Slider::ColourIds::textBoxTextColourId);
+        juce::Colour gradCol1(juce::Colours::black);
+        //juce::Colour gradCol1(juce::Colours::red);
+        juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
+        juce::Path indent;
+
+        float cornerSize = 4.0f;
+
+        if (slider.isHorizontal())
+        {
+            auto iy = height * 0.25f;
+            //juce::Rectangle<float> trackRect((float)x, iy, (float)width, height * 0.50f);
+            juce::Rectangle<float> trackRect = bounds.withHeight(height * 0.8f).toFloat();
+
+            /*juce::ColourGradient horzRGrade (gradCol1, trackRect.getCentreX(), iy, gradCol2, trackRect.getRight()-2, iy, false);
+            juce::ColourGradient horzLGrade (gradCol2, trackRect.getX(), iy, gradCol1, trackRect.getCentreX(), iy, false);
+
+            indent.addRoundedRectangle(trackRect, cornerSize);
+            g.setColour(gradCol1);
+            g.fillPath(indent);
+
+            horzRGrade.addColour(sliderPorp, gradCol1);
+            g.setGradientFill(horzRGrade);
+            g.fillRoundedRectangle(trackRect.withLeft(trackRect.getCentreX()), cornerSize);
+
+            horzLGrade.addColour(sliderPorp, gradCol1);
+            g.setGradientFill(horzLGrade);
+            g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);*/
+
+
+            g.setColour(gradCol1);
+            g.fillRoundedRectangle(trackRect, cornerSize);
+            
+            //int zeroX = slider.getPositionOfValue(0);
+            int zeroX = bounds.getCentreX() - 3;
+            juce::Line<int> zeroLine{ zeroX, y + 2, zeroX, height - 4 };
+            
+
+            g.setColour(textColor);
+                     
+            g.drawLine(zeroLine.toFloat(), 0.5f);
+            
+            g.setFont({ 12.0f });
+            g.drawFittedText("L", trackRect.withX(cornerSize).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
+            g.drawFittedText("R", trackRect.withX(trackRect.getRight() - (cornerSize * 3)).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
+        }
+        else //vertical 
+        {
+            float trackWidth = width;// * 0.35f;
+            //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
+            float ix = bounds.getCentreX() - (trackWidth / 2);
+            juce::Rectangle<float> trackRect(x + 5, (float)y - 5, trackWidth, (float)height + 5);
+
+            /*juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
+            vertGrade.addColour(sliderPorp, gradCol1);
+
+            g.setGradientFill(vertGrade);
+            indent.addRoundedRectangle(trackRect, cornerSize);
+            g.fillPath(indent);*/
+
+            g.setColour(gradCol1);
+            g.fillRoundedRectangle(trackRect, cornerSize);
+        }
+
+        //g.setColour(trackColour.contrasting(0.6f));
+        //g.strokePath(indent, juce::PathStrokeType(0.5f));
+
+    }
+
+
+    void drawLinearSliderThumb(juce::Graphics& g, int x, int y, int width, int height,
+        float sliderPos, float minSliderPos, float maxSliderPos,
+        const juce::Slider::SliderStyle style, juce::Slider& slider) override
+    {
+        float cornerSize = 2.0f;
+        juce::Line<float> line;
+        juce::Point<int> dropPoint;
+
+        int dropRad = 5;
+        int thumbX, thumbY, thumbH, thumbW;
+
+        if (style == juce::Slider::LinearVertical)
+        {
+            thumbH = 7; //height * 0.07;// : height * 0.085f;
+            thumbW = 33; //width * 0.65f;
+
+            thumbX = (x + width * 0.5f) - (thumbW * 0.5f);
+            thumbY = sliderPos;
+
+            line.setStart({ (float)thumbX , (float)thumbY + (thumbH / 2) });
+            line.setEnd({ (float)thumbX + thumbW , (float)thumbY + (thumbH / 2) });
+
+            dropPoint.setXY(2, 2);
+        }
+        else // horizontal
+        {
+            thumbH = height * 0.6f; //height - 3;
+            thumbW = 4;
+
+            thumbX = sliderPos - 5;
+            thumbY = y + 1;
+
+            line.setStart({ (float)thumbX + (thumbW / 2), (float)thumbY });
+            line.setEnd({ (float)thumbX + (thumbW / 2), (float)thumbY + thumbH });
+
+            dropPoint.setXY(1, 1);
+            dropRad = 3;
+        }
+
+        auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
+        juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
+
+        juce::DropShadow ds{ juce::Colours::black, dropRad, dropPoint };
+        ds.drawForRectangle(g, thumb/*.withBottom(thumb.getBottom() + 3)*/);
+
+        g.setColour(thumbColor);
+        g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
+
+
+        g.setColour(thumbColor.darker(0.9f)/*.withAlpha(0.2f)*/);
+        g.drawLine(line);
+
+    }
 };

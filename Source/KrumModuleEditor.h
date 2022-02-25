@@ -215,6 +215,7 @@ private:
     TimeHandle timeHandle;
 
     float buttonClickVelocity = 0.5f;
+    float buttonTextSize = 13.0f;
 
     class CustomToggleButton : public InfoPanelTextButton
     {
@@ -310,7 +311,7 @@ private:
     };
 
     PitchSlider pitchSlider{ *this };
-    PitchButton pitchButton{ /*pitchSlider.get(),*/ *this };
+    PitchButton pitchButton{  *this };
     
     class MidiLabel :   public juce::Component,
                         public juce::SettableTooltipClient

@@ -102,6 +102,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(20.0f), 0.01f };
         clipGainRange.setSkewForCentre(dBToGain(0.0f));
         //clipGainRange.symmetricSkew = true;
+        juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 1 };
+        pitchShiftRange.setSkewForCentre(0);
+        pitchShiftRange.symmetricSkew = true;
+
 
         auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain + index, "Module Gain" + index,
                             gainRange, dBToGain(0.0f),
@@ -129,7 +133,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             TreeIDs::outputStrings, 0);
 
         auto pitchParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePitchShift + index, "Module PitchShift" + index,
-                            juce::NormalisableRange<float>{-12, 12, 1}, 0,   
+                            pitchShiftRange, 0,   
                             "Module " + index + " Pitch Shift",
                             juce::AudioProcessorParameter::genericParameter);
 
