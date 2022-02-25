@@ -441,13 +441,13 @@ public:
     {
         juce::Path p;
 
-        p.addRoundedRectangle(body.reduced(4), 1.0f);
+        p.addRoundedRectangle(body.reduced(4), 5.0f);
 
         g.setColour(juce::Colours::black/*.withAlpha(0.5f)*/);
         g.fillPath(p);
 
-        g.setColour(juce::Colours::white);
-        g.strokePath(p, juce::PathStrokeType(0.5f));
+        g.setColour(bubble.findColour(juce::BubbleComponent::outlineColourId));
+        g.strokePath(p, juce::PathStrokeType(0.75f));
 
     }
 

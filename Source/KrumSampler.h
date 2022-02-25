@@ -47,6 +47,8 @@ public:
     std::atomic<float>* getModuleMute() const;
     std::atomic<float>* getModuleReverse() const;
 
+    std::atomic<float>* getModulPitchShift() const;
+
     int getModuleOutputNumber() const;
 
     bool isParent(KrumModule* moduleToTest);

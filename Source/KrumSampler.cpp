@@ -81,6 +81,11 @@ std::atomic<float>* KrumSound::getModuleReverse() const
     return parentModule->getModuleReverse();
 }
 
+std::atomic<float>* KrumSound::getModulPitchShift() const
+{
+    return parentModule->getModulePitchShift();
+}
+
 int KrumSound::getModuleOutputNumber() const
 {
     return parentModule->getModuleOutputChannelNumber();
@@ -121,9 +126,8 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
     {
         if (*sound->getModuleMute() < 0.5f)
         {
-            //Pitchshifting will be a thing at some point.
-            /*pitchRatio = std::pow(2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
-                * sound->sourceSampleRate / getSampleRate();*/
+            pitchRatio = std::pow(2.0, ((*sound->getModulPitchShift() / 12.0)
+                                    * sound->sourceSampleRate / getSampleRate()));
 
             outputChan = sound->getModuleOutputNumber() - 1; //index offset
 
@@ -138,7 +142,6 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
             {
                 sourceSamplePosition = endSample;
             }
-            //sourceSamplePosition = 0.0;
 
             //only storing this, it will be applied in the render block
             clipGain = sound->getModuleClipGain()->load();
@@ -243,8 +246,8 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int firs
                     *outL++ += (l + r) * 0.5f;
                 }
 
-                //sourceSamplePosition += pitchRatio;
-                --sourceSamplePosition;
+                sourceSamplePosition -= pitchRatio;
+                //--sourceSamplePosition;
                 if (sourceSamplePosition > playingSound->length || sourceSamplePosition < startSample)
                 {
                     stopNote(0.0f, false);
@@ -283,8 +286,8 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int firs
                     *outL++ += (l + r) * 0.5f;
                 }
 
-                //sourceSamplePosition += pitchRatio;
-                ++sourceSamplePosition;
+                sourceSamplePosition += pitchRatio;
+                //++sourceSamplePosition;
                 if (sourceSamplePosition > playingSound->length || sourceSamplePosition > endSample)
                 {
                     stopNote(0.0f, false);

@@ -113,8 +113,9 @@ public:
     bool isModulePlaying();
 
     bool isModuleMuted();
-
     bool getModuleReverseState();
+
+    int getModulePitchShift();
 
     void setNumSamplesOfFile(int numSampleInFile);
     int getNumSamplesInFile();
@@ -265,13 +266,13 @@ private:
     class PitchButton : public InfoPanelButton
     {
     public:
-        PitchButton(KrumModuleEditor& editor);
+        PitchButton( KrumModuleEditor& editor);
         ~PitchButton();
 
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
             const bool shouldDrawButtonAsDown) override;
         
-        void resized() override;
+        //void resized() override;
 
         void mouseEnter(const juce::MouseEvent& e) override;
         void mouseExit(const juce::MouseEvent& e) override;
@@ -284,12 +285,12 @@ private:
         void setShowSlider(bool shouldShow);
         bool isSliderShowing();
 
-        juce::Slider& getSlider();
+        //juce::Slider& getSlider();
 
 
     private:
 
-        juce::Slider slider;
+        //juce::Slider* slider = nullptr;
         float getSliderPos(double value);
 
         //double valueOnMouseDown = 
@@ -297,22 +298,19 @@ private:
         KrumModuleEditor& editor;
     };
     
-    PitchButton pitchButton{ *this };
-    
-    //class ModalManager : public juce::ModalComponentManager::Callback
-    //{
-    //public:
-    //    ModalManager(std::function<void(int)> menuResult)
-    //        : handleSettingsResult(menuResult)
-    //    {}
-    //    
-    //    void modalStateFinished(int returnValue) override
-    //    {
-    //        handleSettingsResult(returnValue);
-    //    }
-    //    
-    //    std::function<void(int)> handleSettingsResult;
-    //};
+    class PitchSlider : public juce::Slider
+    {
+    public:
+        PitchSlider(KrumModuleEditor& editor);
+        ~PitchSlider();
+
+        void mouseExit(const juce::MouseEvent& e) override;
+    private:
+        KrumModuleEditor& editor;
+    };
+
+    PitchSlider pitchSlider{ *this };
+    PitchButton pitchButton{ /*pitchSlider.get(),*/ *this };
     
     class MidiLabel :   public juce::Component,
                         public juce::SettableTooltipClient

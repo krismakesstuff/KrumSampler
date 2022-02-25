@@ -82,6 +82,7 @@ public:
     std::atomic<int> getModuleEndSample();
     std::atomic<float>* getModuleMute();
     std::atomic<float>* getModuleReverse();
+    std::atomic<float>* getModulePitchShift();
 
     int getModuleOutputChannelNumber();
 

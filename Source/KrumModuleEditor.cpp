@@ -164,7 +164,7 @@ void KrumModuleEditor::resized()
 {
     auto area = getLocalBounds().reduced(EditorDimensions::shrinkage);
 
-    int titleHeight = area.getHeight() * 0.075f;
+    int titleHeight = area.getHeight() * 0.08f;
 
     int spacer = 5;
     int thumbnailH = area.getHeight() * 0.25f;
@@ -199,6 +199,8 @@ void KrumModuleEditor::resized()
     muteButton.setBounds(area.withTop(editButton.getBottom() + spacer).withHeight(buttonH).withLeft(area.getRight() - (buttonW + spacer)).withWidth(buttonW));
     reverseButton.setBounds(area.withTop(muteButton.getBottom() + spacer).withHeight(buttonH).withLeft(area.getRight() - (buttonW + spacer)).withWidth(buttonW));
     pitchButton.setBounds(area.withTop(reverseButton.getBottom() + spacer).withHeight(buttonH).withLeft(area.getRight() - (buttonW + spacer)).withWidth(buttonW));
+
+    pitchSlider.setBounds(pitchButton.getX() - (spacer * 2), pitchButton.getY() + (spacer * 2), pitchButton.getWidth() + 15, pitchButton.getHeight() - 7);
 
     midiLabel.setBounds(area.withTrimmedTop(volumeSlider.getBottom()).withHeight(midiLabelH));
     outputCombo.setBounds(area.withTop(midiLabel.getBottom() - spacer).withHeight(outputComboH).reduced(spacer * 1.75, spacer));
@@ -301,7 +303,7 @@ void KrumModuleEditor::buildModule()
     titleBox.setColour(juce::Label::ColourIds::textWhenEditingColourId, juce::Colours::black);
     titleBox.setColour(juce::TextEditor::ColourIds::highlightColourId, juce::Colours::lightgrey);
     titleBox.setColour(juce::CaretComponent::ColourIds::caretColourId, juce::Colours::black);
-    titleBox.setJustificationType(juce::Justification::centred);
+    titleBox.setJustificationType(juce::Justification::left);
     titleBox.setEditable(false, true, false);
     titleBox.setTooltip("double-click to change name");
     
@@ -361,14 +363,19 @@ void KrumModuleEditor::buildModule()
     
     
     addAndMakeVisible(pitchButton);
-    auto& pitchSlider = pitchButton.getSlider();
+    addChildComponent(pitchSlider);
+    //pitchSlider.reset(new juce::Slider());
+    //auto& pitchSlider = pitchButton.getSlider();
     pitchSlider.setScrollWheelEnabled(false);
     pitchSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     pitchSlider.setDoubleClickReturnValue(true, 0.0);
+    pitchSlider.setPopupDisplayEnabled(true, false, this);
     pitchSlider.setTooltip(pitchSlider.getTextFromValue(pitchSlider.getValue()));
 
+    pitchSlider.onValueChange = [this] { updateBubbleComp(&pitchSlider, pitchSlider.getCurrentPopupDisplay()); };
+
     //pitchSlider.onDragStart = [this] { pitchSlider.setShowSlider(true); };
-    //pitchSlider.onDragEnd = [this] { pitchSlider.setShowSlider(false); };
+    pitchSlider.onDragEnd = [this] { pitchSlider.setVisible(false); };
 
     pitchSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModulePitchShift + i, pitchSlider));
 
@@ -421,9 +428,16 @@ void KrumModuleEditor::setChildCompColors()
 
     panSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
     panSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
+    panSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
+    
+
+    pitchSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
+    pitchSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
+    pitchSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
 
     volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
     volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
+    volumeSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
     volumeSlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, moduleColor.darker());
 
     //playButton.setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
@@ -440,9 +454,11 @@ void KrumModuleEditor::setChildCompColors()
 
     muteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::darkred);
+    //muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.darker());
 
     reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-    reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::darkblue);
+    //reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::darkblue);
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.darker());
 
     titleBox.setColour(juce::Label::ColourIds::backgroundColourId, moduleColor.darker(0.6f).withAlpha(0.25f));
     titleBox.setColour(juce::Label::ColourIds::backgroundWhenEditingColourId, moduleColor.darker(0.7f));
@@ -648,6 +664,12 @@ bool KrumModuleEditor::getModuleReverseState()
     return *val > 0.5;
 }
 
+int KrumModuleEditor::getModulePitchShift()
+{
+    auto val = editor.parameters.getRawParameterValue(TreeIDs::paramModulePitchShift + juce::String(getModuleSamplerIndex()));
+    return (int)*val;
+}
+
 void KrumModuleEditor::setNumSamplesOfFile(int numSamplesInFile)
 {
     moduleTree.setProperty(TreeIDs::moduleNumSamplesLength, numSamplesInFile, nullptr);
@@ -667,6 +689,7 @@ void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* c
         juce::Point<int> pos; 
         juce::BubbleComponent::BubblePlacement bubblePlacement = juce::BubbleComponent::above;
         auto area = getLocalBounds();
+
         if (slider->getSliderStyle() == juce::Slider::LinearVertical) 
         {
             pos = { area.getCentreX() /*+ 6*/, getMouseXYRelative().getY() - 5 };
@@ -689,6 +712,7 @@ void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* c
 
         bubbleComp->setAllowedPlacement(bubblePlacement);
         bubbleComp->setPosition(pos, 0);
+        bubbleComp->setColour(juce::BubbleComponent::outlineColourId, getModuleColor().darker(0.7f));
         
     }
     slider->setTooltip(slider->getTextFromValue(slider->getValue()));
@@ -785,7 +809,7 @@ void KrumModuleEditor::setClipGainSliderVisibility(bool sliderShouldBeVisible)
 
 void KrumModuleEditor::setPitchSliderVisibility(bool sliderShouldBeVisible)
 {
-    pitchButton.getSlider().setVisible(sliderShouldBeVisible);
+    pitchSlider.setVisible(sliderShouldBeVisible);
 }
 
 bool KrumModuleEditor::canThumbnailAcceptFile()
@@ -1192,8 +1216,9 @@ KrumModuleEditor::PitchButton::PitchButton(KrumModuleEditor& e)
 {
     //Need to make this bounds of the button as big as the slider, have a the hitTest return for the button bounds
 
-    addChildComponent(&slider);
-    slider.setVisible(false);
+
+    //addChildComponent(&slider);
+    //slider.setVisible(false);
     //slider.onDragEnd = [this] {slider.setVisible(false); };
 }
 
@@ -1201,14 +1226,14 @@ KrumModuleEditor::PitchButton::~PitchButton()
 {
 }
 
-void KrumModuleEditor::PitchButton::resized()
-{
-    auto area = getLocalBounds();
-
-    int expand = 10;
-
-    slider.setBounds(area.withWidth(area.getWidth() + expand).withX(area.getX() + expand).withTrimmedTop(expand));
-}
+//void KrumModuleEditor::PitchButton::resized()
+//{
+//    auto area = getLocalBounds();
+//
+//    int expand = 10;
+//
+//    //slider.setBounds(area.withWidth(area.getWidth() + expand).withX(area.getX() + expand).withTrimmedTop(expand));
+//}
 
 void KrumModuleEditor::PitchButton::paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
     const bool shouldDrawButtonAsDown)
@@ -1216,7 +1241,8 @@ void KrumModuleEditor::PitchButton::paintButton(juce::Graphics& g, const bool sh
     auto area = getLocalBounds();
 
     int titleH = 10;
-    auto color = isMouseOverOrDragging() ? editor.getModuleColor().withAlpha(0.7f) : editor.getModuleColor();
+    auto color = (isMouseOverOrDragging() || editor.pitchSlider.isMouseOver()) ? 
+                    editor.getModuleColor().withAlpha(0.7f) : editor.getModuleColor();
 
     g.setColour(juce::Colours::black);
     g.fillRoundedRectangle(area.toFloat(), 5.0f);
@@ -1224,8 +1250,9 @@ void KrumModuleEditor::PitchButton::paintButton(juce::Graphics& g, const bool sh
     g.setColour(color);
     g.drawFittedText("Pitch", area.withY(3).withBottom(titleH).reduced(3), juce::Justification::centred, 1);
 
-    auto value = slider.getValue();
-    auto valueText = slider.getTextFromValue(value);
+    //auto value = slider.getValue();
+    //auto valueText = slider.getTextFromValue(value);
+    auto valueText = juce::String(editor.pitchSlider.getValue());
 
     /*if (value > 0)
     {
@@ -1245,13 +1272,12 @@ void KrumModuleEditor::PitchButton::mouseEnter(const juce::MouseEvent& e)
 
 void KrumModuleEditor::PitchButton::mouseExit(const juce::MouseEvent& e)
 {
-
-    if (isMouseOver(true))
+    if (editor.pitchSlider.isMouseOver())
     {
         return;
     }
 
-    slider.setVisible(false);
+    editor.pitchSlider.setVisible(false);
     InfoPanelButton::mouseExit(e);
 
 }
@@ -1296,11 +1322,11 @@ bool KrumModuleEditor::PitchButton::isSliderShowing()
 {
     return showSlider;
 }
-
-juce::Slider& KrumModuleEditor::PitchButton::getSlider()
-{
-    return slider;
-}
+//
+//juce::Slider& KrumModuleEditor::PitchButton::getSlider()
+//{
+//    return slider;
+//}
 
 float KrumModuleEditor::PitchButton::getSliderPos(double value)
 {
@@ -1325,6 +1351,19 @@ float KrumModuleEditor::PitchButton::getSliderPos(double value)
     ////return (float)(sliderRegionStart + pos * sliderRegionSize);
     //auto layout = getLookAndFeel().getSliderLayout(*this);
     //return (float)(layout.sliderBounds.getX() + pos * layout.sliderBounds.getWidth());
+}
+
+
+KrumModuleEditor::PitchSlider::PitchSlider(KrumModuleEditor& e)
+    : editor(e), juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::NoTextBox)
+{
+}
+KrumModuleEditor::PitchSlider::~PitchSlider()
+{}
+
+void KrumModuleEditor::PitchSlider::mouseExit(const juce::MouseEvent& e)
+{
+    editor.setPitchSliderVisibility(false);
 }
 
 //=======================================================================================

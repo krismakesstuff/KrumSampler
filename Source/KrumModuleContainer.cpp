@@ -320,7 +320,6 @@ void KrumModuleContainer::showModulePitchSlider(KrumModuleEditor* moduleEditor)
         }
     }
 
-
     moduleEditor->setPitchSliderVisibility(true);
 }
 
