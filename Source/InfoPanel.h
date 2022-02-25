@@ -105,7 +105,7 @@ private:
 class InfoPanelButton : public juce::Button
 {
 public:
-    InfoPanelButton(juce::String title, juce::String message, juce::String keycommand = juce::String(), juce::DrawableButton::ButtonStyle buttonStyle = juce::DrawableButton::ButtonStyle::ImageStretched);
+    InfoPanelButton(juce::String title, juce::String message, juce::String keycommand = juce::String());
     ~InfoPanelButton() override;
 
     void mouseEnter(const juce::MouseEvent& e) override;

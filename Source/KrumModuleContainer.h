@@ -68,6 +68,7 @@ public:
     int getNumModuleEditors();
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
+    void showModulePitchSlider(KrumModuleEditor* moduleEditor);
 
     void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);

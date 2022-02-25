@@ -309,6 +309,21 @@ void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEdito
     moduleEditor->setClipGainSliderVisibility(true);
 }
 
+void KrumModuleContainer::showModulePitchSlider(KrumModuleEditor* moduleEditor)
+{
+    for (int i = 0; i < moduleEditors.size(); i++)
+    {
+        auto modEd = moduleEditors.getUnchecked(i);
+        if (modEd != nullptr && modEd != moduleEditor)
+        {
+            modEd->setPitchSliderVisibility(false);
+        }
+    }
+
+
+    moduleEditor->setPitchSliderVisibility(true);
+}
+
 void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
 {
     for (int i = 0; i < moduleEditors.size(); i++)

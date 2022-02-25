@@ -192,18 +192,27 @@ public:
     {
         juce::Slider::SliderLayout layout;
         auto bounds = slider.getLocalBounds();
-        if (slider.isHorizontal())
+
+        /*if (auto pitchSlider = static_cast<KrumModuleEditor::PitchSlider*>(&slider))
         {
-            layout.sliderBounds = bounds;//bounds.reduced(5, 0);
+            layout.sliderBounds = bounds.withX(bounds.getX() - 20).withWidth(bounds.getWidth() + 40);
         }
-        else if (slider.isBar())
+        else*/
         {
-            layout.sliderBounds = bounds;
+            if (slider.isHorizontal())
+            {
+                layout.sliderBounds = bounds;//bounds.reduced(5, 0);
+            }
+            else if (slider.isBar())
+            {
+                layout.sliderBounds = bounds;
+            }
+            else
+            {
+                layout.sliderBounds = bounds;// .reduced(0, 10); //thumbnail height
+            }
         }
-        else
-        {
-            layout.sliderBounds = bounds;// .reduced(0, 10); //thumbnail height
-        }
+        
         return layout;
     }
 

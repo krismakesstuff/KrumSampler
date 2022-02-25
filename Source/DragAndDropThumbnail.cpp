@@ -180,10 +180,10 @@ void DragAndDropThumbnail::resized()
 
 void DragAndDropThumbnail::mouseDown(const juce::MouseEvent& e)
 {
-    if (e.mods.isPopupMenu())
-    {
-        //add two
-    }
+    //if (e.mods.isPopupMenu())
+    //{
+    //    //add two
+    //}
 
     InfoPanelComponent::mouseDown(e);
 }

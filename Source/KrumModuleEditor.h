@@ -141,6 +141,7 @@ public:
     bool isMouseOverThumbnail();
     bool thumbnailHitTest(const juce::MouseEvent& mouseEvent);
     void setClipGainSliderVisibility(bool sliderShouldBeVisible);
+    void setPitchSliderVisibility(bool sliderShouldBeVisible);
 
     bool canThumbnailAcceptFile();
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
@@ -192,9 +193,9 @@ private:
     InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
     InfoPanelComboBox outputCombo{ "Output Channel", "Select which output bus you would like this module to go to. Default is Main Bus (1-2)" };
    
-    InfoPanelSlider pitchSlider{"Pitch Shift", "Change the pitch of this sample in semi-tone increments"};
-    InfoPanelTextButton reverseButton{"Reverse Button", "Plays the sample in reverse, active when highlighted"};
-    InfoPanelTextButton muteButton{"Mute", "Mutes this sample from being played."};
+    //InfoPanelSlider pitchSlider{"Pitch Shift", "Change the pitch of this sample in semi-tone increments"};
+    //InfoPanelTextButton reverseButton{"Reverse Button", "Plays the sample in reverse, active when highlighted"};
+    //InfoPanelTextButton muteButton{"Mute", "Mutes this sample from being played."};
 
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -213,6 +214,21 @@ private:
     TimeHandle timeHandle;
 
     float buttonClickVelocity = 0.5f;
+
+    class CustomToggleButton : public InfoPanelTextButton
+    {
+    public:
+        CustomToggleButton(juce::String title, juce::String message, KrumModuleEditor& editor);
+        ~CustomToggleButton() override;
+
+        void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
+                         const bool shouldDrawButtonAsDown) override;
+    private:
+        KrumModuleEditor& editor;
+    };
+
+    CustomToggleButton reverseButton{ "Reverse Button", "Plays the sample in reverse, active when highlighted", *this };
+    CustomToggleButton muteButton{ "Mute", "Mutes this sample from being played.", *this };
 
     class OneShotButton : public InfoPanelDrawableButton
     {
@@ -244,17 +260,44 @@ private:
         KrumModuleEditor& editor;
     };
 
-    /*class PitchSlider : public InfoPanelSlider
+    friend class KrumLookAndFeel;
+
+    class PitchButton : public InfoPanelButton
     {
     public:
-        PitchSlider();
-        ~PitchSlider();
+        PitchButton(KrumModuleEditor& editor);
+        ~PitchButton();
 
+        void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
+            const bool shouldDrawButtonAsDown) override;
         
+        void resized() override;
+
+        void mouseEnter(const juce::MouseEvent& e) override;
+        void mouseExit(const juce::MouseEvent& e) override;
+
+        //void mouseDown(const juce::MouseEvent& e) override;
+        //void mouseDrag(const juce::MouseEvent& e) override;
+
+        //void mouseUp(const juce::MouseEvent& e) override;
+
+        void setShowSlider(bool shouldShow);
+        bool isSliderShowing();
+
+        juce::Slider& getSlider();
+
 
     private:
-    };*/
+
+        juce::Slider slider;
+        float getSliderPos(double value);
+
+        //double valueOnMouseDown = 
+        bool showSlider = false;
+        KrumModuleEditor& editor;
+    };
     
+    PitchButton pitchButton{ *this };
     
     //class ModalManager : public juce::ModalComponentManager::Callback
     //{

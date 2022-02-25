@@ -187,7 +187,7 @@ void KrumVoice::stopNote(float velocity, bool allowTailOff)
     }
 }
 
-void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples)
+void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int firstSample, int numSamples)
 {
     if (auto* playingSound = static_cast<KrumSound*> (getCurrentlyPlayingSound().get()))
     {
@@ -202,14 +202,14 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
         
         if (numChannels >= outputChan + 1) // + 1 accounts for stereo pair
         {
-            outL = outputBuffer.getWritePointer(outputChan, startSample);
-            outR = outputBuffer.getWritePointer(outputChan + 1, startSample);
+            outL = outputBuffer.getWritePointer(outputChan, firstSample);
+            outR = outputBuffer.getWritePointer(outputChan + 1, firstSample);
         }
 
         if(outL == nullptr || outR == nullptr) // just use main output bus if we can't get the busses we want
         {
-            outL = outputBuffer.getWritePointer(0, startSample);
-            outR = numChannels > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
+            outL = outputBuffer.getWritePointer(0, firstSample);
+            outR = numChannels > 1 ? outputBuffer.getWritePointer(1, firstSample) : nullptr;
         }
 
         if (*playingSound->getModuleReverse() > 0.5f)
@@ -254,8 +254,6 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int star
         }
         else
         {
-
-
             while (--numSamples >= 0)
             {
                 auto pos = (int)sourceSamplePosition;
