@@ -158,7 +158,7 @@ KrumModuleEditor* KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModu
         addAndMakeVisible(newModuleEditor);
         moduleEditors.add(newModuleEditor);
         
-        if (refreshLayout) //default true
+        if (refreshLayout) //defaults true
         {
             refreshModuleLayout();
         }
@@ -356,7 +356,7 @@ void KrumModuleContainer::timerCallback()
         }
     }
 
-    if (editor && (!(mouseOver)))
+    if (editor && (!mouseOver))
     {
         editor->keyboard.clearHighlightedKey();
     }
@@ -388,8 +388,7 @@ void KrumModuleContainer::createModuleEditors()
         int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
         if (moduleTree.isValid() && ( state > 0)) //reference KrumModule::ModuleState, 0 is empty module
         {
-            auto modEd = addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()/*, state*/));
-            
+            auto modEd = addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()));
         }
     }
 }

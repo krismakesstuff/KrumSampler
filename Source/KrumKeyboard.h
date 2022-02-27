@@ -90,10 +90,12 @@ private:
 
     juce::Array<juce::Colour> getColorsForKey(int midiNote);
 
+    void setModulesMouseOverKey(const juce::MouseEvent& e, bool mouseOver);
+
     //void updateKey(int midiNote, juce::Colour color)
 
     int autoscrollOffset = 35;
-
+    //int mouseOverNote = -1;
     int keyToHighlight = -1;
     juce::Colour highlightKeyColor{ juce::Colours::yellow.darker() };
     float highlightThickness = 2.0f;

@@ -33,13 +33,18 @@ KrumKeyboard::~KrumKeyboard()
 void KrumKeyboard::mouseEnter(const juce::MouseEvent& e)
 {
     InfoPanel::shared_instance().setInfoPanelText("Keyboard", "This keyboard shows your midi inputs and assignments. Can be clicked on to send a midi message");
+   
+    
+
+    setModulesMouseOverKey(e, true);
     juce::MidiKeyboardComponent::mouseEnter(e);
-    DBG("MouseEntered Keyboard: " + e.getPosition().toString());
+    //DBG("MouseEntered Keyboard: " + e.getPosition().toString());
 }
 
 void KrumKeyboard::mouseExit(const juce::MouseEvent& e)
 {
     InfoPanel::shared_instance().clearPanelText();
+    setModulesMouseOverKey(e, false);
     juce::MidiKeyboardComponent::mouseExit(e);
 }
 
@@ -370,6 +375,19 @@ juce::Array<juce::Colour> KrumKeyboard::getColorsForKey(int midiNote)
     }
 
     return retColors;
+}
+
+void KrumKeyboard::setModulesMouseOverKey(const juce::MouseEvent& e, bool mouseOver)
+{
+    int moduleNote = getNoteAtPosition(e.getPosition().toFloat());
+    auto mods = moduleContainer.getModulesFromMidiNote(moduleNote);
+    DBG("Module Note Over: " + juce::String(moduleNote));
+
+    for (int i = 0; i < mods.size(); ++i)
+    {
+        mods[i]->setMouseOverKey(mouseOver);
+        //mods[i]->repaint();
+    }
 }
 
 //void KrumKeyboard::assignMidiNoteColor(int midiNote, juce::Colour moduleColor/*, bool deleteOld*/)

@@ -158,6 +158,8 @@ public:
     bool shouldModuleAcceptFileDrop();
     
     bool getMouseOver();
+    bool getMouseOverKey();
+    void setMouseOverKey(bool isMouseOverKey);
 
 private:
 
@@ -179,6 +181,7 @@ private:
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
     bool mouseOver = false;
+    bool mouseOverKey = false;
 
     juce::ValueTree moduleTree;
     KrumSamplerAudioProcessorEditor& editor;
@@ -299,19 +302,23 @@ private:
         KrumModuleEditor& editor;
     };
     
-    class PitchSlider : public juce::Slider
+    class PitchSlider : public InfoPanelSlider
     {
     public:
         PitchSlider(KrumModuleEditor& editor);
         ~PitchSlider();
 
-        void mouseExit(const juce::MouseEvent& e) override;
+        void paint(juce::Graphics& g) override;
+        void mouseDown(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
+
+        //void mouseExit(const juce::MouseEvent& e) override;
     private:
         KrumModuleEditor& editor;
     };
 
     PitchSlider pitchSlider{ *this };
-    PitchButton pitchButton{  *this };
+    //PitchButton pitchButton{  *this };
     
     class MidiLabel :   public juce::Component,
                         public juce::SettableTooltipClient

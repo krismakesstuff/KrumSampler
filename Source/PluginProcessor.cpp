@@ -99,10 +99,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         gainRange.setSkewForCentre(dBToGain(0.0f));
         gainRange.symmetricSkew = true;
 
+        TreeIDs::gainRange = gainRange;
+
         juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(20.0f), 0.01f };
         clipGainRange.setSkewForCentre(dBToGain(0.0f));
         //clipGainRange.symmetricSkew = true;
-        juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 1 };
+        juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 0.5f };
         pitchShiftRange.setSkewForCentre(0);
         pitchShiftRange.symmetricSkew = true;
 

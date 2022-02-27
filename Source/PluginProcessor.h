@@ -98,6 +98,7 @@ namespace TreeIDs
     //Should I make these all preprocessor define instead?
     //These should be in their own namespace atleast
     static const float defaultGain = 0.85f;
+    static juce::NormalisableRange<float> gainRange;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
     static const juce::StringArray outputStrings{ "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14", "15-16", "17-18", "19-20" };
