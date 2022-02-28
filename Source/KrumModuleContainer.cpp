@@ -289,6 +289,12 @@ int KrumModuleContainer::getNumEmptyModules()
     return count;
 }
 
+KrumModuleEditor* KrumModuleContainer::getModuleEditor(int index)
+{
+    
+    return moduleEditors.getUnchecked(index);
+}
+
 int KrumModuleContainer::getNumModuleEditors()
 {
     return moduleEditors.size();

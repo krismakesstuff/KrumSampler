@@ -32,6 +32,7 @@ public:
 
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
+    void mouseMove(const juce::MouseEvent& e) override;
 
     bool mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
     void mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e) override;
@@ -91,6 +92,7 @@ private:
     juce::Array<juce::Colour> getColorsForKey(int midiNote);
 
     void setModulesMouseOverKey(const juce::MouseEvent& e, bool mouseOver);
+    void clearModulesMouseOverKeys();
 
     //void updateKey(int midiNote, juce::Colour color)
 

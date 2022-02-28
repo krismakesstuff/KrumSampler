@@ -117,6 +117,8 @@ public:
 
     int getModulePitchShift();
 
+    double getModuleGain();
+
     void setNumSamplesOfFile(int numSampleInFile);
     int getNumSamplesInFile();
 
@@ -164,7 +166,7 @@ public:
 private:
 
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
-
+    double normalizeGainValue(double gain);
 
     friend class DragAndDropThumbnail;
     friend class TimeHandle;
@@ -337,7 +339,7 @@ private:
         
         KrumModuleEditor* moduleEditor = nullptr;
     //private:
-        float fontSize = 12.0f;
+        float fontSize = 13.0f;
         juce::Colour textColor = juce::Colours::white;
     };
     

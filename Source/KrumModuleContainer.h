@@ -64,8 +64,9 @@ public:
     juce::OwnedArray<KrumModuleEditor>& getModuleDisplayOrder();
     
     int getNumActiveModules();
-    int getNumEmptyModules();
     int getNumModuleEditors();
+    int getNumEmptyModules();
+    KrumModuleEditor* getModuleEditor(int index);
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
     void showModulePitchSlider(KrumModuleEditor* moduleEditor);

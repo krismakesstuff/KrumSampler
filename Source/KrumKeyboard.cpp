@@ -33,10 +33,6 @@ KrumKeyboard::~KrumKeyboard()
 void KrumKeyboard::mouseEnter(const juce::MouseEvent& e)
 {
     InfoPanel::shared_instance().setInfoPanelText("Keyboard", "This keyboard shows your midi inputs and assignments. Can be clicked on to send a midi message");
-   
-    
-
-    setModulesMouseOverKey(e, true);
     juce::MidiKeyboardComponent::mouseEnter(e);
     //DBG("MouseEntered Keyboard: " + e.getPosition().toString());
 }
@@ -44,8 +40,14 @@ void KrumKeyboard::mouseEnter(const juce::MouseEvent& e)
 void KrumKeyboard::mouseExit(const juce::MouseEvent& e)
 {
     InfoPanel::shared_instance().clearPanelText();
-    setModulesMouseOverKey(e, false);
+    clearModulesMouseOverKeys();
     juce::MidiKeyboardComponent::mouseExit(e);
+}
+
+void KrumKeyboard::mouseMove(const juce::MouseEvent& e)
+{
+    setModulesMouseOverKey(e, true);
+    juce::MidiKeyboardComponent::mouseMove(e);
 }
 
 bool KrumKeyboard::mouseDownOnKey(int midiNoteNumber, const juce::MouseEvent& e)
@@ -380,13 +382,27 @@ juce::Array<juce::Colour> KrumKeyboard::getColorsForKey(int midiNote)
 void KrumKeyboard::setModulesMouseOverKey(const juce::MouseEvent& e, bool mouseOver)
 {
     int moduleNote = getNoteAtPosition(e.getPosition().toFloat());
-    auto mods = moduleContainer.getModulesFromMidiNote(moduleNote);
-    DBG("Module Note Over: " + juce::String(moduleNote));
-
-    for (int i = 0; i < mods.size(); ++i)
+    if (moduleNote > 0)
     {
-        mods[i]->setMouseOverKey(mouseOver);
-        //mods[i]->repaint();
+        auto mods = moduleContainer.getModulesFromMidiNote(moduleNote);
+        //DBG("Module Note Over: " + juce::String(moduleNote));
+
+        clearModulesMouseOverKeys();
+
+        for (int i = 0; i < mods.size(); ++i)
+        {
+            mods[i]->setMouseOverKey(mouseOver);
+            //mods[i]->repaint();
+        }
+        
+    }
+}
+
+void KrumKeyboard::clearModulesMouseOverKeys()
+{
+    for (int i = 0; i < moduleContainer.getNumModuleEditors(); ++i)
+    {
+        moduleContainer.getModuleEditor(i)->setMouseOverKey(false);
     }
 }
 

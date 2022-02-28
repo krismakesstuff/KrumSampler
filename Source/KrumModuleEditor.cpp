@@ -50,7 +50,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
     }
 
     auto area = getLocalBounds().reduced(EditorDimensions::shrinkage);
-    juce::Colour c = getModuleColor().darker(0.4f).withAlpha(0.8f);
+    juce::Colour c = getModuleColor().darker(0.4f).withAlpha(0.7f);
 
     int moduleState = getModuleState();
 
@@ -67,7 +67,9 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         juce::Colour bc = c;
         if (isModuleMuted())
         {
-            bc = c.withAlpha(0.2f);
+            //bc = c.withAlpha(0.2f);
+            bc = juce::Colours::black;
+            c = juce::Colours::black;
         }
 
         if (modulePlaying)
@@ -81,7 +83,14 @@ void KrumModuleEditor::paint (juce::Graphics& g)
             g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 1.0f);
         }
         //auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
-        auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), c.darker(0.55f), area.getBottom());
+        auto bgGrade = juce::ColourGradient::vertical(c.darker(0.55f), (float)area.getY(), bc, area.getBottom());
+
+        auto gain = getModuleGain();
+        //auto adjustedGain = juce::jlimit<double>(0.0, 1.0, gain);
+        auto gainProp = 1 - normalizeGainValue(gain);
+        bgGrade.addColour(juce::jlimit<double>(0.00001,0.9999, gainProp), bc.darker(0.25f));
+        
+
         g.setGradientFill(bgGrade);
         g.fillRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize);
         
@@ -108,61 +117,61 @@ void KrumModuleEditor::paint (juce::Graphics& g)
     }
 }
 
-void KrumModuleEditor::paintVolumeSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds)
-{
-    int numLines = 17;
-    int spaceBetweenLines = (bounds.getHeight() - 10) / numLines;
-    juce::Colour c = juce::Colour::fromString(moduleTree.getProperty(TreeIDs::moduleColor).toString()).withAlpha(0.5f);
-
-    float zerodBY = volumeSlider.getPositionOfValue(1.0f) - 1;
-    juce::Line<float> zeroLine{ {bounds.getX() - 2, bounds.getY() + zerodBY }, {bounds.getCentreX() - 5 ,  bounds.getY()+ zerodBY } };
-    g.setColour(c.darker(0.5f));
-    g.drawLine(zeroLine);
-    
-    
-    g.setColour(c);
-
-    juce::Line<float> firstLine{ {bounds.getX(), bounds.getY() + 9}, {bounds.getCentreX() - 5, bounds.getY() + 9} };
-    juce::Point<int> firstPoint = firstLine.getStart().toInt();
-    g.drawLine(firstLine);
-
-    juce::Line<float> line;
-
-    for (int i = 1; i < numLines; i++)
-    {
-        if (i == 7) 
-        {
-            //this draws on top of the zeroLine, which we've already drawn
-            continue;
-        }
-
-        float startX = bounds.getX() + 2;
-        float endX = bounds.getCentreX() - 5;
-        if (i % 2)
-        {
-            startX += 5;
-            endX -= 4;
-        }
-
-        line.setStart({ startX, firstLine.getStartY() + ( i * spaceBetweenLines)});
-        line.setEnd({ endX, firstLine.getStartY() + (i * spaceBetweenLines)});
-        g.drawLine(line);
-
-    }
-
-    g.drawFittedText("+2", { firstPoint.getX() - 15, firstPoint.getY() - 8 , 17, 17 }, juce::Justification::centredLeft, 1);
-    g.drawFittedText("0", { (int)zeroLine.getStartX() - 15, (int)zeroLine.getStartY() - 8, 17, 17 }, juce::Justification::centredLeft, 1);
-
-}
-
-void KrumModuleEditor::paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds)
-{
-    juce::Colour c = juce::Colour::fromString(moduleTree.getProperty(TreeIDs::moduleColor).toString()).withAlpha(0.5f);
-    g.setColour(c);
-    juce::Line<float> midLine{ {bounds.getCentreX() - 2, bounds.getY() - 2},{bounds.getCentreX() - 2 , bounds.getCentreY() } };
-    g.drawLine(midLine, 1.5f);
-
-}
+//void KrumModuleEditor::paintVolumeSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds)
+//{
+//    int numLines = 17;
+//    int spaceBetweenLines = (bounds.getHeight() - 10) / numLines;
+//    juce::Colour c = juce::Colour::fromString(moduleTree.getProperty(TreeIDs::moduleColor).toString()).withAlpha(0.5f);
+//
+//    float zerodBY = volumeSlider.getPositionOfValue(1.0f) - 1;
+//    juce::Line<float> zeroLine{ {bounds.getX() - 2, bounds.getY() + zerodBY }, {bounds.getCentreX() - 5 ,  bounds.getY()+ zerodBY } };
+//    g.setColour(c.darker(0.5f));
+//    g.drawLine(zeroLine);
+//    
+//    
+//    g.setColour(c);
+//
+//    juce::Line<float> firstLine{ {bounds.getX(), bounds.getY() + 9}, {bounds.getCentreX() - 5, bounds.getY() + 9} };
+//    juce::Point<int> firstPoint = firstLine.getStart().toInt();
+//    g.drawLine(firstLine);
+//
+//    juce::Line<float> line;
+//
+//    for (int i = 1; i < numLines; i++)
+//    {
+//        if (i == 7) 
+//        {
+//            //this draws on top of the zeroLine, which we've already drawn
+//            continue;
+//        }
+//
+//        float startX = bounds.getX() + 2;
+//        float endX = bounds.getCentreX() - 5;
+//        if (i % 2)
+//        {
+//            startX += 5;
+//            endX -= 4;
+//        }
+//
+//        line.setStart({ startX, firstLine.getStartY() + ( i * spaceBetweenLines)});
+//        line.setEnd({ endX, firstLine.getStartY() + (i * spaceBetweenLines)});
+//        g.drawLine(line);
+//
+//    }
+//
+//    g.drawFittedText("+2", { firstPoint.getX() - 15, firstPoint.getY() - 8 , 17, 17 }, juce::Justification::centredLeft, 1);
+//    g.drawFittedText("0", { (int)zeroLine.getStartX() - 15, (int)zeroLine.getStartY() - 8, 17, 17 }, juce::Justification::centredLeft, 1);
+//
+//}
+//
+//void KrumModuleEditor::paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds)
+//{
+//    juce::Colour c = juce::Colour::fromString(moduleTree.getProperty(TreeIDs::moduleColor).toString()).withAlpha(0.5f);
+//    g.setColour(c);
+//    juce::Line<float> midLine{ {bounds.getCentreX() - 2, bounds.getY() - 2},{bounds.getCentreX() - 2 , bounds.getCentreY() } };
+//    g.drawLine(midLine, 1.5f);
+//
+//}
 
 void KrumModuleEditor::resized()
 {
@@ -178,10 +187,10 @@ void KrumModuleEditor::resized()
     int timeHandleH = 13;
 
     //int midiLabelH = area.getHeight() * 0.093f;
-    int midiLabelH = height * 0.08f;
+    int midiLabelH = height * 0.07f;
 
-    int panSliderH = height * 0.05f;
-    int panSliderW = width * 0.9f;
+    int panSliderH = height * 0.040f;
+    int panSliderW = width * 0.95f;
 
     int volumeSliderH = height * 0.55f;
     int volumeSliderW = width * 0.57f;
@@ -200,7 +209,7 @@ void KrumModuleEditor::resized()
     thumbnail.setBounds(area.withBottom(thumbnailH).withTop(titleBox.getBottom()).reduced(spacer));
     timeHandle.setBounds(thumbnail.getX(), thumbnail.getBottom(), thumbnail.getWidth(), timeHandleH);
 
-    panSlider.setBounds(area.getX() + spacer, timeHandle.getBottom() + (spacer), panSliderW, panSliderH);
+    panSlider.setBounds(area.getX() + 2, timeHandle.getBottom() + (spacer), panSliderW, panSliderH);
     volumeSlider.setBounds(area.getX() + spacer/*area.getCentreX() - (volumeSliderW / 2)*/, panSlider.getBottom() + (spacer/* * 3*/), volumeSliderW, volumeSliderH);
     
     pitchSlider.setBounds(area.withTop(panSlider.getBottom() + spacer).withHeight(smallButtonH).withLeft(area.getRight() - (smallButtonW + spacer)).withWidth(smallButtonW));
@@ -210,8 +219,8 @@ void KrumModuleEditor::resized()
     playButton.setBounds(area.withTop(muteButton.getBottom() + (spacer * 11)).withHeight(buttonH).withLeft(area.getRight() - (buttonW + spacer)).withWidth(buttonW));
     editButton.setBounds(area.withTop(playButton.getBottom() + spacer).withHeight(buttonH).withLeft(area.getRight() - (buttonW +spacer)).withWidth(buttonW));
 
-    midiLabel.setBounds(area.withTrimmedTop(volumeSlider.getBottom() - spacer).withHeight(midiLabelH));
-    outputCombo.setBounds(area.withTop(midiLabel.getBottom() - (spacer * 1.5)).withHeight(outputComboH).reduced(spacer * 1.75, spacer));
+    midiLabel.setBounds(area.withTrimmedTop(volumeSlider.getBottom() - spacer).withHeight(midiLabelH).reduced(spacer));
+    outputCombo.setBounds(area.withTop(midiLabel.getBottom()).withHeight(outputComboH).reduced(spacer));
 
 
 //    if (dragHandle != nullptr)
@@ -684,6 +693,12 @@ int KrumModuleEditor::getModulePitchShift()
     return (int)*val;
 }
 
+double KrumModuleEditor::getModuleGain()
+{
+    auto val = editor.parameters.getRawParameterValue(TreeIDs::paramModuleGain + juce::String(getModuleSamplerIndex()));
+    return (double)*val;
+}
+
 void KrumModuleEditor::setNumSamplesOfFile(int numSamplesInFile)
 {
     moduleTree.setProperty(TreeIDs::moduleNumSamplesLength, numSamplesInFile, nullptr);
@@ -731,6 +746,13 @@ void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* c
     }
     slider->setTooltip(slider->getTextFromValue(slider->getValue()));
 
+}
+
+double KrumModuleEditor::normalizeGainValue(double gain)
+{
+    auto param = editor.parameters.getParameter(TreeIDs::paramModuleGain + juce::String(getModuleSamplerIndex()));
+    double norm = param->convertTo0to1(gain);
+    return norm;
 }
 
 int KrumModuleEditor::getAudioFileLengthInMs()
@@ -1219,7 +1241,7 @@ void KrumModuleEditor::MidiLabel::paint(juce::Graphics& g)
     //g.setColour(juce::Colours::black);
     //g.fillRect(area);
     
-    juce::Rectangle<int> midiNoteRect = area.reduced(7);
+    juce::Rectangle<int> midiNoteRect = area;//.reduced(7).withX(spacer);
     juce::Rectangle<int> midiChanRect = area.withX(midiNoteRect.getRight() + spacer).withWidth(area.getWidth() * 0.5f);
 
 
@@ -1233,8 +1255,8 @@ void KrumModuleEditor::MidiLabel::paint(juce::Graphics& g)
     g.setColour(textColor);
     g.setFont(fontSize);
 
-    g.drawFittedText("Note", midiNoteRect, juce::Justification::centredLeft, 1);
-    g.drawFittedText(moduleEditor->getModuleMidiNoteString(true), midiNoteRect, juce::Justification::centredRight, 1);
+    g.drawFittedText("Note", midiNoteRect.withX(5), juce::Justification::centredLeft, 1);
+    g.drawFittedText(moduleEditor->getModuleMidiNoteString(true), midiNoteRect.withWidth(area.getWidth() - 10), juce::Justification::centredRight, 1);
 
     //g.drawFittedText("Chan", midiChanRect, juce::Justification::centredLeft, 1);
     //g.drawFittedText(juce::String(moduleEditor->getModuleMidiChannel()), midiChanRect, juce::Justification::centredRight, 1);

@@ -96,7 +96,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         juce::String index = juce::String(i);
 
         juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
-        gainRange.setSkewForCentre(dBToGain(0.0f));
+        //gainRange.setSkewForCentre(dBToGain(0.0f));
         gainRange.symmetricSkew = true;
 
         TreeIDs::gainRange = gainRange;
