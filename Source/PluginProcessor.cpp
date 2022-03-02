@@ -101,9 +101,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
         TreeIDs::gainRange = gainRange;
 
-        juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(20.0f), 0.01f };
+        juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(30.0f), 0.01f };
         clipGainRange.setSkewForCentre(dBToGain(0.0f));
         //clipGainRange.symmetricSkew = true;
+
         juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 0.5f };
         pitchShiftRange.setSkewForCentre(0);
         pitchShiftRange.symmetricSkew = true;
@@ -162,7 +163,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     //================================== Global Gain(s) ==============================================================
 
     juce::NormalisableRange<float> outGainRange{ dBToGain(-60.0f), dBToGain(2.0f), 0.0001f };
-    outGainRange.setSkewForCentre(dBToGain(0.0f));
+    //outGainRange.setSkewForCentre(dBToGain(0.0f));
     outGainRange.symmetricSkew = true;
 
     auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam.toString(), "Output Gain",
@@ -195,16 +196,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
      : AudioProcessor( BusesProperties().withOutput("Output 1-2", juce::AudioChannelSet::stereo(), true)
-                                      .withOutput("Output 3-4", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 5-6", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 7-8", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 9-10", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 11-12", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 13-14", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false)),
-                                      parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
+                                        .withOutput("Output 3-4", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 5-6", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 7-8", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 9-10", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 11-12", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 13-14", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false)),
+                                        parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
 
 {
     //juce::Logger::setCurrentLogger(Log::logger);
@@ -217,9 +218,7 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     initSampler();
     previewer.assignSampler(&sampler);
 
-#if JucePlugin_Build_Standalone
-    fileBrowser.buildDemoKit();
-#endif
+
 
     juce::Logger::writeToLog("----------------------------");
     juce::Logger::writeToLog("Sampler Processor Constructed");

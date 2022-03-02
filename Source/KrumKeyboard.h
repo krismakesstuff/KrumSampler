@@ -100,7 +100,7 @@ private:
     //int mouseOverNote = -1;
     int keyToHighlight = -1;
     juce::Colour highlightKeyColor{ juce::Colours::yellow.darker() };
-    float highlightThickness = 2.0f;
+    float highlightThickness = 2.5f;
 
     //juce::OwnedArray<KrumKey, juce::CriticalSection> currentlyAssignedKeys;
 

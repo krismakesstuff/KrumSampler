@@ -49,7 +49,7 @@ private:
     
     juce::Colour fontColor {juce::Colours::grey.brighter(0.4f)};
     //juce::Colour bgColor {juce::Colours::darkgrey.darker(0.99f)};
-    juce::Colour bgColor {juce::Colours::black};
+    juce::Colour bgColor {juce::Colours::black.withAlpha(0.2f)};
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InfoPanel)
 };
@@ -92,6 +92,7 @@ class InfoPanelDrawableButton : public juce::DrawableButton
 public:
     InfoPanelDrawableButton(juce::String title, juce::String message, juce::String keycommand = juce::String(), juce::DrawableButton::ButtonStyle buttonStyle = juce::DrawableButton::ButtonStyle::ImageStretched);
     ~InfoPanelDrawableButton() override;
+
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
 

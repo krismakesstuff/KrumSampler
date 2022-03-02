@@ -58,9 +58,8 @@ void SimpleAudioPreviewer::resized()
     auto area = getLocalBounds();
 
     autoPlayToggle.setBounds(area.withRight(area.getWidth() / 3));
-    volumeSlider.setBounds(area.withLeft(area.getWidth() / 3).withY(area.getHeight()/3).withHeight(area.getHeight()/2));
+    volumeSlider.setBounds(area.withLeft(area.getWidth() * 0.30f).withY(area.getHeight()/3).withHeight(area.getHeight()/2));
 }
-
 
 bool SimpleAudioPreviewer::isAutoPlayActive()
 {

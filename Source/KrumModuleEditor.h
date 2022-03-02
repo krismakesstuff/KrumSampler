@@ -135,7 +135,7 @@ public:
     bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
     
-    void handleNewFile(juce::File& file, bool overlayShouldListen, int numSamplesInFile);
+    void handleNewFile(juce::String& name, juce::File& file, bool overlayShouldListen, int numSamplesInFile);
     void setModuleFile(juce::File& newFile);
     void addFileToRecentsFolder(juce::File& file, juce::String name);
 
@@ -269,41 +269,6 @@ private:
 
     friend class KrumLookAndFeel;
 
-    class PitchButton : public InfoPanelButton
-    {
-    public:
-        PitchButton( KrumModuleEditor& editor);
-        ~PitchButton();
-
-        void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
-            const bool shouldDrawButtonAsDown) override;
-        
-        //void resized() override;
-
-        void mouseEnter(const juce::MouseEvent& e) override;
-        void mouseExit(const juce::MouseEvent& e) override;
-
-        //void mouseDown(const juce::MouseEvent& e) override;
-        //void mouseDrag(const juce::MouseEvent& e) override;
-
-        //void mouseUp(const juce::MouseEvent& e) override;
-
-        void setShowSlider(bool shouldShow);
-        bool isSliderShowing();
-
-        //juce::Slider& getSlider();
-
-
-    private:
-
-        //juce::Slider* slider = nullptr;
-        float getSliderPos(double value);
-
-        //double valueOnMouseDown = 
-        bool showSlider = false;
-        KrumModuleEditor& editor;
-    };
-    
     class PitchSlider : public InfoPanelSlider
     {
     public:

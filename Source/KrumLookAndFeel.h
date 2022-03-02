@@ -43,9 +43,60 @@ public:
     {
         juce::Slider::SliderLayout layout;
         auto bounds = slider.getLocalBounds();
-        layout.sliderBounds = bounds.reduced(5);
-        
+        layout.sliderBounds = bounds.reduced(getSliderThumbRadius(slider));
         return layout;
+    }
+
+    int getSliderThumbRadius(juce::Slider& slider) override
+    {
+
+        if (slider.isBar())
+        {
+            return 2;
+        }
+
+        if (slider.isHorizontal())
+        {
+            //return slider.getHeight() * 0.9f;
+            return 5;
+        }
+        else
+        {
+            return 8;
+        }
+    }
+
+    //lineStart is x or y, depending on slider orientation
+    void drawVolumeLines(juce::Graphics& g, float lineStart, float lineDistance, float startDecibel, float endDecibel, float decibelDistance, juce::Slider& slider)
+    {
+
+        float lineThickness = 0.5f;
+
+        if (decibelDistance > 0)
+        {
+            decibelDistance *= -1;
+        }
+
+        for (float currentdb = startDecibel; currentdb > endDecibel; currentdb += decibelDistance)
+        {
+            float currentLinePos = getSliderDecibelPosition(slider, currentdb);
+            
+            if (slider.isHorizontal())
+            {
+                g.drawLine({ currentLinePos, lineStart, currentLinePos, lineDistance }, lineThickness);
+            }      
+            else
+            {
+                g.drawLine({ lineStart, currentLinePos, lineDistance, currentLinePos }, lineThickness);
+
+            }
+        }
+
+    }
+
+    float getSliderDecibelPosition(juce::Slider& slider, float decibel)
+    {
+        return slider.getPositionOfValue(juce::Decibels::decibelsToGain(decibel));
     }
 
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const juce::Slider::SliderStyle style, juce::Slider& slider) override
@@ -53,8 +104,9 @@ public:
         if (slider.isBar())
         {
             g.setColour(slider.findColour(juce::Slider::trackColourId));
+            //g.setColour(juce::Colours::white);
             g.fillRect(slider.isHorizontal() ? juce::Rectangle<float>(static_cast<float> (x), (float)y + 0.5f, sliderPos - (float)x, (float)height - 1.0f)
-                 /*vertical*/ : juce::Rectangle<float>((float)x + 0.5f, sliderPos, (float)width - 1.0f, (float)y + ((float)height - sliderPos)));
+                            /*vertical*/ : juce::Rectangle<float>((float)x + 0.5f, sliderPos, (float)width - 1.0f, (float)y + ((float)height - sliderPos)));
         }
         else
         {
@@ -90,7 +142,8 @@ public:
         }
 
         const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
-        juce::Colour gradCol1(juce::Colours::black);
+        //juce::Colour gradCol1(juce::Colours::black.withAlpha(0.3f));
+        juce::Colour gradCol1(juce::Colours::transparentBlack);
         juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
         juce::Path indent;
 
@@ -125,7 +178,7 @@ public:
             float trackWidth = width;// * 0.35f;
             //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
             float ix = bounds.getCentreX() - (trackWidth / 2);
-            juce::Rectangle<float> trackRect (x + 5, (float)y - 5, trackWidth, (float)height + 5);
+            juce::Rectangle<float> trackRect (x , (float)y, trackWidth, (float)height );
 
             /*juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
             vertGrade.addColour(sliderPorp, gradCol1);
@@ -140,7 +193,6 @@ public:
 
         //g.setColour(trackColour.contrasting(0.6f));
         //g.strokePath(indent, juce::PathStrokeType(0.5f));
-
     }
 
 
@@ -148,7 +200,7 @@ public:
                                 float sliderPos, float minSliderPos, float maxSliderPos,
                                 const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
-        float cornerSize = 2.0f;
+        float cornerSize = 1.0f;
         juce::Line<float> line;
         juce::Point<int> dropPoint;
 
@@ -157,63 +209,95 @@ public:
         
         if (style == juce::Slider::LinearVertical)
         {
-            thumbH = 7; //height * 0.07;// : height * 0.085f;
-            thumbW = 33; //width * 0.65f;
+            thumbH = getSliderThumbRadius(slider); //height * 0.07;// : height * 0.085f;
+            thumbW = 40; //width * 0.65f;
 
-            thumbX = (x + width * 0.5f) - (thumbW * 0.5f);
-            thumbY = sliderPos;
+            thumbX = x - 2;
+            thumbY = sliderPos - thumbH /2;
 
-            line.setStart({ (float)thumbX , (float)thumbY +(thumbH / 2) });
-            line.setEnd({ (float)thumbX + thumbW , (float)thumbY + (thumbH / 2) });
+            auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
+            juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
 
-            dropPoint.setXY(2, 2);
+            juce::Rectangle<int> dbLineRect{ x + thumbW, y, width + 7,height };
+            float textHeight = 11.0f;
+
+            g.setColour(juce::Colours::white.withAlpha(0.2f));
+            drawVolumeLines(g, x + thumbW, width + 7, 2.0f, -60.0f, 0.5f, slider);
+
+            g.setColour(juce::Colours::white);
+            g.setFont(textHeight);
+
+            auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
+            g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() + 6).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto zeroDbPos = getSliderDecibelPosition(slider, 0.0f); //+ thumbOffset;
+            g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() + 8).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto n5DbPos = getSliderDecibelPosition(slider, -5.0f); //+thumbOffset;
+            g.drawFittedText("-5", dbLineRect.withY(n5DbPos - textHeight / 2).withX(dbLineRect.getX() + 6).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto n10DbPos = getSliderDecibelPosition(slider, -10.0f);// +thumbOffset;
+            g.drawFittedText("-10", dbLineRect.withY(n10DbPos - textHeight / 2).withX(dbLineRect.getX() + 5).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto n20DbPos = getSliderDecibelPosition(slider, -20.0f);// +thumbOffset;
+            g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() + 5).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            g.setColour(thumbColor);
+            g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
         }
-        else // horizontal
+        else // horizontal, preview slider
         {
-            thumbH = height * 0.7f; //height - 3;
-            thumbW = 5;
+            thumbH = height + 1 ; //height - 3;
+            thumbW = getSliderThumbRadius(slider);
 
-            thumbX = sliderPos - 5;
-            thumbY = y + 5;
+            thumbX = sliderPos;
+            thumbY = y - 5;
 
-            line.setStart({ (float)thumbX + (thumbW / 2), (float)thumbY });
-            line.setEnd({ (float)thumbX + (thumbW / 2), (float)thumbY + thumbH });
+            auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
+            juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
 
-            dropPoint.setXY(1, 1);
-            dropRad = 3;
+            juce::Rectangle<int> dbLineRect{ x, y + thumbH * 2, width, height + 3 };
+            float textHeight = 9.0f;
+
+            g.setColour(juce::Colours::white.withAlpha(0.175f));
+            drawVolumeLines(g, dbLineRect.getY(), dbLineRect.getHeight(), 2.0f, -60.0f, 0.5f, slider);
+
+            g.setColour(juce::Colours::white);
+            g.setFont(textHeight);
+
+            auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
+            g.drawFittedText("+2", dbLineRect.withX(twoDbPos - 4).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto zeroDbPos = getSliderDecibelPosition(slider, 0.0f); //+ thumbOffset;
+            g.drawFittedText("0", dbLineRect.withX(zeroDbPos).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto n5DbPos = getSliderDecibelPosition(slider, -5.0f); //+thumbOffset;
+            g.drawFittedText("-5", dbLineRect.withX(n5DbPos - 2).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto n10DbPos = getSliderDecibelPosition(slider, -10.0f);// +thumbOffset;
+            g.drawFittedText("-10", dbLineRect.withX(n10DbPos - 3).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+            auto n20DbPos = getSliderDecibelPosition(slider, -20.0f);// +thumbOffset;
+            g.drawFittedText("-20", dbLineRect.withX(n20DbPos - 3).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+
+
+            g.setColour(thumbColor);
+            g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
+
+            /*g.setColour(juce::Colours::red);
+            g.fillRect(x, y, width, height);*/
         }
-
-        auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
-        juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
-        
-        juce::DropShadow ds{juce::Colours::black, dropRad, dropPoint};
-        ds.drawForRectangle(g, thumb/*.withBottom(thumb.getBottom() + 3)*/);
-        
-        g.setColour(thumbColor);
-        g.fillRoundedRectangle(thumb.toFloat(),cornerSize);
-
-        
-        g.setColour(thumbColor.darker(0.9f)/*.withAlpha(0.2f)*/);
-        g.drawLine(line);
 
     }
-
-    
-
-    //int getSliderThumbRadius(juce::Slider& slider) override
-    //{
-    //    if (slider.isHorizontal())
-    //    {
-    //        return 10;
-    //    }
-
-    //    return 20; // thumbW for now
-
-    //}
 
     int getScrollbarButtonSize(juce::ScrollBar& scrollbar) override
     {
         return 20;
+    }
+
+    int getDefaultScrollbarWidth() override
+    {
+        return 50;
     }
 
     void drawScrollbar(juce::Graphics& g, juce::ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
@@ -224,11 +308,13 @@ public:
         if (isScrollbarVertical)
             thumbBounds = { x, thumbStartPosition, width, thumbSize };
         else
-            thumbBounds = { thumbStartPosition, y, thumbSize, height };
+            thumbBounds = { thumbStartPosition, y + 2, thumbSize, height -4 };
 
         auto c = juce::Colours::darkgrey/*.darker()*/;
         g.setColour(isMouseOver ? c.brighter(0.25f) : c);
+
         g.fillRect(thumbBounds.reduced(1));
+        //g.fillRect(thumbBounds.withWidth(50));
 
     }
 
@@ -442,16 +528,21 @@ public:
 
     void drawDrawableButton(juce::Graphics& g, juce::DrawableButton& button, bool highlighted, bool down) override
     {
+
+
         bool toggleState = button.getToggleState();
 
         float cornerSize = 3.0f;
 
         auto color = button.findColour(toggleState ? juce::DrawableButton::backgroundOnColourId
-            : juce::DrawableButton::backgroundColourId);
+                     : juce::DrawableButton::backgroundColourId);
+        
+        button.getLookAndFeel().drawButtonBackground(g, button, color, highlighted, down);
 
         g.setColour(color);
+        //g.setColour(juce::Colours::red);
+
         g.fillRoundedRectangle(button.getBounds().toFloat(), cornerSize);
-        //g.fillAll();
 
         const int textH = (button.getStyle() == juce::DrawableButton::ImageAboveTextLabel)
                             ? juce::jmin(16, button.proportionOfHeight(0.25f)) : 0;
@@ -594,7 +685,7 @@ public:
 
         float cornerSize = 4.0f;
 
-        if (slider.isHorizontal()) // preview slider
+        if (slider.isHorizontal()) 
         {
             auto iy = height * 0.25f;
             juce::Rectangle<float> trackRect((float)x, y, (float)width, height);
@@ -614,7 +705,7 @@ public:
             g.setGradientFill(horzLGrade);
             g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);*/
 
-            g.setColour(gradCol1);
+            g.setColour(juce::Colours::grey);
             g.fillRoundedRectangle(trackRect, cornerSize);
 
         }
@@ -641,25 +732,7 @@ public:
 
     }
 
-    //start and end Decibels are inclusive
-    void drawVolumeLines(juce::Graphics& g, float lineX, float lineWidth, float startDecibel, float endDecibel, float decibelDistance, juce::Slider& slider)
-    {
-        float lineThickness = 0.5f;
-        
-        if (decibelDistance > 0)
-        {
-            decibelDistance *= -1;
-        }
-
-        for (float currentdb = startDecibel; currentdb > endDecibel; currentdb += decibelDistance)
-        {
-            float currentLineY = slider.getPositionOfValue(juce::Decibels::decibelsToGain(currentdb));
-
-            juce::Line<float> line{ lineX, currentLineY, lineWidth, currentLineY };
-            g.drawLine(line, lineThickness);
-
-        }
-    }
+    
 
     void drawLinearSliderThumb(juce::Graphics& g, int x, int y, int width, int height,
         float sliderPos, float minSliderPos, float maxSliderPos,
@@ -714,8 +787,6 @@ public:
         g.fillRect(dbLineRect);*/
 
         
-        juce::NormalisableRange<float> dbRange = TreeIDs::gainRange;
-        
         //vertical
         juce::Rectangle<int> dbLineRect{thumbW + 10, (int)maxSliderPos , width + 5, (int)minSliderPos - getSliderThumbRadius(slider)};
         
@@ -734,71 +805,23 @@ public:
         float thumbOffset = 0;//getSliderThumbRadius(slider) / 2;
         int textHeight = 12;
         g.setFont({ (float)textHeight });
-
-        auto twoDbPos = slider.getPositionOfValue(juce::Decibels::decibelsToGain(2.0f)) + thumbOffset;
+        
+        auto twoDbPos = getSliderDecibelPosition(slider, 2.0f) + thumbOffset;
         g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
-        auto zeroDbPos = slider.getPositionOfValue(juce::Decibels::decibelsToGain(0.0f)) + thumbOffset;
-        g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
+        auto zeroDbPos = getSliderDecibelPosition(slider, 0.0f) + thumbOffset;
+        g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() - 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
        
-        auto n5DbPos = slider.getPositionOfValue(juce::Decibels::decibelsToGain(-5.0f)) + thumbOffset;
+        auto n5DbPos = getSliderDecibelPosition(slider, -5.0f) + thumbOffset;
         g.drawFittedText("-5", dbLineRect.withY(n5DbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
-        auto n10DbPos = slider.getPositionOfValue(juce::Decibels::decibelsToGain(-10.0f)) + thumbOffset;
+        auto n10DbPos = getSliderDecibelPosition(slider, -10.0f) + thumbOffset;
         g.drawFittedText("-10", dbLineRect.withY(n10DbPos - textHeight / 2).withX(dbLineRect.getX() - 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
-        auto n20DbPos = slider.getPositionOfValue(juce::Decibels::decibelsToGain(-20.0f)) + thumbOffset;
+        auto n20DbPos = getSliderDecibelPosition(slider, -20.0f) + thumbOffset;
         g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() - 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
         
-        //auto botDbPos = slider.getPositionOfValue(juce::Decibels::decibelsToGain(-50.0f)) + thumbOffset;
-        //g.drawFittedText("-50", dbLineRect.withY(botDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
-
-
-
-        //int numLines = 5; //draws one less than this number
-        //int lineDistance = (twoDbPos + zeroDbPos) / numLines;
-        //float lineThickness = 0.5f;
-
-        //for(int i = 1; i < numLines; ++i)
-        //{
-        //    float currentLine = i * lineDistance;
-        //    
-        //    juce::Line<float> line{ (float)dbLineRect.getX(), (float)currentLine, (float)dbLineRect.getWidth(), (float)currentLine };
-        //    g.drawLine(line, lineThickness);
-        //}
-
        
-        //int newNumLines = (botDbPos - zeroDbPos) / lineDistance;
-        /*int newNumLines = 7;
-        int newLineDistance = (n20DbPos - zeroDbPos) / newNumLines;
-
-        float decibelDistance = -1.0f;
-        float startdb = 0.0f;
-        float enddb = -20.f;*/
-        //float currentdb = startdb + decibelDistance;
-
-        //drawVolumeLines(g, (float)dbLineRect.getX() - 5, (float)dbLineRect.getWidth() - 5, 1.5f, 0.1f, 0.3f, slider);
-
-        //drawVolumeLines(g, (float)dbLineRect.getX(), (float)dbLineRect.getWidth(), -0.5f, -18.0f, -0.6f, slider);
-
-
-
-        //float currentPos = zeroDbPos;
-        //float maxPos = n20DbPos;
-
-        //for (float currentdb = startdb; currentdb > enddb; currentdb += decibelDistance)
-        //{
-        //    //float currentLine = zeroDbPos + (i * newLineDistance);
-        //    float currentLine = slider.getPositionOfValue(juce::Decibels::decibelsToGain(currentdb));
-
-        //    juce::Line<float> line{ (float)dbLineRect.getX(), (float)currentLine, (float)dbLineRect.getWidth(), (float)currentLine };
-        //    g.drawLine(line, lineThickness);
-
-        //}
-        
-
-        //g.setColour(thumbColor.darker(0.9f)/*.withAlpha(0.2f)*/);
-        //g.drawLine(line);
 
     }
 };

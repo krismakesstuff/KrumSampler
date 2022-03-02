@@ -37,8 +37,8 @@ void KrumModuleContainer::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
     
-    g.setColour(bgColor);
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
+   // g.setColour(bgColor.withAlpha(0.3f));
+   // g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
 
 }
 

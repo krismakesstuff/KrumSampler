@@ -244,8 +244,8 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     bool isHightlighted = midiNoteNumber == keyToHighlight;
     auto c = noteFillColour;
     
-    float lightness = isOver ? (isDown ? 0.3f : 0.4f) : 0.5f;
-    float alpha = 0.8f;
+    float lightness = isOver ? (isDown ? 0.001f : 0.17f) : 0.2f;
+    float alpha = 0.9f;
 
     juce::ColourGradient grade;
     grade.point1 = area.getTopLeft();
@@ -255,26 +255,24 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 
     if (keyColors.size() > 1)
     {
-
         auto gradeRange = juce::NormalisableRange<double>(0, keyColors.size());
-        //gradeRange.setSkewForCentre(keyColors.size() * 0.2f);
 
         for (int i = 0; i < keyColors.size(); ++i)
         {
-            grade.addColour(gradeRange.convertTo0to1(i), keyColors[i].withLightness(lightness).withAlpha(alpha));
+            grade.addColour(gradeRange.convertTo0to1(i), keyColors[i].withAlpha(alpha));
         }
 
     }
     else if (keyColors.size() == 1)
     {
         auto keyColor = keyColors[0];
-        grade.addColour(0.0, keyColor.withLightness(lightness).withAlpha(alpha));
-        grade.addColour(1.0, keyColor.withLightness(lightness - 0.01f));
+        grade.addColour(0.0, keyColor.withAlpha(alpha));
+        grade.addColour(1.0, keyColor.withAlpha(alpha));
     }
     else
     {
-        grade.addColour(0.0, c.withLightness(lightness));
-        grade.addColour(1.0, juce::Colours::black);
+        grade.addColour(0.0, juce::Colours::black);
+        grade.addColour(1.0, c.withLightness(lightness));
     }
 
     //if (isDown) grade.multiplyOpacity(0.4f);
@@ -282,30 +280,31 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 
 
     //auto grade = juce::ColourGradient::vertical(c, juce::Colours::black, area);
+
+    /*if (isDown)
+    {
+        g.setColour(noteFillColour);
+        g.drawRect(area);
+    }
+    else
+    {
+        g.setColour(c.brighter());
+        auto sideIndent = 1.0f / 8.0f;
+        auto topIndent = 7.0f / 8.0f;
+        auto w = area.getWidth();
+        auto h = area.getHeight();
+
+        switch (getOrientation())
+        {
+        case horizontalKeyboard:            g.fillRect(area.reduced(w * sideIndent, 0).removeFromTop(h * topIndent)); break;
+        case verticalKeyboardFacingLeft:    g.fillRect(area.reduced(0, h * sideIndent).removeFromRight(w * topIndent)); break;
+        case verticalKeyboardFacingRight:   g.fillRect(area.reduced(0, h * sideIndent).removeFromLeft(w * topIndent)); break;
+        default: break;
+        }
+    }*/
+    
     g.setGradientFill(grade);
     g.fillRect(area);
-
-    //if (isDown)
-    //{
-    //    g.setColour(noteFillColour);
-    //    g.drawRect(area);
-    //}
-    //else
-    //{
-    //    g.setColour(c.brighter());
-    //    auto sideIndent = 1.0f / 8.0f;
-    //    auto topIndent = 7.0f / 8.0f;
-    //    auto w = area.getWidth();
-    //    auto h = area.getHeight();
-
-    //    switch (getOrientation())
-    //    {
-    //    case horizontalKeyboard:            g.fillRect(area.reduced(w * sideIndent, 0).removeFromTop(h * topIndent)); break;
-    //    case verticalKeyboardFacingLeft:    g.fillRect(area.reduced(0, h * sideIndent).removeFromRight(w * topIndent)); break;
-    //    case verticalKeyboardFacingRight:   g.fillRect(area.reduced(0, h * sideIndent).removeFromLeft(w * topIndent)); break;
-    //    default: break;
-    //    }
-    //}
 
     if (isHightlighted)
     {

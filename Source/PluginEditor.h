@@ -90,6 +90,8 @@ public:
     void hideFileBrowser();
     void showFileBrowser();
 
+
+    float getOutputGainValue();
     
     void saveFileBrowserHiddenState();
     bool getSavedFileBrowserHiddenState();
@@ -126,12 +128,13 @@ private:
     friend class DragAndDropThumbnail;
 
     KrumLookAndFeel kLaf{};
+
+    //These should be one class called ModuleLookAndFeel
     VolumeLookAndFeel vLaf{};
     PanLookAndFeel pLaf{};
 
     juce::Image titleImage;
 
-    InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore"};
     const juce::Font defaultFont{ "Calibri", 11.0f, juce::Font::FontStyleFlags::plain };
 
     juce::Rectangle<int> modulesBG;
@@ -168,6 +171,20 @@ private:
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
     
 
+    InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore","", juce::DrawableButton::ButtonStyle::ImageStretched};
+    
+    
+    class GlobalOutputSlider : public InfoPanelDrawableButton
+    {
+    public:
+
+
+        juce::Label label{ "Output" };
+
+    //private:
+    };
+    
+    //juce::DrawableButton collapseBrowserButton{ "Hide Broswer", juce::DrawableButton::ButtonStyle::ImageStretched};
    
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessorEditor)
