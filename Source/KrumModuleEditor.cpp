@@ -79,7 +79,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         if (mouseOver || mouseOverKey)
         {
             g.setColour(juce::Colours::white.withAlpha(0.8f));
-            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 1.0f);
+            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 2.0f);
         }
         //auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
         auto bgGrade = juce::ColourGradient::vertical(c.darker(0.25f), (float)area.getY(), bc, area.getBottom());
@@ -394,37 +394,49 @@ void KrumModuleEditor::setChildCompColors()
     panSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, moduleColor);
     panSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
 
-    pitchSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
-    pitchSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
-    pitchSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
+    //pitchSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
+    //pitchSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
+    //pitchSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
+    pitchSlider.setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colours::black);
+    pitchSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, moduleColor);
 
     volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
     volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor/*.darker(0.6f)*/);
     volumeSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
     volumeSlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, moduleColor.darker());
 
-    //playButton.setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
-    //playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.2f));
-     
     playButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
+    playButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+    playButton.setColour(juce::TextButton::ColourIds::textColourOnId, moduleColor.brighter(0.2f));
+     
+    //playButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    //playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
 
-    //editButton.setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
-    //editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.2f));
-    
     editButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
+    editButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+    editButton.setColour(juce::TextButton::ColourIds::textColourOnId, moduleColor.brighter(0.2f));
+    
+    //editButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    //editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
 
     muteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::red);
     muteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
+    muteButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
 
     //muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.darker());
 
-    reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    /*reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor);
     reverseButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
     reverseButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor.darker());
+    */
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.9f));
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
 
     titleBox.setColour(juce::Label::ColourIds::textColourId, moduleColor.brighter(0.5f));//*.darker(0.6f)*/.withAlpha(0.1f));
     titleBox.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
@@ -839,7 +851,7 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
                         if (i == 0)
                         {
                             //we set this module with the first dropped file and then create the rest, if we need to
-                            handleNewFile(itemName, file, numDroppedItems == 1, numSamples);
+                            handleNewFile(itemName, file, numSamples);
 
                             addNextModule = true;
                             continue;
@@ -855,7 +867,7 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
                                 if ((int)itTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::empty)
                                 {
                                     auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                                    newModEd->handleNewFile(itemName, file, false, numSamples);
+                                    newModEd->handleNewFile(itemName, file, numSamples);
                                         
                                     addNextModule = true;
                                         
@@ -929,7 +941,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
             {
                 if (i == 0)
                 {
-                    handleNewFile(audioFile.getFileName(), audioFile, numFilesDropped == 1, numSamples);
+                    handleNewFile(audioFile.getFileName(), audioFile, numSamples);
                     addNextModule = true;
                     continue;
                 }
@@ -943,7 +955,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
                         if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
                         {
                             auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                            newModEd->handleNewFile(audioFile.getFileName(), audioFile, false, numSamples);
+                            newModEd->handleNewFile(audioFile.getFileName(), audioFile, numSamples);
                             addNextModule = true;
 
                             DBG("-------");
@@ -970,7 +982,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
     }
 }
 
-void KrumModuleEditor::handleNewFile(juce::String& name, juce::File& file, bool overlayShouldListen, int numSamples)
+void KrumModuleEditor::handleNewFile(juce::String& name, juce::File& file, int numSamples, bool overlayShouldListen)
 {
     DBG("Item: " + file.getFullPathName());
     //juce::String name = file.getFileName(); //compiler reasons
@@ -1093,20 +1105,24 @@ void KrumModuleEditor::OneShotButton::paintButton(juce::Graphics & g, const bool
 
     auto area = getLocalBounds();
 
-    g.setColour(juce::Colours::black);
+    auto color = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::buttonOnColourId : juce::TextButton::ColourIds::buttonColourId);
+    
+    auto lineColor = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::textColourOnId : juce::TextButton::ColourIds::textColourOffId);
+
+    g.setColour(color);
     g.fillRoundedRectangle(area.toFloat(), 5.0f);
 
     auto path = getCurrentImage()->getOutlineAsPath();
     
-    auto color = editor.getModuleColor();
+    //auto color = editor.getModuleColor();
     color = shouldDrawButtonAsHighlighted ? color.withAlpha(0.5f) : (shouldDrawButtonAsDown ? color.withAlpha(0.1f) : color.withAlpha(0.8f));
 
     area.reduce(7, 7);
     path.scaleToFit(area.getX(), area.getY(), area.getWidth(), area.getHeight(), true);
     path.closeSubPath();
 
-    g.setColour(color);
-    //g.setColour(juce::Colours::red);
+    //g.setColour(juce::Colours::black);
+    g.setColour(lineColor);
     g.strokePath(path, juce::PathStrokeType(1.0f));
 
     //g.fillPath(path);
@@ -1146,18 +1162,18 @@ void KrumModuleEditor::MenuButton::paintButton(juce::Graphics& g, const bool sho
 {
     auto area = getLocalBounds();
 
-    g.setColour(juce::Colours::black);
+
+    auto color = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::buttonOnColourId : juce::TextButton::ColourIds::buttonColourId);
+    auto lineColor = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::textColourOnId : juce::TextButton::ColourIds::textColourOffId);
+
+    g.setColour(color);
     g.fillRoundedRectangle(area.toFloat(), 5.0f);
 
     auto path = getCurrentImage()->getOutlineAsPath();
-
-    auto color = isMouseOver() ? editor.getModuleColor().withAlpha(0.7f) : editor.getModuleColor();
-    //color = shouldDrawButtonAsHighlighted ? color.withAlpha(0.5f) : (shouldDrawButtonAsDown ? color.withAlpha(0.1f) : color.withAlpha(0.8f));
-
-    g.setColour(color);
     area.reduce(7, 7);
     path.scaleToFit(area.getX(), area.getY(), area.getWidth(), area.getHeight(), true);
 
+    g.setColour(lineColor);
     g.strokePath(path, juce::PathStrokeType(1.0f));
 }
 
@@ -1212,24 +1228,11 @@ KrumModuleEditor::PitchSlider::PitchSlider(KrumModuleEditor& e)
     : editor(e), InfoPanelSlider("Pitch", "Click and Drag to shift the pitch by semi-tones, double-click to go back to zero")
 {
     setSliderStyle(juce::Slider::LinearBarVertical);
-    //setColour(juce::Slider::trackColourId, juce::Colours::transparentWhite);
-    //setTextBoxIsEditable()
+
     setVelocityBasedMode(true);
-    //setVelocityModeParameters(0.5, 2, 0.5, false);
     setVelocityModeParameters();
-    //setRange(0, 100, 0.01);
-    //setValue(50.0);
     setDoubleClickReturnValue(true, 0);
-   // setWantsKeyboardFocus(true);
-    /*onValueChange = [&]()
-    {
-        if (getValue() < 10)
-            setNumDecimalPlacesToDisplay(2);
-        else if (10 <= getValue() && getValue() < 100)
-            setNumDecimalPlacesToDisplay(1);
-        else
-            setNumDecimalPlacesToDisplay(0);
-    };*/
+
 
 }
 KrumModuleEditor::PitchSlider::~PitchSlider()
@@ -1245,8 +1248,8 @@ void KrumModuleEditor::PitchSlider::paint(juce::Graphics& g)
     auto thick = len / 1.8f;
     int titleH = 12;
 
-    auto bgColor = juce::Colours::black;
-    auto textColor = editor.getModuleColor().darker();
+    auto bgColor = findColour(juce::Slider::ColourIds::backgroundColourId);
+    auto textColor = findColour(juce::Slider::ColourIds::textBoxTextColourId);
 
     if (isMouseOverOrDragging())
     {
@@ -1304,8 +1307,8 @@ void KrumModuleEditor::CustomToggleButton::paintButton(juce::Graphics& g, const 
     int titleH = 10;
     bool buttonOn = getToggleState();
 
-    auto bgColor = buttonOn ? findColour(juce::TextButton::ColourIds::buttonOnColourId) : juce::Colours::black;
-    auto textColor = buttonOn ? findColour(juce::TextButton::ColourIds::textColourOnId) : editor.getModuleColor();
+    auto bgColor = findColour(buttonOn ? juce::TextButton::ColourIds::buttonOnColourId : juce::TextButton::ColourIds::buttonColourId);
+    auto textColor = findColour(buttonOn ? juce::TextButton::ColourIds::textColourOnId : juce::TextButton::ColourIds::textColourOffId);
 
     if (isMouseOver())
     {

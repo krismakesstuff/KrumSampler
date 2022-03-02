@@ -109,11 +109,16 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     {
         //Browser is Hidden
         setSize(EditorDimensions::windowWNoBrowser, EditorDimensions::windowH);
+        fileBrowser.setVisible(false);
+        InfoPanel::shared_instance().setVisible(false);
+        
     }
     else
     {
         //Browser is Visible
         setSize (EditorDimensions::windowW, EditorDimensions::windowH);
+        fileBrowser.setVisible(true);
+        InfoPanel::shared_instance().setVisible(true);
     }
 }
 

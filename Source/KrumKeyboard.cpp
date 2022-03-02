@@ -151,7 +151,12 @@ void KrumKeyboard::drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     bool isHightlighted = midiNoteNumber == keyToHighlight;
     //bool isAssignedColor = isMidiNoteAssigned(midiNoteNumber);
 
-    float lightness = isOver ? (isDown ? 0.3f : 0.4f) : 0.5f;
+    float lightness = isOver ? 0.4f : 0.5f;
+    
+    if (isDown)
+    {
+        lightness -= 0.3f;
+    }
 
     juce::ColourGradient grade;
     grade.point1 = area.getTopLeft();
@@ -179,8 +184,8 @@ void KrumKeyboard::drawWhiteNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     }
     else 
     {
-        grade.addColour(0.0, juce::Colours::white.withLightness(lightness));
-        grade.addColour(1.0, juce::Colours::white);
+        grade.addColour(0.0, juce::Colours::white/*.withLightness(lightness)*/);
+        grade.addColour(1.0, juce::Colours::white.withLightness(lightness + 0.01f));
     }
     
     g.setGradientFill(grade);
@@ -244,8 +249,14 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
     bool isHightlighted = midiNoteNumber == keyToHighlight;
     auto c = noteFillColour;
     
-    float lightness = isOver ? (isDown ? 0.001f : 0.17f) : 0.2f;
+    float lightness = isOver ? 0.4f : 0.3f;
     float alpha = 0.9f;
+
+    if (isDown)
+    {
+        lightness += 0.3f;
+        alpha -= 0.1f;
+    }
 
     juce::ColourGradient grade;
     grade.point1 = area.getTopLeft();
@@ -259,20 +270,23 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 
         for (int i = 0; i < keyColors.size(); ++i)
         {
-            grade.addColour(gradeRange.convertTo0to1(i), keyColors[i].withAlpha(alpha));
+            //grade.addColour(gradeRange.convertTo0to1(i), keyColors[i].withAlpha(alpha));
+            grade.addColour(gradeRange.convertTo0to1(i), keyColors[i].withLightness(lightness + i * 0.1f));
         }
 
     }
     else if (keyColors.size() == 1)
     {
         auto keyColor = keyColors[0];
-        grade.addColour(0.0, keyColor.withAlpha(alpha));
-        grade.addColour(1.0, keyColor.withAlpha(alpha));
+       /* grade.addColour(0.0, keyColor.withAlpha(alpha));
+        grade.addColour(1.0, keyColor.withAlpha(alpha));*/
+        grade.addColour(0.0, keyColor/*.withLightness(lightness)*/);
+        grade.addColour(1.0, keyColor.withLightness(lightness));
     }
     else
     {
-        grade.addColour(0.0, juce::Colours::black);
-        grade.addColour(1.0, c.withLightness(lightness));
+        grade.addColour(0.0, c.withLightness(lightness));
+        grade.addColour(1.0, juce::Colours::black.brighter(0.1f));
     }
 
     //if (isDown) grade.multiplyOpacity(0.4f);
