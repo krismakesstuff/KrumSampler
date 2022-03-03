@@ -2,7 +2,7 @@
 
 ### a simple to use drum sampler
 
-![image](https://github.com/krismakesstuff/KrumSampler/blob/master/ScreenShot%2001.31.2022.png)
+![image](https://github.com/krismakesstuff/KrumSampler/blob/dev/Screen%20Shot%202022-03-03%20at%2010.48.08%20AM.png)
 
 ## Newest Update: 1.4.0-beta [Release](https://github.com/krismakesstuff/KrumSampler/releases/tag/1.3.0-beta)
 - Check out my update [video](https://www.youtube.com/watch?v=LSDDeG-BdvY) 
