@@ -2,22 +2,25 @@
 
 ### a simple to use drum sampler
 
-![image](https://github.com/krismakesstuff/KrumSampler/blob/master/Screenshot2021-12-21.png)
+![image](https://github.com/krismakesstuff/KrumSampler/blob/master/ScreenShot%2001.31.2022.png)
+
+## Newest Update: 1.3.0-beta [Release](https://github.com/krismakesstuff/KrumSampler/releases/tag/1.3.0-beta)
+- Check out my walkthrough [video](https://youtu.be/9vDSEBo0MJI) to see all the features, and the workflow I envisioned while building it. 
 
 ## goals/motivations
 - I'm a working music [producer-engineer](https://krismakesmusic.com/) in NYC and I wanted to have complete control over my drum programming workflow.
 - Too often, drum sampling plug-ins are just way too complicated from a UI standpoint, so I wanted it to be simple and quick to use.
-- You also have limited flexibility with a lot of existing ones, so being able to change the code myself will be amazing! 
-- 2 years ago, I didn't know how to code at all and wanted to learn as I'm very interested in how these tools are made. ALL music professionals rely on these technologies to make a living, yet most of them have no clue how their tools really work. (I've been working on this for the last 9 months or so)
-- This project is part learning, part bespoke workflow building, but also part "hey, look I can code! So hire me.".
+- You also have limited flexibility with a lot of existing ones, so being able to change the code myself is amazing! 
+- 2 years ago, I didn't know how to code at all and wanted to learn as I'm very interested in how these tools are made. ALL music professionals rely on these technologies to make a living, yet most of them have no clue how their tools really work.
+- This project is part learning, part bespoke workflow building, but also part "Hey, look I can code! Hire me and let's build a plug-in!".
 - Lastly, I feel that this has to be open-source. 
-  - Because of the open source community of [JUCE](https://github.com/juce-framework/JUCE) as well as [learn](https://www.learncpp.com/) C++, I have been able to learn and build this stuff for free and by myself. The internet is truly an amazing place. Now that I have harvested knowledge from it, I must give some back.
+  - Because of the open source community of [JUCE](https://github.com/juce-framework/JUCE) as well as [learn](https://www.learncpp.com/) C++, I have been able to learn and build this stuff for free and by myself. The internet is truly an amazing place.
   - This is my way of "giving back" to those communities and hopefully any new comers can get some use out of my code and those communities as well!
 ----------------------------------------------------------
 
 ## How To Download Plug-in
 - Check out [releases](https://github.com/krismakesstuff/KrumSampler/releases) for the latest download. 
-  - I'm not currently using installers, so you'll have to put the appropriate plug-in into it's appropriate folder. (Once I update all the builds to the latest version I will make the installers)
+  - I'm not currently using installers, so you'll have to put the appropriate plug-in into it's appropriate folder. 
 
 ## How To Build Project
 - If you would like to build the plug-in and work on it yourself, you will need the [JUCE](https://github.com/juce-framework/JUCE) framework installed and up to date. 
@@ -35,35 +38,44 @@
 
 ## How to use KrumSampler
 
+### - video walkthrough
+- easiest way to see all the features is to watch [this](https://youtu.be/9vDSEBo0MJI)
+- everything below this is covered in the video, this is here for reference
+
 ### - info panel
-- Before you get started, if you just want to skip this and download, go ahead. You can always use the Info Panel in the top left of the plugin. This will be here for reference.
-  - This responds to your mouse's position and tells you whats under your mouse. 
-  - Make sure the "i" icon is active (white), like pictured above. You can also disable the Info Panel by clicking on the same "i" icon. 
-### - add your own samples
-- The first thing you'll want to do is get your own samples in the plugin.
-  - Drag and drop files or folders from Finder/File Explorer directly to the File Browser, or you can use the "+" button to select some files manually. 
-  - These will be added to the "Favorites" section of the browser.
-  - Once files are in the File Browser, you can play them. Double-clicking the file will play it at the volume set by the slider underneath the File Browser.
-    - If Auto-Play is active, then the file will play everytime it's clicked.  
-  - rename or delete files with a right-click.
-    - this doesn't rename or delete the actual files, just how they are represented in this plug-in. 
+- This responds to your mouse's position and gives a brief decscription of what you are hovering over. 
+  - You can disable this by clicking the white "i" icon in the top right of the plug-in.  
+### - adding your own samples
+- Drag and drop files or folders from Finder/File Explorer directly to the File Browser, or you can use the "+" button to select some files manually. 
+- These will be added to the "Favorites" section of the browser.
+- Once files are in the File Browser, you can play them. Double-clicking the file will play it at the volume set by the slider underneath the File Browser.
+  - If Auto-Play is active, then the file will play everytime it's clicked.  
+- rename or delete files with a right-click.
+  - this doesn't rename or delete the actual files, just how they are represented in this plug-in. 
 ### - create modules
 - Drag and drop one of the samples onto the empty module that says "Drop Samples Here".
   - The module will then show its "Module Settings Overlay". 
   - When only dropping 1 sample the "Midi Listen" button will automatically be enabled (red). This means you simply play the midi note you want to assign to that sample and then hit confirm. 
   - You can also drop multiple samples and it will create modules for every sample, you then have to hit "Midi Listen" on each one to assign its midi. (In the future, I want this process to have more flexibility so I'm going to add some global preferences and some multi-module selecting and assigning)
 ### - module features
-- Each module has it's own volume, pan and clip gain. The play button will play the sample, the settings cog will open the Module Settings Overlay. 
+- Each module has it's own volume, pan, clip gain, time handles and aux outputs. The play button will play the sample with your current settings, the settings cog will open the Module Settings Overlay. 
   - The clip gain slider will appear when your mouse is over the thumbnail. You can click and drag the slider or just scroll with the mouse over the thumbnail to adjust the clip gain.
   - All sliders can be reset to default values when you double click on them.
-  - There is more to come for the modules. There will be aux outputs, solo, mute, pitch shift. Maybe more, but for sure those, so stay tuned!
+  - There is more to come for the modules so stay tuned!
+### - time handles (new in 1.3.0-beta)
+- these handles choose which part of the sample to play when triggered. You can click and drag the handles underneath the waveform. 
 ### - hot swap!
 - You can additionally "hot swap" samples by dragging a sample from the file browser and dropping it on the thumbnail of the desired module.
   - This makes it SUPER easy to change samples out. This is safe to do while playing, so loop your beat in your DAW and swap out the samples as you see fit. 
   - It must be a file from the File Browser, for now the swapping doesn't support external drag and drops.
+### - aux outputs (new in 1.3.0-beta)
+- each module has it's own output. By default, everything goes out 1-2. But you have the ability to bus out your modules in groups or however you see fit.
+  -  You have to set up channels in your DAW to recieve these outputs. If you don't know how to do that, I show it in my walkthrough video. It's very easy, and let's you put your own plug-ins on seperate outputs of the sampler. 
+  - You have to use them in consecutive order. Meaning, you can't have modules outputting to Output 5-6, without first having a module use Output 3-4.
+  - For AU: you'll have to use the Multi-Output version when instantiating your plugin. In Logic, you then have to go to the mix window and create Aux channels. 
 ### - hide browser
 - Once you are up and running you can make the window smaller by hiding the File Browser. This gives you some more screen real estate to program your midi and interact with your DAW. 
-  - Click the arrow button on the left side of the plug-in to accomplish this. It will also hide the Info Panel.
+  - Click the arrow button on the left side of the plug-in to accomplish this. It will also disable the Info Panel.
 ### - notes
 - Some limitations
   - The maximum file length a sample can be is 3 seconds. This is a restriction that keeps the voice count down. 
@@ -82,6 +94,9 @@
   - I'm new to using github so if you have any suggestions on how to handle this better please don't be afraid to let me know 
 - Lastly, I would like to thank you for taking the time to check this out. I'm self taught and stoked to have gotten this far, but there is so much more I want to learn and include in this project. 
   - ANY help or feedback is genuinely appreciated! Happy mixing nerds!
+
+## support
+- If you want to support this project, you can buy me a coffee [here!](https://www.buymeacoffee.com/kriscrawford)
 
 ## MAKE SURE TO CHECK THE ISSUES SECTION
 - Visit [issues](https://github.com/krismakesstuff/KrumSampler/issues). Shows the latest on current bugs and upcoming features! 
