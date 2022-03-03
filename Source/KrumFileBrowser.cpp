@@ -551,6 +551,7 @@ void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e
 
 void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
+
     //double clicks are being called twice on Mac.. this is a work around until I find the actual issue.
 #if JUCE_WINDOWS
     owner.itemDoubleClicked(e);
