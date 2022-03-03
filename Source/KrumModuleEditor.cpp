@@ -40,7 +40,9 @@ KrumModuleEditor::KrumModuleEditor(juce::ValueTree& modTree, KrumSamplerAudioPro
 }
 
 KrumModuleEditor::~KrumModuleEditor()
-{}
+{
+    pitchSliderAttachment.reset();
+}
 
 void KrumModuleEditor::paint (juce::Graphics& g)
 {
@@ -103,11 +105,11 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         //g.drawFittedText("R", rightLabelRect, juce::Justification::centred, 1);
 
 
-        auto sliderBounds = volumeSlider.getBoundsInParent().toFloat();
-        auto sliderLineBounds = sliderBounds.withTrimmedTop(10);
+        //auto sliderBounds = volumeSlider.getBoundsInParent().toFloat();
+        //auto sliderLineBounds = sliderBounds.withTrimmedTop(10);
         //paintVolumeSliderLines(g, sliderBounds);
         
-        auto panSliderBounds = panSlider.getBoundsInParent().toFloat();
+        //auto panSliderBounds = panSlider.getBoundsInParent().toFloat();
         //paintPanSliderLines(g, panSliderBounds);
         
         g.setColour(bc);
@@ -936,12 +938,13 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
         for (int i = 0; i < files.size(); i++)
         {
             juce::File audioFile {files[i]};
+            juce::String fileName = audioFile.getFileName();
             juce::int64 numSamples = 0;
             if(!audioFile.isDirectory() && sampler.isFileAcceptable(audioFile, numSamples))
             {
                 if (i == 0)
                 {
-                    handleNewFile(audioFile.getFileName(), audioFile, numSamples);
+                    handleNewFile(fileName, audioFile, numSamples);
                     addNextModule = true;
                     continue;
                 }
@@ -955,7 +958,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
                         if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
                         {
                             auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                            newModEd->handleNewFile(audioFile.getFileName(), audioFile, numSamples);
+                            newModEd->handleNewFile(fileName, audioFile, numSamples);
                             addNextModule = true;
 
                             DBG("-------");

@@ -273,7 +273,9 @@ void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)
 
 void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
-    owner.itemDoubleClicked(e);
+    //owner.itemDoubleClicked(e);
+    //can't remeber why I did this, one of the many tragedies that exist in KrumFileBrowser.cpp
+    //cleaning this up next month!!
 }
 
 void KrumTreeItem::EditableComp::mouseDrag(const juce::MouseEvent& e)
@@ -367,6 +369,7 @@ void KrumTreeHeaderItem::itemDoubleClicked(const juce::MouseEvent& e)
 juce::File& KrumTreeHeaderItem::getFile() { return file; }
 
 juce::String KrumTreeHeaderItem::getItemHeaderName() { return headerName; }
+
 void KrumTreeHeaderItem::setItemHeaderName(juce::String newName)
 {
     headerName = newName.isNotEmpty() ? newName : file.getFileName();
@@ -546,7 +549,9 @@ void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e
 
 void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
-    owner.itemDoubleClicked(e);
+    //owner.itemDoubleClicked(e);
+    //can't remeber why I did this, one of the many tragedies that exist in KrumFileBrowser.cpp
+    //cleaning this up next month!!
 }
 
 void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)

@@ -174,10 +174,9 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 
     //juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
 
-    
     //Version
     g.setColour(juce::Colours::red.darker());
-    g.setFont({ 17 });
+    g.setFont(16.0f);
     juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
     int versionW = g.getCurrentFont().getStringWidth(versionString);
     g.drawFittedText(versionString, { area.getRight() - 160, websiteButton.getBottom() - 12, versionW + 10, 35 }, juce::Justification::centred, 1);
