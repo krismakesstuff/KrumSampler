@@ -37,8 +37,8 @@ void KrumModuleContainer::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
     
-    g.setColour(bgColor);
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
+   // g.setColour(bgColor.withAlpha(0.3f));
+   // g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
 
 }
 
@@ -158,7 +158,7 @@ KrumModuleEditor* KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModu
         addAndMakeVisible(newModuleEditor);
         moduleEditors.add(newModuleEditor);
         
-        if (refreshLayout) //default true
+        if (refreshLayout) //defaults true
         {
             refreshModuleLayout();
         }
@@ -231,18 +231,22 @@ void KrumModuleContainer::deselectAllModules()
     }
 }
 
-KrumModuleEditor* KrumModuleContainer::getModuleFromMidiNote(int midiNote)
+juce::Array<KrumModuleEditor*> KrumModuleContainer::getModulesFromMidiNote(int midiNote)
 {
+    juce::Array<KrumModuleEditor*>retArray{};
+
     for (int i = 0; i < moduleEditors.size(); i++)
     {
         auto modEd = moduleEditors[i];
         if (modEd->getModuleMidiNote() == midiNote)
         {
-            return modEd;
+            retArray.add(modEd);
+            //return modEd;
         }
     }
     
-    return nullptr;
+    //return nullptr;
+    return retArray;
 }
 
 
@@ -285,6 +289,12 @@ int KrumModuleContainer::getNumEmptyModules()
     return count;
 }
 
+KrumModuleEditor* KrumModuleContainer::getModuleEditor(int index)
+{
+    
+    return moduleEditors.getUnchecked(index);
+}
+
 int KrumModuleContainer::getNumModuleEditors()
 {
     return moduleEditors.size();
@@ -303,6 +313,20 @@ void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEdito
     }
 
     moduleEditor->setClipGainSliderVisibility(true);
+}
+
+void KrumModuleContainer::showModulePitchSlider(KrumModuleEditor* moduleEditor)
+{
+    for (int i = 0; i < moduleEditors.size(); i++)
+    {
+        auto modEd = moduleEditors.getUnchecked(i);
+        if (modEd != nullptr && modEd != moduleEditor)
+        {
+            modEd->setPitchSliderVisibility(false);
+        }
+    }
+
+    moduleEditor->setPitchSliderVisibility(true);
 }
 
 void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
@@ -326,6 +350,23 @@ void KrumModuleContainer::hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor
 
 void KrumModuleContainer::timerCallback()
 {
+    bool mouseOver = false;
+
+    for (int i = 0; i < moduleEditors.size(); ++i)
+    {
+        auto modEd = moduleEditors[i];
+        if (modEd->getMouseOver())
+        {
+            mouseOver = true;
+            break;
+        }
+    }
+
+    if (editor && (!mouseOver))
+    {
+        editor->keyboard.clearHighlightedKey();
+    }
+
     repaint();
 }
 
@@ -353,8 +394,7 @@ void KrumModuleContainer::createModuleEditors()
         int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
         if (moduleTree.isValid() && ( state > 0)) //reference KrumModule::ModuleState, 0 is empty module
         {
-            auto modEd = addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()/*, state*/));
-            
+            auto modEd = addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()));
         }
     }
 }

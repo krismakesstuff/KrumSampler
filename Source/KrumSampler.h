@@ -44,10 +44,13 @@ public:
     std::atomic<int> getModuleStartSample() const;
     std::atomic<int> getModuleEndSample() const;
 
+    std::atomic<float>* getModuleMute() const;
+    std::atomic<float>* getModuleReverse() const;
+
+    std::atomic<float>* getModulPitchShift() const;
+
     int getModuleOutputNumber() const;
 
-    //std::atomic<float>* getModuleOutputChan()const;
-    //void setModulePlaying(bool playing);
     bool isParent(KrumModule* moduleToTest);
 
 private:

@@ -36,7 +36,7 @@
 #define MAX_FILE_LENGTH_SECS 3
 #define NUM_AUX_OUTS 20                     //mono channels
 #define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
-#define KRUM_BUILD_VERSION "1.3.0-Beta"     //added aux outputs & sample trim handles
+#define KRUM_BUILD_VERSION "1.4.0-Beta"     //
 
 
 //The general Tree structure
@@ -68,8 +68,7 @@ namespace TreeIDs
                 DECLARE_ID(moduleEndSample)
                 DECLARE_ID(moduleNumSamplesLength)
            /*     DECLARE_ID(moduleFadeIn)
-                DECLARE_ID(moduleFadeOut)
-                DECLARE_ID(moduleReverse)*/
+                DECLARE_ID(moduleFadeOut) */
 
         DECLARE_ID(PARAMS) //APVTS, these are parameters exposed to the DAW for Automation
             
@@ -77,7 +76,10 @@ namespace TreeIDs
             DECLARE_ID(paramModulePan)
             DECLARE_ID(paramModuleOutputChannel)
             DECLARE_ID(paramModuleClipGain)
-        
+            DECLARE_ID(paramModulePitchShift)
+            DECLARE_ID(paramModuleReverse)
+            DECLARE_ID(paramModuleMute)
+
             DECLARE_ID(outputGainParam)
             DECLARE_ID(previewerGainParam)
 
@@ -89,6 +91,9 @@ namespace TreeIDs
                 DECLARE_ID(Folder)
                 DECLARE_ID(File)
 
+                    DECLARE_ID(FileName)
+                    DECLARE_ID(FilePath)
+
             DECLARE_ID(OPENSTATE)
 
 #undef DECLARE_ID
@@ -96,6 +101,7 @@ namespace TreeIDs
     //Should I make these all preprocessor define instead?
     //These should be in their own namespace atleast
     static const float defaultGain = 0.85f;
+    static juce::NormalisableRange<float> gainRange;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
     static const juce::StringArray outputStrings{ "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14", "15-16", "17-18", "19-20" };
@@ -137,6 +143,7 @@ static juce::String panRangeFrom0To1(float value)
     {
         returnString = "< 0 >";
     }
+
     return returnString;
 }
 

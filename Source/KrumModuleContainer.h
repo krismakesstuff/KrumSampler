@@ -58,16 +58,18 @@ public:
     void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect);
     void deselectAllModules();
     
-    KrumModuleEditor* getModuleFromMidiNote(int midiNote);
+    juce::Array<KrumModuleEditor*> getModulesFromMidiNote(int midiNote);
 
     KrumSamplerAudioProcessorEditor* getEditor();
     juce::OwnedArray<KrumModuleEditor>& getModuleDisplayOrder();
     
     int getNumActiveModules();
-    int getNumEmptyModules();
     int getNumModuleEditors();
+    int getNumEmptyModules();
+    KrumModuleEditor* getModuleEditor(int index);
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
+    void showModulePitchSlider(KrumModuleEditor* moduleEditor);
 
     void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);

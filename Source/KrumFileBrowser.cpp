@@ -50,7 +50,7 @@ void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::
     newLine.setStart(line.getStartX() - 20, line.getStartY());
     newLine.setEnd(line.getEndX() - 10, line.getEndY());
 
-    g.setColour(juce::Colours::black);
+    g.setColour(parentTree->getConnectedLineColor());
     g.drawLine(newLine);
 }
 
@@ -273,7 +273,11 @@ void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)
 
 void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
+
+    //double clicks are being called twice on Mac.. this is a work around until I find the actual issue.
+#if JUCE_WINDOWS
     owner.itemDoubleClicked(e);
+#endif
 }
 
 void KrumTreeItem::EditableComp::mouseDrag(const juce::MouseEvent& e)
@@ -338,7 +342,7 @@ void KrumTreeHeaderItem::paintVerticalConnectingLine(juce::Graphics& g, const ju
 {
     juce::Line<float> newLine = line;
 
-    g.setColour(juce::Colours::black);
+    g.setColour(parentTree->getConnectedLineColor());
     g.drawLine(newLine);
 
 }
@@ -347,7 +351,7 @@ void KrumTreeHeaderItem::paintHorizontalConnectingLine(juce::Graphics& g, const 
 {
     if (isOpen())
     {
-        g.setColour(juce::Colours::black);
+        g.setColour(parentTree->getConnectedLineColor());
         g.drawLine(line);
     }
 }
@@ -367,6 +371,7 @@ void KrumTreeHeaderItem::itemDoubleClicked(const juce::MouseEvent& e)
 juce::File& KrumTreeHeaderItem::getFile() { return file; }
 
 juce::String KrumTreeHeaderItem::getItemHeaderName() { return headerName; }
+
 void KrumTreeHeaderItem::setItemHeaderName(juce::String newName)
 {
     headerName = newName.isNotEmpty() ? newName : file.getFileName();
@@ -546,7 +551,11 @@ void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e
 
 void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
+
+    //double clicks are being called twice on Mac.. this is a work around until I find the actual issue.
+#if JUCE_WINDOWS
     owner.itemDoubleClicked(e);
+#endif
 }
 
 void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
@@ -621,7 +630,8 @@ void KrumTreeView::paint(juce::Graphics& g)
     auto area = getLocalBounds();
     //g.setColour(juce::Colours::darkgrey.darker(0.7f));
     auto grade = juce::ColourGradient::vertical(juce::Colours::darkgrey.darker(0.7f), juce::Colours::black, area);
-    g.setGradientFill(grade);
+    //g.setGradientFill(grade);
+    g.setColour(juce::Colours::black.withAlpha(0.01f));
     g.fillRoundedRectangle(area.expanded(5).toFloat(), 5.0f);
 
     juce::TreeView::paint(g);
@@ -1406,6 +1416,11 @@ void KrumTreeView::assignModuleContainer(KrumModuleContainer* newContainer)
     moduleContainer = newContainer;
 }
 
+juce::Colour KrumTreeView::getConnectedLineColor()
+{
+    return conLineColor;
+}
+
 void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
 {
     auto cFileChooser = static_cast<const CustomFileChooser*>(&fileChooser);
@@ -1486,8 +1501,8 @@ KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* it
 //=================================================================================================================================//
 //=================================================================================================================================//
 
-KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTree& fileBrowserValueTree/*, juce::AudioFormatManager& formatManager*/)
-    : audioPreviewer(previewer), fileTree(fileBrowserValueTree, &previewer), InfoPanelComponent(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message)
+KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTree& fbValueTree/*, juce::AudioFormatManager& formatManager*/)
+    : audioPreviewer(previewer),fileBrowserValueTree(fbValueTree), fileTree(fbValueTree, &previewer), InfoPanelComponent(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message)
 {
 
     addAndMakeVisible(audioPreviewer);
@@ -1497,32 +1512,18 @@ KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTre
 
     addAndMakeVisible(addFavoriteButton);
 
-    int favButtonSize;
-    auto favButtonData = BinaryData::getNamedResource("add_white_24dp_svg", favButtonSize);    
-    auto favButtonImage = juce::Drawable::createFromImageData(favButtonData, favButtonSize);
+    auto favButtonImage = juce::Drawable::createFromImageData(BinaryData::add_white_24dp_svg, BinaryData::add_white_24dp_svgSize);
 
     addFavoriteButton.setImages(favButtonImage.get());
     addFavoriteButton.setButtonText("Add New Favorite Folder");
     addFavoriteButton.onClick = [this] { fileTree.pickNewFavorite(); };
 
-    addFavoriteButton.setConnectedEdges(juce::Button::ConnectedOnBottom);
+    //addFavoriteButton.setConnectedEdges(juce::Button::ConnectedOnBottom);
     addFavoriteButton.setColour(juce::TextButton::buttonColourId, juce::Colours::black);
     addFavoriteButton.setColour(juce::TextButton::buttonOnColourId, fontColor.contrasting(0.2f));
+    addFavoriteButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
 
     addFavoriteButton.setTooltip("Add Files or Folders that will stay with this preset");
-//   
-//#if JucePlugin_Build_Standalone
-//    buildDemoKit();
-//
-//    auto demoChildren = demoKit.findChildFiles(juce::File::findFiles, false);
-//    for (int i = 0; i < demoChildren.size(); i++)
-//    {
-//        DBG(demoChildren[i].getFullPathName());
-//    }
-//
-//    fileTree.createNewFavoriteFolder(demoKit.getFullPathName());
-//#endif
-
 
 }
 
@@ -1543,11 +1544,13 @@ void KrumFileBrowser::paint(juce::Graphics& g)
     g.drawFittedText("File Browser", area.withBottom(titleH).withTrimmedTop(5).reduced(10), juce::Justification::centredLeft, 1);
 
     auto fileTreeFillBounds = fileTree.getBounds().expanded(5).withBottom(audioPreviewer.getBottom()).toFloat();
-    g.drawRoundedRectangle(fileTreeFillBounds, cornerSize, outline);
 
+    //g.drawRoundedRectangle(fileTreeFillBounds, cornerSize, outline);
     //g.setColour(juce::Colours::darkgrey.darker());
     auto grade = juce::ColourGradient::vertical(juce::Colours::darkgrey.darker(),juce::Colours::black, area);
-    g.setGradientFill(grade);
+    //g.setGradientFill(grade);
+    g.setColour(juce::Colours::black.withAlpha(0.001f));
+    //g.setColour(juce::Colours::red);
     g.fillRoundedRectangle(fileTreeFillBounds, cornerSize);
 
 }
@@ -1557,14 +1560,14 @@ void KrumFileBrowser::resized()
     auto area = getLocalBounds().reduced(10);
     int favButtonH = 35;
     int favButtonW = 50;
-    int previewerH = 35;
+    int previewerH = 45;
 
 
     fileTree.setBounds(area.withTrimmedBottom(favButtonH).withTrimmedTop(titleH));
 
     addFavoriteButton.setBounds(area.withBottom(fileTree.getY() - 5).withLeft(area.getRight() - favButtonW));
    
-    audioPreviewer.setBounds(area.withTop(fileTree.getBottom() + 5).withRight(area.getRight()).withHeight(previewerH));
+    audioPreviewer.setBounds(area.withTop(fileTree.getBottom()).withRight(area.getRight()).withHeight(previewerH));
 
 }
 
@@ -1624,6 +1627,23 @@ void KrumFileBrowser::buildDemoKit()
     juce::String separator = juce::File::getSeparatorString();
     juce::File demoKitFolder{ specialLocation.getParentDirectory().getFullPathName() + separator + "DemoKit" };
 
+    auto favVt = fileBrowserValueTree.getChildWithName(TreeIDs::FAVORITES);
+
+    for (int i = 0; i < favVt.getNumChildren(); i++)
+    {
+        auto childTree = favVt.getChild(i);
+
+        if (childTree.getType() == TreeIDs::Folder)
+        {
+            auto name = childTree.getProperty(FileBrowserValueTreeIds::itemNameId);
+            if (name.toString().compare("DemoKit") == 0)
+            {
+                return;
+            }
+        }
+        
+    }
+    
     //if this folder doesn't exist OR does exist but has no files in it, we add the binary audio files
     if (!demoKitFolder.isDirectory() || demoKitFolder.getNumberOfChildFiles(juce::File::TypesOfFileToFind::findFiles) == 0)
     {
@@ -1636,56 +1656,46 @@ void KrumFileBrowser::buildDemoKit()
 
             juce::File wannaKik{ demoKitPath + separator + "WannaKik.wav" };
             wannaKik.create();
-            int wannaKikSize;
-            auto wannaKikData = BinaryData::getNamedResource("WANNA_KIK____48K_wav", wannaKikSize);
-            wannaKik.replaceWithData(wannaKikData, wannaKikSize);
+            wannaKik.replaceWithData(BinaryData::WANNA_KIK____48K_wav, BinaryData::WANNA_KIK____48K_wavSize);
 
             juce::File twentyOneKick{ demoKitPath + separator + "TwentyOneKick.wav" };
             twentyOneKick.create();
-            int twentyOneKickSize;
-            auto twentyOneKickData = BinaryData::getNamedResource("_21_Pilots_Kick_Sample_wav", twentyOneKickSize);
-            twentyOneKick.replaceWithData(twentyOneKickData, twentyOneKickSize);
+            twentyOneKick.replaceWithData(BinaryData::_21_Pilots_Kick_Sample_wav, BinaryData::_21_Pilots_Kick_Sample_wavSize);
 
             juce::File eightOhEight{ demoKitPath + separator + "EightOhEight.wav" };
             eightOhEight.create();
-            int eightOhEightSize;
-            auto eightOhEightData = BinaryData::getNamedResource("_808_and_House_Kick_blend_wav", eightOhEightSize);
-            eightOhEight.replaceWithData(eightOhEightData, eightOhEightSize);
+            eightOhEight.replaceWithData(BinaryData::_808_and_House_Kick_blend_wav, BinaryData::_808_and_House_Kick_blend_wavSize);
 
             juce::File monsterClap{ demoKitPath + separator + "MonsterClap.wav" };
             monsterClap.create();
-            int monsterClapSize;
-            auto monsterClapData = BinaryData::getNamedResource("GW_Monster_clap_snare_wav", monsterClapSize);
-            monsterClap.replaceWithData(monsterClapData, monsterClapSize);
+            monsterClap.replaceWithData(BinaryData::GW_Monster_clap_snare_wav, BinaryData::GW_Monster_clap_snare_wavSize);
 
-            juce::File hiHatsV4{ demoKitPath + "\\HiHatsV4.wav" };
+            juce::File hiHatsV4{ demoKitPath + separator + "HiHatsV4.wav" };
             hiHatsV4.create();
-            int hhv4Size;
-            auto hhv4Data = BinaryData::getNamedResource("HI_HATS_V4__A_wav", hhv4Size);
-            hiHatsV4.replaceWithData(hhv4Data, hhv4Size);
+            hiHatsV4.replaceWithData(BinaryData::HI_HATS_V4__A_wav, BinaryData::HI_HATS_V4__A_wavSize);
 
             juce::File hiHatsV10{ demoKitPath + separator + "HiHatsV10.wav" };
             hiHatsV10.create();
-            int hhv10Size;
-            auto hhv10Data = BinaryData::getNamedResource("HI_HATS_V10__A_wav", hhv10Size);
-            hiHatsV10.replaceWithData(hhv10Data, hhv10Size);
+            hiHatsV10.replaceWithData(BinaryData::HI_HATS_V10__A_wav, BinaryData::HI_HATS_V10__A_wavSize);
 
             juce::File marvinSnap{ demoKitPath + separator + "MarvinSnap.wav" };
             marvinSnap.create();
-            int mSnapSize;
-            auto mSnapData = BinaryData::getNamedResource("Marvin_Snap_wav", mSnapSize);
-            marvinSnap.replaceWithData(mSnapData, mSnapSize);
+            marvinSnap.replaceWithData(BinaryData::Marvin_Snap_wav, BinaryData::Marvin_Snap_wavSize);
+        
+            demoKit = demoKitFolder;
+
+            DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
+            fileTree.createNewFavoriteFolder(demoKit.getFullPathName());
         }
     }
-    else if(fileTree.doesFolderExistInBrowser(demoKit.getFullPathName())) //if true, then the demoKit folder has already been successfully added
+    else if (demoKitFolder.isDirectory())
     {
-        return;
+        demoKit = demoKitFolder;
+
+        DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
+        fileTree.createNewFavoriteFolder(demoKit.getFullPathName());
     }
-
-    demoKit = demoKitFolder;
-
-    DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
-    fileTree.createNewFavoriteFolder(demoKit.getFullPathName());
+    
 }
 
 //================================================================================================

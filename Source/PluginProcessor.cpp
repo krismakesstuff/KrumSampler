@@ -49,7 +49,7 @@ juce::ValueTree createValueTree()
         juce::ValueTree newModule { TreeIDs::MODULE, {{TreeIDs::moduleName,""}},{} }; 
         newModule.setProperty(TreeIDs::moduleState, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleFile, juce::var(""), nullptr);
-        newModule.setProperty(TreeIDs::moduleMidiNote, juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleMidiNote, juce::var(-1), nullptr);
         newModule.setProperty(TreeIDs::moduleMidiChannel, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleColor, juce::var(""), nullptr);
         newModule.setProperty(TreeIDs::moduleDisplayIndex, juce::var(-1), nullptr);
@@ -58,8 +58,7 @@ juce::ValueTree createValueTree()
         newModule.setProperty(TreeIDs::moduleEndSample, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleNumSamplesLength, juce::var(0), nullptr);
         /*newModule.setProperty(TreeIDs::moduleFadeIn, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleReverse, juce::var(0), nullptr);*/
+        newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);*/
 
         krumModulesTree.addChild(newModule, i, nullptr);
     }
@@ -97,12 +96,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         juce::String index = juce::String(i);
 
         juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
-        gainRange.setSkewForCentre(dBToGain(0.0f));
+        //gainRange.setSkewForCentre(dBToGain(0.0f));
         gainRange.symmetricSkew = true;
 
-        juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(20.0f), 0.01f };
+        TreeIDs::gainRange = gainRange;
+
+        juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(30.0f), 0.01f };
         clipGainRange.setSkewForCentre(dBToGain(0.0f));
         //clipGainRange.symmetricSkew = true;
+
+        juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 0.5f };
+        pitchShiftRange.setSkewForCentre(0);
+        pitchShiftRange.symmetricSkew = true;
+
 
         auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain + index, "Module Gain" + index,
                             gainRange, dBToGain(0.0f),
@@ -126,8 +132,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             [](juce::String text) {return panRangeTo0to1(text); });
 
         auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannel + index,
-                            "Module "+ index + " OuputChannel",
+                            "Module " + index + " OuputChannel",
                             TreeIDs::outputStrings, 0);
+
+        auto pitchParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePitchShift + index, "Module PitchShift" + index,
+                            pitchShiftRange, 0,   
+                            "Module " + index + " Pitch Shift",
+                            juce::AudioProcessorParameter::genericParameter);
+
+        auto reverseParam = std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleReverse + index, "Module Reverse" + index,
+                            false, "Module " + index + " Reverse");
+
+        auto muteParam =    std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleMute + index, "Module Mute" + index,
+                            false, "Module " + index + " Mute");
 
         auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
                             "Module" + juce::String(i),
@@ -135,7 +152,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             std::move(gainParam),
                             std::move(clipGainParam),
                             std::move(panParam),
-                            std::move(outputParam));
+                            std::move(outputParam),
+                            std::move(pitchParam),
+                            std::move(reverseParam),
+                            std::move(muteParam));
 
         paramsGroup.push_back(std::move(moduleGroup));
     }
@@ -143,7 +163,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     //================================== Global Gain(s) ==============================================================
 
     juce::NormalisableRange<float> outGainRange{ dBToGain(-60.0f), dBToGain(2.0f), 0.0001f };
-    outGainRange.setSkewForCentre(dBToGain(0.0f));
+    //outGainRange.setSkewForCentre(dBToGain(0.0f));
     outGainRange.symmetricSkew = true;
 
     auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam.toString(), "Output Gain",
@@ -159,7 +179,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                             juce::AudioProcessorParameter::genericParameter,
                             [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
                             [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
-   
+  
+
     auto globalGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Globals", "Global Parameters",
                             "|", std::move(outputGainParameter), std::move(previewerGainParameter));
 
@@ -175,16 +196,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
 KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
      : AudioProcessor( BusesProperties().withOutput("Output 1-2", juce::AudioChannelSet::stereo(), true)
-                                      .withOutput("Output 3-4", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 5-6", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 7-8", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 9-10", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 11-12", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 13-14", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
-                                      .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false)),
-                                      parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
+                                        .withOutput("Output 3-4", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 5-6", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 7-8", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 9-10", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 11-12", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 13-14", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
+                                        .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false)),
+                                        parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
 
 {
     //juce::Logger::setCurrentLogger(Log::logger);
@@ -197,9 +218,7 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     initSampler();
     previewer.assignSampler(&sampler);
 
-#if JucePlugin_Build_Standalone
-    fileBrowser.buildDemoKit();
-#endif
+
 
     juce::Logger::writeToLog("----------------------------");
     juce::Logger::writeToLog("Sampler Processor Constructed");

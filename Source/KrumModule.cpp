@@ -137,6 +137,21 @@ std::atomic<int> KrumModule::getModuleEndSample()
     
 }
 
+std::atomic<float>* KrumModule::getModuleMute()
+{
+    return parameters->getRawParameterValue(TreeIDs::paramModuleMute + getIndexString());
+}
+
+std::atomic<float>* KrumModule::getModuleReverse()
+{
+    return parameters->getRawParameterValue(TreeIDs::paramModuleReverse + getIndexString());
+}
+
+std::atomic<float>* KrumModule::getModulePitchShift()
+{
+    return parameters->getRawParameterValue(TreeIDs::paramModulePitchShift + getIndexString());
+}
+
 int KrumModule::getModuleOutputChannelNumber()
 {
     auto outputString = TreeIDs::outputStrings.getReference((int)*getModuleOutputChannel());

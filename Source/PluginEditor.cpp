@@ -15,16 +15,12 @@
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valTree, juce::ValueTree& fileBrowserTree)
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(audioProcessor.getFileBrowser()), valueTree(valTree)
 {
-    //TODO: change this to the resource folder in "CommonFiles", that is put there by the download installer
-    int titleImageSize;
-    auto titleImageData = BinaryData::getNamedResource("KrumSamplerTitle_png", titleImageSize);
-    titleImage = juce::ImageFileFormat::loadFrom(titleImageData, titleImageSize);
+    
+    titleImage = juce::ImageFileFormat::loadFrom(BinaryData::KrumSamplerTitle_png, BinaryData::KrumSamplerTitle_pngSize);
 
     auto& laf = getLookAndFeel();
     laf.setDefaultLookAndFeel(&kLaf);
-    laf.setDefaultSansSerifTypefaceName("Calibri");
 
-    InfoPanel::shared_instance().getLookAndFeel().setDefaultSansSerifTypefaceName("Calibri");
     toolTipWindow->setMillisecondsBeforeTipAppears(2000);
 
     addAndMakeVisible(websiteButton);
@@ -48,7 +44,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     outputGainSlider.setNumDecimalPlacesToDisplay(2);
     outputGainSlider.setPopupDisplayEnabled(true, false, this);
     outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue()));
-    outputGainSlider.onValueChange = [this] { updateOutputGainBubbleComp(outputGainSlider.getCurrentPopupDisplay()); };
+    outputGainSlider.onValueChange = [this] { updateOutputGainBubbleComp(outputGainSlider.getCurrentPopupDisplay()); repaint(); };
     
     outputGainAttachment.reset(new SliderAttachment(parameters, TreeIDs::outputGainParam.toString(), outputGainSlider));
     
@@ -61,51 +57,42 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     modulesViewport.setInterceptsMouseClicks(true, true);
     modulesViewport.setScrollBarsShown(false, true, false, false);
     
-    
     fileBrowser.assignModuleContainer(&moduleContainer);
     addAndMakeVisible(InfoPanel::shared_instance());
     addAndMakeVisible(fileBrowser);
     
-    int leftChevSize, rightChevSize;
 
-    auto leftChevData = BinaryData::getNamedResource("chevron_left_black_24dp_svg", leftChevSize);
-    auto rightChevData = BinaryData::getNamedResource("chevron_right_black_24dp_svg", rightChevSize);
-
-    auto collapseLeftIm = juce::Drawable::createFromImageData(leftChevData, leftChevSize);
-    auto collapseRightIm = juce::Drawable::createFromImageData(rightChevData, rightChevSize);
+    auto collapseLeftIm = juce::Drawable::createFromImageData(BinaryData::chevron_left_black_24dp_svg, BinaryData::chevron_left_black_24dp_svgSize);
+    auto collapseRightIm = juce::Drawable::createFromImageData(BinaryData::chevron_right_black_24dp_svg, BinaryData::chevron_right_black_24dp_svgSize);
 
     collapseBrowserButton.setImages(collapseRightIm.get(), collapseRightIm.get(), collapseRightIm.get(), collapseRightIm.get(),
                                     collapseLeftIm.get());
 
     collapseBrowserButton.setClickingTogglesState(true);
-    collapseBrowserButton.onClick = [this] { collapseBrowserButton.getToggleState() ? hideFileBrowser() : showFileBrowser(); };
     collapseBrowserButton.setToggleState(getSavedFileBrowserHiddenState(), juce::sendNotification);
+    collapseBrowserButton.onClick = [this] { collapseBrowserButton.getToggleState() ? hideFileBrowser() : showFileBrowser(); };
     collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::darkgrey.darker());
     collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::darkgrey);
+    collapseBrowserButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(collapseBrowserButton);
 
-    int infoBlackSize, infoBlackFilledSize;
-    
-    auto infoBlackData = BinaryData::getNamedResource("info_white_24dp_svg", infoBlackSize);
-    auto infoBlackFilledData = BinaryData::getNamedResource("info_white_filled_24dp_svg", infoBlackFilledSize);
-    
-    auto infoOffIm = juce::Drawable::createFromImageData(infoBlackData, infoBlackSize);
-    auto infoOnIm = juce::Drawable::createFromImageData(infoBlackFilledData, infoBlackFilledSize);
+    auto infoOffIm = juce::Drawable::createFromImageData(BinaryData::info_white_24dp_svg, BinaryData::info_white_24dp_svgSize);
+    auto infoOnIm = juce::Drawable::createFromImageData(BinaryData::info_white_filled_24dp_svg, BinaryData::info_white_filled_24dp_svgSize);
     
     infoButton.setImages(infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOnIm.get());
     infoButton.setClickingTogglesState(true);
+    infoButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     infoButton.onClick = [this] { infoButtonClicked();  };
+
     addAndMakeVisible(infoButton);
 
-    
     moduleContainer.createModuleEditors();
     moduleContainer.showFirstEmptyModule();
-    keyboard.updateKeysFromValueTree();
     
-    if (keyboard.hasAssignedKeys())
-    {
-        keyboard.scrollToKey(keyboard.getLowestKey());
-    }
+    keyboard.scrollToKey(keyboard.getLowestKey());
+    keyboard.repaint();
+
+    fileBrowser.buildDemoKit();
     
     setPaintingIsUnclipped(true);
     
@@ -122,11 +109,16 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     {
         //Browser is Hidden
         setSize(EditorDimensions::windowWNoBrowser, EditorDimensions::windowH);
+        fileBrowser.setVisible(false);
+        InfoPanel::shared_instance().setVisible(false);
+        
     }
     else
     {
         //Browser is Visible
         setSize (EditorDimensions::windowW, EditorDimensions::windowH);
+        fileBrowser.setVisible(true);
+        InfoPanel::shared_instance().setVisible(true);
     }
 }
 
@@ -140,7 +132,12 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
+    float gain = outputGainSlider.valueToProportionOfLength(getOutputGainValue());
+    auto outputGainProp = 1 - parameters.getParameter(TreeIDs::outputGainParam)->convertTo0to1(gain);
+
     auto bgGrade = juce::ColourGradient::vertical(bgColor, bgColor.brighter(0.1f), area);
+    bgGrade.addColour(juce::jlimit<double>(0.00001, 0.9999, outputGainProp), bgColor.brighter(0.077f));
+
     g.setGradientFill(bgGrade);
     g.fillRect(area);
     
@@ -149,73 +146,40 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xMid );
 
     auto moduleBGGrade = juce::ColourGradient::vertical(modulesBGColor.darker(0.2f), modulesBGColor, modulesBG);
-    g.setGradientFill(moduleBGGrade);
-    g.fillRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize);
 
-    g.setColour(juce::Colours::black);
+    //g.setGradientFill(moduleBGGrade);
+    //g.fillRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize);
+
+    g.setColour(juce::Colours::black.withAlpha(0.3f));
     g.fillRoundedRectangle(modulesViewport.getBounds().toFloat(), EditorDimensions::cornerSize);
     
     g.setColour(juce::Colours::grey.brighter(0.2f));
-    g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centred, 1);
-    g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
+    g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centredRight, 1);
+    //g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
 
-    g.setColour(backOutlineColor);
-    g.drawRoundedRectangle(outputGainSlider.getBounds().withBottom(modulesBG.getBottom()).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
+    //g.setColour(backOutlineColor);
+    g.setColour(juce::Colours::black.withAlpha(0.9f));
+    g.drawRoundedRectangle(outputGainSlider.getBounds().withTop(modulesBG.getY() ).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     
     if (!collapseBrowserButton.getToggleState())
     {
+        g.setColour(juce::Colours::black.withAlpha(0.6f));
         g.drawRoundedRectangle(fileBrowser.getBounds().withY(fileBrowser.getBounds().getY()).withBottom(fileBrowser.getBounds().getBottom()).expanded(EditorDimensions::extraShrinkage(1), EditorDimensions::extraShrinkage(1)).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     }
     
     g.setColour(mainFontColor);
-    g.setFont(18.0f);
-    g.drawFittedText("Output", area.withTop(outputGainSlider.getBottom()).withLeft(modulesBG.getRight()).withBottom(modulesBG.getBottom()),
+    g.setFont(22.0f);
+    g.drawFittedText("Output", area.withTop(modulesBG.getY()).withLeft(modulesBG.getRight()).withRight(outputGainSlider.getRight()).withBottom(outputGainSlider.getY()),
                     juce::Justification::centred,1);
 
-    juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
+    //juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
 
-    paintOutputVolumeLines(g, linesBounds.toFloat());
-    
     //Version
     g.setColour(juce::Colours::red.darker());
+    g.setFont(16.0f);
     juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
     int versionW = g.getCurrentFont().getStringWidth(versionString);
-    g.drawFittedText(versionString, { area.getRight() - 350, 10, versionW + 10, 35 }, juce::Justification::centred, 1);
-}
-
-void KrumSamplerAudioProcessorEditor::paintOutputVolumeLines(juce::Graphics& g, juce::Rectangle<float> bounds)
-{
-    int numLines = 40;
-    int spaceBetweenLines = bounds.getHeight() / numLines;
-
-    g.setColour(outputTrackColor);
-    juce::Line<float> firstLine{ {bounds.getX(), bounds.getY() - 16}, {bounds.getCentreX(), bounds.getY() - 16} };
-
-    g.drawLine(firstLine);
-
-    float zerodBY = outputGainSlider.getPositionOfValue(1.0f) - 22;
-    juce::Line<float> zeroLine{ {bounds.getX() - 0, bounds.getY() + zerodBY}, {bounds.getCentreX() - 5 ,  bounds.getY() + zerodBY} };
-    g.drawLine(zeroLine, 2.0f);
-
-    juce::Line<float> line;
-
-    for (int i = 1; i < numLines; i++)
-    {
-        float startX = bounds.getX();
-        float endX = bounds.getCentreX();
-        if (i % 2)
-        {
-            startX += 6;
-            endX -= 6;
-        }
-
-        line.setStart({ startX, firstLine.getStartY() + (i * spaceBetweenLines) });
-        line.setEnd({ endX,  firstLine.getStartY() + (i * spaceBetweenLines) });
-        g.drawLine(line);
-
-    }
-
-    g.drawFittedText("0", { (int)zeroLine.getStartX() - 8, (int)zeroLine.getStartY() - 7, 15, 15 }, juce::Justification::centredLeft, 1);
+    g.drawFittedText(versionString, { area.getRight() - 160, websiteButton.getBottom() - 12, versionW + 10, 35 }, juce::Justification::centred, 1);
 }
 
 void KrumSamplerAudioProcessorEditor::resized()
@@ -223,9 +187,8 @@ void KrumSamplerAudioProcessorEditor::resized()
     auto area = getLocalBounds();
     int infoButtonSize = 21;
     
-    websiteButton.setBounds(EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY() + (EditorDimensions::madeByArea.getHeight() / 2) + 5).withHeight(EditorDimensions::madeByArea.getHeight() * 0.8f).withWidth(EditorDimensions::madeByArea.getWidth() + 10));
-    infoButton.setBounds(websiteButton.getBounds().getCentreX() - (infoButtonSize /2), websiteButton.getBottom(), infoButtonSize, infoButtonSize);
-    
+    websiteButton.setBounds(EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY() + (EditorDimensions::madeByArea.getHeight() / 2) + 5).withHeight(EditorDimensions::madeByArea.getHeight() * 0.75f).withWidth(EditorDimensions::madeByArea.getWidth() + 10));
+    infoButton.setBounds(area.getRight() - (websiteButton.getWidth() + (infoButtonSize * 2)), EditorDimensions::madeByArea.getY() + 20, infoButtonSize, infoButtonSize);
     
     if (!collapseBrowserButton.getToggleState())
     {
@@ -244,11 +207,10 @@ void KrumSamplerAudioProcessorEditor::resized()
     moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
     moduleContainer.refreshModuleLayout();
 
-    outputGainSlider.setBounds(area.withTop(modulesBG.getY()).withBottom(area.getBottom() - EditorDimensions::extraShrinkage(10)).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage(3)).withRight(area.getRight() - EditorDimensions::extraShrinkage(3)));
+    outputGainSlider.setBounds(area.withTop(EditorDimensions::extraShrinkage(20)).withBottom(modulesBG.getBottom()).withLeft(modulesBG.getRight()).withRight(area.getRight() - EditorDimensions::extraShrinkage(2)));
     keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
 
     collapseBrowserButton.setBounds(area.withTop(area.getHeight() / 2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
-
 
 }
 
@@ -296,6 +258,11 @@ void KrumSamplerAudioProcessorEditor::showFileBrowser()
 
     saveFileBrowserHiddenState();
     repaint();
+}
+
+float KrumSamplerAudioProcessorEditor::getOutputGainValue()
+{
+    return *parameters.getRawParameterValue(TreeIDs::outputGainParam);
 }
 
 void KrumSamplerAudioProcessorEditor::saveFileBrowserHiddenState()

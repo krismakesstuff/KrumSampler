@@ -103,7 +103,8 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
         paintIfFileLoaded(g, area, color);
     }
 
-    auto barColor = juce::Colours::white.withAlpha(0.3f);
+    //auto barColor = juce::Colours::white.withAlpha(0.3f);
+    auto barColor = color.withAlpha(0.3f);
     int barWidth = 1;
 
     paintStartBar(g, area, barColor, barWidth);
@@ -179,10 +180,10 @@ void DragAndDropThumbnail::resized()
 
 void DragAndDropThumbnail::mouseDown(const juce::MouseEvent& e)
 {
-    if (e.mods.isPopupMenu())
-    {
-        //add two
-    }
+    //if (e.mods.isPopupMenu())
+    //{
+    //    //add two
+    //}
 
     InfoPanelComponent::mouseDown(e);
 }

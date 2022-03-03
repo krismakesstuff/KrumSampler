@@ -101,10 +101,34 @@ void InfoPanelComponent::setNewPanelMessage(juce::String newTitle, juce::String 
     compTitle = newTitle;
     message = newMessage;
     keycommand = newKeycommand;
-    
+
 }
 
 //=============================================================================
+
+InfoPanelButton::InfoPanelButton(juce::String title, juce::String newMessage, juce::String newKeycommand)
+    : compTitle(title), message(newMessage), keycommand(newKeycommand), juce::Button(juce::String())
+{
+}
+
+InfoPanelButton::~InfoPanelButton()
+{
+}
+
+void InfoPanelButton::mouseEnter(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().setInfoPanelText(compTitle, message, keycommand);
+    juce::Button::mouseEnter(e);
+}
+
+void InfoPanelButton::mouseExit(const juce::MouseEvent& e)
+{
+    InfoPanel::shared_instance().clearPanelText();
+    juce::Button::mouseExit(e);
+}
+
+//=============================================================================
+
 InfoPanelDrawableButton::InfoPanelDrawableButton(juce::String title, juce::String newMessage, juce::String newKeycommand,  juce::DrawableButton::ButtonStyle buttonStyle)
     : compTitle(title), message(newMessage), keycommand(newKeycommand), juce::DrawableButton(title, buttonStyle)
 {}
@@ -226,3 +250,4 @@ void InfoPanelComboBox::mouseExit(const juce::MouseEvent& e)
 }
 
 //=============================================================================
+

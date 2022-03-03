@@ -40,7 +40,9 @@ KrumModuleEditor::KrumModuleEditor(juce::ValueTree& modTree, KrumSamplerAudioPro
 }
 
 KrumModuleEditor::~KrumModuleEditor()
-{}
+{
+    pitchSliderAttachment.reset();
+}
 
 void KrumModuleEditor::paint (juce::Graphics& g)
 {
@@ -50,8 +52,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
     }
 
     auto area = getLocalBounds().reduced(EditorDimensions::shrinkage);
-
-    juce::Colour c = getModuleColor().withAlpha(0.8f);
+    juce::Colour c = getModuleColor().withAlpha(0.73f);
 
     int moduleState = getModuleState();
 
@@ -61,13 +62,36 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 1.0f);
         
         g.setColour(juce::Colours::darkgrey);
-        g.drawFittedText("Drop Sample Here", area.reduced(20), juce::Justification::centred, 3);
+        g.drawFittedText("Drop Sample(s) Here", area.reduced(20), juce::Justification::centred, 3);
     }
     else if (moduleState == KrumModule::ModuleState::active) //if the moduleState is hasfile we will be showing the settingsOverlay
     {
-        juce::Colour bc = modulePlaying ? c.brighter() : c;
+        juce::Colour bc = c;
+        if (isModuleMuted())
+        {
+            //bc = c.withAlpha(0.2f);
+            bc = juce::Colours::black;
+            c = juce::Colours::black;
+        }
+        else if (modulePlaying)
+        {
+            bc = bc.brighter();
+        }
+
+        if (mouseOver || mouseOverKey)
+        {
+            g.setColour(juce::Colours::white.withAlpha(0.8f));
+            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 2.0f);
+        }
+        //auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
+        auto bgGrade = juce::ColourGradient::vertical(c.darker(0.25f), (float)area.getY(), bc, area.getBottom());
+
+        auto gain = getModuleGain();
+        //auto adjustedGain = juce::jlimit<double>(0.0, 1.0, gain);
+        auto gainProp = 1 - normalizeGainValue(gain);
+        bgGrade.addColour(juce::jlimit<double>(0.00001,0.9999, gainProp), bc.brighter(0.2f)/*.darker(0.005f)*/);
         
-        auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
+
         g.setGradientFill(bgGrade);
         g.fillRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize);
         
@@ -76,101 +100,53 @@ void KrumModuleEditor::paint (juce::Graphics& g)
 
         g.setColour(c);
 
-        g.setFont(11.0f);
-        g.drawFittedText("L", leftLabelRect, juce::Justification::centred, 1);
-        g.drawFittedText("R", rightLabelRect, juce::Justification::centred, 1);
+        //g.setFont(11.0f);
+        //g.drawFittedText("L", leftLabelRect, juce::Justification::centred, 1);
+        //g.drawFittedText("R", rightLabelRect, juce::Justification::centred, 1);
 
 
-        auto sliderBounds = volumeSlider.getBoundsInParent().toFloat();
-        auto sliderLineBounds = sliderBounds.withTrimmedTop(10);
-        paintVolumeSliderLines(g, sliderBounds);
+        //auto sliderBounds = volumeSlider.getBoundsInParent().toFloat();
+        //auto sliderLineBounds = sliderBounds.withTrimmedTop(10);
+        //paintVolumeSliderLines(g, sliderBounds);
         
-        auto panSliderBounds = panSlider.getBoundsInParent().toFloat();
-        paintPanSliderLines(g, panSliderBounds);
+        //auto panSliderBounds = panSlider.getBoundsInParent().toFloat();
+        //paintPanSliderLines(g, panSliderBounds);
         
         g.setColour(bc);
         g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 1.0f);
+        
     }
-}
-
-void KrumModuleEditor::paintVolumeSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds)
-{
-    int numLines = 17;
-    int spaceBetweenLines = (bounds.getHeight() - 10) / numLines;
-    juce::Colour c = juce::Colour::fromString(moduleTree.getProperty(TreeIDs::moduleColor).toString()).withAlpha(0.5f);
-
-    float zerodBY = volumeSlider.getPositionOfValue(1.0f) - 1;
-    juce::Line<float> zeroLine{ {bounds.getX() - 2, bounds.getY() + zerodBY }, {bounds.getCentreX() - 5 ,  bounds.getY()+ zerodBY } };
-    g.setColour(c.darker(0.5f));
-    g.drawLine(zeroLine);
-    
-    
-    g.setColour(c);
-
-    juce::Line<float> firstLine{ {bounds.getX(), bounds.getY() + 9}, {bounds.getCentreX() - 5, bounds.getY() + 9} };
-    juce::Point<int> firstPoint = firstLine.getStart().toInt();
-    g.drawLine(firstLine);
-
-    juce::Line<float> line;
-
-    for (int i = 1; i < numLines; i++)
-    {
-        if (i == 7) 
-        {
-            //this draws on top of the zeroLine, which we've already drawn
-            continue;
-        }
-
-        float startX = bounds.getX() + 2;
-        float endX = bounds.getCentreX() - 5;
-        if (i % 2)
-        {
-            startX += 5;
-            endX -= 4;
-        }
-
-        line.setStart({ startX, firstLine.getStartY() + ( i * spaceBetweenLines)});
-        line.setEnd({ endX, firstLine.getStartY() + (i * spaceBetweenLines)});
-        g.drawLine(line);
-
-    }
-
-    g.drawFittedText("+2", { firstPoint.getX() - 15, firstPoint.getY() - 8 , 17, 17 }, juce::Justification::centredLeft, 1);
-    g.drawFittedText("0", { (int)zeroLine.getStartX() - 15, (int)zeroLine.getStartY() - 8, 17, 17 }, juce::Justification::centredLeft, 1);
-
-}
-
-void KrumModuleEditor::paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds)
-{
-    juce::Colour c = juce::Colour::fromString(moduleTree.getProperty(TreeIDs::moduleColor).toString()).withAlpha(0.5f);
-    g.setColour(c);
-    juce::Line<float> midLine{ {bounds.getCentreX() - 2, bounds.getY() - 2},{bounds.getCentreX() - 2 , bounds.getCentreY() } };
-    g.drawLine(midLine, 1.5f);
-
 }
 
 void KrumModuleEditor::resized()
 {
     auto area = getLocalBounds().reduced(EditorDimensions::shrinkage);
+    int height = area.getHeight();
+    int width = area.getWidth();
 
-    int titleHeight = area.getHeight() * 0.08f;
+
+    int titleHeight = height * 0.09f;
 
     int spacer = 5;
-    int thumbnailH = area.getHeight() * 0.25f;
+    int thumbnailH = height * 0.25f;
     int timeHandleH = 13;
 
-    int midiLabelH = area.getHeight() * 0.093f;
+    //int midiLabelH = area.getHeight() * 0.093f;
+    int midiLabelH = height * 0.07f;
 
-    int panSliderH = area.getHeight() * 0.05f;
-    int panSliderW = area.getWidth() * 0.9f;
+    int panSliderH = height * 0.040f;
+    int panSliderW = width * 0.95f;
 
-    int volumeSliderH = area.getHeight() * 0.44f;
-    int volumeSliderW = area.getWidth() * 0.4;
+    int volumeSliderH = height * 0.55f;
+    int volumeSliderW = width * 0.57f;
 
-    int buttonH = area.getHeight() * 0.075f;
-    int buttonW = area.getWidth() * 0.48f;
+    int buttonH = height * 0.085f;
+    int buttonW = width * 0.3f;
 
-    int outputComboH = area.getHeight() * 0.073f;
+    int smallButtonH = height * 0.07f;
+    int smallButtonW = width * 0.25f;
+
+    int outputComboH = height * 0.073f;
 
     settingsOverlay->setBounds(area);
 
@@ -178,15 +154,19 @@ void KrumModuleEditor::resized()
     thumbnail.setBounds(area.withBottom(thumbnailH).withTop(titleBox.getBottom()).reduced(spacer));
     timeHandle.setBounds(thumbnail.getX(), thumbnail.getBottom(), thumbnail.getWidth(), timeHandleH);
 
-    midiLabel.setBounds(area.withTrimmedTop(timeHandle.getBottom() - spacer).withHeight(midiLabelH).reduced(spacer));
-
-    panSlider.setBounds(area.getX() + spacer, midiLabel.getBottom() + (spacer), panSliderW, panSliderH);
-    volumeSlider.setBounds(area.getCentreX() - (volumeSliderW / 2), panSlider.getBottom() + (spacer * 3), volumeSliderW, volumeSliderH);
+    panSlider.setBounds(area.getX() + 2, timeHandle.getBottom() + (spacer), panSliderW, panSliderH);
+    volumeSlider.setBounds(area.getX() + spacer/*area.getCentreX() - (volumeSliderW / 2)*/, panSlider.getBottom() + (spacer/* * 3*/), volumeSliderW, volumeSliderH);
     
-    playButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(buttonH).withLeft(area.getX() + (spacer * 0.5f)).withWidth(buttonW).reduced(spacer));
-    editButton.setBounds(area.withTop(volumeSlider.getBottom() - (spacer * 2)).withHeight(buttonH).withLeft(playButton.getRight() + spacer).withWidth(buttonW).reduced(spacer));
+    pitchSlider.setBounds(area.withTop(panSlider.getBottom() + spacer).withHeight(smallButtonH).withLeft(area.getRight() - (smallButtonW + spacer)).withWidth(smallButtonW));
+    reverseButton.setBounds(area.withTop(pitchSlider.getBottom() + spacer).withHeight(smallButtonH).withLeft(area.getRight() - (smallButtonW + spacer)).withWidth(smallButtonW));
+    muteButton.setBounds(area.withTop(reverseButton.getBottom() + spacer).withHeight(smallButtonH).withLeft(area.getRight() - (smallButtonW + spacer)).withWidth(smallButtonW));
+    
+    playButton.setBounds(area.withTop(muteButton.getBottom() + (spacer * 11)).withHeight(buttonH).withLeft(area.getRight() - (buttonW + spacer)).withWidth(buttonW));
+    editButton.setBounds(area.withTop(playButton.getBottom() + spacer).withHeight(buttonH).withLeft(area.getRight() - (buttonW +spacer)).withWidth(buttonW));
 
-    outputCombo.setBounds(area.withTop(playButton.getBottom() + spacer).withHeight(outputComboH).reduced(spacer * 1.75, spacer));
+    midiLabel.setBounds(area.withTrimmedTop(volumeSlider.getBottom() - spacer).withHeight(midiLabelH).reduced(spacer));
+    outputCombo.setBounds(area.withTop(midiLabel.getBottom()).withHeight(outputComboH).reduced(spacer));
+
 
 //    if (dragHandle != nullptr)
 //    {
@@ -280,7 +260,7 @@ void KrumModuleEditor::buildModule()
     //
     addAndMakeVisible(titleBox);
     titleBox.setText(moduleTree.getProperty(TreeIDs::moduleName).toString(), juce::NotificationType::dontSendNotification);
-    titleBox.setFont({ 17.0f });
+    titleBox.setFont({ 13.0f });
     titleBox.setColour(juce::Label::ColourIds::textColourId, titleFontColor);
     titleBox.setColour(juce::Label::ColourIds::textWhenEditingColourId, juce::Colours::black);
     titleBox.setColour(juce::TextEditor::ColourIds::highlightColourId, juce::Colours::lightgrey);
@@ -301,6 +281,7 @@ void KrumModuleEditor::buildModule()
     addAndMakeVisible(timeHandle);
     
     addAndMakeVisible(volumeSlider);
+    volumeSlider.setLookAndFeel(&editor.vLaf);
     volumeSlider.setScrollWheelEnabled(false);
     volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     volumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
@@ -314,6 +295,7 @@ void KrumModuleEditor::buildModule()
     volumeSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModuleGain + i, volumeSlider));
 
     addAndMakeVisible(panSlider);
+    panSlider.setLookAndFeel(&editor.pLaf);
     panSlider.setScrollWheelEnabled(false);
     panSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     panSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
@@ -329,9 +311,12 @@ void KrumModuleEditor::buildModule()
     addAndMakeVisible(midiLabel);
 
 
-    int playButtonImSize;
-    auto playButtonData = BinaryData::getNamedResource("play_arrowblack18dp_svg", playButtonImSize);
-    auto playButtonImage = juce::Drawable::createFromImageData(playButtonData, playButtonImSize);
+    //int playButtonImSize;
+    //auto playButtonData = BinaryData::getNamedResource("play_arrowblack18dp_svg", playButtonImSize);
+    //auto playButtonData = BinaryData::getNamedResource("nounplaywhite_svg", playButtonImSize);
+    auto playButtonImage = juce::Drawable::createFromImageData(BinaryData::nounplaywhite_svg, BinaryData::nounplaywhite_svgSize);
+
+    //DBG("Play Icon: " + juce::String(playButtonImage ? "valid" : "null"));
 
     addAndMakeVisible(playButton);
     playButton.setImages(playButtonImage.get());
@@ -341,16 +326,47 @@ void KrumModuleEditor::buildModule()
     playButton.onMouseUp = [this](const juce::MouseEvent& e) { handleOneShotButtonMouseUp(e); };
     
     
-    int editButtonImSize;
-    auto editButtonData = BinaryData::getNamedResource("settingsblack18dp_svg", editButtonImSize);
-    auto editButtonImage = juce::Drawable::createFromImageData(editButtonData, editButtonImSize);
+    //addAndMakeVisible(pitchButton);
+    //addChildComponent(pitchSlider);
+    //pitchSlider.reset(new juce::Slider());
+    //auto& pitchSlider = pitchButton.getSlider();
+    addAndMakeVisible(pitchSlider);
+    pitchSlider.setScrollWheelEnabled(false);
+    //pitchSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
+    //pitchSlider.setDoubleClickReturnValue(true, 0.0);
+    //pitchSlider.setPopupDisplayEnabled(true, false, this);
+    pitchSlider.setTooltip(pitchSlider.getTextFromValue(pitchSlider.getValue()));
+
+    pitchSlider.onValueChange = [this] { pitchSlider.setTooltip(pitchSlider.getTextFromValue(pitchSlider.getValue())); };
+
+    //pitchSlider.onDragStart = [this] { pitchSlider.setShowSlider(true); };
+    //pitchSlider.onDragEnd = [this] { pitchSlider.setVisible(false); };
+
+    pitchSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModulePitchShift + i, pitchSlider));
+
+    addAndMakeVisible(reverseButton);
+    reverseButton.setButtonText("REV");
+    reverseButton.setToggleState(getModuleReverseState(), juce::dontSendNotification);
+    reverseButton.setClickingTogglesState(true);
+    reverseButtonAttachment.reset(new ButtonAttachment(editor.parameters, TreeIDs::paramModuleReverse + i, reverseButton));
+
+    addAndMakeVisible(muteButton);
+    muteButton.setButtonText("MUTE");
+    muteButton.setToggleState(isModuleMuted(), juce::dontSendNotification);
+    muteButton.setClickingTogglesState(true);
+    muteButtonAttachment.reset(new ButtonAttachment(editor.parameters, TreeIDs::paramModuleMute + i, muteButton));
+
+    //int editButtonImSize;
+    //auto editButtonData = BinaryData::getNamedResource("settingsblack18dp_svg", editButtonImSize);
+    //auto editButtonData = BinaryData::getNamedResource("nounmenuwhite_png", editButtonImSize);
+    //auto editButtonImage = juce::Drawable::createFromImageData(editButtonData, editButtonImSize);
+    auto editButtonImage = juce::Drawable::createFromImageData(BinaryData::nounmenuwhite_svg, BinaryData::nounmenuwhite_svgSize);
     
     addAndMakeVisible(editButton);
     editButton.setImages(editButtonImage.get());
     editButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
 
     editButton.onClick = [this] { showSettingsOverlay(true, true); };
-
 
     addAndMakeVisible(outputCombo);
     outputCombo.addItemList(TreeIDs::outputStrings, 1);
@@ -377,18 +393,55 @@ void KrumModuleEditor::setChildCompColors()
 
     panSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
     panSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
+    panSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, moduleColor);
+    panSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
+
+    //pitchSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
+    //pitchSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
+    //pitchSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
+    pitchSlider.setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colours::black);
+    pitchSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, moduleColor);
 
     volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
-    volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
+    volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor/*.darker(0.6f)*/);
+    volumeSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
     volumeSlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, moduleColor.darker());
 
-    playButton.setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
-    playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.2f));
+    playButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
+    playButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+    playButton.setColour(juce::TextButton::ColourIds::textColourOnId, moduleColor.brighter(0.2f));
+     
+    //playButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    //playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
 
-    editButton.setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
-    editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.2f));
+    editButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
+    editButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+    editButton.setColour(juce::TextButton::ColourIds::textColourOnId, moduleColor.brighter(0.2f));
+    
+    //editButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    //editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
 
-    titleBox.setColour(juce::Label::ColourIds::backgroundColourId, moduleColor.brighter(0.1f));
+    muteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::red);
+    muteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
+    muteButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+
+    //muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.darker());
+
+    /*reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor);
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor.darker());
+    */
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.9f));
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+
+    titleBox.setColour(juce::Label::ColourIds::textColourId, moduleColor.brighter(0.5f));//*.darker(0.6f)*/.withAlpha(0.1f));
+    titleBox.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
     titleBox.setColour(juce::Label::ColourIds::backgroundWhenEditingColourId, moduleColor.darker(0.7f));
     titleBox.setColour(juce::Label::ColourIds::outlineWhenEditingColourId, moduleColor.darker());
     titleBox.setColour(juce::TextEditor::ColourIds::highlightedTextColourId, moduleColor.contrasting());
@@ -396,15 +449,20 @@ void KrumModuleEditor::setChildCompColors()
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker().withAlpha(0.7f));
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::textBoxOutlineColourId, moduleColor.brighter().withAlpha(0.5f));
 
-    outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, moduleColor.darker(0.55f).withAlpha(0.5f));
+    //outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, moduleColor.darker(0.55f).withAlpha(0.5f));
+    outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black);
     outputCombo.setColour(juce::ComboBox::ColourIds::textColourId, moduleColor);
     outputCombo.setColour(juce::ComboBox::ColourIds::arrowColourId, moduleColor);
     outputCombo.setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.8f));
 
-    outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
+    //outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
+    outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, juce::Colours::black);
     outputCombo.setColour(juce::PopupMenu::ColourIds::textColourId, moduleColor.darker());
-    outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, moduleColor.darker());
+    //outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, moduleColor.darker());
+    outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, juce::Colours::black);
     outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedTextColourId, moduleColor);
+
+    midiLabel.textColor = moduleColor;
     
     //getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
 
@@ -575,6 +633,30 @@ bool KrumModuleEditor::isModulePlaying()
     return modulePlaying;
 }
 
+bool KrumModuleEditor::isModuleMuted()
+{
+    auto val = editor.parameters.getRawParameterValue(TreeIDs::paramModuleMute + juce::String(getModuleSamplerIndex()));
+    return *val > 0.5;
+}
+
+bool KrumModuleEditor::getModuleReverseState()
+{
+    auto val = editor.parameters.getRawParameterValue(TreeIDs::paramModuleReverse + juce::String(getModuleSamplerIndex()));
+    return *val > 0.5;
+}
+
+int KrumModuleEditor::getModulePitchShift()
+{
+    auto val = editor.parameters.getRawParameterValue(TreeIDs::paramModulePitchShift + juce::String(getModuleSamplerIndex()));
+    return (int)*val;
+}
+
+double KrumModuleEditor::getModuleGain()
+{
+    auto val = editor.parameters.getRawParameterValue(TreeIDs::paramModuleGain + juce::String(getModuleSamplerIndex()));
+    return (double)*val;
+}
+
 void KrumModuleEditor::setNumSamplesOfFile(int numSamplesInFile)
 {
     moduleTree.setProperty(TreeIDs::moduleNumSamplesLength, numSamplesInFile, nullptr);
@@ -594,9 +676,10 @@ void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* c
         juce::Point<int> pos; 
         juce::BubbleComponent::BubblePlacement bubblePlacement = juce::BubbleComponent::above;
         auto area = getLocalBounds();
+
         if (slider->getSliderStyle() == juce::Slider::LinearVertical) 
         {
-            pos = { area.getCentreX() /*+ 6*/, getMouseXYRelative().getY() - 5 };
+            pos = { slider->getBounds().getCentreX() - 5 /*+ 6*/, getMouseXYRelative().getY() - 5 };
         }
         else if (slider->getSliderStyle() == juce::Slider::LinearHorizontal)
         {
@@ -616,10 +699,18 @@ void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* c
 
         bubbleComp->setAllowedPlacement(bubblePlacement);
         bubbleComp->setPosition(pos, 0);
+        bubbleComp->setColour(juce::BubbleComponent::outlineColourId, getModuleColor().darker(0.7f));
         
     }
     slider->setTooltip(slider->getTextFromValue(slider->getValue()));
 
+}
+
+double KrumModuleEditor::normalizeGainValue(double gain)
+{
+    auto param = editor.parameters.getParameter(TreeIDs::paramModuleGain + juce::String(getModuleSamplerIndex()));
+    double norm = param->convertTo0to1(gain);
+    return norm;
 }
 
 int KrumModuleEditor::getAudioFileLengthInMs()
@@ -710,6 +801,11 @@ void KrumModuleEditor::setClipGainSliderVisibility(bool sliderShouldBeVisible)
     thumbnail.clipGainSlider.setVisible(sliderShouldBeVisible);
 }
 
+void KrumModuleEditor::setPitchSliderVisibility(bool sliderShouldBeVisible)
+{
+    pitchSlider.setVisible(sliderShouldBeVisible);
+}
+
 bool KrumModuleEditor::canThumbnailAcceptFile()
 {
     return thumbnail.canAcceptFile;
@@ -757,7 +853,7 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
                         if (i == 0)
                         {
                             //we set this module with the first dropped file and then create the rest, if we need to
-                            handleNewFile(file, numDroppedItems == 1, numSamples);
+                            handleNewFile(itemName, file, numSamples);
 
                             addNextModule = true;
                             continue;
@@ -773,7 +869,7 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
                                 if ((int)itTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::empty)
                                 {
                                     auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                                    newModEd->handleNewFile(file, false, numSamples);
+                                    newModEd->handleNewFile(itemName, file, numSamples);
                                         
                                     addNextModule = true;
                                         
@@ -842,12 +938,13 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
         for (int i = 0; i < files.size(); i++)
         {
             juce::File audioFile {files[i]};
+            juce::String fileName = audioFile.getFileName();
             juce::int64 numSamples = 0;
             if(!audioFile.isDirectory() && sampler.isFileAcceptable(audioFile, numSamples))
             {
                 if (i == 0)
                 {
-                    handleNewFile(audioFile, numFilesDropped == 1, numSamples);
+                    handleNewFile(fileName, audioFile, numSamples);
                     addNextModule = true;
                     continue;
                 }
@@ -861,7 +958,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
                         if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
                         {
                             auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                            newModEd->handleNewFile(audioFile, false, numSamples);
+                            newModEd->handleNewFile(fileName, audioFile, numSamples);
                             addNextModule = true;
 
                             DBG("-------");
@@ -888,16 +985,16 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
     }
 }
 
-void KrumModuleEditor::handleNewFile(juce::File& file, bool overlayShouldListen, int numSamples)
+void KrumModuleEditor::handleNewFile(juce::String& name, juce::File& file, int numSamples, bool overlayShouldListen)
 {
     DBG("Item: " + file.getFullPathName());
-    juce::String name = file.getFileName(); //compiler reasons
+    //juce::String name = file.getFileName(); //compiler reasons
     setModuleName(name);
     setModuleFile(file);
     setNumSamplesOfFile(numSamples);
     setModuleState(KrumModule::ModuleState::hasFile);
     settingsOverlay->setMidiListen(overlayShouldListen);
-    addFileToRecentsFolder(file, file.getFileName());
+    addFileToRecentsFolder(file, name);
 }
 
 void KrumModuleEditor::setModuleFile(juce::File& file)
@@ -911,6 +1008,21 @@ bool KrumModuleEditor::shouldModuleAcceptFileDrop()
 {
     int state = getModuleState();
     return state == 0;
+}
+
+bool KrumModuleEditor::getMouseOver()
+{
+    return mouseOver;
+}
+
+bool KrumModuleEditor::getMouseOverKey()
+{
+    return mouseOverKey;
+}
+
+void KrumModuleEditor::setMouseOverKey(bool isMouseOverKey)
+{
+    mouseOverKey = isMouseOverKey;
 }
 
 void KrumModuleEditor::addFileToRecentsFolder(juce::File& file, juce::String name)
@@ -941,14 +1053,22 @@ void KrumModuleEditor::timerCallback()
     auto& keyboard = editor.keyboard;
     int currentMidiNote = getModuleMidiNote();
 
-    if (getLocalBounds().contains(getMouseXYRelative())) //if mouse is over component
+    if (getLocalBounds().contains(getMouseXYRelative()) && getModuleState() > 0) //if mouse is over module and module is active
     {
+        mouseOver = true;
         keyboard.setHighlightKey(currentMidiNote, true);
     }
-    else if (keyboard.isKeyHighlighted(currentMidiNote)) //if mouse is NOT over component and the current is being highlighted
+    else
     {
-        keyboard.setHighlightKey(currentMidiNote, false);
+        //module container will use this to clear the highlighted keys
+        mouseOver = false;
     }
+
+    if (mouseOverKey)
+    {
+        repaint();
+    }
+
 }
 
 void KrumModuleEditor::printValueAndPositionOfSlider()
@@ -976,13 +1096,40 @@ void KrumModuleEditor::handleOneShotButtonMouseUp(const juce::MouseEvent& e)
 
 //============================================================================================================================
 
-KrumModuleEditor::OneShotButton::OneShotButton()
-    //:DrawableButton("PlayButton", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground)
-: InfoPanelDrawableButton("One Shot", "Plays the currently assigned sample", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground)
+KrumModuleEditor::OneShotButton::OneShotButton(KrumModuleEditor& e)
+: InfoPanelDrawableButton("One Shot", "Plays the currently assigned sample", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground), editor(e)
 {}
 
 KrumModuleEditor::OneShotButton::~OneShotButton()
 {}
+
+void KrumModuleEditor::OneShotButton::paintButton(juce::Graphics & g, const bool shouldDrawButtonAsHighlighted, const bool shouldDrawButtonAsDown)
+{
+
+    auto area = getLocalBounds();
+
+    auto color = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::buttonOnColourId : juce::TextButton::ColourIds::buttonColourId);
+    
+    auto lineColor = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::textColourOnId : juce::TextButton::ColourIds::textColourOffId);
+
+    g.setColour(color);
+    g.fillRoundedRectangle(area.toFloat(), 5.0f);
+
+    auto path = getCurrentImage()->getOutlineAsPath();
+    
+    //auto color = editor.getModuleColor();
+    color = shouldDrawButtonAsHighlighted ? color.withAlpha(0.5f) : (shouldDrawButtonAsDown ? color.withAlpha(0.1f) : color.withAlpha(0.8f));
+
+    area.reduce(7, 7);
+    path.scaleToFit(area.getX(), area.getY(), area.getWidth(), area.getHeight(), true);
+    path.closeSubPath();
+
+    //g.setColour(juce::Colours::black);
+    g.setColour(lineColor);
+    g.strokePath(path, juce::PathStrokeType(1.0f));
+
+    //g.fillPath(path);
+}
 
 void KrumModuleEditor::OneShotButton::mouseDown(const juce::MouseEvent& e)
 {
@@ -1007,10 +1154,40 @@ void KrumModuleEditor::OneShotButton::mouseUp(const juce::MouseEvent& e)
 
 //============================================================================================================================
 
+KrumModuleEditor::MenuButton::MenuButton(KrumModuleEditor& e)
+    : InfoPanelDrawableButton("Settings", "Provides a list of actions to change the settings of the module", "", juce::DrawableButton::ButtonStyle::ImageFitted), editor(e)
+{}
+
+KrumModuleEditor::MenuButton::~MenuButton()
+{}
+
+void KrumModuleEditor::MenuButton::paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted, const bool shouldDrawButtonAsDown)
+{
+    auto area = getLocalBounds();
+
+
+    auto color = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::buttonOnColourId : juce::TextButton::ColourIds::buttonColourId);
+    auto lineColor = findColour(shouldDrawButtonAsHighlighted ? juce::TextButton::ColourIds::textColourOnId : juce::TextButton::ColourIds::textColourOffId);
+
+    g.setColour(color);
+    g.fillRoundedRectangle(area.toFloat(), 5.0f);
+
+    auto path = getCurrentImage()->getOutlineAsPath();
+    area.reduce(7, 7);
+    path.scaleToFit(area.getX(), area.getY(), area.getWidth(), area.getHeight(), true);
+
+    g.setColour(lineColor);
+    g.strokePath(path, juce::PathStrokeType(1.0f));
+}
+
+
+//============================================================================================================================
+
 KrumModuleEditor::MidiLabel::MidiLabel(KrumModuleEditor* editor)
     : moduleEditor(editor)
 {
     setTooltip("Lane: " + juce::String(moduleEditor->getModuleSamplerIndex()));
+
 }
 
 KrumModuleEditor::MidiLabel::~MidiLabel()
@@ -1020,19 +1197,133 @@ void KrumModuleEditor::MidiLabel::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
     
-    g.setColour(juce::Colours::black);
-    g.fillRect(area);
+    float cornerSize = 3.0f;
+    int spacer = 5;
+
+
+    //g.setColour(juce::Colours::black);
+    //g.fillRect(area);
     
-    //g.setColour(juce::Colours::white.darker());
-    g.setColour(juce::Colours::grey.brighter(0.2f));
-    g.setFont(14.0f);
+    juce::Rectangle<int> midiNoteRect = area;//.reduced(7).withX(spacer);
+    juce::Rectangle<int> midiChanRect = area.withX(midiNoteRect.getRight() + spacer).withWidth(area.getWidth() * 0.5f);
 
-    juce::Rectangle<int> midiNoteRect = area.withTrimmedBottom(area.getHeight() / 2).withX(5).withWidth(area.getWidth() - 10);
-    juce::Rectangle<int> midiChanRect = area.withTrimmedTop(area.getHeight() / 2).withX(5).withWidth(area.getWidth() - 10);
 
-    g.drawFittedText("Note:", midiNoteRect, juce::Justification::centredLeft, 1);
-    g.drawFittedText(moduleEditor->getModuleMidiNoteString(true), midiNoteRect, juce::Justification::centredRight, 1);
+    g.setColour(juce::Colours::black);
+    g.fillRoundedRectangle(midiNoteRect.toFloat(), cornerSize);
 
-    g.drawFittedText("Channel:", midiChanRect, juce::Justification::centredLeft, 1);
-    g.drawFittedText(juce::String(moduleEditor->getModuleMidiChannel()), midiChanRect, juce::Justification::centredRight, 1);
+
+    //g.setColour(juce::Colours::black);
+    //g.fillRoundedRectangle(midiChanRect.toFloat(), cornerSize);
+    
+    g.setColour(textColor);
+    g.setFont(fontSize);
+
+    g.drawFittedText("Note", midiNoteRect.withX(5), juce::Justification::centredLeft, 1);
+    g.drawFittedText(moduleEditor->getModuleMidiNoteString(true), midiNoteRect.withWidth(area.getWidth() - 10), juce::Justification::centredRight, 1);
+
+    //g.drawFittedText("Chan", midiChanRect, juce::Justification::centredLeft, 1);
+    //g.drawFittedText(juce::String(moduleEditor->getModuleMidiChannel()), midiChanRect, juce::Justification::centredRight, 1);
+}
+
+//============================================================================================================================
+
+KrumModuleEditor::PitchSlider::PitchSlider(KrumModuleEditor& e)
+    : editor(e), InfoPanelSlider("Pitch", "Click and Drag to shift the pitch by semi-tones, double-click to go back to zero")
+{
+    setSliderStyle(juce::Slider::LinearBarVertical);
+
+    setVelocityBasedMode(true);
+    setVelocityModeParameters();
+    setDoubleClickReturnValue(true, 0);
+
+
+}
+KrumModuleEditor::PitchSlider::~PitchSlider()
+{
+}
+
+void KrumModuleEditor::PitchSlider::paint(juce::Graphics& g)
+{
+    auto bounds = getLocalBounds().toFloat();
+    auto h = bounds.getHeight();
+    auto w = bounds.getWidth();
+    auto len = juce::jmin(h, w) * 0.15f;
+    auto thick = len / 1.8f;
+    int titleH = 12;
+
+    auto bgColor = findColour(juce::Slider::ColourIds::backgroundColourId);
+    auto textColor = findColour(juce::Slider::ColourIds::textBoxTextColourId);
+
+    if (isMouseOverOrDragging())
+    {
+        bgColor = bgColor.withAlpha(0.7f);
+        textColor = textColor.withAlpha(0.7f);
+    }
+
+    g.setColour(bgColor);
+    g.fillRoundedRectangle(bounds, 5.0f);
+
+    g.setColour(textColor);
+
+    g.drawFittedText(getTextFromValue(getValue()), bounds.withTop(titleH).reduced(2).toNearestInt(), juce::Justification::centred, 1);
+
+    g.setFont({editor.buttonTextSize + 0.7f});
+    g.drawFittedText("Pitch", bounds.withBottom(titleH).toNearestInt(), juce::Justification::centred, 1);
+}
+
+void KrumModuleEditor::PitchSlider::mouseDown(const juce::MouseEvent& e)
+{
+
+   setMouseCursor(juce::MouseCursor::NoCursor);
+   InfoPanelSlider::mouseDown(e);
+}
+
+
+void KrumModuleEditor::PitchSlider::mouseUp(const juce::MouseEvent& e)
+{
+
+    juce::Desktop::getInstance().getMainMouseSource().setScreenPosition(e.source.getLastMouseDownPosition());
+
+    setMouseCursor(juce::MouseCursor::NormalCursor);
+    InfoPanelSlider::mouseUp(e);
+}
+
+//void KrumModuleEditor::PitchSlider::mouseExit(const juce::MouseEvent& e)
+//{
+//    editor.setPitchSliderVisibility(false);
+//}
+
+//=======================================================================================
+
+KrumModuleEditor::CustomToggleButton::CustomToggleButton(juce::String title, juce::String message, KrumModuleEditor& e)
+    : InfoPanelTextButton(title, message), editor(e)
+{
+}
+
+KrumModuleEditor::CustomToggleButton::~CustomToggleButton()
+{
+}
+
+void KrumModuleEditor::CustomToggleButton::paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted, const bool shouldDrawButtonAsDown)
+{
+    auto area = getLocalBounds();
+    int titleH = 10;
+    bool buttonOn = getToggleState();
+
+    auto bgColor = findColour(buttonOn ? juce::TextButton::ColourIds::buttonOnColourId : juce::TextButton::ColourIds::buttonColourId);
+    auto textColor = findColour(buttonOn ? juce::TextButton::ColourIds::textColourOnId : juce::TextButton::ColourIds::textColourOffId);
+
+    if (isMouseOver())
+    {
+        bgColor = bgColor.withAlpha(0.7f);
+        textColor = textColor.withAlpha(0.7f);
+    }
+
+    g.setColour(bgColor);
+    g.fillRoundedRectangle(area.toFloat(), 5.0f);
+
+    g.setColour(textColor);
+    g.setFont({editor.buttonTextSize});
+    g.drawFittedText(getButtonText(), area/*.withY(3).withBottom(titleH)*/.reduced(3), juce::Justification::centred, 1);
+
 }

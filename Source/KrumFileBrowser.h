@@ -372,6 +372,8 @@ public:
     //give the browser an address for the modulecontainer so we can tell it where the mouse is, specifically when dragging,  and it can tell the modules what to do 
     void assignModuleContainer(KrumModuleContainer* newContainer);
 
+    juce::Colour getConnectedLineColor();
+
 private:
 
     class CustomFileChooser : public juce::FileChooser
@@ -408,8 +410,11 @@ private:
 
     std::unique_ptr<KrumTreeHeaderItem> rootNode;
 
+
     juce::Colour fontColor{ juce::Colours::darkgrey };
     juce::Colour bgColor{ juce::Colours::black };
+    juce::Colour conLineColor{ juce::Colours::darkgrey };
+
 
     SimpleAudioPreviewer* previewer;
 
@@ -442,6 +447,8 @@ public:
     void buildDemoKit();
 
 private:
+
+    juce::ValueTree& fileBrowserValueTree;
 
     KrumTreeView fileTree;
 
