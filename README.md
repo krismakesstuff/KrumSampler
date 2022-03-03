@@ -4,7 +4,7 @@
 
 ![image](https://github.com/krismakesstuff/KrumSampler/blob/dev/Screen%20Shot%202022-03-03%20at%2010.48.08%20AM.png)
 
-## Newest Update: 1.4.0-beta [Release](https://github.com/krismakesstuff/KrumSampler/releases/tag/1.3.0-beta)
+## Newest Update: 1.4.0-beta [Release](https://github.com/krismakesstuff/KrumSampler/releases/tag/1.4.0-beta)
 - Check out my update [video](https://www.youtube.com/watch?v=LSDDeG-BdvY) 
 - You can also check out the 1.3.0 [video](https://www.youtube.com/watch?v=9vDSEBo0MJI) , it has a little more in-depth look at the features
 
