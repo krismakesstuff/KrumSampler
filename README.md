@@ -8,6 +8,7 @@
 - Check out my update [video](https://www.youtube.com/watch?v=LSDDeG-BdvY) 
 - You can also check out the 1.3.0 [video](https://www.youtube.com/watch?v=9vDSEBo0MJI) , it has a little more in-depth look at the features
 
+
 ## goals/motivations
 - I'm a working music [producer-engineer](https://krismakesmusic.com/) in NYC and I wanted to have complete control over my drum programming workflow.
 - Too often, drum sampling plug-ins are just way too complicated from a UI standpoint, so I wanted it to be simple and quick to use.
@@ -40,8 +41,10 @@
 ## How to use KrumSampler
 
 ### - video walkthrough
+
 - easiest way to see all the features is to watch [this](https://www.youtube.com/watch?v=LSDDeG-BdvY)
 - most of this is covered in the video, this is here for reference
+
 
 ### - info panel
 - This responds to your mouse's position and gives a brief decscription of what you are hovering over. 
@@ -84,6 +87,11 @@
 - You can additionally "hot swap" samples by dragging a sample from the file browser and dropping it on the thumbnail of the desired module.
   - This makes it SUPER easy to change samples out. This is safe to do while playing, so loop your beat in your DAW and swap out the samples as you see fit. 
   - It must be a file from the File Browser, for now the swapping doesn't support external drag and drops.
+### - aux outputs (new in 1.3.0-beta)
+- each module has it's own output. By default, everything goes out 1-2. But you have the ability to bus out your modules in groups or however you see fit.
+  -  You have to set up channels in your DAW to recieve these outputs. If you don't know how to do that, I show it in my walkthrough video. It's very easy, and let's you put your own plug-ins on seperate outputs of the sampler. 
+  - You have to use them in consecutive order. Meaning, you can't have modules outputting to Output 5-6, without first having a module use Output 3-4.
+  - For AU: you'll have to use the Multi-Output version when instantiating your plugin. In Logic, you then have to go to the mix window and create Aux channels. 
 ### - hide browser
 - Once you are up and running you can make the window smaller by hiding the File Browser. This gives you some more screen real estate to program your midi and interact with your DAW. 
   - Click the arrow button on the left side of the plug-in to accomplish this. It will also disable the Info Panel.
