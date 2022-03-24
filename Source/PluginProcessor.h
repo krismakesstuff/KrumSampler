@@ -36,7 +36,7 @@
 #define MAX_FILE_LENGTH_SECS 3
 #define NUM_AUX_OUTS 20                     //mono channels
 #define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
-#define KRUM_BUILD_VERSION "1.4.0-Beta"     //
+#define KRUM_BUILD_VERSION "1.5.0-Beta"     //File Browser Update
 
 
 //The general Tree structure
@@ -234,6 +234,9 @@ private:
     KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this, previewer };
     KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree};
     
+    //juce::detail::FloatVectorOperationsBase
+
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessor)
 };

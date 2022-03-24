@@ -219,14 +219,14 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     previewer.assignSampler(&sampler);
 
 
-
     juce::Logger::writeToLog("----------------------------");
     juce::Logger::writeToLog("Sampler Processor Constructed");
+    juce::Logger::writeToLog("Build Version: " + juce::String(KRUM_BUILD_VERSION));
+    juce::Logger::writeToLog("Juce Build Version: " + juce::String(JUCE_BUILDNUMBER));
     juce::Logger::writeToLog("MaxNumModules: " + juce::String(MAX_NUM_MODULES));
     juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
     juce::Logger::writeToLog("MaxFileLengthInSeconds: " + juce::String(MAX_FILE_LENGTH_SECS));
     juce::Logger::writeToLog("----------------------------");
-
 
 }
 

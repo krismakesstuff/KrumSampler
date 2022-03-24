@@ -26,12 +26,12 @@ void InfoPanel::paint (juce::Graphics& g)
     float cornerSize = 3.0f;
     auto panelBG = area/*.reduced(5)*/.toFloat();
     
-    //bg fill
-    g.setColour(bgColor);
-    g.fillRoundedRectangle(panelBG, cornerSize);
-
     if (showText)
     {
+        //bg fill
+        //g.setColour(bgColor.withAlpha(0.1f));
+        //g.fillRoundedRectangle(panelBG, cornerSize);
+        
         auto messageFont = g.getCurrentFont();
         
         //title

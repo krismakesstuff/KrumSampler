@@ -138,11 +138,12 @@ private:
     const juce::Font defaultFont{ "Calibri", 11.0f, juce::Font::FontStyleFlags::plain };
 
     juce::Rectangle<int> modulesBG;
-    juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.99f) };
+    juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.5f) };
     juce::Colour outlineColor{ juce::Colours::white };
     juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
-    juce::Colour bgColor{ juce::Colours::black };
+    //juce::Colour bgColor{juce::Colours::darkgrey.darker(0.999999f)};
+    juce::Colour bgColor{ juce::Colours::black.withBrightness(0.09f) };
     juce::Colour outputThumbColor{ juce::Colours::cadetblue };
     juce::Colour outputTrackColor{ juce::Colours::darkgrey };
     juce::Colour mainFontColor{ juce::Colours::white };

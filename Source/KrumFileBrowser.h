@@ -245,7 +245,7 @@ private:
     JUCE_LEAK_DETECTOR(KrumTreeHeaderItem)
 };
 
-//just so the connecting lines will draw to the bottom, purely for visual purposes
+//just so the connecting lines will draw to the bottom, purely for visual purposes (not using)
 class DummyTreeItem : public juce::TreeViewItem
 {
 public:

@@ -17,7 +17,6 @@
 
 class KrumTreeHeaderItem;
 
-
 KrumTreeItem::KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name)
         : previewer(preview), parentTree(parentTreeView), InfoPanelComponent("File", "Files can be renamed or removed from this browser. NOTE: these aren't you're actual files, so any changes made aren't making changes to the actual file.")
 {
@@ -551,7 +550,6 @@ void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e
 
 void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
-
     //double clicks are being called twice on Mac.. this is a work around until I find the actual issue.
 #if JUCE_WINDOWS
     owner.itemDoubleClicked(e);
@@ -1446,8 +1444,6 @@ void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
 
 }
 
-
-
 KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName)
 {
     if (item->mightContainSubItems())
@@ -1519,7 +1515,7 @@ KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTre
     addFavoriteButton.onClick = [this] { fileTree.pickNewFavorite(); };
 
     //addFavoriteButton.setConnectedEdges(juce::Button::ConnectedOnBottom);
-    addFavoriteButton.setColour(juce::TextButton::buttonColourId, juce::Colours::black);
+    addFavoriteButton.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
     addFavoriteButton.setColour(juce::TextButton::buttonOnColourId, fontColor.contrasting(0.2f));
     addFavoriteButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
 
@@ -1529,9 +1525,7 @@ KrumFileBrowser::KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTre
 
 
 KrumFileBrowser::~KrumFileBrowser()
-{
-
-}
+{}
 
 void KrumFileBrowser::paint(juce::Graphics& g)
 {

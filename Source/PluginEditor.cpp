@@ -105,6 +105,9 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
         infoButtonClicked();
     }
 
+    //Do this! Need to set some maxes and account for browser hidden size
+    //setResizable(true, true);
+
     if (collapseBrowserButton.getToggleState())
     {
         //Browser is Hidden
@@ -135,46 +138,57 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     float gain = outputGainSlider.valueToProportionOfLength(getOutputGainValue());
     auto outputGainProp = 1 - parameters.getParameter(TreeIDs::outputGainParam)->convertTo0to1(gain);
 
-    auto bgGrade = juce::ColourGradient::vertical(bgColor, bgColor.brighter(0.1f), area);
-    bgGrade.addColour(juce::jlimit<double>(0.00001, 0.9999, outputGainProp), bgColor.brighter(0.077f));
+    auto bgGrade = juce::ColourGradient::vertical(bgColor.darker(0.2f), bgColor.brighter(0.0099f), area);
+    bgGrade.addColour(juce::jlimit<double>(0.00001, 0.9999, outputGainProp), bgColor.brighter(0.037f));
 
     g.setGradientFill(bgGrade);
     g.fillRect(area);
     
+    //Title Image
     auto titleRect = area.withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).withCentre({area.getCentreX(), EditorDimensions::topBar / 2}).toFloat();
-
     g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xMid );
 
-    auto moduleBGGrade = juce::ColourGradient::vertical(modulesBGColor.darker(0.2f), modulesBGColor, modulesBG);
+    auto moduleBGGrade = juce::ColourGradient::vertical(modulesBGColor.darker(0.1f), modulesBGColor, modulesBG);
 
-    //g.setGradientFill(moduleBGGrade);
+
+    //Module Container Outline
+    g.setColour(juce::Colours::black);
+    g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     //g.fillRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize);
-
-    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    
+    //Module Container Fill
+    g.setColour(juce::Colours::black.withAlpha(0.03f));
     g.fillRoundedRectangle(modulesViewport.getBounds().toFloat(), EditorDimensions::cornerSize);
     
-    g.setColour(juce::Colours::grey.brighter(0.2f));
-    g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centredRight, 1);
-    //g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
 
-    //g.setColour(backOutlineColor);
-    g.setColour(juce::Colours::black.withAlpha(0.9f));
+    //Output Slider Outline
+    //g.setColour(juce::Colours::black.withAlpha(0.9f));
+    g.setColour(juce::Colours::black);
     g.drawRoundedRectangle(outputGainSlider.getBounds().withTop(modulesBG.getY() ).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     
+    //FileBrowser Outline
     if (!collapseBrowserButton.getToggleState())
     {
-        g.setColour(juce::Colours::black.withAlpha(0.6f));
+        //g.setColour(juce::Colours::black.withAlpha(0.6f));
+        g.setColour(juce::Colours::black);
         g.drawRoundedRectangle(fileBrowser.getBounds().withY(fileBrowser.getBounds().getY()).withBottom(fileBrowser.getBounds().getBottom()).expanded(EditorDimensions::extraShrinkage(1), EditorDimensions::extraShrinkage(1)).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     }
     
+
+    //Output Label
     g.setColour(mainFontColor);
     g.setFont(22.0f);
-    g.drawFittedText("Output", area.withTop(modulesBG.getY()).withLeft(modulesBG.getRight()).withRight(outputGainSlider.getRight()).withBottom(outputGainSlider.getY()),
+    g.drawFittedText("Output", area.withTop(modulesBG.getY()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(outputGainSlider.getRight()).withBottom(outputGainSlider.getY()),
                     juce::Justification::centred,1);
 
     //juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
+    
+    //made-by text
+    g.setFont(17.0f);
+    g.setColour(juce::Colours::grey.brighter(0.2f));
+    g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centredRight, 1);
 
-    //Version
+    //Version text
     g.setColour(juce::Colours::red.darker());
     g.setFont(16.0f);
     juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
@@ -187,6 +201,9 @@ void KrumSamplerAudioProcessorEditor::resized()
     auto area = getLocalBounds();
     int infoButtonSize = 21;
     
+    //..?
+    //using namespace EditorDimensions;
+
     websiteButton.setBounds(EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY() + (EditorDimensions::madeByArea.getHeight() / 2) + 5).withHeight(EditorDimensions::madeByArea.getHeight() * 0.75f).withWidth(EditorDimensions::madeByArea.getWidth() + 10));
     infoButton.setBounds(area.getRight() - (websiteButton.getWidth() + (infoButtonSize * 2)), EditorDimensions::madeByArea.getY() + 20, infoButtonSize, infoButtonSize);
     
@@ -207,7 +224,7 @@ void KrumSamplerAudioProcessorEditor::resized()
     moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
     moduleContainer.refreshModuleLayout();
 
-    outputGainSlider.setBounds(area.withTop(EditorDimensions::extraShrinkage(20)).withBottom(modulesBG.getBottom()).withLeft(modulesBG.getRight()).withRight(area.getRight() - EditorDimensions::extraShrinkage(2)));
+    outputGainSlider.setBounds(area.withTop(EditorDimensions::extraShrinkage(20)).withBottom(modulesBG.getBottom()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(area.getRight() - EditorDimensions::extraShrinkage(2)));
     keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
 
     collapseBrowserButton.setBounds(area.withTop(area.getHeight() / 2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
