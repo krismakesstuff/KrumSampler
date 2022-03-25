@@ -45,7 +45,7 @@ public:
     float fromText(juce::String text);
 
 
-    void loadFile(juce::File& fileToPreview);
+    void loadFile(juce::File fileToPreview);
     juce::AudioFormatManager* getFormatManager();
 
     void saveToggleState();

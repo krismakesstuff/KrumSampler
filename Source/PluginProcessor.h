@@ -10,7 +10,6 @@
 
 #include <JuceHeader.h>
 #include "KrumSampler.h"
-#include "KrumFileBrowser.h"
 #include "SimpleAudioPreviewer.h"
 
 
@@ -87,12 +86,13 @@ namespace TreeIDs
 
             DECLARE_ID(RECENT)
             DECLARE_ID(FAVORITES)
-
                 DECLARE_ID(Folder)
+                    DECLARE_ID(folderName)
+                    DECLARE_ID(folderPath)
+                    DECLARE_ID(hiddenFiles)
                 DECLARE_ID(File)
-
-                    DECLARE_ID(FileName)
-                    DECLARE_ID(FilePath)
+                    DECLARE_ID(fileName)
+                    DECLARE_ID(filePath)
 
             DECLARE_ID(OPENSTATE)
 
@@ -202,7 +202,9 @@ public:
     int getNumModulesInSampler();
 
     juce::AudioThumbnailCache& getThumbnailCache();
-    KrumFileBrowser& getFileBrowser();
+    //KrumFileBrowser& getFileBrowser();
+    SimpleAudioPreviewer* getAudioPreviewer();
+
 
 private:
     
@@ -232,7 +234,6 @@ private:
   
     SimpleAudioPreviewer previewer{formatManager, valueTree, parameters};
     KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this, previewer };
-    KrumFileBrowser fileBrowser{previewer, fileBrowserValueTree};
     
     //juce::detail::FloatVectorOperationsBase
 

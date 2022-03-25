@@ -14,6 +14,7 @@
 #include "KrumModule.h"
 #include "KrumKeyboard.h"
 #include "KrumLookAndFeel.h"
+#include "KrumFileBrowser.h"
 #include "KrumModuleContainer.h"
 #include "InfoPanel.h"
 
@@ -161,7 +162,7 @@ private:
  
     KrumSamplerAudioProcessor& audioProcessor;
     KrumSampler& sampler;
-    KrumFileBrowser& fileBrowser;
+    KrumFileBrowser fileBrowser{valueTree.getChildWithName(TreeIDs::FILEBROWSERTREE)};
 
     KrumModuleContainer moduleContainer{this, valueTree};
     KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer, valueTree };

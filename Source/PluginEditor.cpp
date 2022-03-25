@@ -13,9 +13,10 @@
 
 //==============================================================================
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valTree, juce::ValueTree& fileBrowserTree)
-    : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), fileBrowser(audioProcessor.getFileBrowser()), valueTree(valTree)
+    : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), valueTree(valTree)
 {
     
+
     titleImage = juce::ImageFileFormat::loadFrom(BinaryData::KrumSamplerTitle_png, BinaryData::KrumSamplerTitle_pngSize);
 
     auto& laf = getLookAndFeel();
@@ -57,10 +58,13 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     modulesViewport.setInterceptsMouseClicks(true, true);
     modulesViewport.setScrollBarsShown(false, true, false, false);
     
-    fileBrowser.assignModuleContainer(&moduleContainer);
     addAndMakeVisible(InfoPanel::shared_instance());
-    addAndMakeVisible(fileBrowser);
     
+    fileBrowser.assignAudioPreviewer(audioProcessor.getAudioPreviewer());
+    fileBrowser.rebuildBrowser();
+    fileBrowser.assignModuleContainer(&moduleContainer);
+    fileBrowser.buildDemoKit();
+    addAndMakeVisible(fileBrowser);
 
     auto collapseLeftIm = juce::Drawable::createFromImageData(BinaryData::chevron_left_black_24dp_svg, BinaryData::chevron_left_black_24dp_svgSize);
     auto collapseRightIm = juce::Drawable::createFromImageData(BinaryData::chevron_right_black_24dp_svg, BinaryData::chevron_right_black_24dp_svgSize);
@@ -92,7 +96,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     keyboard.scrollToKey(keyboard.getLowestKey());
     keyboard.repaint();
 
-    fileBrowser.buildDemoKit();
     
     setPaintingIsUnclipped(true);
     

@@ -138,7 +138,7 @@ void SimpleAudioPreviewer::updateBubbleComp(juce::Slider* slider, juce::Componen
     slider->setTooltip(slider->getTextFromValue(slider->getValue()));
 }
 
-void SimpleAudioPreviewer::loadFile(juce::File& fileToPreview)
+void SimpleAudioPreviewer::loadFile(juce::File fileToPreview)
 {
     if (sampler != nullptr && fileToPreview.existsAsFile())
     {

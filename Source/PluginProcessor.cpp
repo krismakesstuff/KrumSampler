@@ -305,13 +305,16 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
             {
                 fileBrowserValueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlFileBrowserTree), nullptr);
                 xmlState->removeChildElement(xmlFileBrowserTree, true);
-                fileBrowser.rebuildBrowser(fileBrowserValueTree);
+                /*if (getActiveEditor())
+                {
+                    fileBrowser.rebuildBrowser(fileBrowserValueTree);
+                }*/
             }
 
             //Remaining App/Modules Settings
             valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr);
             updateModulesFromValueTree();
-            fileBrowser.getAudioPreviewer()->refreshSettings();
+            previewer.refreshSettings();
 
             DBG("---SET STATE---");
             DBG(juce::ValueTree::fromXml(*xmlState).toXmlString());
@@ -382,9 +385,14 @@ juce::AudioThumbnailCache& KrumSamplerAudioProcessor::getThumbnailCache()
     return thumbnailCache.get();
 }
 
-KrumFileBrowser& KrumSamplerAudioProcessor::getFileBrowser()
+//KrumFileBrowser& KrumSamplerAudioProcessor::getFileBrowser()
+//{
+//    return fileBrowser;
+//}
+
+SimpleAudioPreviewer* KrumSamplerAudioProcessor::getAudioPreviewer()
 {
-    return fileBrowser;
+    return &previewer;
 }
 
 void KrumSamplerAudioProcessor::registerFormats()

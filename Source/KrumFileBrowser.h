@@ -38,14 +38,14 @@ class SimpleAudioPreviewer;
 class KrumModuleContainer;
 
 //strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
-namespace FileBrowserValueTreeIds
-{
-    //Probably should move these into the DECLARE_IDs section in Plugin processor.
-    static const juce::String itemNameId{ "name" };
-    static const juce::String pathId{ "path" };
-    static const juce::String hiddenFilesId{ "hiddenFiles" };
-
-}
+//namespace FileBrowserValueTreeIds
+//{
+//    //Probably should move these into the DECLARE_IDs section in Plugin processor.
+//    //static const juce::String itemNameId{ "name" };
+//    //static const juce::String pathId{ "path" };
+//    //static const juce::String hiddenFilesId{ "hiddenFiles" };
+//
+//}
 
 namespace FileBrowserInfoStrings
 {
@@ -87,8 +87,9 @@ class KrumTreeItem :    public juce::TreeViewItem,
     
 {
 public:
-    KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name = juce::String());
-   
+    //KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name = juce::String());
+    KrumTreeItem(juce::ValueTree& fileValueTree, KrumTreeView* parentTreeView, SimpleAudioPreviewer* previewer);
+
     bool mightContainSubItems() override;
     
     std::unique_ptr<juce::Component> createItemComponent() override;
@@ -102,8 +103,10 @@ public:
 
     juce::String getUniqueName() const override;
     
-    juce::File& getFile();
-    juce::String getItemName();
+    juce::String getFilePath() const;
+    juce::String getItemName() const;
+
+    juce::File getFile();
 
     void setItemName(juce::String newName);
     bool isItemEditing();
@@ -117,12 +120,13 @@ public:
 
 private:
 
-    juce::File file;
-    juce::String itemName;
 
     bool editing = false;
     
-    KrumTreeView* parentTree;
+    KrumTreeView* parentTreeView;
+
+    juce::ValueTree& fileValueTree;
+
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     SimpleAudioPreviewer* previewer;
 
@@ -131,7 +135,8 @@ private:
     class EditableComp : public juce::Label
     {
     public:
-        EditableComp(KrumTreeItem& o, juce::String itemName, juce::Colour backColor = juce::Colour{});
+        //EditableComp(KrumTreeItem& o, juce::String itemName, juce::Colour backColor = juce::Colour{});
+        EditableComp(KrumTreeItem& o, juce::Colour backColor = juce::Colour{});
 
         void paint(juce::Graphics& g) override;
 
@@ -168,7 +173,8 @@ class KrumTreeHeaderItem :  public juce::TreeViewItem,
                             //public juce::Component
 {
 public:
-    KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name = juce::String(), int numFilesHidden = 0);
+    //KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name = juce::String(), int numFilesHidden = 0);
+    KrumTreeHeaderItem(juce::ValueTree& folderValueTree, KrumTreeView* pTree);
 
     bool mightContainSubItems() override;
 
@@ -181,9 +187,14 @@ public:
     void itemClicked(const juce::MouseEvent& e) override;
     void itemDoubleClicked(const juce::MouseEvent& e) override;
 
-    juce::File& getFile();
-    juce::String getItemHeaderName();
+
+    juce::String getFolderPath() const;
+    juce::String getItemHeaderName() const;
     void setItemHeaderName(juce::String newName);
+    void setNumFilesExcluded(int numFilesHidden);
+    int getNumFilesExcluded();
+
+    juce::File getFile();
 
     juce::String getUniqueName() const override;
 
@@ -199,28 +210,24 @@ public:
     void tellParentToRemoveMe();
     void clearAllChildren();
 
-    void setNumFilesExcluded(int numFilesHidden);
-    int getNumFilesExcluded();
 
 private:
 
-    KrumTreeView* parentTree;
+    KrumTreeView* parentTreeView;
 
-    juce::File file;
-    juce::String headerName;
+    juce::ValueTree& folderValueTree;
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker(0.6f) };
 
     bool editable = true;
     bool editing = false;
-    int numFilesExcluded;
 
-    //-------------------------------------
+    //--------------------------------------------------------------------------------------
     
     class EditableHeaderComp : public juce::Label
     {
     public:
-        EditableHeaderComp(KrumTreeHeaderItem& o, juce::String itemName, juce::Colour backColor = juce::Colour{});
+        EditableHeaderComp(KrumTreeHeaderItem& o, juce::Colour backColor = juce::Colour{});
         void paint(juce::Graphics& g) override;
 
         void textWasEdited() override;
@@ -256,7 +263,28 @@ public:
     JUCE_LEAK_DETECTOR(DummyTreeItem)
 };
 
-//---------------------------------
+class SectionHeader :   public juce::TreeViewItem,
+                        public InfoPanelComponent
+{
+public:
+    SectionHeader(juce::ValueTree& sectionValueTree, KrumTreeView* rootItem);
+    ~SectionHeader() override;
+
+    bool mightContainSubItems() override;
+
+    void itemClicked(const juce::MouseEvent& e) override;
+
+    static void handleResult(int result, SectionHeader* comp);
+
+private:
+
+    juce::ValueTree& sectionValueTree;
+    KrumTreeView* parentTreeView;
+
+};
+
+
+//--------------------------------------------------------------------------------------------------------------
 //Sorting class, doesn't seem to be working correctly at the moment. Only sorting (trying) folders first, but could do alpha
 class FileBrowserSorter
 {
@@ -308,12 +336,17 @@ public:
 
 //This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
 class KrumTreeView :    public juce::TreeView,
-                        public juce::DragAndDropContainer
+                        public juce::DragAndDropContainer,
+                        public juce::ValueTree::Listener
 {
 public:
 
     KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev);
     ~KrumTreeView();
+
+    void valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property) override;
+
+    void valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval) override;
 
     void paint(juce::Graphics& g) override;
 
@@ -332,18 +365,18 @@ public:
     void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
 
     
-    void reCreateFileBrowserFromTree();
-    void reCreateFavoriteFolder(juce::ValueTree& tree, juce::String name, juce::String fullPath, int hiddenFiles);
-    void reCreateFavoriteFile(juce::String name, juce::String fullPath);
+    void reCreateFileBrowserFromValueTree();
+    void reCreateFavoriteFolder(juce::ValueTree& tree);
+    void reCreateFavoriteFile(juce::ValueTree& fileValueTree);
     void reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
-    void reCreateRecentFile(juce::String name, juce::String fullPath);
+    void reCreateRecentFile(juce::ValueTree& fileValueTree);
     
     void sortFiles(FileBrowserSortingIds sortingId = FileBrowserSortingIds::folders_Id);
 
     void addDummyChild(juce::TreeViewItem* nodeToAddTo = nullptr);
     bool hasAudioFormat(juce::String fileExtension);
 
-    void updateValueTree(juce::String idString);
+    //void updateValueTree(juce::String idString);
     void removeValueTreeItem(juce::String fullPathName, FileBrowserSectionIds browserSection);
     juce::ValueTree findTreeItem(juce::ValueTree parentTree, juce::String fullPathName);
     void updateOpenness();
@@ -360,7 +393,7 @@ public:
     bool areAnyItemsBeingEdited();
 
     juce::ValueTree& getFileBrowserValueTree();
-    KrumTreeHeaderItem* getRootNode();
+    SectionHeader* getRootNode();
 
     KrumTreeHeaderItem* findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName);
     KrumTreeHeaderItem* makeHeaderItem(juce::TreeViewItem* item);
@@ -369,7 +402,7 @@ public:
 
     bool doesFolderExistInBrowser(juce::String fullPathName);
 
-    //give the browser an address for the modulecontainer so we can tell it where the mouse is, specifically when dragging,  and it can tell the modules what to do 
+    //gives the browser an address to the KrumModuleContainer so we know which modules are being dragged over
     void assignModuleContainer(KrumModuleContainer* newContainer);
 
     juce::Colour getConnectedLineColor();
@@ -408,7 +441,8 @@ private:
     
     juce::ValueTree& fileBrowserValueTree;
 
-    std::unique_ptr<KrumTreeHeaderItem> rootNode;
+    //std::unique_ptr<KrumTreeHeaderItem> rootItem;
+    std::unique_ptr<SectionHeader> rootItem;
 
 
     juce::Colour fontColor{ juce::Colours::darkgrey };
@@ -428,7 +462,7 @@ class KrumFileBrowser : public InfoPanelComponent
 {
 public:
 
-    KrumFileBrowser(SimpleAudioPreviewer& previewer, juce::ValueTree& fileBroswerValueTree/*, juce::AudioFormatManager& formatManager*/);
+    KrumFileBrowser(juce::ValueTree& fileBroswerValueTree/*, juce::AudioFormatManager& formatManager*/);
     ~KrumFileBrowser();
 
     void paint(juce::Graphics& g) override;
@@ -441,24 +475,27 @@ public:
 
     bool doesPreviewerSupport(juce::String fileExtension);
     SimpleAudioPreviewer* getAudioPreviewer();
+    
+    void assignAudioPreviewer(SimpleAudioPreviewer* previewer);
     void assignModuleContainer(KrumModuleContainer* container);
 
-    void rebuildBrowser(juce::ValueTree& newTree);
+    void rebuildBrowser();
     void buildDemoKit();
 
 private:
 
     juce::ValueTree& fileBrowserValueTree;
 
-    KrumTreeView fileTree;
+    KrumTreeView treeView;
 
-    SimpleAudioPreviewer& audioPreviewer;
+    SimpleAudioPreviewer* audioPreviewer;
   
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
     juce::Colour fontColor{ juce::Colours::lightgrey };
     
     int titleH = 30;
+    int previewerH = 45;
 
 #if JucePlugin_Build_Standalone
     juce::File demoKit;
