@@ -125,7 +125,7 @@ private:
     
     KrumTreeView* parentTreeView;
 
-    juce::ValueTree& fileValueTree;
+    juce::ValueTree fileValueTree;
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     SimpleAudioPreviewer* previewer;
@@ -187,7 +187,6 @@ public:
     void itemClicked(const juce::MouseEvent& e) override;
     void itemDoubleClicked(const juce::MouseEvent& e) override;
 
-
     juce::String getFolderPath() const;
     juce::String getItemHeaderName() const;
     void setItemHeaderName(juce::String newName);
@@ -215,7 +214,7 @@ private:
 
     KrumTreeView* parentTreeView;
 
-    juce::ValueTree& folderValueTree;
+    juce::ValueTree folderValueTree;
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker(0.6f) };
 
@@ -270,6 +269,10 @@ public:
     SectionHeader(juce::ValueTree& sectionValueTree, KrumTreeView* rootItem);
     ~SectionHeader() override;
 
+    void paintOpenCloseButton(juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour bgColor, bool isMouseOver) override;
+
+    void paintItem(juce::Graphics& g, int width, int height) override;
+
     bool mightContainSubItems() override;
 
     void itemClicked(const juce::MouseEvent& e) override;
@@ -278,7 +281,7 @@ public:
 
 private:
 
-    juce::ValueTree& sectionValueTree;
+    juce::ValueTree sectionValueTree;
     KrumTreeView* parentTreeView;
 
 };
@@ -406,6 +409,8 @@ public:
     void assignModuleContainer(KrumModuleContainer* newContainer);
 
     juce::Colour getConnectedLineColor();
+    juce::Colour getFontColor();
+
 
 private:
 
@@ -462,7 +467,8 @@ class KrumFileBrowser : public InfoPanelComponent
 {
 public:
 
-    KrumFileBrowser(juce::ValueTree& fileBroswerValueTree/*, juce::AudioFormatManager& formatManager*/);
+    KrumFileBrowser(juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager, 
+                    juce::ValueTree& stateTree, juce::AudioProcessorValueTreeState& apvts, KrumSampler& s);
     ~KrumFileBrowser();
 
     void paint(juce::Graphics& g) override;
@@ -474,12 +480,12 @@ public:
     void addFileToRecent(const juce::File file, juce::String name); 
 
     bool doesPreviewerSupport(juce::String fileExtension);
-    SimpleAudioPreviewer* getAudioPreviewer();
+    //SimpleAudioPreviewer* getAudioPreviewer();
     
-    void assignAudioPreviewer(SimpleAudioPreviewer* previewer);
+    //void assignAudioPreviewer(SimpleAudioPreviewer* previewer);
     void assignModuleContainer(KrumModuleContainer* container);
 
-    void rebuildBrowser();
+    void rebuildBrowser(juce::ValueTree& newTree);
     void buildDemoKit();
 
 private:
@@ -488,8 +494,12 @@ private:
 
     KrumTreeView treeView;
 
-    SimpleAudioPreviewer* audioPreviewer;
+    //SimpleAudioPreviewer* audioPreviewer;
+    SimpleAudioPreviewer audioPreviewer;
   
+    //SimpleAudioPreviewer previewer{ formatManager, valueTree, parameters };
+
+
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
     juce::Colour fontColor{ juce::Colours::lightgrey };

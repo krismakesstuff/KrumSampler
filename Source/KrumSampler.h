@@ -164,8 +164,9 @@ class KrumSampler : public juce::Synthesiser,
                     public juce::Timer
 {
 public:
-    KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, 
-                KrumSamplerAudioProcessor& o, SimpleAudioPreviewer& filePreviewer);
+    
+    KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, 
+                juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o);
     ~KrumSampler() override;
 
     void initModules(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
@@ -192,6 +193,8 @@ public:
     
     void addPreviewFile(juce::File& file);
     void playPreviewFile();
+
+    void assignPreveiwer(SimpleAudioPreviewer* previewer);
 
     bool isFileAcceptable(const juce::File& file, juce::int64& numSamplesOfFile);
 
@@ -220,7 +223,7 @@ private:
 
     juce::OwnedArray<KrumModule> modules;
 
-    SimpleAudioPreviewer& filePreviewer;
+    SimpleAudioPreviewer* filePreviewer = nullptr;
     juce::File currentPreviewFile;
 
     JUCE_LEAK_DETECTOR(KrumSampler)

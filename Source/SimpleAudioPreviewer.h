@@ -44,7 +44,6 @@ public:
     juce::String toText(double value);
     float fromText(juce::String text);
 
-
     void loadFile(juce::File fileToPreview);
     juce::AudioFormatManager* getFormatManager();
 

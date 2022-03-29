@@ -437,10 +437,10 @@ void PreviewVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int s
 
 
 //====================================================================================//
-KrumSampler::KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o, SimpleAudioPreviewer& fp)
-    :formatManager(fm), owner(o), filePreviewer(fp)
+KrumSampler::KrumSampler(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts, juce::AudioFormatManager& fm, KrumSamplerAudioProcessor& o)
+    :formatManager(fm), owner(o)/*, filePreviewer(fp)*/
 {
-    startTimerHz(30);
+    //startTimerHz(30);
 }
 
 KrumSampler::~KrumSampler()
@@ -601,7 +601,7 @@ void KrumSampler::addPreviewFile(juce::File& file)
         currentPreviewFile = file;
         removePreviewSound();
 
-        sounds.add(new PreviewSound(&filePreviewer, file.getFullPathName(), *reader, {}, 0, 0.001, 0.001, MAX_FILE_LENGTH_SECS));
+        sounds.add(new PreviewSound(filePreviewer, file.getFullPathName(), *reader, {}, 0, 0.001, 0.001, MAX_FILE_LENGTH_SECS));
         
     }
     else
@@ -640,6 +640,12 @@ void KrumSampler::playPreviewFile()
         }
     }
 
+}
+
+void KrumSampler::assignPreveiwer(SimpleAudioPreviewer* previewerToUse)
+{
+    filePreviewer = previewerToUse;
+    startTimerHz(30);
 }
 
 void KrumSampler::removePreviewSound()
@@ -700,10 +706,10 @@ juce::AudioFormatManager& KrumSampler::getFormatManager()
 
 void KrumSampler::timerCallback()
 {
-    if (filePreviewer.wantsToPlayFile())
+    if (filePreviewer->wantsToPlayFile())
     {
         playPreviewFile();
-        filePreviewer.setWantsToPlayFile(false);
+        filePreviewer->setWantsToPlayFile(false);
     }
 }
 

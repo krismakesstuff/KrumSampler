@@ -60,7 +60,7 @@ void DragAndDropThumbnail::itemDropped(const SourceDetails& dragSourceDetails)
 void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
 {
     canAcceptFile = false;
-    if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager()->findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
+    if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager().findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
     {
         droppedFile = newFile;
         moveDroppedFileToParent();

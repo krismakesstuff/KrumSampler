@@ -198,5 +198,6 @@ void SimpleAudioPreviewer::setWantsToPlayFile(bool wantsToPlay)
 void SimpleAudioPreviewer::assignSampler(KrumSampler* samplerToAssign)
 {
     sampler = samplerToAssign;
+    sampler->assignPreveiwer(this);
 }
 

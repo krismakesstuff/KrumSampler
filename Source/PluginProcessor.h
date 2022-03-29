@@ -203,7 +203,7 @@ public:
 
     juce::AudioThumbnailCache& getThumbnailCache();
     //KrumFileBrowser& getFileBrowser();
-    SimpleAudioPreviewer* getAudioPreviewer();
+    //SimpleAudioPreviewer* getAudioPreviewer();
 
 
 private:
@@ -229,14 +229,12 @@ private:
     };
 
     juce::SharedResourcePointer<ThumbnailCache> thumbnailCache;
-    
     juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
-  
-    SimpleAudioPreviewer previewer{formatManager, valueTree, parameters};
-    KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this, previewer };
     
-    //juce::detail::FloatVectorOperationsBase
+    //move this to file browser
+    //SimpleAudioPreviewer previewer{formatManager, valueTree, parameters};
 
+    KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessor)

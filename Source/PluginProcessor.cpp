@@ -216,7 +216,7 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     
     //value is blank here
     initSampler();
-    previewer.assignSampler(&sampler);
+    //previewer.assignSampler(&sampler);
 
 
     juce::Logger::writeToLog("----------------------------");
@@ -305,16 +305,23 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
             {
                 fileBrowserValueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlFileBrowserTree), nullptr);
                 xmlState->removeChildElement(xmlFileBrowserTree, true);
-                /*if (getActiveEditor())
+
+                DBG("File Browser Tree from Set State");
+                DBG(fileBrowserValueTree.toXmlString());
+
+                auto editor = static_cast<KrumSamplerAudioProcessorEditor*>(getActiveEditor());
+                if (editor)
                 {
-                    fileBrowser.rebuildBrowser(fileBrowserValueTree);
-                }*/
+                    auto fileBrowser = editor->getFileBrowser();
+                    fileBrowser->rebuildBrowser(fileBrowserValueTree);
+                    fileBrowser->buildDemoKit();
+                    //fileBrowser.rebuildBrowser(fileBrowserValueTree);
+                }
             }
 
             //Remaining App/Modules Settings
             valueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlState), nullptr);
             updateModulesFromValueTree();
-            previewer.refreshSettings();
 
             DBG("---SET STATE---");
             DBG(juce::ValueTree::fromXml(*xmlState).toXmlString());
@@ -390,10 +397,10 @@ juce::AudioThumbnailCache& KrumSamplerAudioProcessor::getThumbnailCache()
 //    return fileBrowser;
 //}
 
-SimpleAudioPreviewer* KrumSamplerAudioProcessor::getAudioPreviewer()
-{
-    return &previewer;
-}
+//SimpleAudioPreviewer* KrumSamplerAudioProcessor::getAudioPreviewer()
+//{
+//    return &previewer;
+//}
 
 void KrumSamplerAudioProcessor::registerFormats()
 {

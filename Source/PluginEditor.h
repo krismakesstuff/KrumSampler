@@ -105,7 +105,7 @@ public:
     void addKeyboardListener(juce::MidiKeyboardStateListener* listener);
     void removeKeyboardListener(juce::MidiKeyboardStateListener* listenerToRemove);
 
-    juce::AudioFormatManager* getAudioFormatManager();
+    juce::AudioFormatManager& getAudioFormatManager();
     juce::AudioThumbnailCache& getThumbnailCache();
 
     KrumSampler& getSampler();
@@ -162,7 +162,7 @@ private:
  
     KrumSamplerAudioProcessor& audioProcessor;
     KrumSampler& sampler;
-    KrumFileBrowser fileBrowser{valueTree.getChildWithName(TreeIDs::FILEBROWSERTREE)};
+    KrumFileBrowser fileBrowser; 
 
     KrumModuleContainer moduleContainer{this, valueTree};
     KrumKeyboard keyboard{ audioProcessor.getMidiState(), juce::MidiKeyboardComponent::Orientation::horizontalKeyboard, moduleContainer, valueTree };
