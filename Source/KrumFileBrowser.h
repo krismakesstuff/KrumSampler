@@ -37,7 +37,7 @@ class KrumTreeView;
 class FavoritesTreeView;
 class SimpleAudioPreviewer;
 class KrumModuleContainer;
-
+class FileChooser;
 //strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
 //namespace FileBrowserValueTreeIds
 //{
@@ -349,139 +349,6 @@ public:
     juce::Colour bgColor;
 };
 
-//This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
-class FavoritesTreeView :   public juce::TreeView,
-                            public juce::DragAndDropContainer,
-                            public juce::ValueTree::Listener
-{
-public:
-
-    FavoritesTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev);
-    ~FavoritesTreeView();
-
-    void valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property) override;
-
-    void valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval) override;
-
-    void paint(juce::Graphics& g) override;
-
-    juce::Rectangle<int> getTreeViewBounds();
-
-    void refreshChildren();
-    void deselectAllItems();
-
-    bool isInterestedInFileDrag(const juce::StringArray& files) override;
-    void filesDropped(const juce::StringArray& files, int x, int y) override;
-
-    void pickNewFavorite();
-    void addFileToRecent(juce::File file, juce::String name);
-    void createNewFavoriteFile(const juce::String& fullPathName); 
-    void createNewFavoriteFolder(const juce::String& fullPathName);
-    void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
-
-    
-    void reCreateFileBrowserFromValueTree();
-    void reCreateFavoriteFolder(juce::ValueTree& tree);
-    void reCreateFavoriteFile(juce::ValueTree& fileValueTree);
-    void reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
-    void reCreateRecentFile(juce::ValueTree& fileValueTree);
-    
-    void sortFiles(FileBrowserSortingIds sortingId = FileBrowserSortingIds::folders_Id);
-
-    void addDummyChild(juce::TreeViewItem* nodeToAddTo = nullptr);
-    bool hasAudioFormat(juce::String fileExtension);
-
-    //void updateValueTree(juce::String idString);
-    void removeValueTreeItem(juce::String fullPathName, FileBrowserSectionIds browserSection);
-    juce::ValueTree findTreeItem(juce::ValueTree parentTree, juce::String fullPathName);
-    void updateOpenness();
-
-    void clearRecent();
-    void clearFavorites();
-
-    void removeItem(juce::String idString);
-    void mouseDrag(const juce::MouseEvent& event) override;
-
-    void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details) override;
-
-    void setItemEditing(juce::String idString, bool isEditing);
-    bool areAnyItemsBeingEdited();
-
-
-    juce::Array<juce::ValueTree> getSelectedValueTrees();
-
-    juce::ValueTree& getFileBrowserValueTree();
-    SectionHeader* getRootNode();
-
-    KrumTreeHeaderItem* findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName);
-    KrumTreeHeaderItem* makeHeaderItem(juce::TreeViewItem* item);
-    KrumTreeItem* makeTreeItem(juce::TreeViewItem* item);
-    KrumTreeItem* makeTreeItem(juce::Component* item);
-
-    bool doesFolderExistInBrowser(juce::String fullPathName);
-
-    //gives the browser an address to the KrumModuleContainer so we know which modules are being dragged over
-    void assignModuleContainer(KrumModuleContainer* newContainer);
-
-    juce::Colour getConnectedLineColor();
-    juce::Colour getFontColor();
-
-
-private:
-
-    class CustomFileChooser : public juce::FileChooser
-    {
-    public:
-        CustomFileChooser(juce::String title, juce::File locationToShow, juce::String formats, FavoritesTreeView* ownerTree)
-            : juce::FileChooser(title, locationToShow, formats, false), owner(ownerTree)
-        {}
-
-        ~CustomFileChooser() { owner = nullptr;}
-
-        void showFileChooser(int flags)
-        {
-            if (fileChooserCallback)
-            {
-                launchAsync(flags, fileChooserCallback);
-            }
-            else
-            {
-                DBG("Callback OR FileChooser is Null");
-            }
-        }
-
-        std::function<void(const juce::FileChooser&)> fileChooserCallback;
-
-        FavoritesTreeView* owner = nullptr;
-    };
-
-
-    std::unique_ptr<CustomFileChooser> currentFileChooser = nullptr;
-
-    static void handleChosenFiles(const juce::FileChooser& fileChooser);
-    
-    juce::ValueTree& fileBrowserValueTree;
-
-    //std::unique_ptr<KrumTreeHeaderItem> rootItem;
-    std::unique_ptr<SectionHeader> rootItem;
-
-    int titleH = 20;
-
-    juce::Colour fontColor{ juce::Colours::darkgrey };
-    juce::Colour bgColor{ juce::Colours::black };
-    juce::Colour conLineColor{ juce::Colours::darkgrey };
-
-
-    SimpleAudioPreviewer* previewer;
-
-    KrumModuleContainer* moduleContainer = nullptr;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FavoritesTreeView)
-};
-
-
-//-make recents sections a file list, only show 1 or a few files, with an arrow to expand to see all
-
 class RecentFilesList : public juce::ListBoxModel, 
                         public juce::Component
 {
@@ -520,6 +387,141 @@ private:
     SimpleAudioPreviewer* previewer = nullptr;
 };
 
+//This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
+class FavoritesTreeView :   public juce::TreeView,
+                            public juce::DragAndDropContainer
+{
+public:
+
+    FavoritesTreeView(SimpleAudioPreviewer* prev);
+    ~FavoritesTreeView();
+
+    /*void valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property) override;
+
+    void valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval) override;*/
+
+    void paint(juce::Graphics& g) override;
+
+    juce::Rectangle<int> getTreeViewBounds();
+
+    void refreshChildren();
+    void deselectAllItems();
+
+    bool isInterestedInFileDrag(const juce::StringArray& files) override;
+    void filesDropped(const juce::StringArray& files, int x, int y) override;
+
+    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details) override;
+    void itemDropped(const juce::DragAndDropTarget::SourceDetails& details) override;
+
+    void pickNewFavorite();
+    //void addFileToRecent(juce::File file, juce::String name);
+    void createNewFavoriteFile(const juce::String& fullPathName); 
+    void createNewFavoriteFolder(const juce::String& fullPathName);
+    void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
+
+    
+    void reCreateFavoritesFromValueTree();
+    void reCreateFavoriteFolder(juce::ValueTree& tree);
+    void reCreateFavoriteFile(juce::ValueTree& fileValueTree);
+    void reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
+    //void reCreateRecentFile(juce::ValueTree& fileValueTree);
+    
+    void sortFiles(FileBrowserSortingIds sortingId = FileBrowserSortingIds::folders_Id);
+
+    void addDummyChild(juce::TreeViewItem* nodeToAddTo = nullptr);
+    bool hasAudioFormat(juce::String fileExtension);
+
+    //void updateValueTree(juce::String idString);
+    void removeValueTreeItem(juce::String fullPathName, FileBrowserSectionIds browserSection);
+    juce::ValueTree findTreeItem(juce::ValueTree parentTree, juce::String fullPathName);
+    void updateOpenness();
+
+    void clearFavorites();
+
+    void removeItem(juce::String idString);
+    void mouseDrag(const juce::MouseEvent& event) override;
+
+    void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details) override;
+
+    void setItemEditing(juce::String idString, bool isEditing);
+    bool areAnyItemsBeingEdited();
+
+
+    juce::Array<juce::ValueTree> getSelectedValueTrees();
+
+    juce::ValueTree& getFileBrowserValueTree();
+    SectionHeader* getRootNode();
+
+    KrumTreeHeaderItem* findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName);
+    KrumTreeHeaderItem* makeHeaderItem(juce::TreeViewItem* item);
+    KrumTreeItem* makeTreeItem(juce::TreeViewItem* item);
+    KrumTreeItem* makeTreeItem(juce::Component* item);
+
+    bool doesFolderExistInBrowser(juce::String fullPathName);
+
+    //gives the browser an address to the KrumModuleContainer so we know which modules are being dragged over
+    void assignModuleContainer(KrumModuleContainer* newContainer);
+
+    juce::Colour getConnectedLineColor();
+    juce::Colour getFontColor();
+
+    void updateFavoritesFromTree(juce::ValueTree& newFavsTree);
+
+private:
+
+    class CustomFileChooser : public juce::FileChooser
+    {
+    public:
+        CustomFileChooser(juce::String title, juce::File locationToShow, juce::String formats, FavoritesTreeView* ownerTree)
+            : juce::FileChooser(title, locationToShow, formats, false), owner(ownerTree)
+        {}
+
+        ~CustomFileChooser() { owner = nullptr;}
+
+        void showFileChooser(int flags)
+        {
+            if (fileChooserCallback)
+            {
+                launchAsync(flags, fileChooserCallback);
+            }
+            else
+            {
+                DBG("Callback OR FileChooser is Null");
+            }
+        }
+
+        std::function<void(const juce::FileChooser&)> fileChooserCallback;
+
+        FavoritesTreeView* owner = nullptr;
+    };
+
+
+    std::unique_ptr<CustomFileChooser> currentFileChooser = nullptr;
+
+    static void handleChosenFiles(const juce::FileChooser& fileChooser);
+    
+    //juce::ValueTree& fileBrowserValueTree;
+
+    juce::ValueTree favoritesValueTree;
+
+    //std::unique_ptr<KrumTreeHeaderItem> rootItem;
+    std::unique_ptr<SectionHeader> rootItem;
+
+    int titleH = 20;
+
+    juce::Colour fontColor{ juce::Colours::darkgrey };
+    juce::Colour bgColor{ juce::Colours::black };
+    juce::Colour conLineColor{ juce::Colours::darkgrey };
+
+
+    SimpleAudioPreviewer* previewer;
+
+    KrumModuleContainer* moduleContainer = nullptr;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FavoritesTreeView)
+};
+
+
 
 //class FavoritesTreeView : public juce::TreeView
 //{
@@ -544,27 +546,21 @@ private:
 class LocationTabBar : public juce::TabbedComponent
 {
 public:
-    LocationTabBar()
-        :juce::TabbedComponent(juce::TabbedButtonBar::Orientation::TabsAtLeft)
-    {
-        setTabBarDepth(25);
-        addTab("Desktop", juce::Colours::white, createTabButton("Desktop", -1), true);
-        addTab("Drive 1", juce::Colours::blue, createTabButton("Drive 1", -1), true);
-        addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
-        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
-        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
-        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
-        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
-    }
-    ~LocationTabBar() override {}
+    LocationTabBar(FileChooser& fileChooser);
+    ~LocationTabBar() override; 
 
+    void addTabsFromLocationTree(juce::ValueTree& locationsTree);
 
-    //  juce::TabBarButton* createTabButton(const juce::String& tabName, int tabIndex) override
+    void currentTabChanged(int newCurrentTab, const juce::String& newCurrentTabName) override;
 
 private:
 
     //store the user added locations
     juce::ValueTree fileBrowserTree;
+    juce::Colour bgColor{ juce::Colours::transparentBlack };
+    FileChooser& fileChooser;
+
+    juce::ValueTree locationValueTree;
 
 };
 
@@ -586,45 +582,19 @@ public:
     * 
     */
     
-    FileChooser()
-    {
-        directoryList.setDirectory(defaultLocation, true, true);
-        fileTree.setItemHeight(19);
-        fileTree.refresh();
+    FileChooser();
+    ~FileChooser() override;
 
-        fileChooserThread.startThread(4);
+    void paint(juce::Graphics& g) override;
+    void resized() override;
+    
+    void addLocationTabsFromTree(juce::ValueTree& locationsTree);
 
-        addAndMakeVisible(locationTabs);
+    void setDirectory(juce::File newDirectory);
 
-        addAndMakeVisible(fileTree);
-
-    }
-
-    ~FileChooser() override {}
-
-    void paint(juce::Graphics& g) override
-    {
-        auto area = getLocalBounds();
-
-
-        g.setColour(juce::Colours::white);
-        g.drawFittedText("File Browser", area.withBottom(titleH), juce::Justification::centredLeft, 1);
-    }
-
-
-    void resized() override
-    {
-        auto area = getLocalBounds();
-
-        int tabDepth = 25;
-
-        fileTree.setBounds(area.withTrimmedLeft(tabDepth).withTop(titleH));
-        locationTabs.setBounds(area.withTop(fileTree.getY()).withRight(fileTree.getX()));
-
-    }
+    //void mouseDrag(const juce::MouseEvent& e) override;
 
 private:
-    //juce::File defaultLocation{ "C:\\Users\\krisc\\Desktop" };
     juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
     
     LocationTabBar locationTabs;
@@ -633,7 +603,6 @@ private:
     juce::DirectoryContentsList directoryList{ nullptr, fileChooserThread };
     juce::FileTreeComponent fileTree{ directoryList };
     
-    int titleH = 20;
 
 };
 
@@ -642,6 +611,7 @@ namespace DragStrings
 {
     const juce::String recentsDragString{ "RecentsFileDrag-" };
     const juce::String favoritesDragString{ "FavoritesFileDrag-" };
+    const juce::String fileChooserDragString{ "FileChooserFileDrag-" };
 }
 
 class KrumFileBrowser : public InfoPanelComponent
@@ -654,7 +624,6 @@ public:
         favorites,
         fileChooser,
     };
-
 
 
     KrumFileBrowser(juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager, 

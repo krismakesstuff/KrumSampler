@@ -93,7 +93,9 @@ namespace TreeIDs
                 DECLARE_ID(File)
                     DECLARE_ID(fileName)
                     DECLARE_ID(filePath)
-
+            DECLARE_ID(LOCATIONS)
+                DECLARE_ID(locationName)
+                DECLARE_ID(locationPath)
             DECLARE_ID(OPENSTATE)
 
 #undef DECLARE_ID

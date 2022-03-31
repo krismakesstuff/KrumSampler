@@ -77,11 +77,19 @@ juce::ValueTree createFileBrowserTree()
     juce::ValueTree retValTree{ TreeIDs::FILEBROWSERTREE, {}, };
     juce::ValueTree recTree = { TreeIDs::RECENT ,{} };
     juce::ValueTree favTree = { TreeIDs::FAVORITES , {} };
+    juce::ValueTree locationsTree = { TreeIDs::LOCATIONS , {} };
     juce::ValueTree openTree = { TreeIDs::OPENSTATE, {}};
 
-    retValTree.addChild(recTree, FileBrowserSectionIds::recentFolders_Ids, nullptr);
-    retValTree.addChild(favTree, FileBrowserSectionIds::favoritesFolders_Ids, nullptr);
-    retValTree.addChild(openTree, FileBrowserSectionIds::openness_Ids, nullptr);
+    retValTree.addChild(recTree, -1, nullptr);
+    retValTree.addChild(favTree, -1, nullptr);
+    retValTree.addChild(locationsTree, -1, nullptr);
+
+    juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
+
+    locationsTree.setProperty(TreeIDs::locationName, defaultLocation.getFileName(), nullptr);
+    locationsTree.setProperty(TreeIDs::locationPath, defaultLocation.getFullPathName(), nullptr);
+
+    retValTree.addChild(openTree, -1, nullptr);
 
     return retValTree.createCopy();
 
