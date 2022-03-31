@@ -17,7 +17,7 @@
 
 class KrumTreeHeaderItem;
 
-KrumTreeItem::KrumTreeItem(juce::ValueTree& fileVt, KrumTreeView* parentView, SimpleAudioPreviewer* previewer)
+KrumTreeItem::KrumTreeItem(juce::ValueTree& fileVt, FavoritesTreeView* parentView, SimpleAudioPreviewer* previewer)
 : fileValueTree(fileVt), previewer(previewer), parentTreeView(parentView), InfoPanelComponent("File", "Files can be renamed or removed from this browser. NOTE: these aren't you're actual files, so any changes made aren't making changes to the actual file.")
 {
     /*file = fullPathName;
@@ -63,6 +63,11 @@ void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::
 
     g.setColour(parentTreeView->getConnectedLineColor());
     g.drawLine(newLine);
+}
+
+int KrumTreeItem::getItemHeight() const
+{
+    return 15;
 }
 
 void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
@@ -195,9 +200,11 @@ void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    g.setColour( owner.isSelected() ? bgColor : bgColor.darker(0.7f));
-    g.fillRect(area);
-
+    if (owner.isSelected())
+    {
+        g.setColour(bgColor);
+        g.fillRect(area);
+    }
 
     if (!isBeingEdited())
     {
@@ -335,7 +342,7 @@ void KrumTreeItem::EditableComp::handleResult(int result, EditableComp* comp)
 
 
 //KrumTreeHeaderItem::KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name, int numFilesHidden)
-KrumTreeHeaderItem::KrumTreeHeaderItem(juce::ValueTree& folderVTree, KrumTreeView* pTree)
+KrumTreeHeaderItem::KrumTreeHeaderItem(juce::ValueTree& folderVTree, FavoritesTreeView* pTree)
     : folderValueTree(folderVTree), parentTreeView(pTree), InfoPanelComponent("Folder", "Folders can be renamed and removed, just like Files, these aren't the actual Folders on your system, just a representation")
 {
     //file = fullPathName;
@@ -397,6 +404,11 @@ void KrumTreeHeaderItem::paintHorizontalConnectingLine(juce::Graphics& g, const 
         g.setColour(parentTreeView->getConnectedLineColor());
         g.drawLine(line);
     }
+}
+
+int KrumTreeHeaderItem::getItemHeight() const
+{
+    return 17;
 }
 
 void KrumTreeHeaderItem::itemClicked(const juce::MouseEvent& e)
@@ -538,8 +550,12 @@ KrumTreeHeaderItem::EditableHeaderComp::EditableHeaderComp(KrumTreeHeaderItem& o
 void KrumTreeHeaderItem::EditableHeaderComp::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
-    g.setColour(owner.isSelected() ? bgColor : bgColor.darker(0.7f));
-    g.fillRect(area);
+
+    if (owner.isSelected())
+    {
+        g.setColour(bgColor);
+        g.fillRect(area);
+    }
 
     if (!isBeingEdited())
     {
@@ -630,7 +646,7 @@ void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHe
 //=================================================================================================================================//
 //=================================================================================================================================//
 
-KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev)
+FavoritesTreeView::FavoritesTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev)
     : fileBrowserValueTree(fileBrowserTree), previewer(prev)
 {
 
@@ -641,6 +657,8 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
     rootItem->setLinesDrawnForSubItems(true);
     setRootItem(rootItem.get());
     setRootItemVisible(false);
+
+    
 
    /* auto recentNode = new KrumTreeHeaderItem(this, juce::File(), TreeIDs::RECENT.toString());
     recentNode->setOpen(true);
@@ -684,22 +702,22 @@ KrumTreeView::KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewe
     setPaintingIsUnclipped(true);
 }
 
-KrumTreeView::~KrumTreeView()
+FavoritesTreeView::~FavoritesTreeView()
 {
     setRootItem(nullptr);
 }
 
-void KrumTreeView::valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property)
+void FavoritesTreeView::valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property)
 {
     repaint();
 }
 
-void KrumTreeView::valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChildTree, int indexOfRemoval)
+void FavoritesTreeView::valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChildTree, int indexOfRemoval)
 {
     //find the TreeViewItem from the removedChildTree, then remove it
 }
 
-void KrumTreeView::paint(juce::Graphics& g) 
+void FavoritesTreeView::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
     //g.setColour(juce::Colours::darkgrey.darker(0.7f));
@@ -711,30 +729,30 @@ void KrumTreeView::paint(juce::Graphics& g)
     juce::TreeView::paint(g);
 }
 
-juce::Rectangle<int> KrumTreeView::getTreeViewBounds()
+juce::Rectangle<int> FavoritesTreeView::getTreeViewBounds()
 {
     return rootItem->getOwnerView()->getBounds();
 }
 
-void KrumTreeView::refreshChildren()
+void FavoritesTreeView::refreshChildren()
 {
     auto area = getLocalBounds();
 
     DBG("FileBrowser Area: " + area.toString());
 }
 
-void KrumTreeView::deselectAllItems()
+void FavoritesTreeView::deselectAllItems()
 {
     rootItem->setSelected(false, true);
 }
 
-bool KrumTreeView::isInterestedInFileDrag(const juce::StringArray& files) 
+bool FavoritesTreeView::isInterestedInFileDrag(const juce::StringArray& files)
 {
     //auto wildcard = previewer->getFormatManager()->getWildcardForAllFormats();
     return true;
 }
 
-void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y) 
+void FavoritesTreeView::filesDropped(const juce::StringArray& files, int x, int y)
 {
     for (auto fileName : files)
     {
@@ -754,7 +772,7 @@ void KrumTreeView::filesDropped(const juce::StringArray& files, int x, int y)
     }
 }
 
-void KrumTreeView::pickNewFavorite()
+void FavoritesTreeView::pickNewFavorite()
 {
     const juce::String title{ "Choose A Folder(s) or File(s) to Add to Favorites, you can also drag and drop from external apps!" };
     currentFileChooser.reset(new CustomFileChooser(title, juce::File::getSpecialLocation(juce::File::userDesktopDirectory), previewer->getFormatManager()->getWildcardForAllFormats(), this));
@@ -768,7 +786,7 @@ void KrumTreeView::pickNewFavorite()
 }
 
 //This does NOT check file type, so make sure to check for formatting before adding it here.
-void KrumTreeView::addFileToRecent(juce::File file, juce::String name)
+void FavoritesTreeView::addFileToRecent(juce::File file, juce::String name)
 {
     auto recentNode = rootItem->getSubItem(recentFolders_Ids);
 
@@ -793,7 +811,7 @@ void KrumTreeView::addFileToRecent(juce::File file, juce::String name)
     recentNode->addSubItem(new KrumTreeItem(newFileValTree, this, previewer));
 }
 
-void KrumTreeView::createNewFavoriteFile(const juce::String& fullPathName)
+void FavoritesTreeView::createNewFavoriteFile(const juce::String& fullPathName)
 {
     auto file = juce::File(fullPathName);
 
@@ -814,7 +832,7 @@ void KrumTreeView::createNewFavoriteFile(const juce::String& fullPathName)
     }
 }
 
-void KrumTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
+void FavoritesTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
 {
     juce::File folder(fullPathName);
 
@@ -881,7 +899,7 @@ void KrumTreeView::createNewFavoriteFolder(const juce::String& fullPathName)
     sortFiles();
 }
 
-void KrumTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentFolderValTree)
+void FavoritesTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentFolderValTree)
 {
     if (folder.isDirectory())
     {
@@ -928,7 +946,7 @@ void KrumTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFil
     }
 }
 
-void KrumTreeView::reCreateFileBrowserFromValueTree()
+void FavoritesTreeView::reCreateFileBrowserFromValueTree()
 {
     auto recTreeNode = fileBrowserValueTree.getChildWithName(TreeIDs::RECENT);
     for (int i = 0; i < recTreeNode.getNumChildren(); i++)
@@ -962,7 +980,7 @@ void KrumTreeView::reCreateFileBrowserFromValueTree()
 
 }
 
-void KrumTreeView::reCreateFavoriteFolder(juce::ValueTree& folderValueTree)
+void FavoritesTreeView::reCreateFavoriteFolder(juce::ValueTree& folderValueTree)
 {
     auto newFavFolderNode = new KrumTreeHeaderItem(folderValueTree, this);
     newFavFolderNode->setLinesDrawnForSubItems(true);
@@ -988,7 +1006,7 @@ void KrumTreeView::reCreateFavoriteFolder(juce::ValueTree& folderValueTree)
 
 }
 
-void KrumTreeView::reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode, juce::ValueTree& folderValueTree)
+void FavoritesTreeView::reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode, juce::ValueTree& folderValueTree)
 {
     auto folderNode = new KrumTreeHeaderItem(folderValueTree, this);
     folderNode->setLinesDrawnForSubItems(true);
@@ -1013,20 +1031,20 @@ void KrumTreeView::reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode, juc
 }
 
 //creates a direct child file item in the "Favorites" section
-void KrumTreeView::reCreateFavoriteFile(juce::ValueTree& fileValueTree)
+void FavoritesTreeView::reCreateFavoriteFile(juce::ValueTree& fileValueTree)
 {
     auto favNode = rootItem->getSubItem(favoritesFolders_Ids);
     favNode->addSubItem(new KrumTreeItem(fileValueTree, this, previewer));
 }
 
 //Creates a direct child file item in the "Recent" section
-void KrumTreeView::reCreateRecentFile(juce::ValueTree& fileValueTree)
+void FavoritesTreeView::reCreateRecentFile(juce::ValueTree& fileValueTree)
 {
     auto recNode = rootItem->getSubItem(FileBrowserSectionIds::recentFolders_Ids);
     recNode->addSubItem(new KrumTreeItem(fileValueTree, this, previewer));
 }
 
-void KrumTreeView::sortFiles(FileBrowserSortingIds sortingId)
+void FavoritesTreeView::sortFiles(FileBrowserSortingIds sortingId)
 {
     //FileBrowserSorter sorter;
     //rootItem->sortSubItems<FileBrowserSorter>(sorter);
@@ -1034,7 +1052,7 @@ void KrumTreeView::sortFiles(FileBrowserSortingIds sortingId)
 }
 
 
-void KrumTreeView::addDummyChild(juce::TreeViewItem* nodeToAddTo)
+void FavoritesTreeView::addDummyChild(juce::TreeViewItem* nodeToAddTo)
 {
     if (nodeToAddTo == nullptr)
     {
@@ -1046,7 +1064,7 @@ void KrumTreeView::addDummyChild(juce::TreeViewItem* nodeToAddTo)
     }
 }
 
-bool KrumTreeView::hasAudioFormat(juce::String fileExtension)
+bool FavoritesTreeView::hasAudioFormat(juce::String fileExtension)
 {
     if (previewer)
     {
@@ -1143,7 +1161,7 @@ bool KrumTreeView::hasAudioFormat(juce::String fileExtension)
 //  
 //}
 
-void KrumTreeView::removeValueTreeItem(juce::String fullPathName, FileBrowserSectionIds browserSection)
+void FavoritesTreeView::removeValueTreeItem(juce::String fullPathName, FileBrowserSectionIds browserSection)
 {
 
     juce::ValueTree sectionTree = fileBrowserValueTree.getChild(browserSection);
@@ -1174,7 +1192,7 @@ void KrumTreeView::removeValueTreeItem(juce::String fullPathName, FileBrowserSec
     }
 }
 
-juce::ValueTree KrumTreeView::findTreeItem(juce::ValueTree parentTree, juce::String fullPathName)
+juce::ValueTree FavoritesTreeView::findTreeItem(juce::ValueTree parentTree, juce::String fullPathName)
 {
     for (int i = 0; i < parentTree.getNumChildren(); i++)
     {
@@ -1195,7 +1213,7 @@ juce::ValueTree KrumTreeView::findTreeItem(juce::ValueTree parentTree, juce::Str
 
 }
 
-void KrumTreeView::updateOpenness()
+void FavoritesTreeView::updateOpenness()
 {
     auto xml = getOpennessState(true);
     auto openTree = fileBrowserValueTree.getChildWithName(TreeIDs::OPENSTATE);
@@ -1206,7 +1224,7 @@ void KrumTreeView::updateOpenness()
 
 
 
-void KrumTreeView::clearRecent()
+void FavoritesTreeView::clearRecent()
 {
     auto recentNode = rootItem->getSubItem(FileBrowserSectionIds::recentFolders_Ids);
     recentNode->clearSubItems();
@@ -1216,7 +1234,7 @@ void KrumTreeView::clearRecent()
 
 }
 
-void KrumTreeView::clearFavorites()
+void FavoritesTreeView::clearFavorites()
 {
     auto favNode = rootItem->getSubItem(FileBrowserSectionIds::favoritesFolders_Ids);
     favNode->clearSubItems();
@@ -1226,7 +1244,7 @@ void KrumTreeView::clearFavorites()
 
 }
 
-void KrumTreeView::removeItem(juce::String idString)
+void FavoritesTreeView::removeItem(juce::String idString)
 {
     auto item = findItemFromIdentifierString(idString);
     
@@ -1264,7 +1282,7 @@ void KrumTreeView::removeItem(juce::String idString)
 
 }
 
-void KrumTreeView::mouseDrag(const juce::MouseEvent& event) 
+void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
 {
     if (!areAnyItemsBeingEdited() && event.mouseWasDraggedSinceMouseDown())
     {
@@ -1334,7 +1352,7 @@ void KrumTreeView::mouseDrag(const juce::MouseEvent& event)
     }
 }
 
-void KrumTreeView::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details)
+void FavoritesTreeView::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details)
 {
     if (moduleContainer)
     {
@@ -1347,7 +1365,7 @@ void KrumTreeView::dragOperationEnded(const juce::DragAndDropTarget::SourceDetai
     }
 }
 
-void KrumTreeView::setItemEditing(juce::String idString, bool isEditing)
+void FavoritesTreeView::setItemEditing(juce::String idString, bool isEditing)
 {
     KrumTreeHeaderItem* headerItem = nullptr;
     KrumTreeItem* treeItem = nullptr;
@@ -1375,7 +1393,7 @@ void KrumTreeView::setItemEditing(juce::String idString, bool isEditing)
 }
 
 
-bool KrumTreeView::areAnyItemsBeingEdited()
+bool FavoritesTreeView::areAnyItemsBeingEdited()
 {
     auto faveNode = rootItem->getSubItem(FileBrowserSectionIds::favoritesFolders_Ids);
 
@@ -1405,17 +1423,17 @@ bool KrumTreeView::areAnyItemsBeingEdited()
 }
 
 
-juce::ValueTree& KrumTreeView::getFileBrowserValueTree()
+juce::ValueTree& FavoritesTreeView::getFileBrowserValueTree()
 {
     return fileBrowserValueTree;
 }
 
-SectionHeader* KrumTreeView::getRootNode()
+SectionHeader* FavoritesTreeView::getRootNode()
 {
     return rootItem.get();
 }
 
-KrumTreeHeaderItem* KrumTreeView::makeHeaderItem(juce::TreeViewItem* item)
+KrumTreeHeaderItem* FavoritesTreeView::makeHeaderItem(juce::TreeViewItem* item)
 {
     KrumTreeHeaderItem* retHeader = static_cast<KrumTreeHeaderItem*>(item);
     if (retHeader)
@@ -1429,7 +1447,7 @@ KrumTreeHeaderItem* KrumTreeView::makeHeaderItem(juce::TreeViewItem* item)
 }
 
 
-KrumTreeItem* KrumTreeView::makeTreeItem(juce::TreeViewItem* item)
+KrumTreeItem* FavoritesTreeView::makeTreeItem(juce::TreeViewItem* item)
 {
     KrumTreeItem* retItem = static_cast<KrumTreeItem*>(item);
     if (retItem)
@@ -1443,7 +1461,7 @@ KrumTreeItem* KrumTreeView::makeTreeItem(juce::TreeViewItem* item)
 }
 
 
-KrumTreeItem* KrumTreeView::makeTreeItem(juce::Component* item)
+KrumTreeItem* FavoritesTreeView::makeTreeItem(juce::Component* item)
 {
     KrumTreeItem* retItem = static_cast<KrumTreeItem*>(item);
     if (retItem)
@@ -1456,7 +1474,7 @@ KrumTreeItem* KrumTreeView::makeTreeItem(juce::Component* item)
     }
 }
 
-bool KrumTreeView::doesFolderExistInBrowser(juce::String fullPathName)
+bool FavoritesTreeView::doesFolderExistInBrowser(juce::String fullPathName)
 {
 
     auto favTree = fileBrowserValueTree.getChildWithName(TreeIDs::FAVORITES);
@@ -1478,22 +1496,22 @@ bool KrumTreeView::doesFolderExistInBrowser(juce::String fullPathName)
     return false;
 }
 
-void KrumTreeView::assignModuleContainer(KrumModuleContainer* newContainer)
+void FavoritesTreeView::assignModuleContainer(KrumModuleContainer* newContainer)
 {
     moduleContainer = newContainer;
 }
 
-juce::Colour KrumTreeView::getConnectedLineColor()
+juce::Colour FavoritesTreeView::getConnectedLineColor()
 {
     return conLineColor;
 }
 
-juce::Colour KrumTreeView::getFontColor()
+juce::Colour FavoritesTreeView::getFontColor()
 {
     return fontColor;
 }
 
-void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
+void FavoritesTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
 {
     auto cFileChooser = static_cast<const CustomFileChooser*>(&fileChooser);
     juce::Array<juce::File> resultFiles = fileChooser.getResults();
@@ -1518,7 +1536,7 @@ void KrumTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
 
 }
 
-KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName)
+KrumTreeHeaderItem* FavoritesTreeView::findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName)
 {
     if (item->mightContainSubItems())
     {
@@ -1573,11 +1591,17 @@ KrumTreeHeaderItem* KrumTreeView::findSectionHeaderParent(juce::TreeViewItem* it
 
 KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormatManager& formatManager, 
                                 juce::ValueTree& stateTree, juce::AudioProcessorValueTreeState& apvts, KrumSampler& s)
-    : audioPreviewer(&formatManager, stateTree, apvts), fileBrowserValueTree(fbValueTree), treeView(fbValueTree, &audioPreviewer), InfoPanelComponent(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message)
+    : audioPreviewer(&formatManager, stateTree, apvts), fileBrowserValueTree(fbValueTree), /*treeView(fbValueTree, &audioPreviewer),*/ InfoPanelComponent(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message),
+        recentTreeView(fbValueTree), favoritesTreeView(fbValueTree, &audioPreviewer)
 {
-    addAndMakeVisible(treeView);
+    //addAndMakeVisible(treeView);
 
-    addAndMakeVisible(addFavoriteButton);
+    addAndMakeVisible(recentTreeView);
+    addAndMakeVisible(favoritesTreeView);
+    addAndMakeVisible(fileChooser);
+    //fileChooserTreeView.refresh();
+
+    //addAndMakeVisible(addFavoriteButton);
 
     addAndMakeVisible(audioPreviewer);
     audioPreviewer.assignSampler(&s);
@@ -1587,14 +1611,14 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
 
     addFavoriteButton.setImages(favButtonImage.get());
     addFavoriteButton.setButtonText("Add New Favorite Folder");
-    addFavoriteButton.onClick = [this] { treeView.pickNewFavorite(); };
+    //addFavoriteButton.onClick = [this] { treeView.pickNewFavorite(); };
 
     //addFavoriteButton.setConnectedEdges(juce::Button::ConnectedOnBottom);
-    addFavoriteButton.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
-    addFavoriteButton.setColour(juce::TextButton::buttonOnColourId, fontColor.contrasting(0.2f));
-    addFavoriteButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
+    //addFavoriteButton.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
+    //addFavoriteButton.setColour(juce::TextButton::buttonOnColourId, fontColor.contrasting(0.2f));
+    //addFavoriteButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
 
-    addFavoriteButton.setTooltip("Add Files or Folders that will stay with this preset");
+    //addFavoriteButton.setTooltip("Add Files or Folders that will stay with this preset");
 
 }
 
@@ -1609,44 +1633,56 @@ void KrumFileBrowser::paint(juce::Graphics& g)
     float outline = 1.0f;
 
     g.setColour(fontColor);
-    g.setFont(22.0f);
-    g.drawFittedText("File Browser", area.withBottom(titleH).withTrimmedTop(5).reduced(10), juce::Justification::centredLeft, 1);
+    g.setFont(15.0f);
+    g.drawFittedText("File Browser", area.withBottom(titleH).withTrimmedTop(5), juce::Justification::centredLeft, 1);
 
-    auto fileTreeFillBounds = treeView.getBounds().expanded(5).withBottom(area.getBottom() - previewerH).toFloat();
+    //auto fileTreeFillBounds = treeView.getBounds().expanded(5).withBottom(area.getBottom() - previewerH).toFloat();
+    
+    //g.setColour(juce::Colours::darkgrey);
+    //g.drawFittedText("Recent", area.withTrimmedTop(titleH), juce::Justification::centredLeft, 1);
+    //g.drawFittedText("Favorites", area.withTrimmedTop(area.getHeight() * 0.50f), juce::Justification::centredLeft, 1);
+
 
     //g.drawRoundedRectangle(fileTreeFillBounds, cornerSize, outline);
     //g.setColour(juce::Colours::darkgrey.darker());
-    auto grade = juce::ColourGradient::vertical(juce::Colours::darkgrey.darker(),juce::Colours::black, area);
+    //auto grade = juce::ColourGradient::vertical(juce::Colours::darkgrey.darker(),juce::Colours::black, area);
     //g.setGradientFill(grade);
     g.setColour(juce::Colours::black.withAlpha(0.001f));
     //g.setColour(juce::Colours::red);
-    g.fillRoundedRectangle(fileTreeFillBounds, cornerSize);
+    g.fillRoundedRectangle(area.toFloat(), cornerSize);
 
 }
 
 void KrumFileBrowser::resized()
 {
     auto area = getLocalBounds().reduced(10);
+    int spacer = 5;
     int favButtonH = 35;
     int favButtonW = 50;
-    //int previewerH = 45;
+    int recentTreeViewH = 50;
+    int favTreeViewH = 120;
+    int locationsW = 40;
 
-
-    treeView.setBounds(area.withTrimmedBottom(favButtonH).withTrimmedTop(titleH));
-    addFavoriteButton.setBounds(area.withBottom(treeView.getY() - 5).withLeft(area.getRight() - favButtonW));
-    audioPreviewer.setBounds(area.withTop(treeView.getBottom()).withRight(area.getRight()).withHeight(previewerH));
+    recentTreeView.setBounds(area./*withLeft(locationsW).*/withTrimmedTop(titleH).withBottom(recentTreeViewH));
+    favoritesTreeView.setBounds(area./*withLeft(locationsW).*/withTop(recentTreeView.getBottom() + spacer).withHeight(favTreeViewH));
+    fileChooser.setBounds(area./*withLeft(locationsW).*/withTop(favoritesTreeView.getBottom() + spacer).withBottom(area.getBottom() - previewerH));
+ 
+    audioPreviewer.setBounds(area.withTop(fileChooser.getBottom()).withRight(area.getRight()).withHeight(previewerH));
     
 }
 
 int KrumFileBrowser::getNumSelectedItems()
 {
-    return treeView.getNumSelectedItems();
+    return 0;
+    //return treeView.getNumSelectedItems();
 }
 
 //if no item is found, this will return a nullptr
 KrumTreeItem* KrumFileBrowser::getSelectedItem(int index)
 {
-    auto item = treeView.getSelectedItem(index);
+    return nullptr;
+
+   /* auto item = treeView.getSelectedItem(index);
     KrumTreeItem* krumItem = static_cast<KrumTreeItem*>(item);
     if (krumItem != nullptr)
     {
@@ -1655,24 +1691,26 @@ KrumTreeItem* KrumFileBrowser::getSelectedItem(int index)
     else
     {
         return nullptr;
-    }
+    }*/
+
 }
 
 void KrumFileBrowser::addFileToRecent(const juce::File file, juce::String name)
 {
-    treeView.addFileToRecent(file, name);
+    //treeView.addFileToRecent(file, name);
 }
 
 bool KrumFileBrowser::doesPreviewerSupport(juce::String fileExtension)
 {
-    return treeView.hasAudioFormat(fileExtension);
+    return false;
+    //return treeView.hasAudioFormat(fileExtension);
 }
 
 void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
 {
-    auto oldTree = treeView.getFileBrowserValueTree();
-    oldTree = newTree;
-    treeView.reCreateFileBrowserFromValueTree();
+    //auto oldTree = treeView.getFileBrowserValueTree();
+    //oldTree = newTree;
+    //treeView.reCreateFileBrowserFromValueTree();
     repaint();
 }
 
@@ -1694,7 +1732,7 @@ void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
 
 void KrumFileBrowser::assignModuleContainer(KrumModuleContainer* container)
 {
-    treeView.assignModuleContainer(container);
+    //treeView.assignModuleContainer(container);
 }
 
 void KrumFileBrowser::buildDemoKit()
@@ -1763,7 +1801,7 @@ void KrumFileBrowser::buildDemoKit()
             demoKit = demoKitFolder;
 
             DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
-            treeView.createNewFavoriteFolder(demoKit.getFullPathName());
+            //treeView.createNewFavoriteFolder(demoKit.getFullPathName());
         }
     }
     else if (demoKitFolder.isDirectory())
@@ -1771,7 +1809,7 @@ void KrumFileBrowser::buildDemoKit()
         demoKit = demoKitFolder;
 
         DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
-        treeView.createNewFavoriteFolder(demoKit.getFullPathName());
+        //treeView.createNewFavoriteFolder(demoKit.getFullPathName());
     }
     
 }
@@ -1799,11 +1837,15 @@ void NumberBubble::paint(juce::Graphics& g)
 
 //================================================================================================
 
-SectionHeader::SectionHeader(juce::ValueTree& sectionVTree, KrumTreeView* rootItem)
+SectionHeader::SectionHeader(juce::ValueTree& sectionVTree, FavoritesTreeView* rootItem)
     : sectionValueTree(sectionVTree), parentTreeView(rootItem), InfoPanelComponent("","")
 {
-   
 }
+
+//SectionHeader::SectionHeader()
+//    :sectionValueTree(juce::ValueTree()), parentTreeView(nullptr), InfoPanelComponent("", "")
+//{
+//}
 
 SectionHeader::~SectionHeader()
 {
@@ -1819,6 +1861,11 @@ void SectionHeader::paintItem(juce::Graphics& g, int width, int height)
     auto title = sectionValueTree.getType().toString();
     g.setColour(parentTreeView->getFontColor());
     g.drawFittedText(title, { 0, 0, width, height }, juce::Justification::centredLeft, 1);
+}
+
+int SectionHeader::getItemHeight() const
+{
+    return 30;
 }
 
 bool SectionHeader::mightContainSubItems()

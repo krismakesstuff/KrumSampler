@@ -179,7 +179,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 
     //Output Label
     g.setColour(mainFontColor);
-    g.setFont(22.0f);
+    g.setFont(15.0f);
     g.drawFittedText("Output", area.withTop(modulesBG.getY()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(outputGainSlider.getRight()).withBottom(outputGainSlider.getY()),
                     juce::Justification::centred,1);
 

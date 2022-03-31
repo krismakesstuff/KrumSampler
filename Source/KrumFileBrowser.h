@@ -34,6 +34,7 @@
 class KrumTreeItem;
 class KrumTreeHeaderItem;
 class KrumTreeView;
+class FavoritesTreeView;
 class SimpleAudioPreviewer;
 class KrumModuleContainer;
 
@@ -88,13 +89,14 @@ class KrumTreeItem :    public juce::TreeViewItem,
 {
 public:
     //KrumTreeItem(KrumTreeView* parentTreeView, SimpleAudioPreviewer* preview, juce::File fullPathName, juce::String name = juce::String());
-    KrumTreeItem(juce::ValueTree& fileValueTree, KrumTreeView* parentTreeView, SimpleAudioPreviewer* previewer);
+    KrumTreeItem(juce::ValueTree& fileValueTree, FavoritesTreeView* parentTreeView, SimpleAudioPreviewer* previewer);
 
     bool mightContainSubItems() override;
     
     std::unique_ptr<juce::Component> createItemComponent() override;
     
     void paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
+    int getItemHeight() const override;
 
     void itemClicked(const juce::MouseEvent& e) override;
     void itemDoubleClicked(const juce::MouseEvent& e) override;
@@ -123,7 +125,7 @@ private:
 
     bool editing = false;
     
-    KrumTreeView* parentTreeView;
+    FavoritesTreeView* parentTreeView;
 
     juce::ValueTree fileValueTree;
 
@@ -174,7 +176,7 @@ class KrumTreeHeaderItem :  public juce::TreeViewItem,
 {
 public:
     //KrumTreeHeaderItem(KrumTreeView* pTree, juce::File fullPathName, juce::String name = juce::String(), int numFilesHidden = 0);
-    KrumTreeHeaderItem(juce::ValueTree& folderValueTree, KrumTreeView* pTree);
+    KrumTreeHeaderItem(juce::ValueTree& folderValueTree, FavoritesTreeView* pTree);
 
     bool mightContainSubItems() override;
 
@@ -183,6 +185,7 @@ public:
     void paintOpenCloseButton(juce::Graphics&, const juce::Rectangle< float >& area, juce::Colour backgroundColour, bool isMouseOver) override;
     void paintVerticalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
     void paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
+    int getItemHeight() const override;
 
     void itemClicked(const juce::MouseEvent& e) override;
     void itemDoubleClicked(const juce::MouseEvent& e) override;
@@ -212,7 +215,7 @@ public:
 
 private:
 
-    KrumTreeView* parentTreeView;
+    FavoritesTreeView* parentTreeView;
 
     juce::ValueTree folderValueTree;
 
@@ -266,12 +269,13 @@ class SectionHeader :   public juce::TreeViewItem,
                         public InfoPanelComponent
 {
 public:
-    SectionHeader(juce::ValueTree& sectionValueTree, KrumTreeView* rootItem);
+    SectionHeader(juce::ValueTree& sectionValueTree, FavoritesTreeView* rootItem);
+    //SectionHeader();
     ~SectionHeader() override;
 
     void paintOpenCloseButton(juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour bgColor, bool isMouseOver) override;
-
     void paintItem(juce::Graphics& g, int width, int height) override;
+    int getItemHeight() const override;
 
     bool mightContainSubItems() override;
 
@@ -282,7 +286,7 @@ public:
 private:
 
     juce::ValueTree sectionValueTree;
-    KrumTreeView* parentTreeView;
+    FavoritesTreeView* parentTreeView;
 
 };
 
@@ -338,14 +342,14 @@ public:
 };
 
 //This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
-class KrumTreeView :    public juce::TreeView,
+class FavoritesTreeView :    public juce::TreeView,
                         public juce::DragAndDropContainer,
                         public juce::ValueTree::Listener
 {
 public:
 
-    KrumTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev);
-    ~KrumTreeView();
+    FavoritesTreeView(juce::ValueTree& fileBrowserTree, SimpleAudioPreviewer* prev);
+    ~FavoritesTreeView();
 
     void valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property) override;
 
@@ -417,7 +421,7 @@ private:
     class CustomFileChooser : public juce::FileChooser
     {
     public:
-        CustomFileChooser(juce::String title, juce::File locationToShow, juce::String formats, KrumTreeView* ownerTree)
+        CustomFileChooser(juce::String title, juce::File locationToShow, juce::String formats, FavoritesTreeView* ownerTree)
             : juce::FileChooser(title, locationToShow, formats, false), owner(ownerTree)
         {}
 
@@ -437,8 +441,9 @@ private:
 
         std::function<void(const juce::FileChooser&)> fileChooserCallback;
 
-        KrumTreeView* owner = nullptr;
+        FavoritesTreeView* owner = nullptr;
     };
+
 
     std::unique_ptr<CustomFileChooser> currentFileChooser = nullptr;
 
@@ -459,7 +464,135 @@ private:
 
     KrumModuleContainer* moduleContainer = nullptr;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumTreeView)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FavoritesTreeView)
+};
+
+class RecentTreeView : public juce::TreeView
+{
+public:
+    RecentTreeView(juce::ValueTree& recValTree)
+    : recentValueTree(recValTree)
+    {}
+
+    ~RecentTreeView() override {}
+
+    void paint(juce::Graphics& g) override
+    {
+        g.fillAll(juce::Colours::darkgreen);
+        g.setColour(juce::Colours::white);
+        g.drawFittedText("Recent Tree", getLocalBounds(), juce::Justification::centred, 1);
+    }
+
+private:
+
+    juce::ValueTree& recentValueTree;
+
+};
+
+
+//class FavoritesTreeView : public juce::TreeView
+//{
+//public:
+//    FavoritesTreeView(juce::ValueTree& favValTree) 
+//        :favoritesValueTree(favValTree) 
+//    {}
+//    ~FavoritesTreeView() override {}
+//
+//    void paint(juce::Graphics& g) override
+//    {
+//        g.fillAll(juce::Colours::darkgreen);
+//        g.setColour(juce::Colours::white);
+//        g.drawFittedText("Favorites Tree", getLocalBounds(), juce::Justification::centred, 1);
+//    }
+//private:
+//
+//    juce::ValueTree& favoritesValueTree;
+//
+//};
+
+class LocationTabBar : public juce::TabbedComponent
+{
+public:
+    LocationTabBar()
+        :juce::TabbedComponent(juce::TabbedButtonBar::Orientation::TabsAtLeft)
+    {
+        setTabBarDepth(25);
+        addTab("Desktop", juce::Colours::white, createTabButton("Desktop", -1), true);
+        addTab("Drive 1", juce::Colours::blue, createTabButton("Drive 1", -1), true);
+        addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
+        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
+        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
+        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
+        //addTab("Location", juce::Colours::green, createTabButton("Location", -1), true);
+    }
+    ~LocationTabBar() override {}
+
+
+    //  juce::TabBarButton* createTabButton(const juce::String& tabName, int tabIndex) override
+
+private:
+
+    //store the user added locations
+    juce::ValueTree fileBrowserTree;
+
+};
+
+//class FileChooserTreeView : public juce::FileTreeComponent
+class FileChooser : public juce::Component
+{
+public:
+    //TODO
+    /*
+    * - preview audio files, need effiecent way to decide which files can be previewed
+    *   - will need to handle clicks, sublclassing TreeViewItems? 
+    * - connect location tabs, probably have this component hold the tabs
+    *   - make custom tab paint methods
+    *   - make add location tab, makes new tab from selection or a right-click on the folder (no files)
+    * - drag and drop to favorites section
+    * - make file chooser collapsible??
+    * 
+    * - make recents sections a file list, only show 1 or a few files, with an arrow to expand to see all
+    * 
+    * 
+    */
+    
+    FileChooser()
+    {
+        directoryList.setDirectory(defaultLocation, true, true);
+        fileTree.setItemHeight(19);
+        fileTree.refresh();
+
+        fileChooserThread.startThread(4);
+
+        addAndMakeVisible(locationTabs);
+
+        addAndMakeVisible(fileTree);
+
+    }
+
+    ~FileChooser() override {}
+
+    void resized() override
+    {
+        auto area = getLocalBounds();
+
+        int tabDepth = 25;
+
+        fileTree.setBounds(area.withTrimmedLeft(tabDepth));
+        locationTabs.setBounds(area.withTop(fileTree.getY()).withRight(fileTree.getX()));
+
+    }
+
+private:
+    //juce::File defaultLocation{ "C:\\Users\\krisc\\Desktop" };
+    juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
+    
+    LocationTabBar locationTabs;
+
+    juce::TimeSliceThread fileChooserThread{ "FileChooserThread" };
+    juce::DirectoryContentsList directoryList{ nullptr, fileChooserThread };
+    juce::FileTreeComponent fileTree{ directoryList };
+    
 };
 
 
@@ -492,24 +625,39 @@ private:
 
     juce::ValueTree& fileBrowserValueTree;
 
-    KrumTreeView treeView;
+   // KrumTreeView treeView;
 
     //SimpleAudioPreviewer* audioPreviewer;
     SimpleAudioPreviewer audioPreviewer;
   
     //SimpleAudioPreviewer previewer{ formatManager, valueTree, parameters };
 
+    
+    RecentTreeView recentTreeView;
+    FavoritesTreeView favoritesTreeView;
+    
+    FileChooser fileChooser{};
+    
+    
+    //juce::TabbedComponent tabs{};
+    
+    //juce::Viewport fileChooserViewport;
+
+    
+
+
+
+
 
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
     juce::Colour fontColor{ juce::Colours::lightgrey };
     
-    int titleH = 30;
-    int previewerH = 45;
+    int titleH = 20;
+    int previewerH = 30;
 
-#if JucePlugin_Build_Standalone
     juce::File demoKit;
-#endif
+
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumFileBrowser)
