@@ -825,7 +825,7 @@ bool KrumModuleEditor::isInterestedInDragSource(const juce::DragAndDropTarget::S
     if(shouldModuleAcceptFileDrop())
     {
         auto desc = dragDetails.description.toString();
-        return desc.isNotEmpty() && (desc.contains("FileBrowserDrag-") || desc.contains("ModuleDrag-"));
+        return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) || desc.contains(DragStrings::recentsDragString));
     }
     return false;
 }
@@ -836,80 +836,61 @@ void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails&
     auto desc = dragDetails.description.toString();
     bool addNextModule = false; //set flag true if files are accepted by module, otherwise leave false
     auto& sampler = editor.sampler;
+    juce::Array<juce::ValueTree> selectedTrees;
 
-    if (desc.contains("FileBrowserDrag-"))
+    //grab the correct valueTree from the file browser
+    if (desc.contains(DragStrings::favoritesDragString))
     {
-        int numDroppedItems = editor.fileBrowser.getNumSelectedItems();
-        if (numDroppedItems <= editor.moduleContainer.getNumEmptyModules()) //checks to make sure we have enough modules
+        selectedTrees = editor.fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::favorites);
+    }
+    else if (desc.contains(DragStrings::recentsDragString))
+    {
+        selectedTrees = editor.fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::recent);
+    }
+
+    //checks to make sure we have enough modules
+    if (selectedTrees.size() <= editor.moduleContainer.getNumEmptyModules()) 
+    {
+        for (int i = 0; i < selectedTrees.size(); ++i)
         {
-            for (int i = 0; i < numDroppedItems; i++)
+            auto fileTree = selectedTrees[i];
+            
+            if (i == 0)
             {
-                auto krumItem = editor.fileBrowser.getSelectedItem(i);
-                if (krumItem != nullptr)
+                if (handleNewFile(fileTree))
                 {
-                    auto file = krumItem->getFile();
-                    auto itemName = krumItem->getItemName();
-                    juce::int64 numSamples = 0;
-                    if (!krumItem->mightContainSubItems() && sampler.isFileAcceptable(file, numSamples))
-                    {
-                        if (i == 0)
-                        {
-                            //we set this module with the first dropped file and then create the rest, if we need to
-                            handleNewFile(itemName, file, numSamples);
-
-                            addNextModule = true;
-                            continue;
-                        }
-
-                        //we create the new modules from the value tree
-                        auto modulesTree = moduleTree.getParent();
-                        if (modulesTree.hasType(TreeIDs::KRUMMODULES))
-                        {
-                            for (int j = 0; j < modulesTree.getNumChildren(); j++)
-                            {
-                                auto itTree = modulesTree.getChild(j);
-                                if ((int)itTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::empty)
-                                {
-                                    auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                                    newModEd->handleNewFile(itemName, file, numSamples);
-                                        
-                                    addNextModule = true;
-                                        
-                                    DBG("-------");
-                                    DBG("Module Sampler Index: " + itTree.getProperty(TreeIDs::moduleSamplerIndex).toString());
-                                    DBG("Item: " + file.getFullPathName());                            
-                                        
-                                    break; //ends the loop of module trees
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        DBG("Folders Not Supported");
-                        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not Supported", "Either you dropped a folder on here or the file you dropped isn't a supported format");
-                    }
+                    addNextModule = true;
                 }
                 else
                 {
-                    DBG("Krum Item NULL");
+                    DBG("File Not Added");
+                }
+            }
+            else
+            {
+                auto modulesTree = moduleTree.getParent();
+                if (modulesTree.hasType(TreeIDs::KRUMMODULES))
+                {
+                    for (int j = 0; j < modulesTree.getNumChildren(); j++)
+                    {
+                        auto itTree = modulesTree.getChild(j);
+                        if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
+                        {
+                            auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
+                            newModEd->handleNewFile(fileTree);
+                            addNextModule = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
-        else
-        {
-            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not enough modules available", "");
-        }
     }
-    //    else if (desc.contains("ModuleDrag-"))
-    //    {
-    //        auto modEdDropped = static_cast<KrumModuleEditor*>(dragDetails.sourceComponent.get());
-    //        DBG("Module " + juce::String(modEdDropped->getModuleSamplerIndex()) + " Dropped on Module " + juce::String(getModuleSamplerIndex()));
-    //        if(modEdDropped)
-    //        {
-    //            editor.moduleContainer.moveModule(modEdDropped->getModuleDisplayIndex(), parent.getModuleDisplayIndex());
-    //        }
-    //    }
+    else
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not enough modules available", "");
+    }
+
 
     if (addNextModule)
     {
@@ -925,78 +906,94 @@ void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceD
 //EXTERNAL File Drag and Drop Target
 bool KrumModuleEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
-    return shouldModuleAcceptFileDrop();
+    //return shouldModuleAcceptFileDrop();
+    return false;
 }
 
 //EXTERNAL File Drag and Drop Target
 void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y)
 {
-    bool addNextModule = false; //set flag true if files are accepted by module, otherwise leave false
-    auto& sampler = editor.sampler;
-    int numFilesDropped = files.size();
+    //bool addNextModule = false; //set flag true if files are accepted by module, otherwise leave false
+    //auto& sampler = editor.sampler;
+    //int numFilesDropped = files.size();
 
-    if(numFilesDropped <= editor.moduleContainer.getNumEmptyModules())
-    {
-        for (int i = 0; i < files.size(); i++)
-        {
-            juce::File audioFile {files[i]};
-            juce::String fileName = audioFile.getFileName();
-            juce::int64 numSamples = 0;
-            if(!audioFile.isDirectory() && sampler.isFileAcceptable(audioFile, numSamples))
-            {
-                if (i == 0)
-                {
-                    handleNewFile(fileName, audioFile, numSamples);
-                    addNextModule = true;
-                    continue;
-                }
+    //if(numFilesDropped <= editor.moduleContainer.getNumEmptyModules())
+    //{
+    //    for (int i = 0; i < files.size(); i++)
+    //    {
+    //        juce::File audioFile {files[i]};
+    //        juce::String fileName = audioFile.getFileName();
+    //        juce::int64 numSamples = 0;
+    //        if(!audioFile.isDirectory() && sampler.isFileAcceptable(audioFile, numSamples))
+    //        {
+    //            if (i == 0)
+    //            {
+    //                handleNewFile(fileName, audioFile, numSamples);
+    //                addNextModule = true;
+    //                continue;
+    //            }
 
-                auto modulesTree = moduleTree.getParent();
-                if (modulesTree.hasType(TreeIDs::KRUMMODULES))
-                {
-                    for (int j = 0; j < modulesTree.getNumChildren(); j++)
-                    {
-                        auto itTree = modulesTree.getChild(j);
-                        if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
-                        {
-                            auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-                            newModEd->handleNewFile(fileName, audioFile, numSamples);
-                            addNextModule = true;
+    //            auto modulesTree = moduleTree.getParent();
+    //            if (modulesTree.hasType(TreeIDs::KRUMMODULES))
+    //            {
+    //                for (int j = 0; j < modulesTree.getNumChildren(); j++)
+    //                {
+    //                    auto itTree = modulesTree.getChild(j);
+    //                    if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
+    //                    {
+    //                        auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
+    //                        newModEd->handleNewFile(fileName, audioFile, numSamples);
+    //                        addNextModule = true;
 
-                            DBG("-------");
-                            DBG("Module Sampler Index: " + itTree.getProperty(TreeIDs::moduleSamplerIndex).toString());
-                            DBG("Item: " + audioFile.getFullPathName());
+    //                        DBG("-------");
+    //                        DBG("Module Sampler Index: " + itTree.getProperty(TreeIDs::moduleSamplerIndex).toString());
+    //                        DBG("Item: " + audioFile.getFullPathName());
 
-                            break;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                DBG("External File Not Acceptable");
-                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not Supported", "Either you dropped a folder on here or the file you dropped isn't a supported format");
+    //                        break;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        else
+    //        {
+    //            DBG("External File Not Acceptable");
+    //            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not Supported", "Either you dropped a folder on here or the file you dropped isn't a supported format");
 
-            }
-        }
-    }
+    //        }
+    //    }
+    //}
 
-    if (addNextModule)
+    /*if (addNextModule)
     {
         editor.addNextModuleEditor();
-    }
+    }*/
 }
 
-void KrumModuleEditor::handleNewFile(juce::String& name, juce::File& file, int numSamples, bool overlayShouldListen)
+bool KrumModuleEditor::handleNewFile(juce::ValueTree& fileTree, bool overlayShouldListen)
 {
-    DBG("Item: " + file.getFullPathName());
-    //juce::String name = file.getFileName(); //compiler reasons
-    setModuleName(name);
-    setModuleFile(file);
-    setNumSamplesOfFile(numSamples);
-    setModuleState(KrumModule::ModuleState::hasFile);
-    settingsOverlay->setMidiListen(overlayShouldListen);
-    addFileToRecentsFolder(file, name);
+    auto file = juce::File{ fileTree.getProperty(TreeIDs::filePath).toString() };
+    auto name = fileTree.getProperty(TreeIDs::fileName).toString();
+    juce::int64 numSamples = 0;
+
+    if (editor.sampler.isFileAcceptable(file, numSamples))
+    {
+        DBG("Item: " + file.getFullPathName());
+        //juce::String name = file.getFileName(); //compiler reasons
+        setModuleName(name);
+        setModuleFile(file);
+        setNumSamplesOfFile(numSamples);
+        setModuleState(KrumModule::ModuleState::hasFile);
+        settingsOverlay->setMidiListen(overlayShouldListen);
+        addFileToRecentsFolder(file, name);
+        return true;
+    }
+    else
+    {
+        DBG("Folders Not Supported");
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not Supported", "Either you dropped a folder on here or the file you dropped isn't a supported format");
+    }
+
+    return false;
 }
 
 void KrumModuleEditor::setModuleFile(juce::File& file)

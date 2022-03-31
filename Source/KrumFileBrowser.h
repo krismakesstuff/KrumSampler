@@ -48,6 +48,12 @@ class KrumModuleContainer;
 //
 //}
 
+namespace Dimensions
+{
+    const int rowHeight = 18;
+    const int titleH = 21;
+}
+
 namespace FileBrowserInfoStrings
 {
     static const juce::String compTitle {"File Browser"};
@@ -119,6 +125,8 @@ public:
     void setBGColor(juce::Colour newColor);
 
     void dragInParentTree(const juce::MouseEvent& e);
+
+    juce::ValueTree getValueTree();
 
 private:
 
@@ -342,9 +350,9 @@ public:
 };
 
 //This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
-class FavoritesTreeView :    public juce::TreeView,
-                        public juce::DragAndDropContainer,
-                        public juce::ValueTree::Listener
+class FavoritesTreeView :   public juce::TreeView,
+                            public juce::DragAndDropContainer,
+                            public juce::ValueTree::Listener
 {
 public:
 
@@ -398,6 +406,9 @@ public:
 
     void setItemEditing(juce::String idString, bool isEditing);
     bool areAnyItemsBeingEdited();
+
+
+    juce::Array<juce::ValueTree> getSelectedValueTrees();
 
     juce::ValueTree& getFileBrowserValueTree();
     SectionHeader* getRootNode();
@@ -454,6 +465,7 @@ private:
     //std::unique_ptr<KrumTreeHeaderItem> rootItem;
     std::unique_ptr<SectionHeader> rootItem;
 
+    int titleH = 20;
 
     juce::Colour fontColor{ juce::Colours::darkgrey };
     juce::Colour bgColor{ juce::Colours::black };
@@ -467,26 +479,45 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FavoritesTreeView)
 };
 
-class RecentTreeView : public juce::TreeView
+
+//-make recents sections a file list, only show 1 or a few files, with an arrow to expand to see all
+
+class RecentFilesList : public juce::ListBoxModel, 
+                        public juce::Component
 {
 public:
-    RecentTreeView(juce::ValueTree& recValTree)
-    : recentValueTree(recValTree)
-    {}
+    RecentFilesList(SimpleAudioPreviewer* previewer);
+    
+    ~RecentFilesList() override;
 
-    ~RecentTreeView() override {}
+    void paint(juce::Graphics& g) override;
+    void resized() override;
+    int getNumRows() override;
+    
+    void listBoxItemClicked(int row, const juce::MouseEvent& e) override;
+    void listBoxItemDoubleClicked(int row, const juce::MouseEvent& e) override;
 
-    void paint(juce::Graphics& g) override
-    {
-        g.fillAll(juce::Colours::darkgreen);
-        g.setColour(juce::Colours::white);
-        g.drawFittedText("Recent Tree", getLocalBounds(), juce::Justification::centred, 1);
-    }
+    void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
+
+    void addFile(juce::File fileToAdd, juce::String name);
+    void updateFileListFromTree(juce::ValueTree& recentsTree);
+
+    int getNumSelectedRows();
+    juce::Array<juce::ValueTree> getSelectedValueTrees();
+
+
+    juce::var getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe) override;
 
 private:
 
-    juce::ValueTree& recentValueTree;
+    juce::String getFileName(int rowNumber);
+    juce::String getFilePath(int rowNumber);
 
+    bool expanded = false;
+    juce::ListBox listBox{ "Recent Files", this };
+    juce::ValueTree recentValueTree;
+
+    SimpleAudioPreviewer* previewer = nullptr;
 };
 
 
@@ -551,7 +582,6 @@ public:
     * - drag and drop to favorites section
     * - make file chooser collapsible??
     * 
-    * - make recents sections a file list, only show 1 or a few files, with an arrow to expand to see all
     * 
     * 
     */
@@ -572,13 +602,23 @@ public:
 
     ~FileChooser() override {}
 
+    void paint(juce::Graphics& g) override
+    {
+        auto area = getLocalBounds();
+
+
+        g.setColour(juce::Colours::white);
+        g.drawFittedText("File Browser", area.withBottom(titleH), juce::Justification::centredLeft, 1);
+    }
+
+
     void resized() override
     {
         auto area = getLocalBounds();
 
         int tabDepth = 25;
 
-        fileTree.setBounds(area.withTrimmedLeft(tabDepth));
+        fileTree.setBounds(area.withTrimmedLeft(tabDepth).withTop(titleH));
         locationTabs.setBounds(area.withTop(fileTree.getY()).withRight(fileTree.getX()));
 
     }
@@ -593,12 +633,29 @@ private:
     juce::DirectoryContentsList directoryList{ nullptr, fileChooserThread };
     juce::FileTreeComponent fileTree{ directoryList };
     
+    int titleH = 20;
+
 };
 
+
+namespace DragStrings
+{
+    const juce::String recentsDragString{ "RecentsFileDrag-" };
+    const juce::String favoritesDragString{ "FavoritesFileDrag-" };
+}
 
 class KrumFileBrowser : public InfoPanelComponent
 {
 public:
+
+    enum class BrowserSections
+    {
+        recent,
+        favorites,
+        fileChooser,
+    };
+
+
 
     KrumFileBrowser(juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager, 
                     juce::ValueTree& stateTree, juce::AudioProcessorValueTreeState& apvts, KrumSampler& s);
@@ -607,8 +664,11 @@ public:
     void paint(juce::Graphics& g) override;
     void resized() override;
 
-    int getNumSelectedItems();
+    int getNumSelectedItems(BrowserSections section);
     KrumTreeItem* getSelectedItem(int index);
+
+    juce::Array<juce::ValueTree> getSelectedFileTrees(BrowserSections section);
+
 
     void addFileToRecent(const juce::File file, juce::String name); 
 
@@ -625,28 +685,11 @@ private:
 
     juce::ValueTree& fileBrowserValueTree;
 
-   // KrumTreeView treeView;
-
-    //SimpleAudioPreviewer* audioPreviewer;
     SimpleAudioPreviewer audioPreviewer;
   
-    //SimpleAudioPreviewer previewer{ formatManager, valueTree, parameters };
-
-    
-    RecentTreeView recentTreeView;
+    RecentFilesList recentFilesList{ &audioPreviewer };
     FavoritesTreeView favoritesTreeView;
-    
     FileChooser fileChooser{};
-    
-    
-    //juce::TabbedComponent tabs{};
-    
-    //juce::Viewport fileChooserViewport;
-
-    
-
-
-
 
 
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
@@ -654,7 +697,7 @@ private:
     juce::Colour fontColor{ juce::Colours::lightgrey };
     
     int titleH = 20;
-    int previewerH = 30;
+    int previewerH = 35;
 
     juce::File demoKit;
 

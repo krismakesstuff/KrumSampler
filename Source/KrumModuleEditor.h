@@ -135,7 +135,10 @@ public:
     bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
     
-    void handleNewFile(juce::String& name, juce::File& file, int numSamplesInFile, bool overlayShouldListen = true);
+
+
+    bool handleNewFile(juce::ValueTree& fileTree, bool overlayShouldListen = true);
+    
     void setModuleFile(juce::File& newFile);
     void addFileToRecentsFolder(juce::File& file, juce::String name);
 
