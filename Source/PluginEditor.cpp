@@ -62,7 +62,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     fileBrowser.assignModuleContainer(&moduleContainer);
     //fileBrowser.rebuildBrowser();
-    //fileBrowser.buildDemoKit();
+    fileBrowser.buildDemoKit();
     addAndMakeVisible(fileBrowser);
 
     auto collapseLeftIm = juce::Drawable::createFromImageData(BinaryData::chevron_left_black_24dp_svg, BinaryData::chevron_left_black_24dp_svgSize);
@@ -180,7 +180,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     //Output Label
     g.setColour(mainFontColor);
     g.setFont(15.0f);
-    g.drawFittedText("Output", area.withTop(modulesBG.getY()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(outputGainSlider.getRight()).withBottom(outputGainSlider.getY()),
+    g.drawFittedText("OUTPUT", area.withTop(modulesBG.getY()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(outputGainSlider.getRight()).withBottom(outputGainSlider.getY()),
                     juce::Justification::centred,1);
 
     //juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };

@@ -51,7 +51,7 @@ class FileChooser;
 namespace Dimensions
 {
     const int rowHeight = 18;
-    const int titleH = 21;
+    const int titleH = 20;
 }
 
 namespace FileBrowserInfoStrings
@@ -86,6 +86,7 @@ enum RightClickMenuIds
 
 //---------------------------------------
 //---------------------------------------
+
 
 //Represents a file in the File Browser. Contains a private subclass that responds to mouse clicks
 class KrumTreeItem :    public juce::TreeViewItem,
@@ -273,13 +274,13 @@ public:
     JUCE_LEAK_DETECTOR(DummyTreeItem)
 };
 
-class SectionHeader :   public juce::TreeViewItem,
+class RootHeaderItem :  public juce::TreeViewItem,
                         public InfoPanelComponent
 {
 public:
-    SectionHeader(juce::ValueTree& sectionValueTree, FavoritesTreeView* rootItem);
+    RootHeaderItem(juce::ValueTree& sectionValueTree, FavoritesTreeView* rootItem);
     //SectionHeader();
-    ~SectionHeader() override;
+    ~RootHeaderItem() override;
 
     void paintOpenCloseButton(juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour bgColor, bool isMouseOver) override;
     void paintItem(juce::Graphics& g, int width, int height) override;
@@ -289,7 +290,7 @@ public:
 
     void itemClicked(const juce::MouseEvent& e) override;
 
-    static void handleResult(int result, SectionHeader* comp);
+    static void handleResult(int result, RootHeaderItem* comp);
 
 private:
 
@@ -357,7 +358,7 @@ public:
     
     ~RecentFilesList() override;
 
-    void paint(juce::Graphics& g) override;
+    //void paint(juce::Graphics& g) override;
     void resized() override;
     int getNumRows() override;
     
@@ -450,7 +451,7 @@ public:
     juce::Array<juce::ValueTree> getSelectedValueTrees();
 
     juce::ValueTree& getFileBrowserValueTree();
-    SectionHeader* getRootNode();
+    RootHeaderItem* getRootNode();
 
     KrumTreeHeaderItem* findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName);
     KrumTreeHeaderItem* makeHeaderItem(juce::TreeViewItem* item);
@@ -505,7 +506,7 @@ private:
     juce::ValueTree favoritesValueTree;
 
     //std::unique_ptr<KrumTreeHeaderItem> rootItem;
-    std::unique_ptr<SectionHeader> rootItem;
+    std::unique_ptr<RootHeaderItem> rootItem;
 
     int titleH = 20;
 
@@ -607,6 +608,162 @@ private:
 };
 
 
+//===============================================================================
+
+class SectionResizerEdge : public juce::Component
+{
+public:
+    //SectionResizerEdge(juce::Component* compToResize, juce::ComponentBoundsConstrainer*, juce::ResizableEdgeComponent::Edge edge);
+    SectionResizerEdge();
+    ~SectionResizerEdge() override;
+
+    void resized() override;
+
+    void setResizeComponents(juce::Component* topComponent, juce::Component* bottomComp);
+
+    void mouseEnter(const juce::MouseEvent& e) override;
+    void mouseExit(const juce::MouseEvent& e) override;
+
+private:
+
+    std::unique_ptr<juce::ResizableEdgeComponent> topResizer;
+    std::unique_ptr<juce::ResizableEdgeComponent> bottomResizer;
+
+};
+
+
+class SectionComp : public juce::Component
+{
+public:
+
+    enum SiblingID
+    {
+        top,
+        bottom,
+    };
+
+
+    SectionComp(juce::String title, juce::String infoPanelMessage, juce::Component* ownedComp, int ownedCompIndex = 0);
+    ~SectionComp() override;
+
+    void resized() override;
+
+    void setTopSibling(SectionComp* topSibling);
+    void setBottomSibling(SectionComp* botSibling);
+
+    //pass nullptr if there is no sibling
+    void setSiblingComponents(juce::Component* topComponent, juce::Component* bottomComp);
+
+
+    /*void paint(juce::Graphics& g) override;
+    void resized() override;*/
+
+    virtual juce::Component* getOwnedComp();
+    virtual void updateOwnedComp(juce::ValueTree& updatedTree) = 0;
+
+    /*void mouseMove(const juce::MouseEvent& e) override;
+    void mouseEnter(const juce::MouseEvent& e) override;
+    void mouseExit(const juce::MouseEvent& e) override;
+    void mouseDown(const juce::MouseEvent& e) override;
+    void mouseDrag(const juce::MouseEvent& e) override;
+    void mouseUp(const juce::MouseEvent& e) override;
+    void mouseDoubleClick(const juce::MouseEvent& e) override;
+    void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override;
+    void mouseMagnify(const juce::MouseEvent& e, float scaleFactor) override;
+
+
+    bool hitTest(int x, int y) override;*/
+    //juce::Rectangle<int> getResizeBarArea();
+
+    //grab mouse events in here
+    //make sure you pass it to the owned component!!
+    // 
+    //mouseDrag
+        //change mouseCursor to upDown
+            //change hit test area to titleH
+            //change size of sibling components
+                //getMouseDragDistance
+                // sibling[0].setBounds
+                // sibling[1]setBounds
+                // ..resized
+                // ..resized
+        //pass mouseEvent to owned Component
+
+
+    
+
+protected:
+
+    //juce::Array<SectionComp*> siblings{ nullptr, nullptr};
+    int ownedCompIndex = 0;
+    
+    SectionResizerEdge resizer;
+
+
+};
+
+//===============================================================================
+
+class RecentSection : public SectionComp
+{
+public:
+
+    enum SiblingID
+    {
+        top,
+        bottom,
+    };
+
+    RecentSection(RecentFilesList& recentFilesList);
+    ~RecentSection() override;
+    
+    void paint(juce::Graphics& g) override;
+    void resized() override;
+
+    void updateOwnedComp(juce::ValueTree& updatedTree) override;
+
+    RecentFilesList* getFilesList();
+
+private:
+
+    
+
+};
+
+//===============================================================================
+
+class FavoritesSection : public SectionComp
+{
+public:
+    FavoritesSection(FavoritesTreeView& favoritesTreeView);
+    ~FavoritesSection() override;
+
+    void paint(juce::Graphics& g);
+    void resized() override;
+
+    void updateOwnedComp(juce::ValueTree& updatedTree) override;
+
+    FavoritesTreeView* getTreeView();
+};
+
+//===============================================================================
+
+class FileChooserSection : public SectionComp
+{
+public:
+    FileChooserSection(FileChooser& fileChooser);
+    ~FileChooserSection() override;
+
+    void paint(juce::Graphics& g);
+    void resized() override;
+
+    void updateOwnedComp(juce::ValueTree& updatedTree) override;
+
+    FileChooser* getFileChooser();
+};
+
+//===============================================================================
+
 namespace DragStrings
 {
     const juce::String recentsDragString{ "RecentsFileDrag-" };
@@ -626,24 +783,23 @@ public:
     };
 
 
-    KrumFileBrowser(juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager, 
-                    juce::ValueTree& stateTree, juce::AudioProcessorValueTreeState& apvts, KrumSampler& s);
+    KrumFileBrowser(juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager,
+        juce::ValueTree& stateTree, juce::AudioProcessorValueTreeState& apvts, KrumSampler& s);
     ~KrumFileBrowser();
 
     void paint(juce::Graphics& g) override;
     void resized() override;
 
     int getNumSelectedItems(BrowserSections section);
-    KrumTreeItem* getSelectedItem(int index);
 
     juce::Array<juce::ValueTree> getSelectedFileTrees(BrowserSections section);
 
 
-    void addFileToRecent(const juce::File file, juce::String name); 
+    void addFileToRecent(const juce::File file, juce::String name);
 
     bool doesPreviewerSupport(juce::String fileExtension);
     //SimpleAudioPreviewer* getAudioPreviewer();
-    
+
     //void assignAudioPreviewer(SimpleAudioPreviewer* previewer);
     void assignModuleContainer(KrumModuleContainer* container);
 
@@ -655,11 +811,15 @@ private:
     juce::ValueTree& fileBrowserValueTree;
 
     SimpleAudioPreviewer audioPreviewer;
-  
-    RecentFilesList recentFilesList{ &audioPreviewer };
-    FavoritesTreeView favoritesTreeView;
-    FileChooser fileChooser{};
 
+    RecentFilesList recentFilesList{ &audioPreviewer };
+    std::unique_ptr<RecentSection> recentSection;
+
+    FavoritesTreeView favoritesTreeView;
+    std::unique_ptr<FavoritesSection> favoritesSection;
+
+    FileChooser fileChooser{};
+    std::unique_ptr<FileChooserSection> fileChooserSection;
 
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
