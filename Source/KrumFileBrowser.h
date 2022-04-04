@@ -610,157 +610,127 @@ private:
 
 //===============================================================================
 
-class SectionResizerEdge : public juce::Component
+
+
+//===============================================================================
+
+//class RecentSection : public SectionComp
+//{
+//public:
+//
+//    enum SiblingID
+//    {
+//        top,
+//        bottom,
+//    };
+//
+//    RecentSection(RecentFilesList& recentFilesList);
+//    ~RecentSection() override;
+//    
+//    void paint(juce::Graphics& g) override;
+//    void resized() override;
+//
+//    void updateOwnedComp(juce::ValueTree& updatedTree) override;
+//
+//    RecentFilesList* getFilesList();
+//
+//private:
+//
+//    
+//
+//};
+//
+////===============================================================================
+//
+//class FavoritesSection : public SectionComp
+//{
+//public:
+//    FavoritesSection(FavoritesTreeView& favoritesTreeView);
+//    ~FavoritesSection() override;
+//
+//    void paint(juce::Graphics& g);
+//    void resized() override;
+//
+//    void updateOwnedComp(juce::ValueTree& updatedTree) override;
+//
+//    FavoritesTreeView* getTreeView();
+//};
+//
+////===============================================================================
+//
+//class FileChooserSection : public SectionComp
+//{
+//public:
+//    FileChooserSection(FileChooser& fileChooser);
+//    ~FileChooserSection() override;
+//
+//    void paint(juce::Graphics& g);
+//    void resized() override;
+//
+//    void updateOwnedComp(juce::ValueTree& updatedTree) override;
+//
+//    FileChooser* getFileChooser();
+//};
+
+class PanelHeader : public juce::Component 
 {
 public:
-    //SectionResizerEdge(juce::Component* compToResize, juce::ComponentBoundsConstrainer*, juce::ResizableEdgeComponent::Edge edge);
-    SectionResizerEdge();
-    ~SectionResizerEdge() override;
 
-    void resized() override;
+    enum PanelCompId
+    {
+        recent, 
+        favorites, 
+        fileChooser,
+    };
 
-    void setResizeComponents(juce::Component* topComponent, juce::Component* bottomComp);
+    PanelHeader(juce::String headerTitle, juce::ConcertinaPanel& concertinaPanel, PanelCompId panelId) 
+    : title(headerTitle), panel(concertinaPanel), panelCompId(panelId)
+    {
+        addAndMakeVisible(expandButton);
+        expandButton.setButtonText("Exp");
+        expandButton.setClickingTogglesState(true);
+        expandButton.onClick = [this] { panel.expandPanelFully(getPanelComponent(panelCompId), true); };
+    }
 
-    void mouseEnter(const juce::MouseEvent& e) override;
-    void mouseExit(const juce::MouseEvent& e) override;
+    ~PanelHeader() override {}
+
+    void resized() override
+    {
+        auto area = getLocalBounds();
+
+        int exButtonSize = 15;
+
+        expandButton.setBounds(area.getRight() - exButtonSize, area.getY(), exButtonSize, exButtonSize);
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        auto area = getLocalBounds();
+
+        getLookAndFeel().drawConcertinaPanelHeader(g, area, isMouseOver(), isMouseButtonDown(), panel, *this);
+        /*g.setColour(isMouseOver() ? juce::Colours::lightgrey.withAlpha(0.5f) : juce::Colours::lightgrey);
+        g.fillRect(area);*/
+
+        g.setColour(juce::Colours::lightgrey);
+        g.drawFittedText(title, getLocalBounds(), juce::Justification::centred, 1);
+    }
+
+    juce::Component* getPanelComponent(PanelCompId compId)
+    {
+        return panel.getPanel((int)compId);
+    }
+
 
 private:
 
-    std::unique_ptr<juce::ResizableEdgeComponent> topResizer;
-    std::unique_ptr<juce::ResizableEdgeComponent> bottomResizer;
+    PanelCompId panelCompId;
 
+    juce::TextButton expandButton;
+
+    juce::ConcertinaPanel& panel;
+    juce::String title;
 };
 
-
-class SectionComp : public juce::Component
-{
-public:
-
-    enum SiblingID
-    {
-        top,
-        bottom,
-    };
-
-
-    SectionComp(juce::String title, juce::String infoPanelMessage, juce::Component* ownedComp, int ownedCompIndex = 0);
-    ~SectionComp() override;
-
-    void resized() override;
-
-    void setTopSibling(SectionComp* topSibling);
-    void setBottomSibling(SectionComp* botSibling);
-
-    //pass nullptr if there is no sibling
-    void setSiblingComponents(juce::Component* topComponent, juce::Component* bottomComp);
-
-
-    /*void paint(juce::Graphics& g) override;
-    void resized() override;*/
-
-    virtual juce::Component* getOwnedComp();
-    virtual void updateOwnedComp(juce::ValueTree& updatedTree) = 0;
-
-    /*void mouseMove(const juce::MouseEvent& e) override;
-    void mouseEnter(const juce::MouseEvent& e) override;
-    void mouseExit(const juce::MouseEvent& e) override;
-    void mouseDown(const juce::MouseEvent& e) override;
-    void mouseDrag(const juce::MouseEvent& e) override;
-    void mouseUp(const juce::MouseEvent& e) override;
-    void mouseDoubleClick(const juce::MouseEvent& e) override;
-    void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override;
-    void mouseMagnify(const juce::MouseEvent& e, float scaleFactor) override;
-
-
-    bool hitTest(int x, int y) override;*/
-    //juce::Rectangle<int> getResizeBarArea();
-
-    //grab mouse events in here
-    //make sure you pass it to the owned component!!
-    // 
-    //mouseDrag
-        //change mouseCursor to upDown
-            //change hit test area to titleH
-            //change size of sibling components
-                //getMouseDragDistance
-                // sibling[0].setBounds
-                // sibling[1]setBounds
-                // ..resized
-                // ..resized
-        //pass mouseEvent to owned Component
-
-
-    
-
-protected:
-
-    //juce::Array<SectionComp*> siblings{ nullptr, nullptr};
-    int ownedCompIndex = 0;
-    
-    SectionResizerEdge resizer;
-
-
-};
-
-//===============================================================================
-
-class RecentSection : public SectionComp
-{
-public:
-
-    enum SiblingID
-    {
-        top,
-        bottom,
-    };
-
-    RecentSection(RecentFilesList& recentFilesList);
-    ~RecentSection() override;
-    
-    void paint(juce::Graphics& g) override;
-    void resized() override;
-
-    void updateOwnedComp(juce::ValueTree& updatedTree) override;
-
-    RecentFilesList* getFilesList();
-
-private:
-
-    
-
-};
-
-//===============================================================================
-
-class FavoritesSection : public SectionComp
-{
-public:
-    FavoritesSection(FavoritesTreeView& favoritesTreeView);
-    ~FavoritesSection() override;
-
-    void paint(juce::Graphics& g);
-    void resized() override;
-
-    void updateOwnedComp(juce::ValueTree& updatedTree) override;
-
-    FavoritesTreeView* getTreeView();
-};
-
-//===============================================================================
-
-class FileChooserSection : public SectionComp
-{
-public:
-    FileChooserSection(FileChooser& fileChooser);
-    ~FileChooserSection() override;
-
-    void paint(juce::Graphics& g);
-    void resized() override;
-
-    void updateOwnedComp(juce::ValueTree& updatedTree) override;
-
-    FileChooser* getFileChooser();
-};
 
 //===============================================================================
 
@@ -812,14 +782,19 @@ private:
 
     SimpleAudioPreviewer audioPreviewer;
 
+    juce::ConcertinaPanel concertinaPanel;
+
+    PanelHeader recentHeader{ "RECENT" , concertinaPanel, PanelHeader::PanelCompId::recent};
     RecentFilesList recentFilesList{ &audioPreviewer };
-    std::unique_ptr<RecentSection> recentSection;
+    //std::unique_ptr<RecentSection> recentSection;
 
+    PanelHeader favoritesHeader{ "FAVORITES", concertinaPanel, PanelHeader::PanelCompId::favorites };
     FavoritesTreeView favoritesTreeView;
-    std::unique_ptr<FavoritesSection> favoritesSection;
+    //std::unique_ptr<FavoritesSection> favoritesSection;
 
+    PanelHeader filechooserHeader{ "FILE BROWSER", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
     FileChooser fileChooser{};
-    std::unique_ptr<FileChooserSection> fileChooserSection;
+    //std::unique_ptr<FileChooserSection> fileChooserSection;
 
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     

@@ -1874,28 +1874,42 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
       favoritesTreeView(&audioPreviewer)
 {
 
-    recentSection.reset(new RecentSection(recentFilesList));
+    /*recentSection.reset(new RecentSection(recentFilesList));
     favoritesSection.reset(new FavoritesSection(favoritesTreeView));
     fileChooserSection.reset(new FileChooserSection(fileChooser));
 
-    recentSection->setSiblingComponents(nullptr, favoritesSection.get());
-    favoritesSection->setSiblingComponents(recentSection.get(), fileChooserSection.get());
-    fileChooserSection->setSiblingComponents(favoritesSection.get(), nullptr);
-    
-    addAndMakeVisible(recentSection.get());
     recentSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::RECENT));
-
-    addAndMakeVisible(favoritesSection.get());
     favoritesSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::FAVORITES));
+    fileChooserSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::LOCATIONS));*/
 
+    addAndMakeVisible(concertinaPanel);
+    concertinaPanel.addPanel(0, &recentFilesList, false);
+    concertinaPanel.setCustomPanelHeader(&recentFilesList, &recentHeader, false);
+    concertinaPanel.addPanel(1, &favoritesTreeView, false);
+    concertinaPanel.setCustomPanelHeader(&favoritesTreeView, &favoritesHeader, false);
+    concertinaPanel.addPanel(2, &fileChooser, false);
+    concertinaPanel.setCustomPanelHeader(&fileChooser, &filechooserHeader, false);
 
-    addAndMakeVisible(fileChooserSection.get());
-    fileChooserSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::LOCATIONS));
+    recentFilesList.updateFileListFromTree(fbValueTree.getChildWithName(TreeIDs::RECENT));
+    favoritesTreeView.updateFavoritesFromTree(fbValueTree.getChildWithName(TreeIDs::FAVORITES));
+    fileChooser.addLocationTabsFromTree(fbValueTree.getChildWithName(TreeIDs::LOCATIONS));
 
 
     addAndMakeVisible(audioPreviewer);
     audioPreviewer.assignSampler(&s);
     audioPreviewer.refreshSettings();
+
+    /*recentSection->setSiblingComponents(nullptr, favoritesSection.get());
+    favoritesSection->setSiblingComponents(recentSection.get(), fileChooserSection.get());
+    fileChooserSection->setSiblingComponents(favoritesSection.get(), nullptr);
+    
+    addAndMakeVisible(recentSection.get());
+
+    addAndMakeVisible(favoritesSection.get());
+
+
+    addAndMakeVisible(fileChooserSection.get());
+
 
     auto favButtonImage = juce::Drawable::createFromImageData(BinaryData::add_white_24dp_svg, BinaryData::add_white_24dp_svgSize);
 
@@ -1909,6 +1923,7 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
     //addFavoriteButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
 
     //addFavoriteButton.setTooltip("Add Files or Folders that will stay with this preset");
+    */
 
 }
 
@@ -1954,19 +1969,21 @@ void KrumFileBrowser::resized()
     int locationsW = 40;
 
     //recentFilesList.setBounds(area.withBottom(recentTreeViewH));
-    //favoritesTreeView.setBounds(area./*withLeft(locationsW).*/withTop(recentSection.getBottom() + spacer).withHeight(favTreeViewH));
+    //favoritesTreeView.setBounds(area./*withLeft(locationsW).*///withTop(recentSection.getBottom() + spacer).withHeight(favTreeViewH));
     //fileChooser.setBounds(area./*withLeft(locationsW).*/withTop(favoritesSection.getBottom() + spacer).withBottom(area.getBottom() - previewerH));
-    if (recentSection.get())
+    /*if (recentSection.get())
     {
-    }
+    }*/
 
 
     
-    recentSection->setBounds(area.withBottom(recentTreeViewH));
-    favoritesSection->setBounds(area./*withLeft(locationsW).*/withTop(recentSection->getBottom() + spacer).withHeight(favTreeViewH));
-    fileChooserSection->setBounds(area./*withLeft(locationsW).*/withTop(favoritesSection->getBottom() + spacer).withBottom(area.getBottom() - previewerH));
+    //recentSection->setBounds(area.withBottom(recentTreeViewH));
+    //favoritesSection->setBounds(area./*withLeft(locationsW).*/withTop(recentSection->getBottom() + spacer).withHeight(favTreeViewH));
+    //fileChooserSection->setBounds(area./*withLeft(locationsW).*/withTop(favoritesSection->getBottom() + spacer).withBottom(area.getBottom() - previewerH));
  
-    audioPreviewer.setBounds(area.withTop(fileChooserSection->getBottom()).withRight(area.getRight()).withHeight(previewerH));
+    concertinaPanel.setBounds(area.withTrimmedBottom(previewerH));
+
+    audioPreviewer.setBounds(area.withTop(concertinaPanel.getBottom()).withRight(area.getRight()).withHeight(previewerH));
     
 }
 
@@ -1974,12 +1991,13 @@ int KrumFileBrowser::getNumSelectedItems(BrowserSections section)
 {
     if (section == BrowserSections::recent)
     {
-        //return recentFilesList.getNumSelectedRows();
-        return recentSection->getFilesList()->getNumSelectedRows();
+        return recentFilesList.getNumSelectedRows();
+        //return recentSection->getFilesList()->getNumSelectedRows();
     }
     else if (section == BrowserSections::favorites)
     {
-        return favoritesSection->getTreeView()->getNumSelectedItems();
+        //return favoritesSection->getTreeView()->getNumSelectedItems();
+        return favoritesTreeView.getNumSelectedItems();
     }
     return 0;
 }
@@ -1988,11 +2006,11 @@ juce::Array<juce::ValueTree> KrumFileBrowser::getSelectedFileTrees(BrowserSectio
 {
     if (section == BrowserSections::recent)
     {
-        return recentSection->getFilesList()->getSelectedValueTrees();
+        return recentFilesList.getSelectedValueTrees();
     }
     else if (section == BrowserSections::favorites)
     {
-        return favoritesSection->getTreeView()->getSelectedValueTrees();
+        return favoritesTreeView.getSelectedValueTrees();
     }
 
     return juce::Array<juce::ValueTree>();
@@ -2001,7 +2019,8 @@ juce::Array<juce::ValueTree> KrumFileBrowser::getSelectedFileTrees(BrowserSectio
 void KrumFileBrowser::addFileToRecent(const juce::File file, juce::String name)
 {
     //treeView.addFileToRecent(file, name);
-    recentSection->getFilesList()->addFile(file, name);
+    //recentSection->getFilesList()->addFile(file, name);
+    recentFilesList.addFile(file, name);
 }
 
 bool KrumFileBrowser::doesPreviewerSupport(juce::String fileExtension)
@@ -2105,7 +2124,7 @@ void KrumFileBrowser::buildDemoKit()
             demoKit = demoKitFolder;
 
             DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
-            favoritesSection->getTreeView()->createNewFavoriteFolder(demoKit.getFullPathName());
+            favoritesTreeView.createNewFavoriteFolder(demoKit.getFullPathName());
         }
     }
     else if (demoKitFolder.isDirectory())
@@ -2113,7 +2132,7 @@ void KrumFileBrowser::buildDemoKit()
         demoKit = demoKitFolder;
 
         DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
-        favoritesSection->getTreeView()->createNewFavoriteFolder(demoKit.getFullPathName());
+        favoritesTreeView.createNewFavoriteFolder(demoKit.getFullPathName());
     }
     
 }
@@ -2203,387 +2222,387 @@ void RootHeaderItem::handleResult(int result, RootHeaderItem* comp)
 
 //=================================================================================================================
 
-SectionComp::SectionComp(juce::String title, juce::String infoPanelMessage, juce::Component* ownedComp, int ownedIndex)
-    //: InfoPanelComponent(title, infoPanelMessage), ownedCompIndex (ownedIndex)
-{
-    setName(title);
-    addAndMakeVisible(ownedComp, ownedCompIndex);
-    //ownedComp->setInterceptsMouseClicks(false, true);
-    //setInterceptsMouseClicks(false, true);
-
-    setRepaintsOnMouseActivity(true);
-
-}
-
-SectionComp::~SectionComp()
-{
-}
-
-void SectionComp::resized()
-{
-    auto area = getLocalBounds();
-
-    resizer.setBounds(area.withTop(Dimensions::titleH));
-    getOwnedComp()->setBounds(area.withTrimmedTop(Dimensions::titleH));
-}
-
-void SectionComp::setTopSibling(SectionComp* topSibling)
-{
-    //siblings.add(topSibling);
-}
-
-void SectionComp::setBottomSibling(SectionComp* botSibling)
-{
-    //siblings.add(botSibling);
-}
-
-void SectionComp::setSiblingComponents(juce::Component* topComponent, juce::Component* bottomComp)
-{
-    resized();
-    resizer.setResizeComponents(topComponent, bottomComp);
-    addAndMakeVisible(resizer);
-    repaint();
-}
-
-juce::Component* SectionComp::getOwnedComp()
-{
-    return getChildComponent(ownedCompIndex);
-}
-
-//=====================================================================================
-
-SectionResizerEdge::SectionResizerEdge()
-// : juce::ResizableEdgeComponent(compToResize, constrainer, edge)
-    //: topResizer(), bottomResizer()
-{
-    //setInterceptsMouseClicks(true, false);
-}
-
-SectionResizerEdge::~SectionResizerEdge()
-{
-}
-
-void SectionResizerEdge::resized()
-{
-    auto area = getLocalBounds();
-
-    if (topResizer != nullptr)
-    {
-        topResizer->setBounds(area.withTrimmedBottom(area.getHeight() /2));
-    }
-
-    if (bottomResizer != nullptr)
-    {
-        bottomResizer->setBounds(area.withTrimmedTop(area.getHeight() / 2));
-    }
-}
-
-void SectionResizerEdge::setResizeComponents(juce::Component* topComponent, juce::Component* bottomComponent)
-{
-    topResizer.reset(new juce::ResizableEdgeComponent(topComponent, nullptr, juce::ResizableEdgeComponent::Edge::topEdge));
-    bottomResizer.reset(new juce::ResizableEdgeComponent(bottomComponent, nullptr, juce::ResizableEdgeComponent::Edge::bottomEdge));
-
-    addAndMakeVisible(topResizer.get());
-    addAndMakeVisible(bottomResizer.get());
-
-    auto area = getLocalBounds();
-    topResizer->setBounds(area);
-    bottomResizer->setBounds(area);
-
-    topResizer->toFront(false);
-    bottomResizer->toFront(false);
-    
-    resized();
-    repaint();
-}
-
-void SectionResizerEdge::mouseEnter(const juce::MouseEvent& e)
-{
-    setMouseCursor(juce::MouseCursor::UpDownResizeCursor);
-}
-
-void SectionResizerEdge::mouseExit(const juce::MouseEvent& e)
-{
-    setMouseCursor(juce::MouseCursor::UpDownResizeCursor);
-}
-//
-//
-//void SectionComp::mouseExit(const juce::MouseEvent& e)
+//SectionComp::SectionComp(juce::String title, juce::String infoPanelMessage, juce::Component* ownedComp, int ownedIndex)
+//    //: InfoPanelComponent(title, infoPanelMessage), ownedCompIndex (ownedIndex)
 //{
-//    InfoPanelComponent::mouseExit(e);
+//    setName(title);
+//    addAndMakeVisible(ownedComp, ownedCompIndex);
+//    //ownedComp->setInterceptsMouseClicks(false, true);
+//    //setInterceptsMouseClicks(false, true);
 //
-//    if (contains(e.getPosition()))
+//    setRepaintsOnMouseActivity(true);
+//
+//}
+//
+//SectionComp::~SectionComp()
+//{
+//}
+//
+//void SectionComp::resized()
+//{
+//    auto area = getLocalBounds();
+//
+//    resizer.setBounds(area.withTop(Dimensions::titleH));
+//    getOwnedComp()->setBounds(area.withTrimmedTop(Dimensions::titleH));
+//}
+//
+//void SectionComp::setTopSibling(SectionComp* topSibling)
+//{
+//    //siblings.add(topSibling);
+//}
+//
+//void SectionComp::setBottomSibling(SectionComp* botSibling)
+//{
+//    //siblings.add(botSibling);
+//}
+//
+//void SectionComp::setSiblingComponents(juce::Component* topComponent, juce::Component* bottomComp)
+//{
+//    resized();
+//    resizer.setResizeComponents(topComponent, bottomComp);
+//    addAndMakeVisible(resizer);
+//    repaint();
+//}
+//
+//juce::Component* SectionComp::getOwnedComp()
+//{
+//    return getChildComponent(ownedCompIndex);
+//}
+//
+////=====================================================================================
+//
+//SectionResizerEdge::SectionResizerEdge()
+//// : juce::ResizableEdgeComponent(compToResize, constrainer, edge)
+//    //: topResizer(), bottomResizer()
+//{
+//    //setInterceptsMouseClicks(true, false);
+//}
+//
+//SectionResizerEdge::~SectionResizerEdge()
+//{
+//}
+//
+//void SectionResizerEdge::resized()
+//{
+//    auto area = getLocalBounds();
+//
+//    if (topResizer != nullptr)
 //    {
-//        setMouseCursor(juce::MouseCursor::NormalCursor);
+//        topResizer->setBounds(area.withTrimmedBottom(area.getHeight() /2));
+//    }
+//
+//    if (bottomResizer != nullptr)
+//    {
+//        bottomResizer->setBounds(area.withTrimmedTop(area.getHeight() / 2));
+//    }
+//}
+//
+//void SectionResizerEdge::setResizeComponents(juce::Component* topComponent, juce::Component* bottomComponent)
+//{
+//    topResizer.reset(new juce::ResizableEdgeComponent(topComponent, nullptr, juce::ResizableEdgeComponent::Edge::topEdge));
+//    bottomResizer.reset(new juce::ResizableEdgeComponent(bottomComponent, nullptr, juce::ResizableEdgeComponent::Edge::bottomEdge));
+//
+//    addAndMakeVisible(topResizer.get());
+//    addAndMakeVisible(bottomResizer.get());
+//
+//    auto area = getLocalBounds();
+//    topResizer->setBounds(area);
+//    bottomResizer->setBounds(area);
+//
+//    topResizer->toFront(false);
+//    bottomResizer->toFront(false);
+//    
+//    resized();
+//    repaint();
+//}
+//
+//void SectionResizerEdge::mouseEnter(const juce::MouseEvent& e)
+//{
+//    setMouseCursor(juce::MouseCursor::UpDownResizeCursor);
+//}
+//
+//void SectionResizerEdge::mouseExit(const juce::MouseEvent& e)
+//{
+//    setMouseCursor(juce::MouseCursor::UpDownResizeCursor);
+//}
+////
+////
+////void SectionComp::mouseExit(const juce::MouseEvent& e)
+////{
+////    InfoPanelComponent::mouseExit(e);
+////
+////    if (contains(e.getPosition()))
+////    {
+////        setMouseCursor(juce::MouseCursor::NormalCursor);
+////    }
+////    else
+////    {
+////        getOwnedComp()->mouseExit(e);
+////    }
+////
+////    getOwnedComp()->mouseExit(e);
+////}
+////
+////void SectionComp::mouseDrag(const juce::MouseEvent& e)
+////{
+////    if (e.mouseWasDraggedSinceMouseDown())
+////    {
+////        auto mouseDownPos = e.getMous
+////
+////        int startX = e.getDistanceFromDragStartX();
+////        int startY = e.getDistanceFromDragStartY();
+////
+////        auto currentXY = e.getScreenPosition();
+////        auto dragDistance = e.getDistanceFromDragStart();
+////
+////        if (e.getMouseDownY() < currentXY.y)
+////        {
+////            dragDistance *= -1;
+////        }
+////
+////
+////        SectionComp* topSibling = siblings.getUnchecked((int)SectionComp::SiblingID::top);
+////        SectionComp* bottomSibling = siblings.getUnchecked((int)SectionComp::SiblingID::bottom);
+////        
+////        if (topSibling)
+////        {
+////            auto topSiblingBounds = topSibling->getBoundsInParent();
+////            topSibling->setTopLeftPosition(topSibling->getX(), topSibling->getY() + dragDistance);
+////            topSibling->resized();
+////            topSibling->repaint();
+////        }
+////
+////        if (bottomSibling)
+////        {
+////            auto botSiblingBounds = bottomSibling->getBoundsInParent();
+////            bottomSibling->setTopLeftPosition(bottomSibling->getX(), bottomSibling->getY() + dragDistance);
+////            bottomSibling->resized();
+////            bottomSibling->repaint();
+////
+////        }
+////
+////    }
+////
+////
+////    getOwnedComp()->mouseDrag(e);
+////}
+////
+////void SectionComp::mouseDown(const juce::MouseEvent& e)
+////{
+////    InfoPanelComponent::mouseDown(e);
+////
+////    if (contains(e.getPosition()))
+////    {
+////        setMouseCursor(juce::MouseCursor::NormalCursor);
+////    }
+////    else
+////    {
+////        getOwnedComp()->mouseExit(e);
+////    }
+////}
+////
+////void SectionComp::mouseUp(const juce::MouseEvent& e)
+////{
+////    InfoPanelComponent::mouseUp(e);
+////
+////    if (contains(e.getPosition()))
+////    {
+////        setMouseCursor(juce::MouseCursor::NormalCursor);
+////    }
+////    else
+////    {
+////        getOwnedComp()->mouseUp(e);
+////    }
+////}
+////
+////void SectionComp::mouseDoubleClick(const juce::MouseEvent& e)
+////{
+////    InfoPanelComponent::mouseDoubleClick(e);
+////
+////    if (contains(e.getPosition()))
+////    {
+////        expand or shrink size of siblings
+////    }
+////    else
+////    {
+////        getOwnedComp()->mouseDoubleClick(e);
+////    }
+////}
+////
+////void SectionComp::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)
+////{
+////
+////    if (contains(e.getPosition()))
+////    {
+////    }
+////    else
+////    {
+////        getOwnedComp()->mouseWheelMove(e, wheel);
+////    }
+////}
+////
+////void SectionComp::mouseMagnify(const juce::MouseEvent& e, float scaleFactor)
+////{
+////    if (contains(e.getPosition()))
+////    {
+////    }
+////    else
+////    {
+////        getOwnedComp()->mouseMagnify(e, scaleFactor);
+////    }
+////}
+////
+////bool SectionComp::hitTest(int x, int y)
+////{
+////    return y < Dimensions::titleH;
+////}
+//
+////=================================================================================================================
+//
+//RecentSection::RecentSection(RecentFilesList& recentFilesList)
+//    : SectionComp("RECENT", "stores your recently used samples", &recentFilesList)
+//{
+//}
+//
+//RecentSection::~RecentSection()
+//{
+//}
+//
+//void RecentSection::paint(juce::Graphics& g)
+//{
+//    auto area = getLocalBounds();
+//
+//    g.setColour(juce::Colours::lightgrey);
+//    g.drawFittedText(getName(), area.withBottom(Dimensions::titleH), juce::Justification::centred, 1);
+//
+//    g.setColour(juce::Colours::black.withAlpha(0.1f));
+//    g.fillRect(area.withBottom(Dimensions::titleH));
+//}
+//
+//void RecentSection::resized()
+//{
+//    auto area = getLocalBounds();
+//
+//    getOwnedComp()->setBounds(area.withTop(Dimensions::titleH));
+//}
+//
+//void RecentSection::updateOwnedComp(juce::ValueTree& updatedTree)
+//{
+//    getFilesList()->updateFileListFromTree(updatedTree);
+//
+//    /*auto recentFilesList = static_cast<RecentFilesList*>(getOwnedComp());
+//    if (recentFilesList)
+//    {
+//        recentFilesList->updateFileListFromTree(updatedTree);
 //    }
 //    else
 //    {
-//        getOwnedComp()->mouseExit(e);
-//    }
-//
-//    getOwnedComp()->mouseExit(e);
+//        DBG("RecentFilesList is NULL");
+//    }*/
 //}
 //
-//void SectionComp::mouseDrag(const juce::MouseEvent& e)
+//RecentFilesList* RecentSection::getFilesList()
 //{
-//    if (e.mouseWasDraggedSinceMouseDown())
+//    auto recentFilesList = static_cast<RecentFilesList*>(getOwnedComp());
+//    if (recentFilesList)
 //    {
-//        auto mouseDownPos = e.getMous
-//
-//        int startX = e.getDistanceFromDragStartX();
-//        int startY = e.getDistanceFromDragStartY();
-//
-//        auto currentXY = e.getScreenPosition();
-//        auto dragDistance = e.getDistanceFromDragStart();
-//
-//        if (e.getMouseDownY() < currentXY.y)
-//        {
-//            dragDistance *= -1;
-//        }
-//
-//
-//        SectionComp* topSibling = siblings.getUnchecked((int)SectionComp::SiblingID::top);
-//        SectionComp* bottomSibling = siblings.getUnchecked((int)SectionComp::SiblingID::bottom);
-//        
-//        if (topSibling)
-//        {
-//            auto topSiblingBounds = topSibling->getBoundsInParent();
-//            topSibling->setTopLeftPosition(topSibling->getX(), topSibling->getY() + dragDistance);
-//            topSibling->resized();
-//            topSibling->repaint();
-//        }
-//
-//        if (bottomSibling)
-//        {
-//            auto botSiblingBounds = bottomSibling->getBoundsInParent();
-//            bottomSibling->setTopLeftPosition(bottomSibling->getX(), bottomSibling->getY() + dragDistance);
-//            bottomSibling->resized();
-//            bottomSibling->repaint();
-//
-//        }
-//
+//        return recentFilesList;
 //    }
-//
-//
-//    getOwnedComp()->mouseDrag(e);
+//    
+//    DBG("FileList is Null");
+//    return nullptr;
 //}
 //
-//void SectionComp::mouseDown(const juce::MouseEvent& e)
+////=================================================================================================================
+//
+//FavoritesSection::FavoritesSection(FavoritesTreeView& favoritesTreeView)
+//    :SectionComp("FAVORITES", "Drop files here to store them as favorites, you can drag files from here to the modules", &favoritesTreeView)
 //{
-//    InfoPanelComponent::mouseDown(e);
-//
-//    if (contains(e.getPosition()))
-//    {
-//        setMouseCursor(juce::MouseCursor::NormalCursor);
-//    }
-//    else
-//    {
-//        getOwnedComp()->mouseExit(e);
-//    }
 //}
 //
-//void SectionComp::mouseUp(const juce::MouseEvent& e)
+//FavoritesSection::~FavoritesSection()
 //{
-//    InfoPanelComponent::mouseUp(e);
-//
-//    if (contains(e.getPosition()))
-//    {
-//        setMouseCursor(juce::MouseCursor::NormalCursor);
-//    }
-//    else
-//    {
-//        getOwnedComp()->mouseUp(e);
-//    }
 //}
 //
-//void SectionComp::mouseDoubleClick(const juce::MouseEvent& e)
+//void FavoritesSection::paint(juce::Graphics& g)
 //{
-//    InfoPanelComponent::mouseDoubleClick(e);
+//    auto area = getLocalBounds();
 //
-//    if (contains(e.getPosition()))
-//    {
-//        expand or shrink size of siblings
-//    }
-//    else
-//    {
-//        getOwnedComp()->mouseDoubleClick(e);
-//    }
+//    g.setColour(juce::Colours::lightgrey);
+//    g.drawFittedText(getName(), area.withBottom(Dimensions::titleH), juce::Justification::centred, 1);
+//    
+//    g.setColour(juce::Colours::black.withAlpha(0.1f));
+//    g.fillRect(area.withBottom(Dimensions::titleH));
 //}
 //
-//void SectionComp::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)
+//void FavoritesSection::resized()
 //{
-//
-//    if (contains(e.getPosition()))
-//    {
-//    }
-//    else
-//    {
-//        getOwnedComp()->mouseWheelMove(e, wheel);
-//    }
+//    auto area = getLocalBounds();
+//    getOwnedComp()->setBounds(area.withTop(Dimensions::titleH));
 //}
 //
-//void SectionComp::mouseMagnify(const juce::MouseEvent& e, float scaleFactor)
+//void FavoritesSection::updateOwnedComp(juce::ValueTree& updatedTree)
 //{
-//    if (contains(e.getPosition()))
-//    {
-//    }
-//    else
-//    {
-//        getOwnedComp()->mouseMagnify(e, scaleFactor);
-//    }
+//    getTreeView()->updateFavoritesFromTree(updatedTree);
 //}
 //
-//bool SectionComp::hitTest(int x, int y)
+//FavoritesTreeView* FavoritesSection::getTreeView()
 //{
-//    return y < Dimensions::titleH;
+//    auto favTreeView = static_cast<FavoritesTreeView*>(getOwnedComp());
+//    if (favTreeView)
+//    {
+//        return favTreeView;
+//    }
+//    
+//    DBG("FavoritesTreeView is NULL");
+//    return nullptr;
 //}
-
-//=================================================================================================================
-
-RecentSection::RecentSection(RecentFilesList& recentFilesList)
-    : SectionComp("RECENT", "stores your recently used samples", &recentFilesList)
-{
-}
-
-RecentSection::~RecentSection()
-{
-}
-
-void RecentSection::paint(juce::Graphics& g)
-{
-    auto area = getLocalBounds();
-
-    g.setColour(juce::Colours::lightgrey);
-    g.drawFittedText(getName(), area.withBottom(Dimensions::titleH), juce::Justification::centred, 1);
-
-    g.setColour(juce::Colours::black.withAlpha(0.1f));
-    g.fillRect(area.withBottom(Dimensions::titleH));
-}
-
-void RecentSection::resized()
-{
-    auto area = getLocalBounds();
-
-    getOwnedComp()->setBounds(area.withTop(Dimensions::titleH));
-}
-
-void RecentSection::updateOwnedComp(juce::ValueTree& updatedTree)
-{
-    getFilesList()->updateFileListFromTree(updatedTree);
-
-    /*auto recentFilesList = static_cast<RecentFilesList*>(getOwnedComp());
-    if (recentFilesList)
-    {
-        recentFilesList->updateFileListFromTree(updatedTree);
-    }
-    else
-    {
-        DBG("RecentFilesList is NULL");
-    }*/
-}
-
-RecentFilesList* RecentSection::getFilesList()
-{
-    auto recentFilesList = static_cast<RecentFilesList*>(getOwnedComp());
-    if (recentFilesList)
-    {
-        return recentFilesList;
-    }
-    
-    DBG("FileList is Null");
-    return nullptr;
-}
-
-//=================================================================================================================
-
-FavoritesSection::FavoritesSection(FavoritesTreeView& favoritesTreeView)
-    :SectionComp("FAVORITES", "Drop files here to store them as favorites, you can drag files from here to the modules", &favoritesTreeView)
-{
-}
-
-FavoritesSection::~FavoritesSection()
-{
-}
-
-void FavoritesSection::paint(juce::Graphics& g)
-{
-    auto area = getLocalBounds();
-
-    g.setColour(juce::Colours::lightgrey);
-    g.drawFittedText(getName(), area.withBottom(Dimensions::titleH), juce::Justification::centred, 1);
-    
-    g.setColour(juce::Colours::black.withAlpha(0.1f));
-    g.fillRect(area.withBottom(Dimensions::titleH));
-}
-
-void FavoritesSection::resized()
-{
-    auto area = getLocalBounds();
-    getOwnedComp()->setBounds(area.withTop(Dimensions::titleH));
-}
-
-void FavoritesSection::updateOwnedComp(juce::ValueTree& updatedTree)
-{
-    getTreeView()->updateFavoritesFromTree(updatedTree);
-}
-
-FavoritesTreeView* FavoritesSection::getTreeView()
-{
-    auto favTreeView = static_cast<FavoritesTreeView*>(getOwnedComp());
-    if (favTreeView)
-    {
-        return favTreeView;
-    }
-    
-    DBG("FavoritesTreeView is NULL");
-    return nullptr;
-}
-
-
-//=================================================================================================================
-
-FileChooserSection::FileChooserSection(FileChooser& fileChooser)
-    :SectionComp("FILE BROWSER", "Browse files on your computer, drag from here into favorites", &fileChooser)
-{
-}
-
-FileChooserSection::~FileChooserSection()
-{
-}
-
-void FileChooserSection::paint(juce::Graphics& g)
-{
-    auto area = getLocalBounds();
-
-    g.setColour(juce::Colours::lightgrey);
-    g.drawFittedText(getName(), area.withBottom(Dimensions::titleH), juce::Justification::centred, 1);
-
-    g.setColour(juce::Colours::black.withAlpha(0.1f));
-    g.fillRect(area.withBottom(Dimensions::titleH));
-}
-
-void FileChooserSection::resized()
-{
-    auto area = getLocalBounds();
-    getOwnedComp()->setBounds(area.withTop(Dimensions::titleH));
-}
-
-void FileChooserSection::updateOwnedComp(juce::ValueTree& updatedTree)
-{
-    getFileChooser()->addLocationTabsFromTree(updatedTree);
-}
-
-FileChooser* FileChooserSection::getFileChooser()
-{
-    auto fileChooser = static_cast<FileChooser*>(getOwnedComp());
-    if (fileChooser)
-    {
-        return fileChooser;
-    }
-
-    DBG("FileChooser is NULL");
-    return nullptr;
-}
+//
+//
+////=================================================================================================================
+//
+//FileChooserSection::FileChooserSection(FileChooser& fileChooser)
+//    :SectionComp("FILE BROWSER", "Browse files on your computer, drag from here into favorites", &fileChooser)
+//{
+//}
+//
+//FileChooserSection::~FileChooserSection()
+//{
+//}
+//
+//void FileChooserSection::paint(juce::Graphics& g)
+//{
+//    auto area = getLocalBounds();
+//
+//    g.setColour(juce::Colours::lightgrey);
+//    g.drawFittedText(getName(), area.withBottom(Dimensions::titleH), juce::Justification::centred, 1);
+//
+//    g.setColour(juce::Colours::black.withAlpha(0.1f));
+//    g.fillRect(area.withBottom(Dimensions::titleH));
+//}
+//
+//void FileChooserSection::resized()
+//{
+//    auto area = getLocalBounds();
+//    getOwnedComp()->setBounds(area.withTop(Dimensions::titleH));
+//}
+//
+//void FileChooserSection::updateOwnedComp(juce::ValueTree& updatedTree)
+//{
+//    getFileChooser()->addLocationTabsFromTree(updatedTree);
+//}
+//
+//FileChooser* FileChooserSection::getFileChooser()
+//{
+//    auto fileChooser = static_cast<FileChooser*>(getOwnedComp());
+//    if (fileChooser)
+//    {
+//        return fileChooser;
+//    }
+//
+//    DBG("FileChooser is NULL");
+//    return nullptr;
+//}
 
 //===================================================================================================
 
