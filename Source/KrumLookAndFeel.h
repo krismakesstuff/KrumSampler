@@ -25,9 +25,29 @@ class KrumLookAndFeel : public juce::LookAndFeel_V4
 public:
     KrumLookAndFeel() 
     {
-        juce::Typeface::Ptr tface = juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratLight_ttf, BinaryData::MontserratLight_ttfSize);
-        setDefaultSansSerifTypeface(tface);
+        setDefaultSansSerifTypeface(getMontRegularTypeface());
     }
+
+    juce::Typeface::Ptr getMontLightTypeface()
+    {
+        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratMedium_ttf, BinaryData::MontserratMedium_ttfSize);
+    }
+
+    juce::Typeface::Ptr getMontMediumTypeface()
+    {
+        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratLight_ttf, BinaryData::MontserratLight_ttfSize);
+    }
+    
+    juce::Typeface::Ptr getMontRegularTypeface()
+    {
+        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratRegular_ttf, BinaryData::MontserratRegular_ttfSize);
+    }
+
+    juce::Typeface::Ptr getMontBoldTypeface()
+    {
+        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBold_ttf, BinaryData::MontserratBlack_ttfSize);
+    }
+
 
   /*  juce::Typeface::Ptr getTypefaceForFont(const juce::Font& f) override
     {
@@ -91,7 +111,6 @@ public:
 
             }
         }
-
     }
 
     float getSliderDecibelPosition(juce::Slider& slider, float decibel)
@@ -310,10 +329,14 @@ public:
         else
             thumbBounds = { thumbStartPosition, y + 2, thumbSize, height -4 };
 
+        g.setColour(juce::Colours::black.withAlpha(0.2f));
+        g.fillRect(x, y, width, height);
+        
         auto c = juce::Colours::darkgrey/*.darker()*/;
         g.setColour(isMouseOver ? c.brighter(0.25f) : c);
-
         g.fillRect(thumbBounds.reduced(1));
+
+
         //g.fillRect(thumbBounds.withWidth(50));
 
     }
@@ -528,8 +551,6 @@ public:
 
     void drawDrawableButton(juce::Graphics& g, juce::DrawableButton& button, bool highlighted, bool down) override
     {
-
-
         bool toggleState = button.getToggleState();
 
         float cornerSize = 3.0f;
@@ -689,21 +710,6 @@ public:
         {
             auto iy = height * 0.25f;
             juce::Rectangle<float> trackRect((float)x, y, (float)width, height);
-
-            /*juce::ColourGradient horzRGrade (gradCol1, trackRect.getCentreX(), iy, gradCol2, trackRect.getRight()-2, iy, false);
-            juce::ColourGradient horzLGrade (gradCol2, trackRect.getX(), iy, gradCol1, trackRect.getCentreX(), iy, false);
-
-            indent.addRoundedRectangle(trackRect, cornerSize);
-            g.setColour(gradCol1);
-            g.fillPath(indent);
-
-            horzRGrade.addColour(sliderPorp, gradCol1);
-            g.setGradientFill(horzRGrade);
-            g.fillRoundedRectangle(trackRect.withLeft(trackRect.getCentreX()), cornerSize);
-
-            horzLGrade.addColour(sliderPorp, gradCol1);
-            g.setGradientFill(horzLGrade);
-            g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);*/
 
             g.setColour(juce::Colours::grey);
             g.fillRoundedRectangle(trackRect, cornerSize);
@@ -1002,5 +1008,55 @@ public:
 
     }
 };
+
+class FileBrowserLookAndFeel : public KrumLookAndFeel
+{
+public:
+
+    void drawComboBox(juce::Graphics& g, int width, int height, bool,
+        int, int, int, int, juce::ComboBox& box)
+    {
+        auto cornerSize = box.findParentComponentOfClass<juce::ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
+        juce::Rectangle<int> boxBounds(0, 0, width, height);
+
+        g.setColour(box.findColour(juce::ComboBox::backgroundColourId));
+        g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+
+        g.setColour(box.findColour(juce::ComboBox::outlineColourId));
+        g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+
+        bool popUp = box.isPopupActive();
+
+        int arrowW = width * 0.085f;
+        juce::Rectangle<int> arrowZone(width - arrowW, 0, arrowW, height);
+        juce::Path path;
+        path.startNewSubPath((float)arrowZone.getX() + 3.0f, (float)arrowZone.getCentreY() - 2.0f);
+        path.lineTo((float)arrowZone.getCentreX(), (float)arrowZone.getCentreY() + 3.0f);
+        path.lineTo((float)arrowZone.getRight() - 3.0f, (float)arrowZone.getCentreY() - 2.0f);
+
+        g.setColour(box.findColour(juce::ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
+
+        if (popUp)
+        {
+            auto pathCentre = path.getBounds().getCentre();
+            float rotation = juce::MathConstants<float>::pi;
+
+            g.fillPath(path, juce::AffineTransform::rotation(rotation, pathCentre.getX(), pathCentre.getY()));
+        }
+        else
+        {
+            g.fillPath(path);
+        }
+    }
+
+    int getDefaultScrollbarWidth() override
+    {
+        return 5;
+    }
+
+
+
+};
+
 
 //===========================================================================================================

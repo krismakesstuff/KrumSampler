@@ -59,7 +59,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     addAndMakeVisible(InfoPanel::shared_instance());
     
-    
+    fileBrowser.setLookAndFeel(&fbLaf);
     fileBrowser.assignModuleContainer(&moduleContainer);
     //fileBrowser.rebuildBrowser();
     fileBrowser.buildDemoKit();
@@ -137,13 +137,14 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    float gain = outputGainSlider.valueToProportionOfLength(getOutputGainValue());
+    /*float gain = outputGainSlider.valueToProportionOfLength(getOutputGainValue());
     auto outputGainProp = 1 - parameters.getParameter(TreeIDs::outputGainParam)->convertTo0to1(gain);
 
     auto bgGrade = juce::ColourGradient::vertical(bgColor.darker(0.2f), bgColor.brighter(0.0099f), area);
     bgGrade.addColour(juce::jlimit<double>(0.00001, 0.9999, outputGainProp), bgColor.brighter(0.037f));
 
-    g.setGradientFill(bgGrade);
+    g.setGradientFill(bgGrade);*/
+    g.setColour(juce::Colours::black.brighter(0.12f));
     g.fillRect(area);
     
     //Title Image

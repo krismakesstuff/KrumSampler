@@ -103,6 +103,9 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
 {
     juce::Rectangle<int> area = { 0, 0, width, height };
     int spacer = 5;
+    
+    fileIcon->drawWithin(g, area.withWidth(Dimensions::fileIconSize).reduced(3).toFloat(), juce::RectanglePlacement::stretchToFit, Dimensions::fileIconAlpha);
+    
     if (rowIsSelected)
     {
         g.setColour(juce::Colours::black.withAlpha(0.5f));
@@ -114,7 +117,8 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
      }*/
 
     g.setColour(juce::Colours::lightgrey);
-    g.drawFittedText(getFileName(rowNumber), area.withX(spacer), juce::Justification::centredLeft, 1);
+    g.drawFittedText(getFileName(rowNumber), area.withX(Dimensions::fileIconSize + spacer), juce::Justification::centredLeft, 1);
+
 
 }
 
@@ -210,7 +214,7 @@ KrumTreeItem::KrumTreeItem(juce::ValueTree& fileVt, FavoritesTreeView* parentVie
 
     treeHasChanged();
 
-    setLinesDrawnForSubItems(true);
+    //setLinesDrawnForSubItems(true);
     setDrawsInLeftMargin(true);
     setInterceptsMouseClicks(false, true);
 }
@@ -237,15 +241,15 @@ std::unique_ptr<juce::Component> KrumTreeItem::createItemComponent()
     return std::move(std::unique_ptr<juce::Component>(comp));
 }
 
-void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
-{
-    juce::Line<float> newLine = line;
-    newLine.setStart(line.getStartX() - 20, line.getStartY());
-    newLine.setEnd(line.getEndX() - 10, line.getEndY());
-
-    g.setColour(parentTreeView->getConnectedLineColor());
-    g.drawLine(newLine);
-}
+//void KrumTreeItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
+//{
+//    juce::Line<float> newLine = line;
+//    newLine.setStart(line.getStartX() - 20, line.getStartY());
+//    newLine.setEnd(line.getEndX() - 10, line.getEndY());
+//
+//    g.setColour(parentTreeView->getConnectedLineColor());
+//    g.drawLine(newLine);
+//}
 
 int KrumTreeItem::getItemHeight() const
 {
@@ -381,6 +385,7 @@ KrumTreeItem::EditableComp::EditableComp (KrumTreeItem& o, juce::Colour backColo
     setText(owner.getItemName(), juce::dontSendNotification);
     setTooltip(owner.getFilePath());
     setInterceptsMouseClicks(true, true);
+
 }
 
 void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
@@ -396,8 +401,10 @@ void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
     if (!isBeingEdited())
     {
         g.setColour(juce::Colours::lightgrey);
-        g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
+        g.drawFittedText(getText(), area.withLeft(25), juce::Justification::centredLeft, 1);
     }
+
+    owner.fileIcon->drawWithin(g, area.withWidth(Dimensions::fileIconSize).reduced(3).toFloat(), juce::RectanglePlacement::fillDestination, Dimensions::fileIconAlpha);
 }
 
 void KrumTreeItem::EditableComp::textWasEdited()
@@ -535,7 +542,7 @@ KrumTreeHeaderItem::KrumTreeHeaderItem(juce::ValueTree& folderVTree, FavoritesTr
     //file = fullPathName;
     //headerName = name;
     treeHasChanged();
-    setLinesDrawnForSubItems(true);
+    setLinesDrawnForSubItems(false);
     setInterceptsMouseClicks(false, true);
 
 }
@@ -570,27 +577,42 @@ std::unique_ptr<juce::Component> KrumTreeHeaderItem::createItemComponent()
     return std::move(std::unique_ptr<juce::Component>(comp));
 }
 
-void KrumTreeHeaderItem::paintOpenCloseButton(juce::Graphics&, const juce::Rectangle< float >& area, juce::Colour backgroundColour, bool isMouseOver)
+void KrumTreeHeaderItem::paintOpenCloseButton(juce::Graphics& g, const juce::Rectangle< float >& buttonArea, juce::Colour backgroundColour, bool isMouseOver)
 {
+    juce::Path path;
+    auto area = buttonArea.reduced(7, 5);
+    g.setColour(juce::Colours::grey);
+
+    if (!isOpen())
+    {
+        path.addTriangle(area.getTopLeft(), {area.getRight(), area.getCentreY()}, area.getBottomLeft());
+        g.strokePath(path, juce::PathStrokeType(1.0f));
+    }
+    else
+    {
+        path.addTriangle(area.getBottomLeft(), area.getTopRight(), area.getBottomRight());
+        g.strokePath(path, juce::PathStrokeType(1.0f));
+        g.fillPath(path);
+    }
 
 }
 
 void KrumTreeHeaderItem::paintVerticalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
 {
-    juce::Line<float> newLine = line;
+    //juce::Line<float> newLine = line;
 
-    g.setColour(parentTreeView->getConnectedLineColor());
-    g.drawLine(newLine);
+    //g.setColour(parentTreeView->getConnectedLineColor());
+    //g.drawLine(newLine);
 
 }
 
 void KrumTreeHeaderItem::paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line)
 {
-    if (isOpen())
-    {
-        g.setColour(parentTreeView->getConnectedLineColor());
-        g.drawLine(line);
-    }
+    //if (isOpen())
+    //{
+    //    g.setColour(parentTreeView->getConnectedLineColor());
+    //    g.drawLine(line);
+    //}
 }
 
 int KrumTreeHeaderItem::getItemHeight() const
@@ -740,21 +762,31 @@ void KrumTreeHeaderItem::EditableHeaderComp::paint(juce::Graphics& g)
 
     if (owner.isSelected())
     {
-        g.setColour(bgColor);
+        g.setColour(bgColor.withAlpha(0.3f));
         g.fillRect(area);
     }
 
     if (!isBeingEdited())
     {
         g.setColour(juce::Colours::lightgrey);
-        g.drawFittedText(getText(), area.withLeft(5), juce::Justification::centredLeft, 1);
+        g.drawFittedText(getText(), area.withLeft(20), juce::Justification::centredLeft, 1);
 
-        if (owner.isEditable())
+        /*if (owner.isEditable())
         {
             g.setFont(g.getCurrentFont().getHeightInPoints() - 5.0f);
             g.drawFittedText("Folder", area.withTrimmedRight(5) , juce::Justification::centredRight, 1);
-        }
+        }*/
     }
+
+    if (owner.isOpen())
+    {
+        owner.folderOpenIcon->drawWithin(g, area.withWidth(Dimensions::fileIconSize).reduced(3).toFloat(), juce::RectanglePlacement::fillDestination, Dimensions::fileIconAlpha);
+    }
+    else
+    {
+        owner.folderIcon->drawWithin(g, area.withWidth(Dimensions::fileIconSize).reduced(3).toFloat(), juce::RectanglePlacement::fillDestination, Dimensions::fileIconAlpha);
+    }
+    
 }
 
 void KrumTreeHeaderItem::EditableHeaderComp::textWasEdited()
@@ -1768,8 +1800,12 @@ LocationTabBar::LocationTabBar(FileChooser& fc)
     : fileChooser(fc), juce::TabbedComponent(juce::TabbedButtonBar::Orientation::TabsAtLeft)
 {
     //find roots, add tabs
-    setTabBarDepth(25);
-
+    setTabBarDepth(Dimensions::locationTabDepth);
+    //findAndAddRoots();
+    //setCurrentTabIndex(0);
+    //setOutline(0);
+    //setIndent(0);
+    //setColour(juce::TabbedComponent::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     //need to save locations to ValueTree
 
     //addTab("Desktop", bgColor, createTabButton("Desktop", 0), true);
@@ -1780,43 +1816,128 @@ LocationTabBar::LocationTabBar(FileChooser& fc)
 LocationTabBar::~LocationTabBar() 
 {}
 
+void LocationTabBar::addLocation(juce::File location, juce::String name)
+{
+    //we make sure a tab doesn't already exist
+    for (int i = 0; i < locationsValueTree.getNumChildren(); ++i)
+    {
+        auto locationTree = locationsValueTree.getChild(i);
+        auto path = locationTree.getProperty(TreeIDs::locationPath).toString();
+        
+        if (path.compare(location.getFullPathName()) == 0)
+        {
+            DBG("Location already exists!");
+            return;
+        }
+    }
+
+    juce::ValueTree newLocation{ TreeIDs::Location };
+    newLocation.setProperty(TreeIDs::locationName, name, nullptr);
+    newLocation.setProperty(TreeIDs::locationPath, location.getFullPathName(), nullptr);
+    locationsValueTree.addChild(newLocation, -1, nullptr);
+
+    addTab(name, bgColor, createTabButton(name, -1), true);
+    repaint();
+}
+
 void LocationTabBar::addTabsFromLocationTree(juce::ValueTree& locationsTree)
 {
-    locationValueTree = locationsTree;
+    locationsValueTree = locationsTree;
 
-    for (int i = 0; i < locationValueTree.getNumChildren(); ++i)
+    for (int i = 0; i < locationsValueTree.getNumChildren(); ++i)
     {
-        auto tabName = locationValueTree.getProperty(TreeIDs::locationName).toString();
-        auto tabPath = locationValueTree.getProperty(TreeIDs::locationPath).toString();
+        auto locationTree = locationsValueTree.getChild(i);
+        auto tabName = locationTree.getProperty(TreeIDs::locationName).toString();
+        auto tabPath = locationTree.getProperty(TreeIDs::locationPath).toString();
 
+        DBG("Tab Name: " + tabName + ", Tab Path: " + tabPath);
         addTab(tabName, bgColor, createTabButton(tabName, -1), true);
     }
     
+
+    setCurrentTabIndex(0);
+
     repaint();
 
-
 }
+
 
 void LocationTabBar::currentTabChanged(int newCurrentTab, const juce::String & newCurrentTabName)
 {
-    auto tabName = locationValueTree.getProperty(TreeIDs::locationName).toString();
-    auto tabPath = locationValueTree.getProperty(TreeIDs::locationPath).toString();
-    
-    if (tabName.compare(newCurrentTabName) == 0)
+    lastSelectedIndex = newCurrentTab;
+
+    for (int i = 0; i < locationsValueTree.getNumChildren(); ++i)
     {
-        fileChooser.setDirectory(juce::File(tabPath));
+        auto location = locationsValueTree.getChild(i);
+        auto tabName = location.getProperty(TreeIDs::locationName).toString();
+        auto tabPath = location.getProperty(TreeIDs::locationPath).toString();
+    
+        if (tabName.compare(newCurrentTabName) == 0)
+        {
+            fileChooser.setDirectory(juce::File(tabPath));
+            break;
+        }
     }
+
     repaint();
 
+    DBG("Current Tab Changed");
 }
+
+void LocationTabBar::popupMenuClickOnTab(int tabIndex, const juce::String& tabName)
+{
+
+    juce::PopupMenu menu;
+    //juce::Rectangle<int> showPoint{ getM, getMouseXYRelative().getY(), 0, 0 };
+    juce::PopupMenu::Options menuOptions;
+    //auto button = getTabbedButtonBar().getTabButton(tabIndex);
+
+    menu.addItem(RightClickMenuIds::rename_Id, "Rename");
+    menu.addItem(RightClickMenuIds::remove_Id, "Remove");
+
+    //setCurrentTabIndex(tabIndex, false);
+    menu.showMenuAsync(menuOptions.withMousePosition(), juce::ModalCallbackFunction::create(handleTabRightClick, this));
+    
+}
+
+void LocationTabBar::handleTabRightClick(int result, LocationTabBar* tabBar)
+{
+    DBG("CurrentTab: " + tabBar->getCurrentTabName() + ", index = " + juce::String(tabBar->getCurrentTabIndex()));
+    
+    if (result == RightClickMenuIds::rename_Id)
+    {
+
+    }
+    else if (result == RightClickMenuIds::remove_Id)
+    {
+    }
+
+    //tabBar->setCurrentTabIndex(tabBar->lastSelectedIndex);
+}
+
+
+//void LocationTabBar::findAndAddRoots()
+//{
+//   
+//    {
+//        /*auto name = root.getFileName();
+//        auto path = root.getFullPathName();*/
+//
+//        addLocation(root, root.getFileName());
+//    }
+//    repaint();
+//}
 
 //=================================================================================================================================//
 
 FileChooser::FileChooser()
     :locationTabs(*this)
 {
+    //getLookAndFeel().setDefaultLookAndFeel()
+
     directoryList.setDirectory(defaultLocation, true, true);
-    fileTree.setItemHeight(19);
+    fileTree.setItemHeight(Dimensions::rowHeight);
+    fileTree.setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, juce::Colours::darkgrey.darker(0.3f));
     fileTree.setDragAndDropDescription(DragStrings::fileChooserDragString);
     fileTree.refresh();
     fileChooserThread.startThread(4);
@@ -1824,6 +1945,17 @@ FileChooser::FileChooser()
     addAndMakeVisible(fileTree);
 
     addAndMakeVisible(locationTabs);
+
+    addAndMakeVisible(currentPathBox);
+    currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black.withAlpha(0.2f));
+    currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black.withAlpha(0.2f));
+    currentPathBox.setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::lightgrey.darker(0.5f));
+    currentPathBox.setEditableText(true);
+    //currentPathBox.onChange
+    
+
+    addAndMakeVisible(goUpButton);
+    goUpButton.onClick = [this] { goUp(); };
 
 }
 
@@ -1843,10 +1975,13 @@ void FileChooser::resized()
 {
     auto area = getLocalBounds();
 
-    int tabDepth = 25;
+    int upButtonSize = Dimensions::currentPathHeight;
 
-    fileTree.setBounds(area.withTrimmedLeft(tabDepth));
-    locationTabs.setBounds(area.withTop(fileTree.getY()).withRight(fileTree.getX()));
+    currentPathBox.setBounds(area.withLeft(Dimensions::locationTabDepth).withBottom(Dimensions::currentPathHeight).withRight(area.getWidth() - upButtonSize));
+    goUpButton.setBounds(area.withLeft(currentPathBox.getRight()).withBottom(upButtonSize));
+ 
+    fileTree.setBounds(area.withTop(currentPathBox.getBottom()).withTrimmedLeft(Dimensions::locationTabDepth));
+    locationTabs.setBounds(area/*.withTop(fileTree.getY())*/.withRight(fileTree.getX()));
 
 }
 
@@ -1860,6 +1995,13 @@ void FileChooser::setDirectory(juce::File newDirectory)
 {
     directoryList.setDirectory(newDirectory, true, true);
     directoryList.refresh();
+
+    currentPathBox.setText(newDirectory.getFullPathName());
+}
+
+void FileChooser::goUp()
+{
+    setDirectory(directoryList.getDirectory().getParentDirectory());
 }
 
 //void FileChooser::mouseDrag(const juce::MouseEvent& e)
@@ -1881,6 +2023,9 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
     recentSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::RECENT));
     favoritesSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::FAVORITES));
     fileChooserSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::LOCATIONS));*/
+
+
+    //TODO set default sizes, and save the last used size
 
     addAndMakeVisible(concertinaPanel);
     concertinaPanel.addPanel(0, &recentFilesList, false);
@@ -1982,7 +2127,6 @@ void KrumFileBrowser::resized()
     //fileChooserSection->setBounds(area./*withLeft(locationsW).*/withTop(favoritesSection->getBottom() + spacer).withBottom(area.getBottom() - previewerH));
  
     concertinaPanel.setBounds(area.withTrimmedBottom(previewerH));
-
     audioPreviewer.setBounds(area.withTop(concertinaPanel.getBottom()).withRight(area.getRight()).withHeight(previewerH));
     
 }
@@ -2026,7 +2170,6 @@ void KrumFileBrowser::addFileToRecent(const juce::File file, juce::String name)
 bool KrumFileBrowser::doesPreviewerSupport(juce::String fileExtension)
 {
     return false;
-    //return treeView.hasAudioFormat(fileExtension);
 }
 
 void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
@@ -2221,6 +2364,77 @@ void RootHeaderItem::handleResult(int result, RootHeaderItem* comp)
 }
 
 //=================================================================================================================
+
+
+PanelHeader::PanelHeader(juce::String headerTitle, juce::ConcertinaPanel& concertinaPanel, PanelCompId panelId)
+    : InfoPanelComponent(headerTitle, ""), title(headerTitle), panel(concertinaPanel), panelCompId(panelId)
+{
+    setRepaintsOnMouseActivity(true);
+    setNewPanelMessage(title, getInfoPanelMessage());
+}
+
+PanelHeader::~PanelHeader()
+{}
+
+void PanelHeader::resized()
+{
+    auto area = getLocalBounds();
+
+    int exButtonSize = 15;
+
+    //arrowButton.setBounds(area.getRight() - exButtonSize, area.getY(), exButtonSize, exButtonSize);
+    //setButtonShape(area.withLeft(area.getWidth() - 30).reduced(10).toFloat());
+
+}
+
+void PanelHeader::paint(juce::Graphics& g)
+{
+    auto area = getLocalBounds();
+    auto klaf = static_cast<KrumLookAndFeel*>(&getLookAndFeel());
+
+    g.setColour(isMouseOver() ? juce::Colours::black.withAlpha(0.4f) : juce::Colours::black.withAlpha(0.2f));
+    g.fillRect(area);
+
+
+    juce::Line<float> topLine{area.getBottomLeft().toFloat(), area.getBottomRight().toFloat() };
+    g.setColour(juce::Colours::lightgrey.darker(0.8f));
+    g.drawLine(topLine, 0.5f);
+
+
+    g.setColour(juce::Colours::lightgrey.darker(0.2f));
+
+    if (klaf)
+    {
+        g.setFont(klaf->getMontBoldTypeface());
+    }
+
+    g.drawFittedText(title, area.withLeft(5), juce::Justification::centredLeft, 1);
+}
+
+juce::Component* PanelHeader::getPanelComponent(PanelCompId compId)
+{
+    return panel.getPanel((int)compId);
+}
+
+juce::String PanelHeader::getInfoPanelMessage()
+{
+    if (panelCompId == PanelCompId::recent)
+    {
+        return "stores the samples you recently used";
+    }
+    else if(panelCompId == PanelCompId::favorites)
+    {
+        return "add file or folders by dropping them onto here.";
+    }
+    else if (panelCompId == PanelCompId::fileChooser)
+    {
+        return "browse your machine and drag items into the favorites to save them. You can also create saved locations for easy access";
+    }
+}
+
+
+
+
 
 //SectionComp::SectionComp(juce::String title, juce::String infoPanelMessage, juce::Component* ownedComp, int ownedIndex)
 //    //: InfoPanelComponent(title, infoPanelMessage), ownedCompIndex (ownedIndex)
@@ -2605,4 +2819,3 @@ void RootHeaderItem::handleResult(int result, RootHeaderItem* comp)
 //}
 
 //===================================================================================================
-

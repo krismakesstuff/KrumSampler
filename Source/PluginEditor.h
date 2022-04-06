@@ -130,9 +130,10 @@ private:
 
     KrumLookAndFeel kLaf{};
 
-    //These should be one class called ModuleLookAndFeel
+    //These should be one class called ModuleLookAndFeel?
     VolumeLookAndFeel vLaf{};
     PanLookAndFeel pLaf{};
+    FileBrowserLookAndFeel fbLaf{};
 
     juce::Image titleImage;
 

@@ -47,6 +47,8 @@
             file="Resources/add-black-18dp.svg"/>
       <FILE id="DC2gc0" name="add_white_24dp.svg" compile="0" resource="1"
             file="Resources/add_white_24dp.svg"/>
+      <FILE id="lafLmC" name="audio_file_white_24dp.svg" compile="0" resource="1"
+            file="Resources/audio_file_white_24dp.svg"/>
       <FILE id="u62HI7" name="chevron_left_black_24dp.svg" compile="0" resource="1"
             file="Resources/chevron_left_black_24dp.svg"/>
       <FILE id="mWTAkK" name="chevron_right_black_24dp.svg" compile="0" resource="1"
@@ -55,6 +57,10 @@
             file="Resources/clear-black-18dp.svg"/>
       <FILE id="uny5hK" name="drag_handle-black-18dp.svg" compile="0" resource="1"
             file="Resources/drag_handle-black-18dp.svg"/>
+      <FILE id="Tytx1A" name="folder_open_white_24dp.svg" compile="0" resource="1"
+            file="Resources/folder_open_white_24dp.svg"/>
+      <FILE id="m1Ywg5" name="folder_white_24dp.svg" compile="0" resource="1"
+            file="Resources/folder_white_24dp.svg"/>
       <FILE id="EZQWYm" name="info_white_24dp.svg" compile="0" resource="1"
             file="Resources/info_white_24dp.svg"/>
       <FILE id="YYB0j5" name="info_white_filled_24dp.svg" compile="0" resource="1"

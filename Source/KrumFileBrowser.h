@@ -50,8 +50,12 @@ class FileChooser;
 
 namespace Dimensions
 {
-    const int rowHeight = 18;
-    const int titleH = 20;
+    const int rowHeight = 19;
+    const int titleH = 21;
+    const int fileIconSize = 20;
+    const float fileIconAlpha = 0.5f;
+    const int locationTabDepth = 22;
+    const int currentPathHeight = 18;
 }
 
 namespace FileBrowserInfoStrings
@@ -102,7 +106,7 @@ public:
     
     std::unique_ptr<juce::Component> createItemComponent() override;
     
-    void paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
+    //void paintHorizontalConnectingLine(juce::Graphics& g, const juce::Line<float>& line) override;
     int getItemHeight() const override;
 
     void itemClicked(const juce::MouseEvent& e) override;
@@ -140,6 +144,9 @@ private:
 
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     SimpleAudioPreviewer* previewer;
+
+    std::unique_ptr<juce::Drawable> fileIcon = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
+    
 
     //-----------------------------------------
 
@@ -228,10 +235,14 @@ private:
 
     juce::ValueTree folderValueTree;
 
-    juce::Colour bgColor{ juce::Colours::darkgrey.darker(0.6f) };
+    juce::Colour bgColor{ juce::Colours::darkgrey.darker(0.3f) };
 
     bool editable = true;
     bool editing = false;
+
+    std::unique_ptr<juce::Drawable> folderIcon = juce::Drawable::createFromImageData(BinaryData::folder_white_24dp_svg, BinaryData::folder_white_24dp_svgSize);
+    std::unique_ptr<juce::Drawable> folderOpenIcon = juce::Drawable::createFromImageData(BinaryData::folder_open_white_24dp_svg, BinaryData::folder_open_white_24dp_svgSize);
+
 
     //--------------------------------------------------------------------------------------
     
@@ -386,6 +397,9 @@ private:
     juce::ValueTree recentValueTree;
 
     SimpleAudioPreviewer* previewer = nullptr;
+
+    std::unique_ptr<juce::Drawable> fileIcon = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
+
 };
 
 //This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
@@ -415,7 +429,6 @@ public:
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& details) override;
 
     void pickNewFavorite();
-    //void addFileToRecent(juce::File file, juce::String name);
     void createNewFavoriteFile(const juce::String& fullPathName); 
     void createNewFavoriteFolder(const juce::String& fullPathName);
     void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
@@ -425,7 +438,6 @@ public:
     void reCreateFavoriteFolder(juce::ValueTree& tree);
     void reCreateFavoriteFile(juce::ValueTree& fileValueTree);
     void reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
-    //void reCreateRecentFile(juce::ValueTree& fileValueTree);
     
     void sortFiles(FileBrowserSortingIds sortingId = FileBrowserSortingIds::folders_Id);
 
@@ -508,7 +520,7 @@ private:
     //std::unique_ptr<KrumTreeHeaderItem> rootItem;
     std::unique_ptr<RootHeaderItem> rootItem;
 
-    int titleH = 20;
+    //int titleH = 20;
 
     juce::Colour fontColor{ juce::Colours::darkgrey };
     juce::Colour bgColor{ juce::Colours::black };
@@ -544,24 +556,42 @@ private:
 //
 //};
 
+class LocationTabButton : public juce::TabBarButton 
+{
+public:
+    LocationTabButton();
+    ~LocationTabButton() override;
+
+    void paint(juce::Graphics& g) override;
+
+    
+};
+
 class LocationTabBar : public juce::TabbedComponent
 {
 public:
     LocationTabBar(FileChooser& fileChooser);
     ~LocationTabBar() override; 
 
-    void addTabsFromLocationTree(juce::ValueTree& locationsTree);
 
     void currentTabChanged(int newCurrentTab, const juce::String& newCurrentTabName) override;
+    void popupMenuClickOnTab(int tabIndex, const juce::String& tabName) override;
 
+    void addLocation(juce::File location, juce::String name);
+    void addTabsFromLocationTree(juce::ValueTree& locationsTree);
+
+    static void handleTabRightClick(int result, LocationTabBar* tabBar);
+    
 private:
+
+    int lastSelectedIndex = -1;
 
     //store the user added locations
     juce::ValueTree fileBrowserTree;
     juce::Colour bgColor{ juce::Colours::transparentBlack };
     FileChooser& fileChooser;
 
-    juce::ValueTree locationValueTree;
+    juce::ValueTree locationsValueTree;
 
 };
 
@@ -592,8 +622,46 @@ public:
     void addLocationTabsFromTree(juce::ValueTree& locationsTree);
 
     void setDirectory(juce::File newDirectory);
+    void goUp();
 
-    //void mouseDrag(const juce::MouseEvent& e) override;
+    
+
+    //void updateSelectedPath()
+    //{
+    //    auto newText = currentPathBox.getText().trim().unquoted();
+
+    //    if (newText.isNotEmpty())
+    //    {
+    //        auto index = currentPathBox.getSelectedId() - 1;
+
+    //        StringArray rootNames, rootPaths;
+    //        getRoots(rootNames, rootPaths);
+
+    //        if (rootPaths[index].isNotEmpty())
+    //        {
+    //            setRoot(File(rootPaths[index]));
+    //        }
+    //        else
+    //        {
+    //            File f(newText);
+
+    //            for (;;)
+    //            {
+    //                if (f.isDirectory())
+    //                {
+    //                    setRoot(f);
+    //                    break;
+    //                }
+
+    //                if (f.getParentDirectory() == f)
+    //                    break;
+
+    //                f = f.getParentDirectory();
+    //            }
+    //        }
+    //    }
+    //}
+
 
 private:
     juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
@@ -604,75 +672,17 @@ private:
     juce::DirectoryContentsList directoryList{ nullptr, fileChooserThread };
     juce::FileTreeComponent fileTree{ directoryList };
     
-
+    juce::ComboBox currentPathBox;
+    juce::TextButton goUpButton;
+    //std::unique_ptr<juce::Button> goUpButton;
 };
 
 
 //===============================================================================
 
-
-
 //===============================================================================
 
-//class RecentSection : public SectionComp
-//{
-//public:
-//
-//    enum SiblingID
-//    {
-//        top,
-//        bottom,
-//    };
-//
-//    RecentSection(RecentFilesList& recentFilesList);
-//    ~RecentSection() override;
-//    
-//    void paint(juce::Graphics& g) override;
-//    void resized() override;
-//
-//    void updateOwnedComp(juce::ValueTree& updatedTree) override;
-//
-//    RecentFilesList* getFilesList();
-//
-//private:
-//
-//    
-//
-//};
-//
-////===============================================================================
-//
-//class FavoritesSection : public SectionComp
-//{
-//public:
-//    FavoritesSection(FavoritesTreeView& favoritesTreeView);
-//    ~FavoritesSection() override;
-//
-//    void paint(juce::Graphics& g);
-//    void resized() override;
-//
-//    void updateOwnedComp(juce::ValueTree& updatedTree) override;
-//
-//    FavoritesTreeView* getTreeView();
-//};
-//
-////===============================================================================
-//
-//class FileChooserSection : public SectionComp
-//{
-//public:
-//    FileChooserSection(FileChooser& fileChooser);
-//    ~FileChooserSection() override;
-//
-//    void paint(juce::Graphics& g);
-//    void resized() override;
-//
-//    void updateOwnedComp(juce::ValueTree& updatedTree) override;
-//
-//    FileChooser* getFileChooser();
-//};
-
-class PanelHeader : public juce::Component 
+class PanelHeader : public InfoPanelComponent 
 {
 public:
 
@@ -683,52 +693,29 @@ public:
         fileChooser,
     };
 
-    PanelHeader(juce::String headerTitle, juce::ConcertinaPanel& concertinaPanel, PanelCompId panelId) 
-    : title(headerTitle), panel(concertinaPanel), panelCompId(panelId)
-    {
-        addAndMakeVisible(expandButton);
-        expandButton.setButtonText("Exp");
-        expandButton.setClickingTogglesState(true);
-        expandButton.onClick = [this] { panel.expandPanelFully(getPanelComponent(panelCompId), true); };
-    }
+    PanelHeader(juce::String headerTitle, juce::ConcertinaPanel& concertinaPanel, PanelCompId panelId);
+    ~PanelHeader() override; 
 
-    ~PanelHeader() override {}
-
-    void resized() override
-    {
-        auto area = getLocalBounds();
-
-        int exButtonSize = 15;
-
-        expandButton.setBounds(area.getRight() - exButtonSize, area.getY(), exButtonSize, exButtonSize);
-    }
-
-    void paint(juce::Graphics& g) override
-    {
-        auto area = getLocalBounds();
-
-        getLookAndFeel().drawConcertinaPanelHeader(g, area, isMouseOver(), isMouseButtonDown(), panel, *this);
-        /*g.setColour(isMouseOver() ? juce::Colours::lightgrey.withAlpha(0.5f) : juce::Colours::lightgrey);
-        g.fillRect(area);*/
-
-        g.setColour(juce::Colours::lightgrey);
-        g.drawFittedText(title, getLocalBounds(), juce::Justification::centred, 1);
-    }
-
-    juce::Component* getPanelComponent(PanelCompId compId)
-    {
-        return panel.getPanel((int)compId);
-    }
-
+    void resized() override;
+    void paint(juce::Graphics& g) override;
+    
+    juce::Component* getPanelComponent(PanelCompId compId);
 
 private:
 
+    juce::String getInfoPanelMessage();
+
+    bool mouseOver = false;
+
     PanelCompId panelCompId;
 
-    juce::TextButton expandButton;
+    //juce::TextButton expandButton;
+
+    //juce::ShapeButton arrowButton{ "arrowButton", juce::Colours::lightgrey, juce::Colours::lightgrey.darker(), juce::Colours::lightgrey.withAlpha(0.2f) };
 
     juce::ConcertinaPanel& panel;
     juce::String title;
+    //bool closed = false;
 };
 
 
@@ -784,15 +771,15 @@ private:
 
     juce::ConcertinaPanel concertinaPanel;
 
-    PanelHeader recentHeader{ "RECENT" , concertinaPanel, PanelHeader::PanelCompId::recent};
+    PanelHeader recentHeader{ "Recent" , concertinaPanel, PanelHeader::PanelCompId::recent};
     RecentFilesList recentFilesList{ &audioPreviewer };
     //std::unique_ptr<RecentSection> recentSection;
 
-    PanelHeader favoritesHeader{ "FAVORITES", concertinaPanel, PanelHeader::PanelCompId::favorites };
+    PanelHeader favoritesHeader{ "Favorites", concertinaPanel, PanelHeader::PanelCompId::favorites };
     FavoritesTreeView favoritesTreeView;
     //std::unique_ptr<FavoritesSection> favoritesSection;
 
-    PanelHeader filechooserHeader{ "FILE BROWSER", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
+    PanelHeader filechooserHeader{ "File Browser", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
     FileChooser fileChooser{};
     //std::unique_ptr<FileChooserSection> fileChooserSection;
 
@@ -805,6 +792,7 @@ private:
 
     juce::File demoKit;
 
+    
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumFileBrowser)
