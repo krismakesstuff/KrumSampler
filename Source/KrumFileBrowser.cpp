@@ -1796,6 +1796,43 @@ KrumTreeHeaderItem* FavoritesTreeView::findSectionHeaderParent(juce::TreeViewIte
     return nullptr;
 }
 
+//==================================================================================================
+
+LocationTabButton::LocationTabButton(juce::TabbedButtonBar& barComp, const juce::String& tabName, int tabIndex)
+    : juce::TabBarButton(tabName, barComp), name(tabName), index(tabIndex)
+{
+}
+
+LocationTabButton::~LocationTabButton()
+{
+}
+
+void LocationTabButton::paint(juce::Graphics& g)
+{
+    auto area = getLocalBounds();
+
+
+    g.setColour(juce::Colours::black);
+    g.drawRect(area);
+
+    g.setColour(juce::Colours::lightgrey.darker(0.4f));
+    auto laf = static_cast<KrumLookAndFeel*>(&getLookAndFeel());
+    g.setFont(laf->getMontLightTypeface());
+    g.setFont(12.0f);
+
+    juce::AffineTransform t;
+    t = t.rotated(juce::MathConstants<float>::pi * -0.5f).translated(area.getX(), area.getBottom());
+
+    g.addTransform(t);
+    juce::Rectangle<float> textRect{ (float)area.getHeight(), (float)area.getWidth() };
+    g.drawText(name, textRect.withTrimmedBottom(5), juce::Justification::centred);
+    //g.drawFittedText(name, area.reduced(2), juce::Justification::centredLeft, 1, 1.0f);
+
+
+}
+
+//==========================================================================================
+
 LocationTabBar::LocationTabBar(FileChooser& fc)
     : fileChooser(fc), juce::TabbedComponent(juce::TabbedButtonBar::Orientation::TabsAtLeft)
 {
@@ -1915,6 +1952,12 @@ void LocationTabBar::handleTabRightClick(int result, LocationTabBar* tabBar)
     //tabBar->setCurrentTabIndex(tabBar->lastSelectedIndex);
 }
 
+juce::TabBarButton* LocationTabBar::createTabButton(const juce::String& tabName, int tabIndex)
+{
+    auto& bar = getTabbedButtonBar();
+    return new LocationTabButton(bar, tabName, tabIndex);
+}
+
 
 //void LocationTabBar::findAndAddRoots()
 //{
@@ -1927,6 +1970,10 @@ void LocationTabBar::handleTabRightClick(int result, LocationTabBar* tabBar)
 //    }
 //    repaint();
 //}
+
+//=================================================================================================
+
+
 
 //=================================================================================================================================//
 
@@ -1947,7 +1994,7 @@ FileChooser::FileChooser()
     addAndMakeVisible(locationTabs);
 
     addAndMakeVisible(currentPathBox);
-    currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black.withAlpha(0.2f));
+    currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black.withAlpha(0.1f));
     currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black.withAlpha(0.2f));
     currentPathBox.setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::lightgrey.darker(0.5f));
     currentPathBox.setEditableText(true);
@@ -1968,7 +2015,9 @@ void FileChooser::paint(juce::Graphics& g)
     auto area = getLocalBounds();
 
     //g.setColour(juce::Colours::white);
+   
     //g.drawFittedText("File Browser", area.withBottom(Dimensions::titleH), juce::Justification::centredLeft, 1);
+
 }
 
 void FileChooser::resized()
@@ -2819,3 +2868,4 @@ juce::String PanelHeader::getInfoPanelMessage()
 //}
 
 //===================================================================================================
+

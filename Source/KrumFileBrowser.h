@@ -559,11 +559,13 @@ private:
 class LocationTabButton : public juce::TabBarButton 
 {
 public:
-    LocationTabButton();
+    LocationTabButton(juce::TabbedButtonBar& barComp, const juce::String& tabName, int tabIndex);
     ~LocationTabButton() override;
 
     void paint(juce::Graphics& g) override;
 
+    juce::String name;
+    int index;
     
 };
 
@@ -582,6 +584,8 @@ public:
 
     static void handleTabRightClick(int result, LocationTabBar* tabBar);
     
+    juce::TabBarButton* createTabButton(const juce::String& tabName, int tabIndex) override;
+
 private:
 
     int lastSelectedIndex = -1;

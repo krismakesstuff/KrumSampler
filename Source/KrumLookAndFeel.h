@@ -1054,7 +1054,12 @@ public:
         return 5;
     }
 
-
+    void positionComboBoxText(juce::ComboBox& box, juce::Label& label)
+    {
+        label.setJustificationType(juce::Justification::centredLeft);
+        label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 5);
+        label.setFont(getMontRegularTypeface());
+    }
 
 };
 
