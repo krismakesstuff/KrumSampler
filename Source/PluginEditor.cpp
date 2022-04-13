@@ -25,7 +25,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
     addAndMakeVisible(websiteButton);
     websiteButton.setButtonText(websiteURL.getDomain());
-    websiteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    websiteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::transparentBlack);
     websiteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
     websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::grey.brighter(0.2f));
     websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::grey.brighter(0.2f));

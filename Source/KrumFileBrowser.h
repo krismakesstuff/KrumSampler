@@ -38,6 +38,8 @@ class FavoritesTreeView;
 class SimpleAudioPreviewer;
 class KrumModuleContainer;
 class FileChooser;
+class KrumFileBrowser;
+
 //strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
 //namespace FileBrowserValueTreeIds
 //{
@@ -384,7 +386,6 @@ public:
     int getNumSelectedRows();
     juce::Array<juce::ValueTree> getSelectedValueTrees();
 
-
     juce::var getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe) override;
 
 private:
@@ -535,27 +536,6 @@ private:
 };
 
 
-
-//class FavoritesTreeView : public juce::TreeView
-//{
-//public:
-//    FavoritesTreeView(juce::ValueTree& favValTree) 
-//        :favoritesValueTree(favValTree) 
-//    {}
-//    ~FavoritesTreeView() override {}
-//
-//    void paint(juce::Graphics& g) override
-//    {
-//        g.fillAll(juce::Colours::darkgreen);
-//        g.setColour(juce::Colours::white);
-//        g.drawFittedText("Favorites Tree", getLocalBounds(), juce::Justification::centred, 1);
-//    }
-//private:
-//
-//    juce::ValueTree& favoritesValueTree;
-//
-//};
-
 class LocationTabButton : public juce::TabBarButton 
 {
 public:
@@ -582,7 +562,9 @@ public:
     void addLocation(juce::File location, juce::String name);
     void addTabsFromLocationTree(juce::ValueTree& locationsTree);
 
-    static void handleTabRightClick(int result, LocationTabBar* tabBar);
+
+
+    static void handleTabRightClick(int result, LocationTabBar* tabBar, int tabIndex);
     
     juce::TabBarButton* createTabButton(const juce::String& tabName, int tabIndex) override;
 
@@ -597,27 +579,31 @@ private:
 
     juce::ValueTree locationsValueTree;
 
+    static void handleRenameExit(int result, LocationTabBar* tabBar, juce::TextEditor* editor);
+
 };
 
 //class FileChooserTreeView : public juce::FileTreeComponent
-class FileChooser : public juce::Component
+class FileChooser : public juce::Component,
+                    public juce::FileBrowserListener,
+                    public juce::ValueTree::Listener,
+                    public juce::ComboBox::Listener
 {
 public:
     //TODO
     /*
-    * - preview audio files, need effiecent way to decide which files can be previewed
-    *   - will need to handle clicks, sublclassing TreeViewItems? 
-    * - connect location tabs, probably have this component hold the tabs
-    *   - make custom tab paint methods
-    *   - make add location tab, makes new tab from selection or a right-click on the folder (no files)
     * - drag and drop to favorites section
-    * - make file chooser collapsible??
-    * 
-    * 
     * 
     */
+
+    enum RightClickMenuIds
+    {
+        addToFavorite = 1,
+        addLocation,
+        revealInOS,
+    };
     
-    FileChooser();
+    FileChooser(KrumFileBrowser& fileBrower, SimpleAudioPreviewer& previewer);
     ~FileChooser() override;
 
     void paint(juce::Graphics& g) override;
@@ -627,45 +613,18 @@ public:
 
     void setDirectory(juce::File newDirectory);
     void goUp();
-
     
+    void selectionChanged() override;
+    void fileClicked(const juce::File& file, const juce::MouseEvent& e) override;
+    void fileDoubleClicked(const juce::File& file) override;
+    void browserRootChanged(const juce::File& newRoot) override;
 
-    //void updateSelectedPath()
-    //{
-    //    auto newText = currentPathBox.getText().trim().unquoted();
+    void valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild) override;
 
-    //    if (newText.isNotEmpty())
-    //    {
-    //        auto index = currentPathBox.getSelectedId() - 1;
-
-    //        StringArray rootNames, rootPaths;
-    //        getRoots(rootNames, rootPaths);
-
-    //        if (rootPaths[index].isNotEmpty())
-    //        {
-    //            setRoot(File(rootPaths[index]));
-    //        }
-    //        else
-    //        {
-    //            File f(newText);
-
-    //            for (;;)
-    //            {
-    //                if (f.isDirectory())
-    //                {
-    //                    setRoot(f);
-    //                    break;
-    //                }
-
-    //                if (f.getParentDirectory() == f)
-    //                    break;
-
-    //                f = f.getParentDirectory();
-    //            }
-    //        }
-    //    }
-    //}
-
+    void addDefaultPaths();
+    void updatePathList();
+    void getDefaultRoots(juce::StringArray& rootNames, juce::StringArray& rootPaths);
+    void handleChosenPath();
 
 private:
     juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
@@ -676,17 +635,51 @@ private:
     juce::DirectoryContentsList directoryList{ nullptr, fileChooserThread };
     juce::FileTreeComponent fileTree{ directoryList };
     
-    juce::ComboBox currentPathBox;
-    juce::TextButton goUpButton;
+    //juce::ComboBox currentPathBox;
+
+    class CurrentPathBox : public juce::ComboBox
+    {
+    public:
+        CurrentPathBox(FileChooser& fc)
+        : fileChooser(fc) {}
+
+        void showPopup() override
+        {
+            fileChooser.updatePathList();
+            juce::ComboBox::showPopup();
+        }
+
+    private:
+        FileChooser& fileChooser;
+
+    };
+
+    CurrentPathBox currentPathBox{ *this };
+
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
+
+
+    //juce::TextButton goUpButton;
+    juce::DrawableButton goUpButton{"UpButton", juce::DrawableButton::ButtonStyle::ImageFitted};
     //std::unique_ptr<juce::Button> goUpButton;
+
+    SimpleAudioPreviewer& previewer;
+    KrumFileBrowser& fileBrowser;
+
+    static void handleRightClick(int result, FileChooser* fileChooser);
+
+    int lastSelectedId = -1;
+    //juce::ChildProcess
+    //juce::FileChooser
+
 };
 
-
 //===============================================================================
 
 //===============================================================================
 
-class PanelHeader : public InfoPanelComponent 
+class PanelHeader : public InfoPanelComponent,
+                    public juce::Timer
 {
 public:
 
@@ -720,6 +713,16 @@ private:
     juce::ConcertinaPanel& panel;
     juce::String title;
     //bool closed = false;
+
+    void timerCallback() override;
+
+
+    bool drawAnimation = false;
+    int currentDrawFrame = 0;
+    int animationLengthSecs = 2;
+
+    juce::Colour animationColor{ juce::Colours::green.withAlpha(0.8f) };
+
 };
 
 
@@ -755,9 +758,8 @@ public:
 
     juce::Array<juce::ValueTree> getSelectedFileTrees(BrowserSections section);
 
-
     void addFileToRecent(const juce::File file, juce::String name);
-
+    void addFileToFavorites(juce::File file);
     bool doesPreviewerSupport(juce::String fileExtension);
     //SimpleAudioPreviewer* getAudioPreviewer();
 
@@ -766,6 +768,8 @@ public:
 
     void rebuildBrowser(juce::ValueTree& newTree);
     void buildDemoKit();
+
+    juce::ValueTree& getFileBrowserValueTree();
 
 private:
 
@@ -784,7 +788,7 @@ private:
     //std::unique_ptr<FavoritesSection> favoritesSection;
 
     PanelHeader filechooserHeader{ "File Browser", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
-    FileChooser fileChooser{};
+    FileChooser fileChooser{*this, audioPreviewer};
     //std::unique_ptr<FileChooserSection> fileChooserSection;
 
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};

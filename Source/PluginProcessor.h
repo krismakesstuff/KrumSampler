@@ -30,9 +30,9 @@
 
 #define GUI_REFRESH_RATE_HZ const int 30
 #define MAX_NUM_MODULES 20
-#define MAX_VOICES 14
+#define MAX_VOICES 19
 #define NUM_PREVIEW_VOICES 1
-#define MAX_FILE_LENGTH_SECS 3
+#define MAX_FILE_LENGTH_SECS 7
 #define NUM_AUX_OUTS 20                     //mono channels
 #define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
 #define KRUM_BUILD_VERSION "1.5.0-Beta"     //File Browser Update

@@ -337,8 +337,6 @@ public:
         g.fillRect(thumbBounds.reduced(1));
 
 
-        //g.fillRect(thumbBounds.withWidth(50));
-
     }
 
     void drawScrollbarButton(juce::Graphics& g, juce::ScrollBar& scrollbar, int width, int height, int buttonDirection, bool isScrollbarVertical,
@@ -368,7 +366,6 @@ public:
             g.setColour(juce::Colours::darkgrey);
             g.fillPath(triPath);
 
-
             break;
         }
         case(2):
@@ -384,7 +381,6 @@ public:
 
         }
     }
-
 
     void drawComboBox(juce::Graphics& g, int width, int height, bool,
         int, int, int, int, juce::ComboBox& box)
@@ -420,9 +416,7 @@ public:
         {
             g.fillPath(path);
         }
-
     }
-
 
     void positionComboBoxText(juce::ComboBox& box, juce::Label& label)
     {

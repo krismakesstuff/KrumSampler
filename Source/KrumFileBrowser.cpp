@@ -320,7 +320,6 @@ juce::String KrumTreeItem::getUniqueName() const
     return juce::String(getIndexInParent() + "-" + getFilePath());
 }
 
-
 juce::String KrumTreeItem::getFilePath() const
 {
     return fileValueTree.getProperty(TreeIDs::filePath).toString();
@@ -350,7 +349,6 @@ void KrumTreeItem::setItemEditing(bool isEditing)
 {
     editing = isEditing;
 }
-
 
 void KrumTreeItem::removeThisItem()
 {
@@ -1855,23 +1853,12 @@ LocationTabBar::~LocationTabBar()
 
 void LocationTabBar::addLocation(juce::File location, juce::String name)
 {
-    //we make sure a tab doesn't already exist
-    for (int i = 0; i < locationsValueTree.getNumChildren(); ++i)
-    {
-        auto locationTree = locationsValueTree.getChild(i);
-        auto path = locationTree.getProperty(TreeIDs::locationPath).toString();
-        
-        if (path.compare(location.getFullPathName()) == 0)
-        {
-            DBG("Location already exists!");
-            return;
-        }
-    }
+    
 
-    juce::ValueTree newLocation{ TreeIDs::Location };
+    /*juce::ValueTree newLocation{ TreeIDs::Location };
     newLocation.setProperty(TreeIDs::locationName, name, nullptr);
     newLocation.setProperty(TreeIDs::locationPath, location.getFullPathName(), nullptr);
-    locationsValueTree.addChild(newLocation, -1, nullptr);
+    locationsValueTree.addChild(newLocation, -1, nullptr);*/
 
     addTab(name, bgColor, createTabButton(name, -1), true);
     repaint();
@@ -1921,6 +1908,12 @@ void LocationTabBar::currentTabChanged(int newCurrentTab, const juce::String & n
     DBG("Current Tab Changed");
 }
 
+juce::TabBarButton* LocationTabBar::createTabButton(const juce::String& tabName, int tabIndex)
+{
+    auto& bar = getTabbedButtonBar();
+    return new LocationTabButton(bar, tabName, tabIndex);
+}
+
 void LocationTabBar::popupMenuClickOnTab(int tabIndex, const juce::String& tabName)
 {
 
@@ -1933,29 +1926,43 @@ void LocationTabBar::popupMenuClickOnTab(int tabIndex, const juce::String& tabNa
     menu.addItem(RightClickMenuIds::remove_Id, "Remove");
 
     //setCurrentTabIndex(tabIndex, false);
-    menu.showMenuAsync(menuOptions.withMousePosition(), juce::ModalCallbackFunction::create(handleTabRightClick, this));
+    menu.showMenuAsync(menuOptions.withMousePosition(), juce::ModalCallbackFunction::withParam<LocationTabBar*, int>(handleTabRightClick, this, tabIndex));
     
 }
 
-void LocationTabBar::handleTabRightClick(int result, LocationTabBar* tabBar)
+void LocationTabBar::handleTabRightClick(int result, LocationTabBar* tabBar, int tabIndex)
 {
     DBG("CurrentTab: " + tabBar->getCurrentTabName() + ", index = " + juce::String(tabBar->getCurrentTabIndex()));
     
     if (result == RightClickMenuIds::rename_Id)
     {
+        juce::AlertWindow window{ "Rename Location: " ,"Enter the name of the location tab" , juce::MessageBoxIconType::QuestionIcon, nullptr};
+        window.addTextEditor("renamer", "new location name");
+        window.addButton("Cancel", 0);
+        window.addButton("Ok", 1);
+        window.setEscapeKeyCancels(true);
+        //Redraw Methods
 
+        window.showAsync(juce::MessageBoxOptions(), juce::ModalCallbackFunction::withParam<LocationTabBar*, juce::TextEditor*>(handleRenameExit, tabBar, window.getTextEditor("renamer")));
     }
     else if (result == RightClickMenuIds::remove_Id)
     {
+        auto tree = tabBar->locationsValueTree;
+        tree.removeChild(tabIndex, nullptr);
+        tabBar->removeTab(tabIndex);
     }
-
-    //tabBar->setCurrentTabIndex(tabBar->lastSelectedIndex);
 }
 
-juce::TabBarButton* LocationTabBar::createTabButton(const juce::String& tabName, int tabIndex)
+
+void LocationTabBar::handleRenameExit(int result, LocationTabBar* tabBar, juce::TextEditor* editor)
 {
-    auto& bar = getTabbedButtonBar();
-    return new LocationTabButton(bar, tabName, tabIndex);
+    if (result == 1)
+    {
+        auto newName = editor->getText();
+        DBG("New Name " + newName);
+
+    }
+
 }
 
 
@@ -1977,12 +1984,13 @@ juce::TabBarButton* LocationTabBar::createTabButton(const juce::String& tabName,
 
 //=================================================================================================================================//
 
-FileChooser::FileChooser()
-    :locationTabs(*this)
+FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
+    : locationTabs(*this), fileBrowser(fb), previewer(p)
 {
-    //getLookAndFeel().setDefaultLookAndFeel()
 
-    directoryList.setDirectory(defaultLocation, true, true);
+
+    //directoryList.setDirectory(defaultLocation, true, true);
+    setDirectory(defaultLocation);
     fileTree.setItemHeight(Dimensions::rowHeight);
     fileTree.setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, juce::Colours::darkgrey.darker(0.3f));
     fileTree.setDragAndDropDescription(DragStrings::fileChooserDragString);
@@ -1990,20 +1998,26 @@ FileChooser::FileChooser()
     fileChooserThread.startThread(4);
     
     addAndMakeVisible(fileTree);
-
     addAndMakeVisible(locationTabs);
 
     addAndMakeVisible(currentPathBox);
     currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black.withAlpha(0.1f));
     currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black.withAlpha(0.2f));
     currentPathBox.setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::lightgrey.darker(0.5f));
-    currentPathBox.setEditableText(true);
-    //currentPathBox.onChange
+    currentPathBox.setEditableText(false);
+    currentPathBox.addListener(this);
+    //resetRecentPaths();
+    //currentPathBox.onChange = [this] { handleChosenPath(); };
     
-
     addAndMakeVisible(goUpButton);
+    auto upArrowImage = juce::Drawable::createFromImageData(BinaryData::arrow_upward_white_24dp_svg, BinaryData::arrow_upward_white_24dp_svgSize);
+    goUpButton.setImages(upArrowImage.get());
     goUpButton.onClick = [this] { goUp(); };
+    goUpButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
 
+
+    fileTree.addListener(this);
+    fileBrowser.getFileBrowserValueTree().addListener(this);
 }
 
 FileChooser::~FileChooser()
@@ -2044,13 +2058,259 @@ void FileChooser::setDirectory(juce::File newDirectory)
 {
     directoryList.setDirectory(newDirectory, true, true);
     directoryList.refresh();
-
     currentPathBox.setText(newDirectory.getFullPathName());
 }
 
 void FileChooser::goUp()
 {
     setDirectory(directoryList.getDirectory().getParentDirectory());
+}
+
+void FileChooser::selectionChanged()
+{
+}
+
+void FileChooser::fileClicked(const juce::File& file, const juce::MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+    {
+        juce::PopupMenu menu;
+        //juce::Rectangle<int> showPoint{ getM, getMouseXYRelative().getY(), 0, 0 };
+        juce::PopupMenu::Options menuOptions;
+
+        menu.addItem(RightClickMenuIds::addToFavorite, "Add To Favorites");
+        menu.addItem(RightClickMenuIds::addLocation, "Add Location Tab");
+        menu.addItem(RightClickMenuIds::revealInOS, "Reveal");
+
+        //setCurrentTabIndex(tabIndex, false);
+        menu.showMenuAsync(menuOptions.withMousePosition(), juce::ModalCallbackFunction::create(handleRightClick, this));
+    }
+}
+
+void FileChooser::fileDoubleClicked(const juce::File& file)
+{
+    DBG("File Double-Clicked: " + file.getFullPathName());
+    if (!file.isDirectory() && fileBrowser.doesPreviewerSupport(file.getFileExtension()))
+    {
+        if (previewer.getCurrentFile() != file)
+        {
+            previewer.loadFile(file);
+        }
+        
+        previewer.setWantsToPlayFile(true);
+    }
+    else
+    {
+        DBG("File not previewable");
+    }
+}
+
+void FileChooser::browserRootChanged(const juce::File& newRoot)
+{
+}
+
+void FileChooser::valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild)
+{
+    if (parentTree.getType() == TreeIDs::LOCATIONS)
+    {
+        juce::File file = addedChild.getProperty(TreeIDs::locationPath);
+        juce::String name = addedChild.getProperty(TreeIDs::locationName);
+        locationTabs.addLocation(file, name);
+    }
+}
+
+void FileChooser::handleChosenPath()
+{
+    int selected = currentPathBox.getSelectedId() - 1;
+    juce::File file = currentPathBox.getItemText(selected);
+    //juce::String slash = juce::File::getSeparatorString();
+    setDirectory(file);
+    
+}
+
+void FileChooser::addDefaultPaths()
+{
+
+    juce::StringArray rootNames, rootPaths;
+    getDefaultRoots(rootNames, rootPaths);
+
+    for (int i = 0; i < rootNames.size(); ++i)
+    {
+        if (rootNames[i].isEmpty())
+            currentPathBox.addSeparator();
+        else
+            currentPathBox.addItem(rootNames[i], currentPathBox.getNumItems() + i + 1);
+    }
+
+    currentPathBox.addSeparator();
+}
+
+void FileChooser::updatePathList()
+{
+    currentPathBox.clear();
+    juce::File currentDir = directoryList.getDirectory();
+    currentPathBox.setText(currentDir.getFullPathName());
+    int dirIndex = 1;
+
+    for (juce::File parentDir = currentDir.getParentDirectory(); !parentDir.isRoot(); parentDir = parentDir.getParentDirectory())
+    {
+        currentPathBox.addItem(parentDir.getFullPathName(), dirIndex++);
+    }
+
+    currentPathBox.addSeparator();
+    addDefaultPaths();
+
+}
+
+void FileChooser::getDefaultRoots(juce::StringArray& rootNames, juce::StringArray& rootPaths)
+{
+#if JUCE_WINDOWS
+    juce::Array<juce::File> roots;
+    juce::File::findFileSystemRoots(roots);
+    rootPaths.clear();
+
+    for (int i = 0; i < roots.size(); ++i)
+    {
+        const juce::File& drive = roots.getReference(i);
+
+        juce::String name(drive.getFullPathName());
+        rootPaths.add(name);
+
+        if (drive.isOnHardDisk())
+        {
+            juce::String volume(drive.getVolumeLabel());
+
+            if (volume.isEmpty())
+                volume = TRANS("Hard Drive");
+
+            name << " [" << volume << ']';
+        }
+        else if (drive.isOnCDRomDrive())
+        {
+            name << " [" << TRANS("CD/DVD drive") << ']';
+        }
+
+        rootNames.add(name);
+    }
+
+    rootPaths.add({});
+    rootNames.add({});
+
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getFullPathName());
+    rootNames.add(TRANS("Documents"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userMusicDirectory).getFullPathName());
+    rootNames.add(TRANS("Music"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userPicturesDirectory).getFullPathName());
+    rootNames.add(TRANS("Pictures"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
+    rootNames.add(TRANS("Desktop"));
+
+#elif JUCE_MAC
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName());
+    rootNames.add(TRANS("Home folder"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getFullPathName());
+    rootNames.add(TRANS("Documents"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userMusicDirectory).getFullPathName());
+    rootNames.add(TRANS("Music"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userPicturesDirectory).getFullPathName());
+    rootNames.add(TRANS("Pictures"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
+    rootNames.add(TRANS("Desktop"));
+
+    rootPaths.add({});
+    rootNames.add({});
+
+    for (auto& volume : juce::File("/Volumes").findChildFiles(juce::File::findDirectories, false))
+    {
+        if (volume.isDirectory() && !volume.getFileName().startsWithChar('.'))
+        {
+            rootPaths.add(volume.getFullPathName());
+            rootNames.add(volume.getFileName());
+        }
+    }
+
+#else
+    rootPaths.add("/");
+    rootNames.add("/");
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName());
+    rootNames.add(TRANS("Home folder"));
+    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
+    rootNames.add(TRANS("Desktop"));
+#endif
+}
+
+
+void FileChooser::comboBoxChanged(juce::ComboBox* comboBox)
+{
+    if (comboBox->getSelectedId() != lastSelectedId)
+    {
+        handleChosenPath();
+        lastSelectedId = comboBox->getSelectedId();
+    }
+}
+
+void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
+{
+    if (result == RightClickMenuIds::addToFavorite)
+    {
+        DBG("add to favorites");
+
+        //juce::Array<juce::File> selectedFiles;
+        //for(int i = 0; i < fileChooser->fileBrowser.getS
+        auto& fbTree = fileChooser->fileBrowser.getFileBrowserValueTree();
+        auto favTree = fbTree.getChildWithName(TreeIDs::FAVORITES);
+
+        auto numFiles = fileChooser->fileTree.getNumSelectedFiles();
+        auto& fileTree = fileChooser->fileTree;
+        auto selectedTrees = fileChooser->fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::fileChooser);
+
+        for (int i = 0; i < numFiles; ++i)
+        {
+            auto file = fileTree.getSelectedFile(i);
+            fileChooser->fileBrowser.addFileToFavorites(file);
+        }
+    }
+    else if (result == RightClickMenuIds::addLocation)
+    {
+        DBG("add to location");
+        auto selectedFile = fileChooser->fileTree.getSelectedFile();
+
+        if (!selectedFile.isDirectory() && !selectedFile.isRoot())
+        {
+            selectedFile = selectedFile.getParentDirectory();
+        }
+
+        auto& fbTree = fileChooser->fileBrowser.getFileBrowserValueTree();
+        auto& locationsValueTree = fbTree.getChildWithName(TreeIDs::LOCATIONS);
+        //auto& tabs = fileChooser->locationTabs;
+
+        //we make sure a tab doesn't already exist
+        //auto locationsValueTree = fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::LOCATIONS);
+
+        for (int i = 0; i < locationsValueTree.getNumChildren(); ++i)
+        {
+            auto locationTree = locationsValueTree.getChild(i);
+            auto path = locationTree.getProperty(TreeIDs::locationPath).toString();
+
+            if (path.compare(selectedFile.getFullPathName()) == 0)
+            {
+                DBG("Location already exists!");
+                return;
+            }
+        }
+
+        juce::ValueTree newLocation{ TreeIDs::Location };
+        newLocation.setProperty(TreeIDs::locationName, selectedFile.getFileName(), nullptr);
+        newLocation.setProperty(TreeIDs::locationPath, selectedFile.getFullPathName(), nullptr);
+        locationsValueTree.addChild(newLocation, -1, nullptr);
+    }
+    else if (result == RightClickMenuIds::revealInOS)
+    {
+        DBG("show in explorer");
+        auto selectedFile = fileChooser->fileTree.getSelectedFile();
+        selectedFile.revealToUser();
+    }
+
 }
 
 //void FileChooser::mouseDrag(const juce::MouseEvent& e)
@@ -2205,20 +2465,35 @@ juce::Array<juce::ValueTree> KrumFileBrowser::getSelectedFileTrees(BrowserSectio
     {
         return favoritesTreeView.getSelectedValueTrees();
     }
-
+    //else if (section == BrowserSections::fileChooser)
+    //{
+    //    return fileChooser.
+    //}
+    
     return juce::Array<juce::ValueTree>();
 }
 
 void KrumFileBrowser::addFileToRecent(const juce::File file, juce::String name)
 {
-    //treeView.addFileToRecent(file, name);
-    //recentSection->getFilesList()->addFile(file, name);
     recentFilesList.addFile(file, name);
+}
+
+void KrumFileBrowser::addFileToFavorites(juce::File file)
+{
+    if (file.isDirectory())
+    {
+        favoritesTreeView.createNewFavoriteFolder(file.getFullPathName());
+    }
+    else
+    {
+        favoritesTreeView.createNewFavoriteFile(file.getFullPathName());
+    }
 }
 
 bool KrumFileBrowser::doesPreviewerSupport(juce::String fileExtension)
 {
-    return false;
+    auto format = audioPreviewer.getFormatManager()->findFormatForFileExtension(fileExtension);
+    return format != nullptr;
 }
 
 void KrumFileBrowser::rebuildBrowser(juce::ValueTree& newTree)
@@ -2329,6 +2604,11 @@ void KrumFileBrowser::buildDemoKit()
     
 }
 
+juce::ValueTree& KrumFileBrowser::getFileBrowserValueTree()
+{
+    return fileBrowserValueTree;
+}
+
 //================================================================================================
 
 NumberBubble::NumberBubble(int numberToDisplay, juce::Colour backgroundColor, juce::Rectangle<int> parentBounds)
@@ -2420,6 +2700,7 @@ PanelHeader::PanelHeader(juce::String headerTitle, juce::ConcertinaPanel& concer
 {
     setRepaintsOnMouseActivity(true);
     setNewPanelMessage(title, getInfoPanelMessage());
+    startTimerHz(30);
 }
 
 PanelHeader::~PanelHeader()
@@ -2458,6 +2739,13 @@ void PanelHeader::paint(juce::Graphics& g)
     }
 
     g.drawFittedText(title, area.withLeft(5), juce::Justification::centredLeft, 1);
+
+    if (drawAnimation)
+    {
+        g.setColour(animationColor);
+        g.fillRect(area);
+    }
+
 }
 
 juce::Component* PanelHeader::getPanelComponent(PanelCompId compId)
@@ -2479,6 +2767,22 @@ juce::String PanelHeader::getInfoPanelMessage()
     {
         return "browse your machine and drag items into the favorites to save them. You can also create saved locations for easy access";
     }
+}
+
+void PanelHeader::timerCallback()
+{
+    /*if (drawAnimation)
+    {
+
+        repaint();
+        currentDrawFrame++;
+        
+    }
+    else
+    {
+        
+    }*/
+
 }
 
 

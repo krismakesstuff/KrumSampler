@@ -47,6 +47,8 @@
             file="Resources/add-black-18dp.svg"/>
       <FILE id="DC2gc0" name="add_white_24dp.svg" compile="0" resource="1"
             file="Resources/add_white_24dp.svg"/>
+      <FILE id="pGpq9e" name="arrow_upward_white_24dp.svg" compile="0" resource="1"
+            file="Resources/arrow_upward_white_24dp.svg"/>
       <FILE id="lafLmC" name="audio_file_white_24dp.svg" compile="0" resource="1"
             file="Resources/audio_file_white_24dp.svg"/>
       <FILE id="u62HI7" name="chevron_left_black_24dp.svg" compile="0" resource="1"
