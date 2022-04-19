@@ -13,6 +13,7 @@
 #include "KrumFileBrowser.h"
 #include "KrumModuleEditor.h"
 #include "PluginEditor.h"
+//#include "C:\Users\krisc\Documents\JUCE\modules\juce_gui_basics\filebrowser\juce_FileTreeComponent.cpp"
 
 
 class KrumTreeHeaderItem;
@@ -863,8 +864,8 @@ void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHe
 //=================================================================================================================================//
 //=================================================================================================================================//
 
-FavoritesTreeView::FavoritesTreeView(SimpleAudioPreviewer* prev)
-    : previewer(prev)
+FavoritesTreeView::FavoritesTreeView(FileChooser* fc, SimpleAudioPreviewer* prev)
+    : fileChooser(fc), previewer(prev)
 {
 
     setMultiSelectEnabled(true);
@@ -899,6 +900,7 @@ void FavoritesTreeView::paint(juce::Graphics& g)
     //g.fillRoundedRectangle(area.expanded(5).toFloat(), 5.0f);
 
     juce::TreeView::paint(g);
+
 }
 
 juce::Rectangle<int> FavoritesTreeView::getTreeViewBounds()
@@ -949,28 +951,53 @@ void FavoritesTreeView::filesDropped(const juce::StringArray& files, int x, int 
 
 bool FavoritesTreeView::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details)
 {
-    return details.description.toString().contains(DragStrings::fileChooserDragString);
-    //return false;
+    bool isInterested = details.description.toString().contains(DragStrings::fileChooserDragString);
+    showDropScreen = isInterested;
+    return isInterested;
 }
 
 void FavoritesTreeView::itemDropped(const juce::DragAndDropTarget::SourceDetails& details)
 {
     DBG("Items Dropped");
     DBG(details.description.toString());
+    
+    auto selectedFiles = fileChooser->getSelectedFiles();
+
+    for (int i = 0; i < selectedFiles.size(); ++i)
+    {
+        auto file = selectedFiles[i];
+        DBG("File " + juce::String(i + 1) + ": " + file.getFullPathName());
+
+        if (file.isDirectory())
+        {
+            createNewFavoriteFolder(file.getFullPathName());
+        }
+        else
+        {
+            createNewFavoriteFile(file.getFullPathName());
+        }
+
+    }
+
+    //DBG("File Path Dropped: " + fileChooser->getSelectedFile().getFullPathName());
+
+
+
+
 }
 
-void FavoritesTreeView::pickNewFavorite()
-{
-    const juce::String title{ "Choose A Folder(s) or File(s) to Add to Favorites, you can also drag and drop from external apps!" };
-    currentFileChooser.reset(new CustomFileChooser(title, juce::File::getSpecialLocation(juce::File::userDesktopDirectory), previewer->getFormatManager()->getWildcardForAllFormats(), this));
-
-    //Must set the callback lambda before showing
-    currentFileChooser->fileChooserCallback = handleChosenFiles;
-
-    int fileBrowserFlag = juce::FileBrowserComponent::FileChooserFlags::canSelectMultipleItems | juce::FileBrowserComponent::FileChooserFlags::openMode
-                        | juce::FileBrowserComponent::FileChooserFlags::canSelectDirectories | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-    currentFileChooser->showFileChooser(fileBrowserFlag);
-}
+//void FavoritesTreeView::pickNewFavorite()
+//{
+//    const juce::String title{ "Choose A Folder(s) or File(s) to Add to Favorites, you can also drag and drop from external apps!" };
+//    currentFileChooser.reset(new CustomFileChooser(title, juce::File::getSpecialLocation(juce::File::userDesktopDirectory), previewer->getFormatManager()->getWildcardForAllFormats(), this));
+//
+//    //Must set the callback lambda before showing
+//    currentFileChooser->fileChooserCallback = handleChosenFiles;
+//
+//    int fileBrowserFlag = juce::FileBrowserComponent::FileChooserFlags::canSelectMultipleItems | juce::FileBrowserComponent::FileChooserFlags::openMode
+//                        | juce::FileBrowserComponent::FileChooserFlags::canSelectDirectories | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+//    currentFileChooser->showFileChooser(fileBrowserFlag);
+//}
 
 //This does NOT check file type, so make sure to check for formatting before adding it here.
 //void FavoritesTreeView::addFileToRecent(juce::File file, juce::String name)
@@ -1534,6 +1561,9 @@ void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
                     }
                 }
             }
+
+
+
         }
     }
 }
@@ -1720,30 +1750,30 @@ void FavoritesTreeView::updateFavoritesFromTree(juce::ValueTree& newFavsTree)
 
 }
 
-void FavoritesTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
-{
-    auto cFileChooser = static_cast<const CustomFileChooser*>(&fileChooser);
-    juce::Array<juce::File> resultFiles = fileChooser.getResults();
-
-    for (int i = 0; i < resultFiles.size(); i++)
-    {
-        auto itFile = resultFiles[i];
-        if (itFile.isDirectory())
-        {
-            cFileChooser->owner->createNewFavoriteFolder(itFile.getFullPathName());
-        }
-        else
-        {
-            cFileChooser->owner->createNewFavoriteFile(itFile.getFullPathName());
-        }
-    }
-
-    /*auto favNode = cFileChooser->owner->rootItem;
-    FileBrowserSorter sorter;
-    favNode->sortSubItems(sorter);
-    favNode->treeHasChanged();*/
-
-}
+//void FavoritesTreeView::handleChosenFiles(const juce::FileChooser& fileChooser)
+//{
+//    auto cFileChooser = static_cast<const CustomFileChooser*>(&fileChooser);
+//    juce::Array<juce::File> resultFiles = fileChooser.getResults();
+//
+//    for (int i = 0; i < resultFiles.size(); i++)
+//    {
+//        auto itFile = resultFiles[i];
+//        if (itFile.isDirectory())
+//        {
+//            cFileChooser->owner->createNewFavoriteFolder(itFile.getFullPathName());
+//        }
+//        else
+//        {
+//            cFileChooser->owner->createNewFavoriteFile(itFile.getFullPathName());
+//        }
+//    }
+//
+//    /*auto favNode = cFileChooser->owner->rootItem;
+//    FileBrowserSorter sorter;
+//    favNode->sortSubItems(sorter);
+//    favNode->treeHasChanged();*/
+//
+//}
 
 KrumTreeHeaderItem* FavoritesTreeView::findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName)
 {
@@ -1980,6 +2010,19 @@ void LocationTabBar::handleRenameExit(int result, LocationTabBar* tabBar, juce::
 
 //=================================================================================================
 
+//class FileChooserItem : public juce::FileListTreeItem
+//{
+//    FileChooserItem(juce::FileTreeComponent& treeComp, juce::DirectoryContentsList* parentContents,
+//        int indexInContents,  const juce::File& f, juce::TimeSliceThread& t)
+//        :juce::FileListTreeItem(treeComp, parentContents, indexInContents, f, t)
+//    {}
+//
+//    juce::var getDragSourceDescription() override 
+//    {
+//         return DragStrings::fileChooserDragString + file.getFullPathName();
+//    }
+//
+//};
 
 
 //=================================================================================================================================//
@@ -1988,13 +2031,15 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     : locationTabs(*this), fileBrowser(fb), previewer(p)
 {
 
-
     //directoryList.setDirectory(defaultLocation, true, true);
     setDirectory(defaultLocation);
     fileTree.setItemHeight(Dimensions::rowHeight);
+    fileTree.setMultiSelectEnabled(true);
     fileTree.setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, juce::Colours::darkgrey.darker(0.3f));
     fileTree.setDragAndDropDescription(DragStrings::fileChooserDragString);
     fileTree.refresh();
+    //fileTree.setRootItem(), don't use refresh() if you go this route
+    //fileTree.addListener()
     fileChooserThread.startThread(4);
     
     addAndMakeVisible(fileTree);
@@ -2004,8 +2049,14 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black.withAlpha(0.1f));
     currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black.withAlpha(0.2f));
     currentPathBox.setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::lightgrey.darker(0.5f));
+    currentPathBox.setColour(juce::PopupMenu::textColourId, juce::Colours::lightgrey.darker(0.5f));
     currentPathBox.setEditableText(false);
     currentPathBox.addListener(this);
+
+    //pathBoxNames.clear();
+    //pathBoxPaths.clear();
+    //getDefaultPaths();
+
     //resetRecentPaths();
     //currentPathBox.onChange = [this] { handleChosenPath(); };
     
@@ -2040,11 +2091,11 @@ void FileChooser::resized()
 
     int upButtonSize = Dimensions::currentPathHeight;
 
-    currentPathBox.setBounds(area.withLeft(Dimensions::locationTabDepth).withBottom(Dimensions::currentPathHeight).withRight(area.getWidth() - upButtonSize));
-    goUpButton.setBounds(area.withLeft(currentPathBox.getRight()).withBottom(upButtonSize));
+    currentPathBox.setBounds(area.withLeft(upButtonSize).withBottom(Dimensions::currentPathHeight));
+    goUpButton.setBounds(area.withRight(currentPathBox.getX()).withBottom(upButtonSize));
  
-    fileTree.setBounds(area.withTop(currentPathBox.getBottom()).withTrimmedLeft(Dimensions::locationTabDepth));
-    locationTabs.setBounds(area/*.withTop(fileTree.getY())*/.withRight(fileTree.getX()));
+    fileTree.setBounds(area.withTop(currentPathBox.getBottom()));
+    //locationTabs.setBounds(area/*.withTop(fileTree.getY())*/.withRight(fileTree.getX()));
 
 }
 
@@ -2057,8 +2108,9 @@ void FileChooser::addLocationTabsFromTree(juce::ValueTree& locationsTree)
 void FileChooser::setDirectory(juce::File newDirectory)
 {
     directoryList.setDirectory(newDirectory, true, true);
+    //setRootItem, don't call refresh?
     directoryList.refresh();
-    currentPathBox.setText(newDirectory.getFullPathName());
+    currentPathBox.setText(newDirectory.getFullPathName(), juce::dontSendNotification);
 }
 
 void FileChooser::goUp()
@@ -2079,7 +2131,7 @@ void FileChooser::fileClicked(const juce::File& file, const juce::MouseEvent& e)
         juce::PopupMenu::Options menuOptions;
 
         menu.addItem(RightClickMenuIds::addToFavorite, "Add To Favorites");
-        menu.addItem(RightClickMenuIds::addLocation, "Add Location Tab");
+        menu.addItem(RightClickMenuIds::addPlace, "Add To Places");
         menu.addItem(RightClickMenuIds::revealInOS, "Reveal");
 
         //setCurrentTabIndex(tabIndex, false);
@@ -2099,6 +2151,10 @@ void FileChooser::fileDoubleClicked(const juce::File& file)
         
         previewer.setWantsToPlayFile(true);
     }
+    else if(file.isDirectory())
+    {
+        setDirectory(file);
+    }
     else
     {
         DBG("File not previewable");
@@ -2108,6 +2164,25 @@ void FileChooser::fileDoubleClicked(const juce::File& file)
 void FileChooser::browserRootChanged(const juce::File& newRoot)
 {
 }
+
+juce::File FileChooser::getSelectedFile()
+{
+    return fileTree.getSelectedFile(0);
+}
+
+juce::Array<juce::File> FileChooser::getSelectedFiles()
+{
+    juce::Array<juce::File> selectedFiles{};
+
+    for (int i = 0; i < fileTree.getNumSelectedFiles(); ++i)
+    {
+        selectedFiles.add(fileTree.getSelectedFile(i));
+    }
+
+    return selectedFiles;
+
+}
+
 
 void FileChooser::valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild)
 {
@@ -2121,60 +2196,142 @@ void FileChooser::valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTr
 
 void FileChooser::handleChosenPath()
 {
-    int selected = currentPathBox.getSelectedId() - 1;
-    juce::File file = currentPathBox.getItemText(selected);
-    //juce::String slash = juce::File::getSeparatorString();
-    setDirectory(file);
-    
-}
 
-void FileChooser::addDefaultPaths()
-{
+    juce::File file = getFileFromChosenPath();
 
-    juce::StringArray rootNames, rootPaths;
-    getDefaultRoots(rootNames, rootPaths);
-
-    for (int i = 0; i < rootNames.size(); ++i)
+    if (file.exists())
     {
-        if (rootNames[i].isEmpty())
-            currentPathBox.addSeparator();
-        else
-            currentPathBox.addItem(rootNames[i], currentPathBox.getNumItems() + i + 1);
+        setDirectory(file);
     }
 
-    currentPathBox.addSeparator();
+   /* if (itemPath.isNotEmpty())
+    {
+        juce::File file{ itemPath };
+        setDirectory(file);
+        DBG("volume label: " + file.getVolumeLabel());
+    }
+    else
+    {
+        DBG("ItemPath is EMPTY, itemName = " + itemName);
+        DBG("SelectedID = " + juce::String(selected));
+    }*/
+
 }
+
 
 void FileChooser::updatePathList()
 {
     currentPathBox.clear();
+    pathBoxPaths.clear();
+    pathBoxNames.clear();
+    
+    currentPathBox.addSectionHeading("Path");
+    pathBoxPaths.add(juce::String());
+    pathBoxNames.add(juce::String());
+
     juce::File currentDir = directoryList.getDirectory();
-    currentPathBox.setText(currentDir.getFullPathName());
+    currentPathBox.setText(currentDir.getFullPathName(), juce::dontSendNotification);
     int dirIndex = 1;
 
     for (juce::File parentDir = currentDir.getParentDirectory(); !parentDir.isRoot(); parentDir = parentDir.getParentDirectory())
     {
         currentPathBox.addItem(parentDir.getFullPathName(), dirIndex++);
+        pathBoxNames.add(parentDir.getFullPathName());
+        pathBoxPaths.add(parentDir.getFullPathName());
     }
 
-    currentPathBox.addSeparator();
+    getDefaultPaths();
     addDefaultPaths();
+}
+
+juce::String FileChooser::findPathFromName(juce::String itemName)
+{
+    int index = -1;
+    for (int i = 0; i < pathBoxNames.size(); ++i)
+    {
+        if (pathBoxNames[i].compare(itemName) == 0)
+        {
+            index = i;
+        }
+    }
+
+    if (index >= 0)
+    {
+        return pathBoxPaths[index];
+    }
+
+    return juce::String{};
 
 }
 
-void FileChooser::getDefaultRoots(juce::StringArray& rootNames, juce::StringArray& rootPaths)
+juce::File FileChooser::getFileFromChosenPath()
 {
+
+    juce::String currentName = currentPathBox.getText();
+    int index = -1;
+    for (int i = 0; i < pathBoxNames.size(); ++i)
+    {
+        if (pathBoxNames[i].compare(currentName) == 0)
+        {
+            index = i;
+        }
+    }
+
+    if (index >= 0)
+    {
+        return juce::File { pathBoxPaths[index] };
+    }
+
+    return juce::File();
+}
+
+void FileChooser::addDefaultPaths()
+{
+    int path = 0;
+    int drives = 1;
+    int places = 2;
+
+    int currentHeader = 0;
+    for (int i = 0; i < pathBoxNames.size(); ++i)
+    {
+        if (pathBoxNames[i].isEmpty())
+        {
+            if (currentHeader == places)
+            {
+                currentPathBox.addSectionHeading("Places");
+            }
+            else
+            {
+                currentHeader++;
+            }
+        }
+        else if (currentHeader == places)
+        {
+            currentPathBox.addItem(pathBoxNames[i], currentPathBox.getNumItems() + i + 1);
+        }
+
+    }
+}
+
+void FileChooser::getDefaultPaths()
+{
+    //pathBoxPaths.clear();
+    //pathBoxNames.clear();
+    currentPathBox.addSectionHeading("Drives");
+    pathBoxNames.add(juce::String());
+    pathBoxPaths.add(juce::String());
+
 #if JUCE_WINDOWS
     juce::Array<juce::File> roots;
     juce::File::findFileSystemRoots(roots);
-    rootPaths.clear();
+
 
     for (int i = 0; i < roots.size(); ++i)
     {
         const juce::File& drive = roots.getReference(i);
 
         juce::String name(drive.getFullPathName());
-        rootPaths.add(name);
+        pathBoxPaths.add(name);
 
         if (drive.isOnHardDisk())
         {
@@ -2190,59 +2347,69 @@ void FileChooser::getDefaultRoots(juce::StringArray& rootNames, juce::StringArra
             name << " [" << TRANS("CD/DVD drive") << ']';
         }
 
-        rootNames.add(name);
+        pathBoxNames.add(name);
     }
 
-    rootPaths.add({});
-    rootNames.add({});
+    pathBoxPaths.add({});
+    pathBoxNames.add({});
 
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getFullPathName());
-    rootNames.add(TRANS("Documents"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userMusicDirectory).getFullPathName());
-    rootNames.add(TRANS("Music"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userPicturesDirectory).getFullPathName());
-    rootNames.add(TRANS("Pictures"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
-    rootNames.add(TRANS("Desktop"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Documents"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userMusicDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Music"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userPicturesDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Pictures"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Desktop"));
 
 #elif JUCE_MAC
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName());
-    rootNames.add(TRANS("Home folder"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getFullPathName());
-    rootNames.add(TRANS("Documents"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userMusicDirectory).getFullPathName());
-    rootNames.add(TRANS("Music"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userPicturesDirectory).getFullPathName());
-    rootNames.add(TRANS("Pictures"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
-    rootNames.add(TRANS("Desktop"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Home folder"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Documents"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userMusicDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Music"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userPicturesDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Pictures"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Desktop"));
 
-    rootPaths.add({});
-    rootNames.add({});
+    pathBoxPaths.add({});
+    pathBoxNames.add({});
 
     for (auto& volume : juce::File("/Volumes").findChildFiles(juce::File::findDirectories, false))
     {
         if (volume.isDirectory() && !volume.getFileName().startsWithChar('.'))
         {
-            rootPaths.add(volume.getFullPathName());
-            rootNames.add(volume.getFileName());
+            pathBoxPaths.add(volume.getFullPathName());
+            pathBoxNames.add(volume.getFileName());
         }
     }
 
 #else
-    rootPaths.add("/");
-    rootNames.add("/");
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName());
-    rootNames.add(TRANS("Home folder"));
-    rootPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
-    rootNames.add(TRANS("Desktop"));
+    pathBoxPaths.add("/");
+    pathBoxNames.add("/");
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userHomeDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Home folder"));
+    pathBoxPaths.add(juce::File::getSpecialLocation(juce::File::userDesktopDirectory).getFullPathName());
+    pathBoxNames.add(TRANS("Desktop"));
 #endif
+
+    //previously saved locations
+    auto locationsTree = fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::LOCATIONS);
+    for (int i = 0; i < locationsTree.getNumChildren(); ++i)
+    {
+        auto locationTree = locationsTree.getChild(i);
+        pathBoxPaths.add(locationTree.getProperty(TreeIDs::locationPath).toString());
+        pathBoxNames.add(locationTree.getProperty(TreeIDs::locationName).toString());
+    }
+
 }
 
 
 void FileChooser::comboBoxChanged(juce::ComboBox* comboBox)
 {
-    if (comboBox->getSelectedId() != lastSelectedId)
+    if (comboBox->getSelectedId() != lastSelectedId && !comboBox->isPopupActive())
     {
         handleChosenPath();
         lastSelectedId = comboBox->getSelectedId();
@@ -2270,7 +2437,7 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
             fileChooser->fileBrowser.addFileToFavorites(file);
         }
     }
-    else if (result == RightClickMenuIds::addLocation)
+    else if (result == RightClickMenuIds::addPlace)
     {
         DBG("add to location");
         auto selectedFile = fileChooser->fileTree.getSelectedFile();
@@ -2303,6 +2470,10 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
         newLocation.setProperty(TreeIDs::locationName, selectedFile.getFileName(), nullptr);
         newLocation.setProperty(TreeIDs::locationPath, selectedFile.getFullPathName(), nullptr);
         locationsValueTree.addChild(newLocation, -1, nullptr);
+
+        fileChooser->getDefaultPaths();
+
+        fileChooser->animateAddPlace();
     }
     else if (result == RightClickMenuIds::revealInOS)
     {
@@ -2313,6 +2484,14 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
 
 }
 
+void FileChooser::animateAddPlace()
+{
+    auto& animator = juce::Desktop::getInstance().getAnimator();
+    animator.fadeOut(&currentPathBox, 500);
+    animator.fadeIn(&currentPathBox, 500);
+}
+
+
 //void FileChooser::mouseDrag(const juce::MouseEvent& e)
 //{
 //}
@@ -2322,16 +2501,8 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
 KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormatManager& formatManager, 
                                 juce::ValueTree& stateTree, juce::AudioProcessorValueTreeState& apvts, KrumSampler& s)
     : audioPreviewer(&formatManager, stateTree, apvts), fileBrowserValueTree(fbValueTree), /*treeView(fbValueTree, &audioPreviewer),*/ InfoPanelComponent(FileBrowserInfoStrings::compTitle, FileBrowserInfoStrings::message),
-      favoritesTreeView(&audioPreviewer)
+      favoritesTreeView(&fileChooser, &audioPreviewer)
 {
-
-    /*recentSection.reset(new RecentSection(recentFilesList));
-    favoritesSection.reset(new FavoritesSection(favoritesTreeView));
-    fileChooserSection.reset(new FileChooserSection(fileChooser));
-
-    recentSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::RECENT));
-    favoritesSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::FAVORITES));
-    fileChooserSection->updateOwnedComp(fbValueTree.getChildWithName(TreeIDs::LOCATIONS));*/
 
 
     //TODO set default sizes, and save the last used size
@@ -2353,31 +2524,6 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
     audioPreviewer.assignSampler(&s);
     audioPreviewer.refreshSettings();
 
-    /*recentSection->setSiblingComponents(nullptr, favoritesSection.get());
-    favoritesSection->setSiblingComponents(recentSection.get(), fileChooserSection.get());
-    fileChooserSection->setSiblingComponents(favoritesSection.get(), nullptr);
-    
-    addAndMakeVisible(recentSection.get());
-
-    addAndMakeVisible(favoritesSection.get());
-
-
-    addAndMakeVisible(fileChooserSection.get());
-
-
-    auto favButtonImage = juce::Drawable::createFromImageData(BinaryData::add_white_24dp_svg, BinaryData::add_white_24dp_svgSize);
-
-    addFavoriteButton.setImages(favButtonImage.get());
-    addFavoriteButton.setButtonText("Add New Favorite Folder");
-    //addFavoriteButton.onClick = [this] { treeView.pickNewFavorite(); };
-
-    //addFavoriteButton.setConnectedEdges(juce::Button::ConnectedOnBottom);
-    //addFavoriteButton.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
-    //addFavoriteButton.setColour(juce::TextButton::buttonOnColourId, fontColor.contrasting(0.2f));
-    //addFavoriteButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
-
-    //addFavoriteButton.setTooltip("Add Files or Folders that will stay with this preset");
-    */
 
 }
 
@@ -2390,16 +2536,6 @@ void KrumFileBrowser::paint(juce::Graphics& g)
     auto area = getLocalBounds();
     float cornerSize = 5.0f;
     float outline = 1.0f;
-
-    //g.setColour(fontColor);
-    //g.setFont(15.0f);
-    //g.drawFittedText("File Browser", area.withBottom(titleH).withTrimmedTop(5), juce::Justification::centredLeft, 1);
-
-    //auto fileTreeFillBounds = treeView.getBounds().expanded(5).withBottom(area.getBottom() - previewerH).toFloat();
-    
-    //g.setColour(juce::Colours::darkgrey);
-    //g.drawFittedText("Recent", area.withTrimmedTop(titleH), juce::Justification::centredLeft, 1);
-    //g.drawFittedText("Favorites", area.withTrimmedTop(area.getHeight() * 0.50f), juce::Justification::centredLeft, 1);
 
 
     //g.drawRoundedRectangle(fileTreeFillBounds, cornerSize, outline);
@@ -2422,19 +2558,6 @@ void KrumFileBrowser::resized()
     int favTreeViewH = 120;
     int locationsW = 40;
 
-    //recentFilesList.setBounds(area.withBottom(recentTreeViewH));
-    //favoritesTreeView.setBounds(area./*withLeft(locationsW).*///withTop(recentSection.getBottom() + spacer).withHeight(favTreeViewH));
-    //fileChooser.setBounds(area./*withLeft(locationsW).*/withTop(favoritesSection.getBottom() + spacer).withBottom(area.getBottom() - previewerH));
-    /*if (recentSection.get())
-    {
-    }*/
-
-
-    
-    //recentSection->setBounds(area.withBottom(recentTreeViewH));
-    //favoritesSection->setBounds(area./*withLeft(locationsW).*/withTop(recentSection->getBottom() + spacer).withHeight(favTreeViewH));
-    //fileChooserSection->setBounds(area./*withLeft(locationsW).*/withTop(favoritesSection->getBottom() + spacer).withBottom(area.getBottom() - previewerH));
- 
     concertinaPanel.setBounds(area.withTrimmedBottom(previewerH));
     audioPreviewer.setBounds(area.withTop(concertinaPanel.getBottom()).withRight(area.getRight()).withHeight(previewerH));
     
@@ -2476,6 +2599,7 @@ juce::Array<juce::ValueTree> KrumFileBrowser::getSelectedFileTrees(BrowserSectio
 void KrumFileBrowser::addFileToRecent(const juce::File file, juce::String name)
 {
     recentFilesList.addFile(file, name);
+    recentHeader.animateAddFile();
 }
 
 void KrumFileBrowser::addFileToFavorites(juce::File file)
@@ -2488,6 +2612,9 @@ void KrumFileBrowser::addFileToFavorites(juce::File file)
     {
         favoritesTreeView.createNewFavoriteFile(file.getFullPathName());
     }
+
+    favoritesHeader.animateAddFile();
+
 }
 
 bool KrumFileBrowser::doesPreviewerSupport(juce::String fileExtension)
@@ -2700,7 +2827,7 @@ PanelHeader::PanelHeader(juce::String headerTitle, juce::ConcertinaPanel& concer
 {
     setRepaintsOnMouseActivity(true);
     setNewPanelMessage(title, getInfoPanelMessage());
-    startTimerHz(30);
+    startTimerHz(10);
 }
 
 PanelHeader::~PanelHeader()
@@ -2721,8 +2848,19 @@ void PanelHeader::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
     auto klaf = static_cast<KrumLookAndFeel*>(&getLookAndFeel());
+    bool mouseOver = isMouseOver();
+    
+    auto& animator = juce::Desktop::getInstance().getAnimator();
 
-    g.setColour(isMouseOver() ? juce::Colours::black.withAlpha(0.4f) : juce::Colours::black.withAlpha(0.2f));
+    if (animator.isAnimating(this))
+    {
+        g.setColour(juce::Colours::green);
+    }
+    else
+    {
+        g.setColour(mouseOver ? juce::Colours::black.withAlpha(0.4f) : juce::Colours::black.withAlpha(0.2f));
+    }
+
     g.fillRect(area);
 
 
@@ -2731,7 +2869,7 @@ void PanelHeader::paint(juce::Graphics& g)
     g.drawLine(topLine, 0.5f);
 
 
-    g.setColour(juce::Colours::lightgrey.darker(0.2f));
+    g.setColour(juce::Colours::lightgrey.darker(0.2f).withAlpha(0.7f));
 
     if (klaf)
     {
@@ -2740,17 +2878,26 @@ void PanelHeader::paint(juce::Graphics& g)
 
     g.drawFittedText(title, area.withLeft(5), juce::Justification::centredLeft, 1);
 
-    if (drawAnimation)
+
+    /*if (drawAnimation)
     {
         g.setColour(animationColor);
         g.fillRect(area);
+    }*/
+
+    if (showCanDropFile)
+    {
+        g.setColour(juce::Colours::blue);
+        g.drawRect(area);
+        
     }
+
 
 }
 
-juce::Component* PanelHeader::getPanelComponent(PanelCompId compId)
+juce::Component* PanelHeader::getPanelComponent()
 {
-    return panel.getPanel((int)compId);
+    return panel.getPanel((int)panelCompId);
 }
 
 juce::String PanelHeader::getInfoPanelMessage()
@@ -2769,19 +2916,61 @@ juce::String PanelHeader::getInfoPanelMessage()
     }
 }
 
+bool PanelHeader::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details)
+{
+    if (details.description.toString().contains(DragStrings::fileChooserDragString))
+    {
+        if (panelCompId == PanelCompId::favorites)
+        {
+            auto favs = static_cast<FavoritesTreeView*> (getPanelComponent());
+            if (favs)
+            {
+                showCanDropFile = true;
+                
+                favs->isInterestedInDragSource(details);
+                return true;
+            }
+        }
+    }
+
+    return false;
+
+}
+
+void PanelHeader::itemDropped(const juce::DragAndDropTarget::SourceDetails& details)
+{
+    if (details.description.toString().contains(DragStrings::fileChooserDragString))
+    {
+        if (panelCompId == PanelCompId::favorites)
+        {
+            auto favs = static_cast<FavoritesTreeView*> (getPanelComponent());
+            if (favs)
+            {
+                showCanDropFile = false;
+                favs->itemDropped(details);
+                animateAddFile();
+            }
+        }
+    }
+}
+
+void PanelHeader::animateAddFile()
+{
+    auto& animator = juce::Desktop::getInstance().getAnimator();
+    animator.fadeOut(this, 500);
+    animator.fadeIn(this, 500);
+}
+
 void PanelHeader::timerCallback()
 {
-    /*if (drawAnimation)
-    {
+    auto mousePos = getMouseXYRelative();
 
-        repaint();
-        currentDrawFrame++;
-        
-    }
-    else
+    if (!getLocalBounds().contains(mousePos) && showCanDropFile)
     {
-        
-    }*/
+        showCanDropFile = false;
+    }
+
+    repaint();
 
 }
 

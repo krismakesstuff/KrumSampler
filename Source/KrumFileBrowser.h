@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "InfoPanel.h"
-
+//#include "C:\Users\krisc\Documents\JUCE\modules\juce_gui_basics\filebrowser\juce_FileTreeComponent.cpp"
 /*
 * 
 * The File Browser holds folders and files chosen by the user for quick access. These file paths will save with the plugin as well as any custom names that are given to them. 
@@ -39,7 +39,10 @@ class SimpleAudioPreviewer;
 class KrumModuleContainer;
 class FileChooser;
 class KrumFileBrowser;
+//class juce::FileTreeComponent::FileListTreeItem;
 
+
+// 
 //strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
 //namespace FileBrowserValueTreeIds
 //{
@@ -403,13 +406,15 @@ private:
 
 };
 
+class FileChooser;
+
 //This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
 class FavoritesTreeView :   public juce::TreeView,
                             public juce::DragAndDropContainer
 {
 public:
 
-    FavoritesTreeView(SimpleAudioPreviewer* prev);
+    FavoritesTreeView(FileChooser* fc, SimpleAudioPreviewer* prev);
     ~FavoritesTreeView();
 
     /*void valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property) override;
@@ -429,7 +434,7 @@ public:
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& details) override;
 
-    void pickNewFavorite();
+    //void pickNewFavorite();
     void createNewFavoriteFile(const juce::String& fullPathName); 
     void createNewFavoriteFolder(const juce::String& fullPathName);
     void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
@@ -483,7 +488,7 @@ public:
 
 private:
 
-    class CustomFileChooser : public juce::FileChooser
+    /*class CustomFileChooser : public juce::FileChooser
     {
     public:
         CustomFileChooser(juce::String title, juce::File locationToShow, juce::String formats, FavoritesTreeView* ownerTree)
@@ -512,25 +517,28 @@ private:
 
     std::unique_ptr<CustomFileChooser> currentFileChooser = nullptr;
 
-    static void handleChosenFiles(const juce::FileChooser& fileChooser);
+    static void handleChosenFiles(const juce::FileChooser& fileChooser);*/
     
     //juce::ValueTree& fileBrowserValueTree;
 
-    juce::ValueTree favoritesValueTree;
 
     //std::unique_ptr<KrumTreeHeaderItem> rootItem;
-    std::unique_ptr<RootHeaderItem> rootItem;
-
     //int titleH = 20;
+
+    bool showDropScreen = false;
+
+    juce::ValueTree favoritesValueTree;
+    std::unique_ptr<RootHeaderItem> rootItem;
 
     juce::Colour fontColor{ juce::Colours::darkgrey };
     juce::Colour bgColor{ juce::Colours::black };
     juce::Colour conLineColor{ juce::Colours::darkgrey };
 
-
+    FileChooser* fileChooser;
     SimpleAudioPreviewer* previewer;
-
     KrumModuleContainer* moduleContainer = nullptr;
+
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FavoritesTreeView)
 };
@@ -599,7 +607,7 @@ public:
     enum RightClickMenuIds
     {
         addToFavorite = 1,
-        addLocation,
+        addPlace,
         revealInOS,
     };
     
@@ -619,23 +627,51 @@ public:
     void fileDoubleClicked(const juce::File& file) override;
     void browserRootChanged(const juce::File& newRoot) override;
 
+    juce::File getSelectedFile();
+    juce::Array<juce::File> getSelectedFiles();
+
     void valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild) override;
 
-    void addDefaultPaths();
     void updatePathList();
-    void getDefaultRoots(juce::StringArray& rootNames, juce::StringArray& rootPaths);
+    void addDefaultPaths();
+    //void addLocationPaths();
     void handleChosenPath();
 
+    void animateAddPlace();
+
+    //const juce::String& getDragAndDropDescription() const override;
+
 private:
+
+    friend class FileChooserItem;
+
+    juce::String findPathFromName(juce::String itemName);
+    juce::File getFileFromChosenPath();
+
+    //void getDefaultRoots(juce::StringArray& rootNames, juce::StringArray& rootPaths);
+    void getDefaultPaths();
+    //void getLocations(juce::StringArray& locationNames, juce::StringArray& locationPaths);
+    
     juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
     
+
     LocationTabBar locationTabs;
 
     juce::TimeSliceThread fileChooserThread{ "FileChooserThread" };
     juce::DirectoryContentsList directoryList{ nullptr, fileChooserThread };
     juce::FileTreeComponent fileTree{ directoryList };
     
+   /* class FileTree : public juce::FileTreeComponent 
+    {
+        FileTree(juce::DirectoryContentsList& listToShow);
+        ~FileTree() override;
+
+
+    };*/
+
+
     //juce::ComboBox currentPathBox;
+    juce::StringArray pathBoxNames, pathBoxPaths;
 
     class CurrentPathBox : public juce::ComboBox
     {
@@ -649,6 +685,19 @@ private:
             juce::ComboBox::showPopup();
         }
 
+        void paint(juce::Graphics& g) override
+        {
+            juce::ComboBox::paint(g);
+
+            auto& animator = juce::Desktop::getInstance().getAnimator();
+            if (animator.isAnimating(this))
+            {
+                g.setColour(juce::Colours::green);
+                g.fillRect(getLocalBounds());
+            }
+        }
+
+
     private:
         FileChooser& fileChooser;
 
@@ -657,6 +706,7 @@ private:
     CurrentPathBox currentPathBox{ *this };
 
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
+    //juce::StringArray rootPaths;
 
 
     //juce::TextButton goUpButton;
@@ -679,6 +729,7 @@ private:
 //===============================================================================
 
 class PanelHeader : public InfoPanelComponent,
+                    public juce::DragAndDropTarget,
                     public juce::Timer
 {
 public:
@@ -696,14 +747,19 @@ public:
     void resized() override;
     void paint(juce::Graphics& g) override;
     
-    juce::Component* getPanelComponent(PanelCompId compId);
+    juce::Component* getPanelComponent();
+
+    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details) override;
+    void itemDropped(const juce::DragAndDropTarget::SourceDetails& details) override;
+
+    void animateAddFile();
 
 private:
 
     juce::String getInfoPanelMessage();
 
     bool mouseOver = false;
-
+    bool showCanDropFile = false;
     PanelCompId panelCompId;
 
     //juce::TextButton expandButton;

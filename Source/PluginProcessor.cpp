@@ -85,25 +85,25 @@ juce::ValueTree createFileBrowserTree()
     retValTree.addChild(locationsTree, -1, nullptr);
 
     //default location tab
-    juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
-    juce::ValueTree locationTree{ TreeIDs::Location };
+    //juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
+    //juce::ValueTree locationTree{ TreeIDs::Location };
 
-    locationTree.setProperty(TreeIDs::locationName, defaultLocation.getFileName(), nullptr);
-    locationTree.setProperty(TreeIDs::locationPath, defaultLocation.getFullPathName(), nullptr);
-    locationsTree.addChild(locationTree, -1, nullptr);
+    //locationTree.setProperty(TreeIDs::locationName, defaultLocation.getFileName(), nullptr);
+    //locationTree.setProperty(TreeIDs::locationPath, defaultLocation.getFullPathName(), nullptr);
+    //locationsTree.addChild(locationTree, -1, nullptr);
 
-    //system root tabs (drives)
-    juce::Array<juce::File> roots;
-    juce::File::findFileSystemRoots(roots);
+    ////system root tabs (drives)
+    //juce::Array<juce::File> roots;
+    //juce::File::findFileSystemRoots(roots);
 
-    for (auto root : roots)
-    {
-        juce::ValueTree newLocation{ TreeIDs::Location };
-        newLocation.setProperty(TreeIDs::locationName, root.getFileName(), nullptr);
-        newLocation.setProperty(TreeIDs::locationPath, root.getFullPathName(), nullptr);
-        locationsTree.addChild(newLocation, -1, nullptr);
+    //for (auto root : roots)
+    //{
+    //    juce::ValueTree newLocation{ TreeIDs::Location };
+    //    newLocation.setProperty(TreeIDs::locationName, root.getFileName(), nullptr);
+    //    newLocation.setProperty(TreeIDs::locationPath, root.getFullPathName(), nullptr);
+    //    locationsTree.addChild(newLocation, -1, nullptr);
 
-    }
+    //}
     
 
     retValTree.addChild(openTree, -1, nullptr);

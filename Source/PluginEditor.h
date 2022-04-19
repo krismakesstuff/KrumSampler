@@ -34,7 +34,7 @@ namespace EditorDimensions
     const static int windowW = 1200;
     const static int windowWNoBrowser = 900;
     
-    const static int  topBar = 60;
+    const static int  topBar = 50;
     const static int shrinkage = 5;
     const juce::Rectangle<int> madeByArea{ 0, 0, 150, 35 };
 

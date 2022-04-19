@@ -44,8 +44,9 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     outputGainSlider.setNumDecimalPlacesToDisplay(2);
     outputGainSlider.setPopupDisplayEnabled(true, false, this);
     outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue()));
+
     outputGainSlider.onValueChange = [this] { updateOutputGainBubbleComp(outputGainSlider.getCurrentPopupDisplay()); repaint(); };
-    
+    outputGainSlider.onDragEnd = [this] { outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue())); };
     outputGainAttachment.reset(new SliderAttachment(parameters, TreeIDs::outputGainParam.toString(), outputGainSlider));
     
     addAndMakeVisible(keyboard);
@@ -187,16 +188,16 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     //juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
     
     //made-by text
-    g.setFont(17.0f);
+    g.setFont(16.0f);
     g.setColour(juce::Colours::grey.brighter(0.2f));
     g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centredRight, 1);
 
     //Version text
     g.setColour(juce::Colours::red.darker());
-    g.setFont(16.0f);
+    g.setFont(15.0f);
     juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
     int versionW = g.getCurrentFont().getStringWidth(versionString);
-    g.drawFittedText(versionString, { area.getRight() - 160, websiteButton.getBottom() - 12, versionW + 10, 35 }, juce::Justification::centred, 1);
+    g.drawFittedText(versionString, { area.getRight() - 150, websiteButton.getBottom() - 15, versionW + 10, 35 }, juce::Justification::centred, 1);
 }
 
 void KrumSamplerAudioProcessorEditor::resized()
@@ -336,7 +337,6 @@ void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component
         bubbleComp->setPosition(pos, 0);
 
     }
-    outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue()));
 }
 
 void KrumSamplerAudioProcessorEditor::addKeyboardListener(juce::MidiKeyboardStateListener* listener)

@@ -1050,9 +1050,152 @@ public:
 
     void positionComboBoxText(juce::ComboBox& box, juce::Label& label)
     {
-        label.setJustificationType(juce::Justification::centredLeft);
+        label.setJustificationType(juce::Justification::centred);
         label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 5);
         label.setFont(getMontRegularTypeface());
+    }
+
+    void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
+    {
+        //g.setColour(findColour(juce::ComboBox::ColourIds::backgroundColourId));
+        g.setColour(juce::Colours::black);
+        g.fillRect(0, 0, width, height);
+
+        g.setColour(juce::Colours::darkgrey);
+        g.drawRect(0, 0, width, height);
+    }
+
+    void drawPopupMenuItem(juce::Graphics& g, const juce::Rectangle<int>& area,
+        const bool isSeparator, const bool isActive,
+        const bool isHighlighted, const bool isTicked,
+        const bool hasSubMenu, const juce::String& text,
+        const juce::String& shortcutKeyText,
+        const juce::Drawable* icon, const juce::Colour* const textColourToUse) override
+    {
+        if (isSeparator)
+        {
+            auto r = area.reduced(5, 0);
+            r.removeFromTop(juce::roundToInt(((float)r.getHeight() * 0.5f) - 0.5f));
+
+            g.setColour(findColour(juce::PopupMenu::textColourId).withAlpha(0.3f));
+            g.fillRect(r.removeFromTop(1));
+        }
+        else
+        {
+            auto textColour = findColour(juce::PopupMenu::textColourId);
+
+            auto r = area.reduced(1);
+            if (isHighlighted && isActive)
+            {
+                //g.setColour(findColour(juce::PopupMenu::highlightedBackgroundColourId));
+                g.setColour(juce::Colours::grey.withAlpha(0.2f));
+                g.fillRect(r);
+
+                g.setColour(juce::Colours::lightgrey.withAlpha(0.5f));
+                
+                //g.setColour(findColour(juce::PopupMenu::highlightedTextColourId));
+                //g.setColour(juce::Colours::red);
+            }
+            else
+            {
+                g.setColour(textColour.withMultipliedAlpha(isActive ? 1.0f : 0.5f));
+            }
+
+            r.reduce(juce::jmin(5, area.getWidth() / 20), 0);
+
+            auto font = getPopupMenuFont();
+            auto maxFontHeight = (float)r.getHeight() - 3;
+
+            if (font.getHeight() > maxFontHeight)
+                font.setHeight(maxFontHeight);
+
+            g.setFont(font);
+
+            auto iconArea = r.removeFromLeft(juce::roundToInt(maxFontHeight)).toFloat();
+
+            if (icon != nullptr)
+            {
+                icon->drawWithin(g, iconArea, juce::RectanglePlacement::centred | juce::RectanglePlacement::onlyReduceInSize, 1.0f);
+                r.removeFromLeft(juce::roundToInt(maxFontHeight * 0.5f));
+            }
+            else if (isTicked)
+            {
+                //auto tick = getTickShape(1.0f);
+                juce::Path circlePath;
+                iconArea.reduce(3, 3);
+                circlePath.addEllipse(iconArea.getX() - 3, iconArea.getY() + 1.5f, iconArea.getWidth(), iconArea.getWidth());
+
+                g.fillPath(circlePath);
+                //g.fillPath(tick, tick.getTransformToScaleToFit(iconArea.reduced(iconArea.getWidth() / 5, 0).toFloat(), true));
+            }
+
+            if (hasSubMenu)
+            {
+                auto arrowH = 0.6f * getPopupMenuFont().getAscent();
+
+                auto x = static_cast<float> (r.removeFromRight((int)arrowH).getX());
+                auto halfH = static_cast<float> (r.getCentreY());
+
+                juce::Path path;
+                path.startNewSubPath(x, halfH - arrowH * 0.5f);
+                path.lineTo(x + arrowH * 0.6f, halfH);
+                path.lineTo(x, halfH + arrowH * 0.5f);
+
+                g.strokePath(path, juce::PathStrokeType(2.0f));
+            }
+
+            r.removeFromRight(3);
+            g.drawFittedText(text, r, juce::Justification::centredLeft, 1, 1.0f);
+
+            /*g.setColour(juce::Colours::white);
+            juce::Line<float> bottomLine { area.getBottomLeft().toFloat(), area.getBottomRight().toFloat() };
+            g.drawLine(bottomLine);*/
+
+            if (shortcutKeyText.isNotEmpty())
+            {
+                auto f2 = font;
+                f2.setHeight(f2.getHeight() * 0.75f);
+                f2.setHorizontalScale(0.95f);
+                g.setFont(f2);
+
+                g.drawText(shortcutKeyText, r, juce::Justification::centredRight, true);
+            }
+        }
+    }
+
+    void getIdealPopupMenuItemSize(const juce::String& text, const bool isSeparator,
+                                int standardMenuItemHeight, int& idealWidth, int& idealHeight) override
+    {
+        if (isSeparator)
+        {
+            idealWidth = 50;
+            idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight / 10 : 10;
+        }
+        else
+        {
+            auto font = getPopupMenuFont();
+
+            //if (standardMenuItemHeight > 0 && font.getHeight() > (float)standardMenuItemHeight / 1.3f)
+              //  font.setHeight((float)standardMenuItemHeight / 1.3f);
+
+            //idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight : juce::roundToInt(font.getHeight() * 1.3f);
+            //idealWidth = font.getStringWidth(text) + idealHeight * 2;
+
+            idealHeight = 17;
+            idealWidth = 50;
+            //font.setHeight(10.0f);
+        }
+    }
+
+    void drawPopupMenuSectionHeader(juce::Graphics& g, const juce::Rectangle<int>& area, const juce::String& sectionName) override
+    {
+        //g.setColour(juce::Colours::darkgrey.darker(0.99f));
+        g.setColour(juce::Colours::black);
+        g.fillRect(area);
+
+        g.setColour(juce::Colours::lightgrey.withAlpha(0.5f));
+        g.drawFittedText(sectionName, area.reduced(2), juce::Justification::centredLeft, 1, 1.0f);
+
     }
 
 };
