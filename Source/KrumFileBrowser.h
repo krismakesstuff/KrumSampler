@@ -63,6 +63,14 @@ namespace Dimensions
     const int currentPathHeight = 18;
 }
 
+namespace Colors
+{
+    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.3f).withAlpha(0.6f) };
+    const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
+    const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
+    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };
+}
+
 namespace FileBrowserInfoStrings
 {
     static const juce::String compTitle {"File Browser"};
@@ -414,7 +422,8 @@ class FavoritesTreeView :   public juce::TreeView,
 {
 public:
 
-    FavoritesTreeView(FileChooser* fc, SimpleAudioPreviewer* prev);
+    //FavoritesTreeView(FileChooser* fc, SimpleAudioPreviewer* prev);
+    FavoritesTreeView(KrumFileBrowser& fb);
     ~FavoritesTreeView();
 
     /*void valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property) override;
@@ -438,7 +447,6 @@ public:
     void createNewFavoriteFile(const juce::String& fullPathName); 
     void createNewFavoriteFolder(const juce::String& fullPathName);
     void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
-
     
     void reCreateFavoritesFromValueTree();
     void reCreateFavoriteFolder(juce::ValueTree& tree);
@@ -534,8 +542,10 @@ private:
     juce::Colour bgColor{ juce::Colours::black };
     juce::Colour conLineColor{ juce::Colours::darkgrey };
 
-    FileChooser* fileChooser;
-    SimpleAudioPreviewer* previewer;
+    KrumFileBrowser& fileBrowser;
+
+    //FileChooser* fileChooser;
+    //SimpleAudioPreviewer* previewer;
     KrumModuleContainer* moduleContainer = nullptr;
 
 
@@ -544,52 +554,52 @@ private:
 };
 
 
-class LocationTabButton : public juce::TabBarButton 
-{
-public:
-    LocationTabButton(juce::TabbedButtonBar& barComp, const juce::String& tabName, int tabIndex);
-    ~LocationTabButton() override;
-
-    void paint(juce::Graphics& g) override;
-
-    juce::String name;
-    int index;
-    
-};
-
-class LocationTabBar : public juce::TabbedComponent
-{
-public:
-    LocationTabBar(FileChooser& fileChooser);
-    ~LocationTabBar() override; 
-
-
-    void currentTabChanged(int newCurrentTab, const juce::String& newCurrentTabName) override;
-    void popupMenuClickOnTab(int tabIndex, const juce::String& tabName) override;
-
-    void addLocation(juce::File location, juce::String name);
-    void addTabsFromLocationTree(juce::ValueTree& locationsTree);
-
-
-
-    static void handleTabRightClick(int result, LocationTabBar* tabBar, int tabIndex);
-    
-    juce::TabBarButton* createTabButton(const juce::String& tabName, int tabIndex) override;
-
-private:
-
-    int lastSelectedIndex = -1;
-
-    //store the user added locations
-    juce::ValueTree fileBrowserTree;
-    juce::Colour bgColor{ juce::Colours::transparentBlack };
-    FileChooser& fileChooser;
-
-    juce::ValueTree locationsValueTree;
-
-    static void handleRenameExit(int result, LocationTabBar* tabBar, juce::TextEditor* editor);
-
-};
+//class LocationTabButton : public juce::TabBarButton 
+//{
+//public:
+//    LocationTabButton(juce::TabbedButtonBar& barComp, const juce::String& tabName, int tabIndex);
+//    ~LocationTabButton() override;
+//
+//    void paint(juce::Graphics& g) override;
+//
+//    juce::String name;
+//    int index;
+//    
+//};
+//
+//class LocationTabBar : public juce::TabbedComponent
+//{
+//public:
+//    LocationTabBar(FileChooser& fileChooser);
+//    ~LocationTabBar() override; 
+//
+//
+//    void currentTabChanged(int newCurrentTab, const juce::String& newCurrentTabName) override;
+//    void popupMenuClickOnTab(int tabIndex, const juce::String& tabName) override;
+//
+//    void addLocation(juce::File location, juce::String name);
+//    void addTabsFromLocationTree(juce::ValueTree& locationsTree);
+//
+//
+//
+//    static void handleTabRightClick(int result, LocationTabBar* tabBar, int tabIndex);
+//    
+//    juce::TabBarButton* createTabButton(const juce::String& tabName, int tabIndex) override;
+//
+//private:
+//
+//    int lastSelectedIndex = -1;
+//
+//    //store the user added locations
+//    juce::ValueTree fileBrowserTree;
+//    juce::Colour bgColor{ juce::Colours::transparentBlack };
+//    FileChooser& fileChooser;
+//
+//    juce::ValueTree locationsValueTree;
+//
+//    static void handleRenameExit(int result, LocationTabBar* tabBar, juce::TextEditor* editor);
+//
+//};
 
 //class FileChooserTreeView : public juce::FileTreeComponent
 class FileChooser : public juce::Component,
@@ -655,7 +665,7 @@ private:
     juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
     
 
-    LocationTabBar locationTabs;
+    //LocationTabBar locationTabs;
 
     juce::TimeSliceThread fileChooserThread{ "FileChooserThread" };
     juce::DirectoryContentsList directoryList{ nullptr, fileChooserThread };
@@ -672,31 +682,40 @@ private:
 
     //juce::ComboBox currentPathBox;
     juce::StringArray pathBoxNames, pathBoxPaths;
+    
+    class CurrentPathBox;
+    class PathBoxItem : public juce::PopupMenu::CustomComponent
+    {
+    public:
+        PathBoxItem(CurrentPathBox& owner);
+        ~PathBoxItem() override;
+
+        void paint(juce::Graphics& g) override;
+        void getIdealSize(int& idealWidth, int& idealHeight) override;
+
+        //void mouseEnter(const juce::MouseEvent& e) override;
+        //void mouseExit(const juce::MouseEvent& e) override;
+        void mouseDown(const juce::MouseEvent& e) override;
+
+
+        //void paint(juce::Graphics& g) override;
+    private:
+
+        static void handleRightClick(int result, PathBoxItem* item);
+
+
+        CurrentPathBox& ownerComboBox;
+    };
 
     class CurrentPathBox : public juce::ComboBox
     {
     public:
-        CurrentPathBox(FileChooser& fc)
-        : fileChooser(fc) {}
+        CurrentPathBox(FileChooser& fc);
+        ~CurrentPathBox() override;
+        void showPopup() override;
 
-        void showPopup() override
-        {
-            fileChooser.updatePathList();
-            juce::ComboBox::showPopup();
-        }
-
-        void paint(juce::Graphics& g) override
-        {
-            juce::ComboBox::paint(g);
-
-            auto& animator = juce::Desktop::getInstance().getAnimator();
-            if (animator.isAnimating(this))
-            {
-                g.setColour(juce::Colours::green);
-                g.fillRect(getLocalBounds());
-            }
-        }
-
+        void paint(juce::Graphics& g) override;
+        void addPathBoxItem(int itemId, std::unique_ptr<PathBoxItem> pathBoxItem, juce::String title);
 
     private:
         FileChooser& fileChooser;
@@ -707,6 +726,8 @@ private:
 
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
     //juce::StringArray rootPaths;
+
+    
 
 
     //juce::TextButton goUpButton;
@@ -828,6 +849,9 @@ public:
     juce::ValueTree& getFileBrowserValueTree();
 
 private:
+
+    friend class FavoritesTreeView;
+
 
     juce::ValueTree& fileBrowserValueTree;
 

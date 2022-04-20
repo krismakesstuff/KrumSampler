@@ -1053,12 +1053,13 @@ public:
         label.setJustificationType(juce::Justification::centred);
         label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 5);
         label.setFont(getMontRegularTypeface());
+        label.setColour(juce::Label::ColourIds::textColourId, juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
     }
 
     void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
     {
         //g.setColour(findColour(juce::ComboBox::ColourIds::backgroundColourId));
-        g.setColour(juce::Colours::black);
+        g.setColour(juce::Colours::black.withAlpha(0.9f));
         g.fillRect(0, 0, width, height);
 
         g.setColour(juce::Colours::darkgrey);
@@ -1169,7 +1170,7 @@ public:
         if (isSeparator)
         {
             idealWidth = 50;
-            idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight / 10 : 10;
+            idealHeight = 8;
         }
         else
         {
@@ -1190,13 +1191,122 @@ public:
     void drawPopupMenuSectionHeader(juce::Graphics& g, const juce::Rectangle<int>& area, const juce::String& sectionName) override
     {
         //g.setColour(juce::Colours::darkgrey.darker(0.99f));
-        g.setColour(juce::Colours::black);
+        g.setColour(juce::Colours::black.withAlpha(0.3f));
         g.fillRect(area);
 
         g.setColour(juce::Colours::lightgrey.withAlpha(0.5f));
         g.drawFittedText(sectionName, area.reduced(2), juce::Justification::centredLeft, 1, 1.0f);
 
     }
+
+    void drawFileBrowserRow(juce::Graphics& g, int width, int height,
+        const juce::File&, const juce::String& filename, juce::Image* icon,
+        const juce::String& fileSizeDescription,
+        const juce::String& fileTimeDescription,
+        bool isDirectory, bool isItemSelected,
+        int /*itemIndex*/, juce::DirectoryContentsDisplayComponent& dcc) override
+    {
+        auto fileListComp = dynamic_cast<juce::Component*> (&dcc);
+
+        juce::Rectangle<int> area = { 0, 0, width, height };
+
+        if (isItemSelected)
+        {
+            g.setColour(juce::Colours::black.withAlpha(0.15f));
+            g.fillRect(area);
+        }
+           /* g.fillAll(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::highlightColourId)
+                : findColour(juce::DirectoryContentsDisplayComponent::highlightColourId));*/
+
+        const int x = 32;
+        g.setColour(juce::Colours::white.withAlpha(0.4f));
+
+        if (icon != nullptr && icon->isValid())
+        {
+            
+            g.drawImageWithin(*icon, 2, 2, x - 4, height - 4,
+                juce::RectanglePlacement::centred | juce::RectanglePlacement::onlyReduceInSize,
+                true);
+        }
+        else
+        {
+            if (auto* d = isDirectory ? getDefaultFolderImage()
+                : getDefaultDocumentFileImage())
+                d->drawWithin(g, juce::Rectangle<float>(2.0f, 2.0f, x - 4.0f, (float)height - 4.0f),
+                    juce::RectanglePlacement::centred | juce::RectanglePlacement::onlyReduceInSize, 1.0f);
+        }
+
+        if (isItemSelected)
+            g.setColour(juce::Colours::lightgrey);
+            //g.setColour(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::highlightedTextColourId)
+            //    : findColour(juce::DirectoryContentsDisplayComponent::highlightedTextColourId));
+        else
+            g.setColour(juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
+            //g.setColour(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::textColourId)
+             //   : findColour(juce::DirectoryContentsDisplayComponent::textColourId));
+
+        g.setFont((float)height * 0.7f);
+
+        if (width > 450 && !isDirectory)
+        {
+            auto sizeX = juce::roundToInt((float)width * 0.7f);
+            auto dateX = juce::roundToInt((float)width * 0.8f);
+
+            g.drawFittedText(filename,
+                x, 0, sizeX - x, height,
+                juce::Justification::centredLeft, 1);
+
+            g.setFont((float)height * 0.5f);
+            g.setColour(juce::Colours::darkgrey);
+
+            if (!isDirectory)
+            {
+                g.drawFittedText(fileSizeDescription,
+                    sizeX, 0, dateX - sizeX - 8, height,
+                    juce::Justification::centredRight, 1);
+
+                g.drawFittedText(fileTimeDescription,
+                    dateX, 0, width - 8 - dateX, height,
+                    juce::Justification::centredRight, 1);
+            }
+        }
+        else
+        {
+            g.drawFittedText(filename,
+                x, 0, width - x, height,
+                juce::Justification::centredLeft, 1);
+
+        }
+    }
+
+    void drawTreeviewPlusMinusBox(juce::Graphics& g, const juce::Rectangle<float>& bounds,
+        juce::Colour backgroundColour, bool isOpen, bool isMouseOver)
+    {
+
+    /*    Path p;
+        p.addTriangle(0.0f, 0.0f, 1.0f, isOpen ? 0.0f : 0.5f, isOpen ? 0.5f : 0.0f, 1.0f);
+
+        g.setColour(backgroundColour.contrasting().withAlpha(isMouseOver ? 0.5f : 0.3f));
+        g.fillPath(p, p.getTransformToScaleToFit(area.reduced(2, area.getHeight() / 4), true));*/
+
+        juce::Path path;
+        auto area = bounds.reduced(7, 5);
+        g.setColour(juce::Colours::grey);
+
+        if (!isOpen)
+        {
+            path.addTriangle(area.getTopLeft(), { area.getRight(), area.getCentreY() }, area.getBottomLeft());
+            g.strokePath(path, juce::PathStrokeType(1.0f));
+        }
+        else
+        {
+            path.addTriangle(area.getBottomLeft(), area.getTopRight(), area.getBottomRight());
+            g.strokePath(path, juce::PathStrokeType(1.0f));
+            g.fillPath(path);
+        }
+
+    }
+
 
 };
 
