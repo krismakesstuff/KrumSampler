@@ -77,36 +77,15 @@ juce::ValueTree createFileBrowserTree()
     juce::ValueTree retValTree{ TreeIDs::FILEBROWSERTREE, {}, };
     juce::ValueTree recTree = { TreeIDs::RECENT ,{} };
     juce::ValueTree favTree = { TreeIDs::FAVORITES , {} };
-    juce::ValueTree locationsTree = { TreeIDs::LOCATIONS , {} };
+    juce::ValueTree locationsTree = { TreeIDs::PLACES , {} };
     juce::ValueTree openTree = { TreeIDs::OPENSTATE, {}};
+    juce::ValueTree lastOpenTree = { TreeIDs::LASTOPENPATH, {} };
 
     retValTree.addChild(recTree, -1, nullptr);
     retValTree.addChild(favTree, -1, nullptr);
     retValTree.addChild(locationsTree, -1, nullptr);
-
-    //default location tab
-    //juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
-    //juce::ValueTree locationTree{ TreeIDs::Location };
-
-    //locationTree.setProperty(TreeIDs::locationName, defaultLocation.getFileName(), nullptr);
-    //locationTree.setProperty(TreeIDs::locationPath, defaultLocation.getFullPathName(), nullptr);
-    //locationsTree.addChild(locationTree, -1, nullptr);
-
-    ////system root tabs (drives)
-    //juce::Array<juce::File> roots;
-    //juce::File::findFileSystemRoots(roots);
-
-    //for (auto root : roots)
-    //{
-    //    juce::ValueTree newLocation{ TreeIDs::Location };
-    //    newLocation.setProperty(TreeIDs::locationName, root.getFileName(), nullptr);
-    //    newLocation.setProperty(TreeIDs::locationPath, root.getFullPathName(), nullptr);
-    //    locationsTree.addChild(newLocation, -1, nullptr);
-
-    //}
-    
-
     retValTree.addChild(openTree, -1, nullptr);
+    retValTree.addChild(lastOpenTree, -1, nullptr);
 
     return retValTree.createCopy();
 

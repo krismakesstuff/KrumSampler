@@ -1003,6 +1003,17 @@ public:
     }
 };
 
+
+namespace Colors
+{
+    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.2f).withAlpha(0.8f) };
+    const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
+    const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
+    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };
+    const juce::Colour addAnimationColor{ juce::Colours::green };
+    const juce::Colour removeAnimationColor{ juce::Colours::red };
+}
+
 class FileBrowserLookAndFeel : public KrumLookAndFeel
 {
 public:
@@ -1078,7 +1089,8 @@ public:
             auto r = area.reduced(5, 0);
             r.removeFromTop(juce::roundToInt(((float)r.getHeight() * 0.5f) - 0.5f));
 
-            g.setColour(findColour(juce::PopupMenu::textColourId).withAlpha(0.3f));
+            //g.setColour(findColour(juce::PopupMenu::textColourId).withAlpha(0.3f));
+            g.setColour(Colors::fontColor);
             g.fillRect(r.removeFromTop(1));
         }
         else
@@ -1199,6 +1211,8 @@ public:
 
     }
 
+    
+
     void drawFileBrowserRow(juce::Graphics& g, int width, int height,
         const juce::File&, const juce::String& filename, juce::Image* icon,
         const juce::String& fileSizeDescription,
@@ -1237,11 +1251,11 @@ public:
         }
 
         if (isItemSelected)
-            g.setColour(juce::Colours::lightgrey);
+            g.setColour(Colors::highlightFontColor);
             //g.setColour(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::highlightedTextColourId)
             //    : findColour(juce::DirectoryContentsDisplayComponent::highlightedTextColourId));
         else
-            g.setColour(juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
+            g.setColour(Colors::fontColor);
             //g.setColour(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::textColourId)
              //   : findColour(juce::DirectoryContentsDisplayComponent::textColourId));
 
