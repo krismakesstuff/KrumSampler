@@ -10,7 +10,9 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "InfoPanel.h"
+//#include "InfoPanel.h"
+#include "SimpleAudioPreviewer.h"
+// 
 //#include "C:\Users\krisc\Documents\JUCE\modules\juce_gui_basics\filebrowser\juce_FileTreeComponent.cpp"
 /*
 * 
@@ -35,10 +37,11 @@ class KrumTreeItem;
 class KrumTreeHeaderItem;
 class KrumTreeView;
 class FavoritesTreeView;
-class SimpleAudioPreviewer;
+//class SimpleAudioPreviewer;
 class KrumModuleContainer;
 class FileChooser;
 class KrumFileBrowser;
+class KrumSampler;
 //class juce::FileTreeComponent::FileListTreeItem;
 
 
@@ -58,7 +61,7 @@ namespace Dimensions
     const int rowHeight = 18;
     const float rowTextScalar = 0.85f;
     const int titleH = 21;
-    const int fileIconSize = 20;
+    const int fileIconSize = 19;
     const float fileIconAlpha = 0.5f;
     const int locationTabDepth = 22;
     const int currentPathHeight = 18;
@@ -101,6 +104,7 @@ enum RightClickMenuIds
     remove_Id,
     clear_Id,
     reveal_Id,
+    assignToModule,
 };
 
 //---------------------------------------
@@ -141,6 +145,7 @@ public:
     void setItemEditing(bool isEditing);
     void removeThisItem();
 
+
     void tellParentToRemoveMe();
     void setBGColor(juce::Colour newColor);
 
@@ -160,7 +165,7 @@ private:
     juce::Colour bgColor{ juce::Colours::darkgrey.darker() };
     SimpleAudioPreviewer* previewer;
 
-    std::unique_ptr<juce::Drawable> fileIcon = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
+    std::unique_ptr<juce::Drawable> audioFileIcon = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
     
 
     //-----------------------------------------
@@ -185,6 +190,8 @@ private:
         void mouseDrag(const juce::MouseEvent& e) override;
 
         static void handleResult(int result, EditableComp* comp);
+
+        //void setSelectedWithMods(const juce::MouseEvent& e, bool selected);
 
     private:
 
@@ -379,12 +386,16 @@ public:
 //--------------------------------------------------------------------------------------------------------------
 
 class RecentFilesList : public juce::ListBoxModel, 
-                        public juce::Component
+                        public juce::Component,
+                        public juce::ValueTree::Listener
 {
 public:
-    RecentFilesList(SimpleAudioPreviewer* previewer);
+    RecentFilesList( KrumFileBrowser& fileBrowser, SimpleAudioPreviewer* previewer);
     
     ~RecentFilesList() override;
+
+    void valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval) override;
+
 
     //void paint(juce::Graphics& g) override;
     void resized() override;
@@ -395,13 +406,16 @@ public:
 
     void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
 
-    void addFile(juce::File fileToAdd, juce::String name);
+    //returns true if added, false if file already exists in recents section
+    bool addFile(juce::File fileToAdd, juce::String name);
     void updateFileListFromTree(juce::ValueTree& recentsTree);
 
     int getNumSelectedRows();
     juce::Array<juce::ValueTree> getSelectedValueTrees();
 
     juce::var getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe) override;
+
+    void clearList();
 
 private:
 
@@ -413,8 +427,9 @@ private:
     juce::ValueTree recentValueTree;
 
     SimpleAudioPreviewer* previewer = nullptr;
+    KrumFileBrowser& fileBrowser;
 
-    std::unique_ptr<juce::Drawable> fileIcon = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
+    std::unique_ptr<juce::Drawable> audioFileIcon = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
 
 };
 //--------------------------------------------------------------------------------------------------------------
@@ -500,7 +515,12 @@ public:
 
     void updateFavoritesFromTree(juce::ValueTree& newFavsTree);
 
+    void makeModulesFromSelectedFiles();
+
 private:
+
+    friend class KrumTreeItem;
+    
 
     bool showDropScreen = false;
 
@@ -678,9 +698,10 @@ public:
     
     juce::Component* getPanelComponent();
 
+    void mouseDown(const juce::MouseEvent& e) override;
+
     bool isInterestedInFileDrag(const juce::StringArray& files);
     void filesDropped(const juce::StringArray& files, int x, int y);
-
 
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& details) override;
@@ -694,6 +715,8 @@ public:
 private:
 
     juce::String getInfoPanelMessage();
+
+    static void handleRightClick(int result, PanelHeader* header);
 
     bool mouseOver = false;
     bool showCanDropFile = false;
@@ -754,7 +777,7 @@ public:
     void addFileToRecent(const juce::File file, juce::String name);
     void addFileToFavorites(juce::File file);
     bool doesPreviewerSupport(juce::String fileExtension);
-    //SimpleAudioPreviewer* getAudioPreviewer();
+    SimpleAudioPreviewer* getAudioPreviewer();
 
     //void assignAudioPreviewer(SimpleAudioPreviewer* previewer);
     void assignModuleContainer(KrumModuleContainer* container);
@@ -763,38 +786,34 @@ public:
     void buildDemoKit();
 
     juce::ValueTree& getFileBrowserValueTree();
-    
+    juce::ValueTree& getStateValueTree();
+    juce::AudioFormatManager& getFormatManager();
     PanelHeader* getPanelHeader(BrowserSections section);
 
 private:
 
-    friend class FavoritesTreeView;
-
-
     juce::ValueTree& fileBrowserValueTree;
+    juce::ValueTree& stateValueTree;
+    juce::AudioFormatManager& formatManager;
 
     SimpleAudioPreviewer audioPreviewer;
-
     juce::ConcertinaPanel concertinaPanel;
 
-    PanelHeader recentHeader{ "Recent" , concertinaPanel, PanelHeader::PanelCompId::recent};
-    RecentFilesList recentFilesList{ &audioPreviewer };
-    //std::unique_ptr<RecentSection> recentSection;
+    PanelHeader recentHeader{ "RECENT" , concertinaPanel, PanelHeader::PanelCompId::recent};
+    RecentFilesList recentFilesList{ *this, &audioPreviewer };
 
-    PanelHeader favoritesHeader{ "Favorites", concertinaPanel, PanelHeader::PanelCompId::favorites };
+    PanelHeader favoritesHeader{ "FAVORITES", concertinaPanel, PanelHeader::PanelCompId::favorites };
     FavoritesTreeView favoritesTreeView;
-    //std::unique_ptr<FavoritesSection> favoritesSection;
 
-    PanelHeader filechooserHeader{ "File Browser", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
+    PanelHeader filechooserHeader{ "FILE BROWSER", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
     FileChooser fileChooser{*this, audioPreviewer};
-    //std::unique_ptr<FileChooserSection> fileChooserSection;
 
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
     juce::Colour fontColor{ juce::Colours::lightgrey };
     
     int titleH = 20;
-    int previewerH = 35;
+    int previewerH = 45;
 
     bool init = true;
 

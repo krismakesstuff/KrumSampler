@@ -136,7 +136,7 @@ public:
     void setAndDrawThumbnail();
     
 
-
+    //make handleNewFileDrop?
     bool handleNewFile(juce::ValueTree& fileTree, bool overlayShouldListen = true);
     
     void setModuleFile(juce::File& newFile);

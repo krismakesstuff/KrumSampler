@@ -30,31 +30,48 @@
 
 namespace EditorDimensions
 {
-    const static int windowH = 600;
     const static int windowW = 1200;
+    const static int windowH = 600;
     const static int windowWNoBrowser = 900;
+
+    const static int maxWindowW = 1670;
+    const static int maxWindowH = windowH;
+    const static int maxWindowWNoBrowser = 1320;
     
-    const static int  topBar = 50;
+    const static int minWindowW = 800;
+    const static int minWindowH = windowH;
+    const static int minWindowWNoBrowser = 550;
+
+    //---------------------------
+
+    const static int  topBar = 40;
     const static int shrinkage = 5;
     const juce::Rectangle<int> madeByArea{ 0, 0, 150, 35 };
+    const static int bottomBarH = 20;
 
     const static int moduleH = windowH * 0.68f;
     const static int moduleW = 120;
 
-    const static int addButtonH = 50;
-    const static int addButtonW = 100;
-    const static int collapseButtonH = 40;
-    const static int collapseButtonW = 15;
+    //const static int addButtonH = 50;
+    //const static int addButtonW = 100;
+    const static int collapseButtonH = 30;
+    const static int collapseButtonW = 13;
+
+    const static int infoButtonSize = 25;
 
     const static int outputW = 80;
-    const static int keyboardH = 90;
+    
+    const static int presetsW = 130;
+    const static int presetsH = 25;
+    
+    const static int settingsButtonW = 23;
+    const static int settingsButtonH = 23;
+
+    const static int keyboardH = 85;
 
     const static int titleImageW = 420; //nice
-    
-    const static int fileTreeH = 600;
-    const static int fileTreeTitleH = 30;
 
-    const static int fileTreeW = 350;
+    const static int fileBrowserW = 350;
 
     const static float cornerSize = 5.0f;
     const static float smallOutline = 1.0f;
@@ -88,9 +105,9 @@ public:
 
     void printModules();
 
+    bool isBrowserHidden();
     void hideFileBrowser();
     void showFileBrowser();
-
 
     float getOutputGainValue();
     
@@ -101,6 +118,12 @@ public:
     bool getSavedInfoButtonState();
     void saveInfoButtonState();
     
+    int getSavedEditorWidth();
+    void saveEditorWidth();
+
+    int getSavedEditorHeight();
+    void saveEditorHeight();
+
 
     void addKeyboardListener(juce::MidiKeyboardStateListener* listener);
     void removeKeyboardListener(juce::MidiKeyboardStateListener* listenerToRemove);
@@ -121,6 +144,14 @@ private:
 
     void updateOutputGainBubbleComp(juce::Component*);
 
+    void setConstrainerLimits(bool checkBounds);
+
+    void setWindowSizeAndPosition();
+    void collapseButtonClicked();
+
+    void saveEditorDimensions();
+
+    bool showWebsite();
 
     bool needsToUpdateThumbs = false;
 
@@ -140,16 +171,6 @@ private:
     const juce::Font defaultFont{ "Calibri", 11.0f, juce::Font::FontStyleFlags::plain };
 
     juce::Rectangle<int> modulesBG;
-    juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.5f) };
-    juce::Colour outlineColor{ juce::Colours::white };
-    juce::Colour backOutlineColor{ juce::Colours::darkgrey };
-
-    //juce::Colour bgColor{juce::Colours::darkgrey.darker(0.999999f)};
-    juce::Colour bgColor{ juce::Colours::black.withBrightness(0.09f) };
-    juce::Colour outputThumbColor{ juce::Colours::cadetblue };
-    juce::Colour outputTrackColor{ juce::Colours::darkgrey };
-    juce::Colour mainFontColor{ juce::Colours::white };
-    juce::Colour backFontColor{ juce::Colours::darkgrey };
 
     juce::Viewport modulesViewport{ "ModulesViewport" };
 
@@ -176,7 +197,37 @@ private:
 
     InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore","", juce::DrawableButton::ButtonStyle::ImageStretched};
     
+
+    InfoPanelComboBox presetsComboBox{"Presets", "COMING SOON!!"};
+    InfoPanelDrawableButton settingsButton{ "Global Settings", "COMING SOON!!" };
     
+    //class Constrainer : public juce::ComponentBoundsConstrainer
+    //{
+    //public:
+    //    Constrainer();
+    //    ~Constrainer() override;
+
+    //    void applyBoundsToComponent(juce::Component& comp, juce::Rectangle<int> bounds) override;
+
+    //    //void checkBounds(Rectangle< int >& bounds, const Rectangle< int >& previousBounds, const Rectangle< int >& limits, bool isStretchingTop, bool isStretchingLeft, bool isStretchingBottom, bool isStretchingRight)
+
+    //};
+
+
+    juce::ComponentBoundsConstrainer constrainer;
+    class Positioner : public juce::Component::Positioner
+    {
+    public:
+        Positioner(KrumSamplerAudioProcessorEditor& comp);
+        ~Positioner() override;
+
+        void applyNewBounds(const juce::Rectangle<int>& bounds) override;
+    private:
+        KrumSamplerAudioProcessorEditor& editor;
+    };
+     
+    Positioner positioner{ *this };
+
     class GlobalOutputSlider : public InfoPanelDrawableButton
     {
     public:

@@ -312,13 +312,7 @@ void KrumModuleEditor::buildModule()
 
     addAndMakeVisible(midiLabel);
 
-
-    //int playButtonImSize;
-    //auto playButtonData = BinaryData::getNamedResource("play_arrowblack18dp_svg", playButtonImSize);
-    //auto playButtonData = BinaryData::getNamedResource("nounplaywhite_svg", playButtonImSize);
     auto playButtonImage = juce::Drawable::createFromImageData(BinaryData::nounplaywhite_svg, BinaryData::nounplaywhite_svgSize);
-
-    //DBG("Play Icon: " + juce::String(playButtonImage ? "valid" : "null"));
 
     addAndMakeVisible(playButton);
     playButton.setImages(playButtonImage.get());
@@ -327,23 +321,12 @@ void KrumModuleEditor::buildModule()
     playButton.onMouseDown = [this](const juce::MouseEvent& e) { handleOneShotButtonMouseDown(e); };
     playButton.onMouseUp = [this](const juce::MouseEvent& e) { handleOneShotButtonMouseUp(e); };
     
-    
-    //addAndMakeVisible(pitchButton);
-    //addChildComponent(pitchSlider);
-    //pitchSlider.reset(new juce::Slider());
-    //auto& pitchSlider = pitchButton.getSlider();
+
     addAndMakeVisible(pitchSlider);
     pitchSlider.setScrollWheelEnabled(false);
-    //pitchSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
-    //pitchSlider.setDoubleClickReturnValue(true, 0.0);
-    //pitchSlider.setPopupDisplayEnabled(true, false, this);
     pitchSlider.setTooltip(pitchSlider.getTextFromValue(pitchSlider.getValue()));
 
     pitchSlider.onValueChange = [this] { pitchSlider.setTooltip(pitchSlider.getTextFromValue(pitchSlider.getValue())); };
-
-    //pitchSlider.onDragStart = [this] { pitchSlider.setShowSlider(true); };
-    //pitchSlider.onDragEnd = [this] { pitchSlider.setVisible(false); };
-
     pitchSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModulePitchShift + i, pitchSlider));
 
     addAndMakeVisible(reverseButton);
@@ -358,10 +341,6 @@ void KrumModuleEditor::buildModule()
     muteButton.setClickingTogglesState(true);
     muteButtonAttachment.reset(new ButtonAttachment(editor.parameters, TreeIDs::paramModuleMute + i, muteButton));
 
-    //int editButtonImSize;
-    //auto editButtonData = BinaryData::getNamedResource("settingsblack18dp_svg", editButtonImSize);
-    //auto editButtonData = BinaryData::getNamedResource("nounmenuwhite_png", editButtonImSize);
-    //auto editButtonImage = juce::Drawable::createFromImageData(editButtonData, editButtonImSize);
     auto editButtonImage = juce::Drawable::createFromImageData(BinaryData::nounmenuwhite_svg, BinaryData::nounmenuwhite_svgSize);
     
     addAndMakeVisible(editButton);
@@ -484,7 +463,6 @@ void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
     settingsOverlay->setVisible(false);
     showModule();
 }
-
 
 void KrumModuleEditor::showNewSettingsOverlay()
 {
@@ -834,7 +812,7 @@ bool KrumModuleEditor::isInterestedInDragSource(const juce::DragAndDropTarget::S
 void KrumModuleEditor::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails)
 {
     auto desc = dragDetails.description.toString();
-    bool addNextModule = false; //set flag true if files are accepted by module, otherwise leave false
+    bool addNextModule = false;                         //set flag true if files are accepted by module, otherwise leave false
     auto& sampler = editor.sampler;
     juce::Array<juce::ValueTree> selectedTrees;
 

@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "KrumFileBrowser.h"
 
 /*
 * 
@@ -19,10 +20,33 @@
 * 
 */
 
+namespace Colors
+{
+    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.2f).withAlpha(0.8f) };
+    const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
+    const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
+    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };
+    const juce::Colour addAnimationColor{ juce::Colour::fromRGB(144, 190, 109) };
+    const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) };
+
+
+    const juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.5f) };
+    const juce::Colour outlineColor{ juce::Colours::white };
+    const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
+
+    //juce::Colour bgColor{juce::Colours::darkgrey.darker(0.999999f)};
+    const juce::Colour bgColor{ juce::Colours::black.withBrightness(0.09f) };
+    const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
+    const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
+    const juce::Colour mainFontColor{ juce::Colours::white };
+    const juce::Colour backFontColor{ juce::Colours::darkgrey };
+
+}
 
 class KrumLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
+
     KrumLookAndFeel() 
     {
         setDefaultSansSerifTypeface(getMontRegularTypeface());
@@ -1004,15 +1028,6 @@ public:
 };
 
 
-namespace Colors
-{
-    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.2f).withAlpha(0.8f) };
-    const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
-    const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
-    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };
-    const juce::Colour addAnimationColor{ juce::Colours::green };
-    const juce::Colour removeAnimationColor{ juce::Colours::red };
-}
 
 class FileBrowserLookAndFeel : public KrumLookAndFeel
 {
@@ -1063,7 +1078,8 @@ public:
     {
         label.setJustificationType(juce::Justification::centred);
         label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 5);
-        label.setFont(getMontRegularTypeface());
+        //label.setFont(getMontRegularTypeface());
+        label.setFont(getMontBoldTypeface());
         label.setColour(juce::Label::ColourIds::textColourId, juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
     }
 
@@ -1214,13 +1230,15 @@ public:
     
 
     void drawFileBrowserRow(juce::Graphics& g, int width, int height,
-        const juce::File&, const juce::String& filename, juce::Image* icon,
+        const juce::File& file, const juce::String& filename, juce::Image* icon,
         const juce::String& fileSizeDescription,
         const juce::String& fileTimeDescription,
         bool isDirectory, bool isItemSelected,
         int /*itemIndex*/, juce::DirectoryContentsDisplayComponent& dcc) override
     {
         auto fileListComp = dynamic_cast<juce::Component*> (&dcc);
+
+        bool audioFile = file.getFileExtension().compareIgnoreCase(".wav") == 0;
 
         juce::Rectangle<int> area = { 0, 0, width, height };
 
@@ -1229,68 +1247,29 @@ public:
             g.setColour(juce::Colours::black.withAlpha(0.15f));
             g.fillRect(area);
         }
-           /* g.fillAll(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::highlightColourId)
-                : findColour(juce::DirectoryContentsDisplayComponent::highlightColourId));*/
 
-        const int x = 32;
         g.setColour(juce::Colours::white.withAlpha(0.4f));
+        
+        if (auto* d = isDirectory ? getDefaultFolderImage()
+                      : audioFile ? getAudioFileImage() : getDefaultDocumentFileImage())
+        {
 
-        if (icon != nullptr && icon->isValid())
-        {
-            
-            g.drawImageWithin(*icon, 2, 2, x - 4, height - 4,
-                juce::RectanglePlacement::centred | juce::RectanglePlacement::onlyReduceInSize,
-                true);
-        }
-        else
-        {
-            if (auto* d = isDirectory ? getDefaultFolderImage()
-                : getDefaultDocumentFileImage())
-                d->drawWithin(g, juce::Rectangle<float>(2.0f, 2.0f, x - 4.0f, (float)height - 4.0f),
-                    juce::RectanglePlacement::centred | juce::RectanglePlacement::onlyReduceInSize, 1.0f);
+            d->drawWithin(g, area.withWidth(Dimensions::fileIconSize).reduced(3).toFloat(),
+                juce::RectanglePlacement::stretchToFit, Dimensions::fileIconAlpha);
         }
 
         if (isItemSelected)
             g.setColour(Colors::highlightFontColor);
-            //g.setColour(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::highlightedTextColourId)
-            //    : findColour(juce::DirectoryContentsDisplayComponent::highlightedTextColourId));
         else
             g.setColour(Colors::fontColor);
-            //g.setColour(fileListComp != nullptr ? fileListComp->findColour(juce::DirectoryContentsDisplayComponent::textColourId)
-             //   : findColour(juce::DirectoryContentsDisplayComponent::textColourId));
 
-        g.setFont((float)height * 0.7f);
+        g.setFont((float)height * 0.8f);
 
-        if (width > 450 && !isDirectory)
-        {
-            auto sizeX = juce::roundToInt((float)width * 0.7f);
-            auto dateX = juce::roundToInt((float)width * 0.8f);
+        g.drawFittedText(filename,
+            area.withX(Dimensions::fileIconSize + 5),
+            juce::Justification::centredLeft, 1);
 
-            g.drawFittedText(filename,
-                x, 0, sizeX - x, height,
-                juce::Justification::centredLeft, 1);
-
-            g.setFont((float)height * 0.5f);
-            g.setColour(juce::Colours::darkgrey);
-
-            if (!isDirectory)
-            {
-                g.drawFittedText(fileSizeDescription,
-                    sizeX, 0, dateX - sizeX - 8, height,
-                    juce::Justification::centredRight, 1);
-
-                g.drawFittedText(fileTimeDescription,
-                    dateX, 0, width - 8 - dateX, height,
-                    juce::Justification::centredRight, 1);
-            }
-        }
-        else
-        {
-            g.drawFittedText(filename,
-                x, 0, width - x, height,
-                juce::Justification::centredLeft, 1);
-
-        }
+        
     }
 
     void drawTreeviewPlusMinusBox(juce::Graphics& g, const juce::Rectangle<float>& bounds,
@@ -1314,15 +1293,35 @@ public:
         }
         else
         {
-            path.addTriangle(area.getBottomLeft(), area.getTopRight(), area.getBottomRight());
+            path.addTriangle(area.getBottomLeft(), { area.getRight(), area.getCentreY() - 2 }, area.getBottomRight());
             g.strokePath(path, juce::PathStrokeType(1.0f));
             g.fillPath(path);
         }
 
     }
 
+    const juce::Drawable* getDefaultDocumentFileImage() override
+    {
+        return fileIconImage.get();
+    }
+    
+    const juce::Drawable* getDefaultFolderImage() override
+    {
+        return folderIconImage.get();
+    }
+
+    const juce::Drawable* getAudioFileImage()
+    {
+        return audioFileIconImage.get();
+    }
+
+    std::unique_ptr<juce::Drawable> fileIconImage = juce::Drawable::createFromImageData(BinaryData::file_white_24dp_svg, BinaryData::file_white_24dp_svgSize);
+    std::unique_ptr<juce::Drawable> folderIconImage = juce::Drawable::createFromImageData(BinaryData::folder_white_24dp_svg, BinaryData::folder_white_24dp_svgSize);
+    std::unique_ptr<juce::Drawable> audioFileIconImage = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
 
 };
+
+
 
 
 //===========================================================================================================

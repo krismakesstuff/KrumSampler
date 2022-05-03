@@ -11,7 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "SimpleAudioPreviewer.h"
-
+#include "KrumLookAndFeel.h"
 
 //==============================================================================
 
@@ -20,6 +20,9 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::V
 {
     addAndMakeVisible(autoPlayToggle);
     autoPlayToggle.setButtonText("Auto-Play");
+    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::textColourId, Colors::fontColor);
+    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::tickDisabledColourId, Colors::fontColor);
+    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::tickColourId, Colors::highlightFontColor);
     autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
     autoPlayToggle.setTooltip("double-click files to preview, auto-play will preview as it's selected");
     autoPlayToggle.onStateChange = [this] { saveToggleState(); };
@@ -51,6 +54,9 @@ SimpleAudioPreviewer::~SimpleAudioPreviewer()
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)
 {
+    g.setColour(Colors::modulesBGColor.withAlpha(0.2f));
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), 1.0f);
+    //g.drawRect(getLocalBounds());
 }
 
 void SimpleAudioPreviewer::resized()

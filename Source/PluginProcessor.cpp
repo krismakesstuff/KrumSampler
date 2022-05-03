@@ -35,7 +35,9 @@ juce::ValueTree createValueTree()
     globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::fileBrowserHidden, juce::var(0), nullptr);
     globalSettingsTree.setProperty(TreeIDs::infoPanelToggle, juce::var(1), nullptr);
-
+    globalSettingsTree.setProperty(TreeIDs::editorWidth, juce::var(EditorDimensions::windowW), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::editorHeight, juce::var(EditorDimensions::windowH), nullptr);
+   
     appStateValueTree.addChild(globalSettingsTree, -1, nullptr);
     
     //----------------- Module Settings ---------------------------

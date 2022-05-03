@@ -24,11 +24,12 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     toolTipWindow->setMillisecondsBeforeTipAppears(2000);
 
     addAndMakeVisible(websiteButton);
-    websiteButton.setButtonText(websiteURL.getDomain());
+    websiteButton.setButtonText(madeByString);
+    
     websiteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::transparentBlack);
     websiteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
-    websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::grey.brighter(0.2f));
-    websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::grey.brighter(0.2f));
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, Colors::fontColor.darker(0.1f));
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, Colors::highlightFontColor);
     websiteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     websiteButton.onClick = [this] { websiteURL.launchInDefaultBrowser(); };
 
@@ -37,9 +38,9 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     outputGainSlider.setScrollWheelEnabled(false);
     outputGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     outputGainSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, true, 10, 10);
-    outputGainSlider.setColour(juce::Slider::ColourIds::thumbColourId, outputThumbColor);
-    outputGainSlider.setColour(juce::Slider::ColourIds::trackColourId, outputTrackColor);
-    outputGainSlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, outlineColor);
+    outputGainSlider.setColour(juce::Slider::ColourIds::thumbColourId, Colors::outputThumbColor);
+    outputGainSlider.setColour(juce::Slider::ColourIds::trackColourId, Colors::outputTrackColor);
+    outputGainSlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, Colors::outlineColor);
     
     outputGainSlider.setNumDecimalPlacesToDisplay(2);
     outputGainSlider.setPopupDisplayEnabled(true, false, this);
@@ -51,6 +52,24 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     addAndMakeVisible(keyboard);
     
+    presetsComboBox.setTextWhenNothingSelected("Coming Soon!!");
+    presetsComboBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+    presetsComboBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black);
+    presetsComboBox.setColour(juce::ComboBox::ColourIds::arrowColourId, Colors::fontColor);
+    presetsComboBox.setColour(juce::ComboBox::ColourIds::textColourId, Colors::fontColor);
+    addAndMakeVisible(presetsComboBox);
+
+
+    auto settingsIm = juce::Drawable::createFromImageData(BinaryData::settingsgrey18dp_svg, BinaryData::settingsgrey18dp_svgSize);
+
+    settingsButton.setImages(settingsIm.get());
+    settingsButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+    //settingsButton.setColour(juce::DrawableButton::ColourIds::, juce::Colours::transparentBlack);
+    settingsButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+
+    addAndMakeVisible(settingsButton);
+
+
     addAndMakeVisible(modulesViewport);
     
     modulesViewport.setViewedComponent(&moduleContainer);
@@ -74,18 +93,22 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
     collapseBrowserButton.setClickingTogglesState(true);
     collapseBrowserButton.setToggleState(getSavedFileBrowserHiddenState(), juce::sendNotification);
-    collapseBrowserButton.onClick = [this] { collapseBrowserButton.getToggleState() ? hideFileBrowser() : showFileBrowser(); };
-    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::darkgrey.darker());
-    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::darkgrey);
+    //collapseBrowserButton.onClick = [this] { collapseBrowserButton.getToggleState() ? hideFileBrowser() : showFileBrowser(); };
+    collapseBrowserButton.onClick = [this] { collapseButtonClicked(); };
+    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, Colors::fontColor.darker(0.4f));
+    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, Colors::fontColor.darker(0.4f));
     collapseBrowserButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(collapseBrowserButton);
 
-    auto infoOffIm = juce::Drawable::createFromImageData(BinaryData::info_white_24dp_svg, BinaryData::info_white_24dp_svgSize);
-    auto infoOnIm = juce::Drawable::createFromImageData(BinaryData::info_white_filled_24dp_svg, BinaryData::info_white_filled_24dp_svgSize);
+    auto infoOffIm = juce::Drawable::createFromImageData(BinaryData::info_grey_bigger_24dp_svg, BinaryData::info_grey_bigger_24dp_svgSize);
+    auto infoOnIm = juce::Drawable::createFromImageData(BinaryData::info_grey_filled_bigger_24dp_svg, BinaryData::info_grey_filled_bigger_24dp_svgSize);
     
     infoButton.setImages(infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOffIm.get(), infoOnIm.get());
     infoButton.setClickingTogglesState(true);
     infoButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    //infoButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, Colors::fontColor.withAlpha(0.5f));
+    //infoButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, Colors::highlightFontColor.withAlpha(0.5f));
+    //infoButton.getCurrentImage()->
     infoButton.onClick = [this] { infoButtonClicked();  };
 
     addAndMakeVisible(infoButton);
@@ -108,24 +131,35 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
         infoButtonClicked();
     }
 
-    //Do this! Need to set some maxes and account for browser hidden size
-    //setResizable(true, true);
 
-    if (collapseBrowserButton.getToggleState())
-    {
-        //Browser is Hidden
-        setSize(EditorDimensions::windowWNoBrowser, EditorDimensions::windowH);
-        fileBrowser.setVisible(false);
-        InfoPanel::shared_instance().setVisible(false);
+    //constrainer.setSizeLimits();
+
+    //constrainer.setSizeLimits()
+    setResizable(true, true);
+    setConstrainer(&constrainer);
+    setConstrainerLimits(false);
+    setSize(getSavedEditorWidth(), getSavedEditorHeight());
         
-    }
-    else
-    {
-        //Browser is Visible
-        setSize (EditorDimensions::windowW, EditorDimensions::windowH);
-        fileBrowser.setVisible(true);
-        InfoPanel::shared_instance().setVisible(true);
-    }
+    //setSize(EditorDimensions::windowW, EditorDimensions::windowH);
+    //setWindowSizeAndPosition();
+
+
+
+    //if (isBrowserHidden())
+    //{
+    //    //Browser is Hidden
+    //    setSize(EditorDimensions::windowWNoBrowser, EditorDimensions::windowH);
+    //    fileBrowser.setVisible(false);
+    //    InfoPanel::shared_instance().setVisible(false);
+    //    
+    //}
+    //else
+    //{
+    //    //Browser is Visible
+    //    setSize (EditorDimensions::windowW, EditorDimensions::windowH);
+    //    fileBrowser.setVisible(true);
+    //    InfoPanel::shared_instance().setVisible(true);
+    //}
 }
 
 KrumSamplerAudioProcessorEditor::~KrumSamplerAudioProcessorEditor()
@@ -149,10 +183,11 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillRect(area);
     
     //Title Image
-    auto titleRect = area.withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).withCentre({area.getCentreX(), EditorDimensions::topBar / 2}).toFloat();
-    g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xMid );
+    //auto titleRect = area.withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).withCentre({area.getCentreX(), EditorDimensions::topBar / 2}).toFloat();
+    auto titleRect = area.withTop(EditorDimensions::shrinkage).withLeft(EditorDimensions::extraShrinkage()).withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).toFloat();
+    g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xLeft );
 
-    auto moduleBGGrade = juce::ColourGradient::vertical(modulesBGColor.darker(0.1f), modulesBGColor, modulesBG);
+    auto moduleBGGrade = juce::ColourGradient::vertical(Colors::modulesBGColor.darker(0.1f), Colors::modulesBGColor, modulesBG);
 
 
     //Module Container Outline
@@ -178,9 +213,14 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
         g.drawRoundedRectangle(fileBrowser.getBounds().withY(fileBrowser.getBounds().getY()).withBottom(fileBrowser.getBounds().getBottom()).expanded(EditorDimensions::extraShrinkage(1), EditorDimensions::extraShrinkage(1)).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     }
     
+    //Presets Label
+    g.setColour(Colors::fontColor);
+    g.setFont(16.0f);
+    g.drawFittedText("PRESETS", {presetsComboBox.getX() - 57, presetsComboBox.getY(), presetsComboBox.getWidth() /2, presetsComboBox.getHeight()}, juce::Justification::centredLeft, 1, 1.0f);
+
 
     //Output Label
-    g.setColour(mainFontColor);
+    g.setColour(Colors::fontColor);
     g.setFont(15.0f);
     g.drawFittedText("OUTPUT", area.withTop(modulesBG.getY()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(outputGainSlider.getRight()).withBottom(outputGainSlider.getY()),
                     juce::Justification::centred,1);
@@ -188,50 +228,75 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     //juce::Rectangle<int> linesBounds{ outputGainSlider.getBoundsInParent().withWidth(outputGainSlider.getWidth() - 10).withTrimmedLeft(10).withTrimmedTop(21).withTrimmedBottom(5) };
     
     //made-by text
-    g.setFont(16.0f);
-    g.setColour(juce::Colours::grey.brighter(0.2f));
-    g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY()), juce::Justification::centredRight, 1);
+    //g.setFont(13.0f);
+    //g.setColour(juce::Colours::grey.brighter(0.2f));
+    //g.drawFittedText(madeByString, EditorDimensions::madeByArea.withRight(websiteButton.getX()).withY(area.getY()), juce::Justification::centredRight, 1);
+    //g.drawFittedText(madeByString, EditorDimensions::madeByArea.withX(titleImage.getBounds().getRight() - 100).withY(area.getY()), juce::Justification::centredLeft, 1);
 
     //Version text
-    g.setColour(juce::Colours::red.darker());
+    //g.setColour(juce::Colours::red.darker());
+    if (showWebsite())
+    {
+        g.setColour(Colors::fontColor.darker(0.1f));
+        g.setFont(12.0f);
+        juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
+        int versionW = g.getCurrentFont().getStringWidth(versionString);
+        //g.drawFittedText(versionString, { area.getRight() - 250, websiteButton.getBottom() - 15, versionW + 10, 35 }, juce::Justification::centred, 1);
+        g.drawFittedText(versionString, { titleImage.getBounds().getRight() - 102, websiteButton.getBottom() - 17, versionW + 10, 35 }, juce::Justification::centredLeft, 1);
+    }
     g.setFont(15.0f);
-    juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
-    int versionW = g.getCurrentFont().getStringWidth(versionString);
-    g.drawFittedText(versionString, { area.getRight() - 150, websiteButton.getBottom() - 15, versionW + 10, 35 }, juce::Justification::centred, 1);
 }
 
 void KrumSamplerAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
-    int infoButtonSize = 21;
+    //int infoButtonSize = 21;
     
     //..?
     //using namespace EditorDimensions;
 
-    websiteButton.setBounds(EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 10)).withY(area.getY() + (EditorDimensions::madeByArea.getHeight() / 2) + 5).withHeight(EditorDimensions::madeByArea.getHeight() * 0.75f).withWidth(EditorDimensions::madeByArea.getWidth() + 10));
-    infoButton.setBounds(area.getRight() - (websiteButton.getWidth() + (infoButtonSize * 2)), EditorDimensions::madeByArea.getY() + 20, infoButtonSize, infoButtonSize);
+
+    //websiteButton.setBounds(EditorDimensions::madeByArea.withX(area.getRight() - (EditorDimensions::madeByArea.getWidth() + 5)).withY(area.getY()).reduced(5));// .withHeight(EditorDimensions::madeByArea.getHeight() * 0.75f).withWidth(EditorDimensions::madeByArea.getWidth() + 10));
+    if (showWebsite())
+    {
+        websiteButton.setBounds(EditorDimensions::madeByArea.withX(titleImage.getBounds().getRight() - 125).withY(area.getY() + 7).reduced(12,7));
+    }
+    else
+    {
+        websiteButton.setBounds({});
+    }
+
+    presetsComboBox.setBounds(area.withLeft(area.getRight() - (EditorDimensions::presetsW + EditorDimensions::settingsButtonW + 30)).withTop(area.getY() + 10).withWidth(EditorDimensions::presetsW).withHeight(EditorDimensions::presetsH));
+    settingsButton.setBounds(area.withLeft(presetsComboBox.getRight() + 15).withTop(presetsComboBox.getY() + 2).withWidth(EditorDimensions::settingsButtonW).withHeight(EditorDimensions::settingsButtonH));
+
+    //infoButton.setBounds(area.getRight() - (websiteButton.getWidth() + (infoButtonSize * 2)), EditorDimensions::madeByArea.getY() + 20, infoButtonSize, infoButtonSize);
     
     if (!collapseBrowserButton.getToggleState())
     {
         //File Browser is Visible
-        InfoPanel::shared_instance().setBounds(area.getX() + EditorDimensions::shrinkage, area.getY() + EditorDimensions::shrinkage, EditorDimensions::fileTreeW, EditorDimensions::topBar);
-        modulesBG = area.withTop(EditorDimensions::topBar).withLeft(area.getX()  + EditorDimensions::fileTreeW).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
-        fileBrowser.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).reduced(EditorDimensions::extraShrinkage(3)));
+        //InfoPanel::shared_instance().setBounds(area.getX() + EditorDimensions::shrinkage, area.getY() + EditorDimensions::shrinkage, EditorDimensions::fileBrowserW, EditorDimensions::topBar);
+        modulesBG = area.withTop(EditorDimensions::topBar).withLeft(area.getX()  + EditorDimensions::fileBrowserW).withBottom(getHeight() - EditorDimensions::bottomBarH).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
+        fileBrowser.setBounds(area.withTop(EditorDimensions::topBar).withRight(modulesBG.getX()).withBottom(getHeight() - EditorDimensions::bottomBarH).reduced(EditorDimensions::extraShrinkage(3)));
     }
     else
     {
         //File Browser is Hidden
-        modulesBG = area.withTop(EditorDimensions::topBar).withRight(area.getRight() - EditorDimensions::outputW).reduced(EditorDimensions::extraShrinkage());
+        modulesBG = area.withTop(EditorDimensions::topBar).withRight(area.getRight() - EditorDimensions::outputW).withBottom(getHeight() - EditorDimensions::bottomBarH).reduced(EditorDimensions::extraShrinkage());
     }
 
-    modulesViewport.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
-    moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - EditorDimensions::keyboardH).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
+    modulesViewport.setBounds(modulesBG.withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
+    moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
     moduleContainer.refreshModuleLayout();
+
+    infoButton.setBounds(area.withLeft(EditorDimensions::shrinkage).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage)).withHeight(EditorDimensions::infoButtonSize).withWidth(EditorDimensions::infoButtonSize).reduced(EditorDimensions::shrinkage));
+    InfoPanel::shared_instance().setBounds(area.withX(infoButton.getRight()).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage)).reduced(EditorDimensions::shrinkage));
 
     outputGainSlider.setBounds(area.withTop(EditorDimensions::extraShrinkage(20)).withBottom(modulesBG.getBottom()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(area.getRight() - EditorDimensions::extraShrinkage(2)));
     keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
 
     collapseBrowserButton.setBounds(area.withTop(area.getHeight() / 2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
+
+    saveEditorDimensions();
 
 }
 
@@ -258,27 +323,21 @@ void KrumSamplerAudioProcessorEditor::printModules()
     }
 }
 
+bool KrumSamplerAudioProcessorEditor::isBrowserHidden()
+{
+    return collapseBrowserButton.getToggleState();
+}
+
 void KrumSamplerAudioProcessorEditor::hideFileBrowser()
 {
-    //fileDrop.setVisible(false);
     fileBrowser.setVisible(false);
-    InfoPanel::shared_instance().setVisible(false);
-    
-    setSize(EditorDimensions::windowWNoBrowser, EditorDimensions::windowH);
-
-    saveFileBrowserHiddenState();
-    repaint();
+    //InfoPanel::shared_instance().setVisible(false);
 }
 
 void KrumSamplerAudioProcessorEditor::showFileBrowser()
 {
     fileBrowser.setVisible(true);
-    
-    InfoPanel::shared_instance().setVisible(getSavedInfoButtonState());
-    setSize(EditorDimensions::windowW, EditorDimensions::windowH);
-
-    saveFileBrowserHiddenState();
-    repaint();
+    //InfoPanel::shared_instance().setVisible(getSavedInfoButtonState());
 }
 
 float KrumSamplerAudioProcessorEditor::getOutputGainValue()
@@ -326,6 +385,30 @@ void KrumSamplerAudioProcessorEditor::saveInfoButtonState()
     globalTree.setProperty(TreeIDs::infoPanelToggle, infoButton.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
 }
 
+int KrumSamplerAudioProcessorEditor::getSavedEditorWidth()
+{
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
+    return (int)globalTree.getProperty(TreeIDs::editorWidth);
+}
+
+void KrumSamplerAudioProcessorEditor::saveEditorWidth()
+{
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
+    globalTree.setProperty(TreeIDs::editorWidth, getWidth(), nullptr);
+}
+
+int KrumSamplerAudioProcessorEditor::getSavedEditorHeight()
+{
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
+    return (int)globalTree.getProperty(TreeIDs::editorHeight);
+}
+
+void KrumSamplerAudioProcessorEditor::saveEditorHeight()
+{
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
+    globalTree.setProperty(TreeIDs::editorHeight, getHeight(), nullptr);
+}
+
 void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component* comp)
 {
     auto bubbleComp = static_cast<juce::BubbleComponent*>(comp);
@@ -337,6 +420,78 @@ void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component
         bubbleComp->setPosition(pos, 0);
 
     }
+}
+
+void KrumSamplerAudioProcessorEditor::setConstrainerLimits(bool updateComp)
+{
+
+    if (isBrowserHidden())
+    {
+        constrainer.setSizeLimits(EditorDimensions::minWindowWNoBrowser, EditorDimensions::minWindowH, EditorDimensions::maxWindowWNoBrowser, EditorDimensions::maxWindowH);
+    }
+    else
+    {
+        constrainer.setSizeLimits(EditorDimensions::minWindowW, EditorDimensions::minWindowH, EditorDimensions::maxWindowW, EditorDimensions::maxWindowH);
+    }
+        
+    if (updateComp)
+    {
+        constrainer.checkComponentBounds(this);
+    }
+}
+
+void KrumSamplerAudioProcessorEditor::setWindowSizeAndPosition()
+{
+    auto pos = getScreenBounds();
+
+    if (isBrowserHidden())
+    {
+        setResizeLimits(EditorDimensions::minWindowW, EditorDimensions::minWindowH, EditorDimensions::maxWindowW, EditorDimensions::maxWindowH);
+        setBounds(pos.getX() - EditorDimensions::fileBrowserW, pos.getY(), pos.getWidth(), pos.getHeight());
+        InfoPanel::shared_instance().setVisible(getSavedInfoButtonState());
+        fileBrowser.setVisible(true);
+    }
+    else
+    {
+        setResizeLimits(EditorDimensions::minWindowWNoBrowser, EditorDimensions::minWindowH, EditorDimensions::maxWindowWNoBrowser, EditorDimensions::maxWindowH);
+        setBounds(pos.getX() + EditorDimensions::fileBrowserW, pos.getY(), pos.getWidth(), pos.getHeight());
+        InfoPanel::shared_instance().setVisible(false);
+        fileBrowser.setVisible(false);
+    }
+
+}
+
+void KrumSamplerAudioProcessorEditor::collapseButtonClicked()
+{
+    //setWindowSizeAndPosition();
+    setConstrainerLimits(true);
+    
+    if (isBrowserHidden())
+    {
+        hideFileBrowser();
+    }
+    else
+    {
+        showFileBrowser();
+    }
+
+    saveFileBrowserHiddenState();
+    resized();
+    repaint();
+    saveEditorDimensions();
+
+}
+
+void KrumSamplerAudioProcessorEditor::saveEditorDimensions()
+{
+    saveEditorHeight();
+    saveEditorWidth();
+
+}
+
+bool KrumSamplerAudioProcessorEditor::showWebsite()
+{
+    return getLocalBounds().getWidth() > 640;
 }
 
 void KrumSamplerAudioProcessorEditor::addKeyboardListener(juce::MidiKeyboardStateListener* listener)
@@ -389,6 +544,25 @@ juce::Viewport* KrumSamplerAudioProcessorEditor::getModuleViewport()
     return &modulesViewport; 
 }
 
+KrumSamplerAudioProcessorEditor::Positioner::Positioner(KrumSamplerAudioProcessorEditor& comp)
+    : juce::Component::Positioner(comp), editor(comp)
+{}
+
+KrumSamplerAudioProcessorEditor::Positioner::~Positioner() {}
+
+void KrumSamplerAudioProcessorEditor::Positioner::applyNewBounds(const juce::Rectangle<int>& bounds) 
+{
+    /*if (editor.isBrowserHidden())
+    {
+      
+    }*/
+}
+
+
+
 //=========================================================================================
 
-
+//void KrumSamplerAudioProcessorEditor::Constrainer::applyBoundsToComponent(juce::Component& comp, juce::Rectangle<int> bounds)
+//{
+//
+//}

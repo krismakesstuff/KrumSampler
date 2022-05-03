@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "InfoPanel.h"
+#include "KrumLookAndFeel.h"
 
 //==============================================================================
 InfoPanel::InfoPanel()
@@ -38,20 +39,26 @@ void InfoPanel::paint (juce::Graphics& g)
         float titleTextH = panelBG.getHeight() / 3.7;
         int numLines = panelBG.getHeight() / 4;
         juce::Path titleBG;
-        titleBG.addRoundedRectangle(panelBG.getX() + 5, panelBG.getY(), panelBG.getWidth(), titleTextH, cornerSize, cornerSize, true, true, false, false);
-
+        //titleBG.addRoundedRectangle(panelBG.getX() + 5, panelBG.getY(), panelBG.getWidth(), titleTextH, cornerSize, cornerSize, true, true, false, false);
+        //g.drawFittedText(title, titleBG.getBounds().toNearestInt(), juce::Justification::centredLeft, 1);
+        auto klaf = static_cast<KrumLookAndFeel*>(&getLookAndFeel());
+        auto t = title.toUpperCase() + ": ";
+        g.setFont(klaf->getMontBoldTypeface());
+        int titleWidth = g.getCurrentFont().getStringWidth(t);
+        //g.setFont(fontSize * 1.15f);
         g.setColour(fontColor);
-        g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::bold).withHeight(titleTextH));
-        g.drawFittedText(title, titleBG.getBounds().toNearestInt(), juce::Justification::centredLeft, 1);
+        g.drawFittedText(t, area.withRight(titleWidth + 5), juce::Justification::centred, 1, 1.0f);
         
         //message
-        juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight() + 2).withTrimmedLeft(5).withTrimmedRight(12).toNearestInt();
-        g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::plain).withHeight(17.0f)); 
-        g.drawFittedText(message, messageArea, juce::Justification::topLeft, numLines);
+        //juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight() + 2).withTrimmedLeft(5).withTrimmedRight(12).toNearestInt();
+        //g.drawFittedText(message, messageArea, juce::Justification::topLeft, numLines);
+        g.setFont(messageFont.withHeight(fontSize)); 
+        g.setColour(fontColor.darker(0.2f));
+        g.drawText(message, area.withLeft(titleWidth + 5).withRight(getRight() - 10), juce::Justification::centredLeft, true);
         
         //keycommand
-        g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::italic).withHeight(numLines * 0.85f));
-        g.drawFittedText(keycommand, panelBG.withTrimmedTop(messageArea.getBottom()).toNearestInt(), juce::Justification::centredLeft, 1);
+        //g.setFont(messageFont.withStyle(juce::Font::FontStyleFlags::italic).withHeight(numLines * 0.85f));
+        //g.drawFittedText(keycommand, panelBG.withTrimmedTop(messageArea.getBottom()).toNearestInt(), juce::Justification::centredLeft, 1);
     }
     
 }

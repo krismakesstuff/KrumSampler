@@ -10,6 +10,20 @@
               pluginManufacturerCode="Kris" pluginCode="Krum">
   <MAINGROUP id="NTQyMJ" name="KrumSampler">
     <GROUP id="{EB4A4C0D-C950-9DF2-E178-9C3B37C020B8}" name="Resources">
+      <FILE id="MA8PRH" name="settings-grey-18dp.svg" compile="0" resource="1"
+            file="Resources/settings-grey-18dp.svg"/>
+      <FILE id="BbPjPx" name="settings-black-18dp.svg" compile="0" resource="1"
+            file="Resources/settings-black-18dp.svg"/>
+      <FILE id="aKXS1I" name="arrow_upward_grey_24dp.svg" compile="0" resource="1"
+            file="Resources/arrow_upward_grey_24dp.svg"/>
+      <FILE id="v0HenX" name="info_grey_bigger_24dp.svg" compile="0" resource="1"
+            file="Resources/info_grey_bigger_24dp.svg"/>
+      <FILE id="THi0m2" name="info_grey_filled_bigger_24dp.svg" compile="0"
+            resource="1" file="Resources/info_grey_filled_bigger_24dp.svg"/>
+      <FILE id="Ekpmqa" name="info_grey_24dp.svg" compile="0" resource="1"
+            file="Resources/info_grey_24dp.svg"/>
+      <FILE id="cxjTCH" name="info_grey_filled_24dp.svg" compile="0" resource="1"
+            file="Resources/info_grey_filled_24dp.svg"/>
       <GROUP id="{743F7E78-4475-25FE-A20F-6371AAABE9A3}" name="DemoKit">
         <FILE id="vrWR9M" name="&#61473;&#61473;&#61473;WANNA KIK __ 48K.wav"
               compile="0" resource="1" file="Resources/DemoKit/&#61473;&#61473;&#61473;WANNA KIK __ 48K.wav"/>
@@ -61,6 +75,8 @@
             file="Resources/drag_handle-black-18dp.svg"/>
       <FILE id="Tytx1A" name="folder_open_white_24dp.svg" compile="0" resource="1"
             file="Resources/folder_open_white_24dp.svg"/>
+      <FILE id="goAbSZ" name="file_white_24dp.svg" compile="0" resource="1"
+            file="Resources/file_white_24dp.svg"/>
       <FILE id="m1Ywg5" name="folder_white_24dp.svg" compile="0" resource="1"
             file="Resources/folder_white_24dp.svg"/>
       <FILE id="EZQWYm" name="info_white_24dp.svg" compile="0" resource="1"

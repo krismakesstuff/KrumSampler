@@ -34,7 +34,7 @@
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 7
 #define NUM_AUX_OUTS 20                     //mono channels
-#define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
+#define SAVE_RELOAD_STATE 1                //quick way to enable and disable getStateInfo() and setStateInfo()
 #define KRUM_BUILD_VERSION "1.5.0-Beta"     //File Browser Update
 
 
@@ -50,6 +50,8 @@ namespace TreeIDs
             DECLARE_ID(previewerAutoPlay)
             DECLARE_ID(fileBrowserHidden)
             DECLARE_ID(infoPanelToggle)
+            DECLARE_ID(editorWidth)
+            DECLARE_ID(editorHeight)
 
         DECLARE_ID(KRUMMODULES) //Module Tree
 

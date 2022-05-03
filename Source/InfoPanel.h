@@ -47,6 +47,8 @@ private:
     juce::String title;
     juce::String keycommand;
     
+    float fontSize = 17.0f;
+
     juce::Colour fontColor {juce::Colours::grey.brighter(0.4f)};
     //juce::Colour bgColor {juce::Colours::darkgrey.darker(0.99f)};
     juce::Colour bgColor {juce::Colours::black.withAlpha(0.2f)};
