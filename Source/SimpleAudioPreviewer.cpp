@@ -54,14 +54,14 @@ SimpleAudioPreviewer::~SimpleAudioPreviewer()
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)
 {
-    g.setColour(Colors::modulesBGColor.withAlpha(0.2f));
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), 1.0f);
+    g.setColour(Colors::bgColor.darker(0.1f));
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), 5.0f);
     //g.drawRect(getLocalBounds());
 }
 
 void SimpleAudioPreviewer::resized()
 {
-    auto area = getLocalBounds();
+    auto area = getLocalBounds().reduced(2);
 
     autoPlayToggle.setBounds(area.withRight(area.getWidth() / 3));
     volumeSlider.setBounds(area.withLeft(area.getWidth() * 0.30f).withY(area.getHeight()/3).withHeight(area.getHeight()/2));

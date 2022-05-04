@@ -26,16 +26,15 @@ namespace Colors
     const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
     const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
     const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };
-    const juce::Colour addAnimationColor{ juce::Colour::fromRGB(144, 190, 109) };
-    const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) };
-
+    //from ColorPalette.h
+    const juce::Colour addAnimationColor{ juce::Colour::fromRGB(67, 170, 139) }; //zomp
+    const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) }; //redSalsa
 
     const juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.5f) };
     const juce::Colour outlineColor{ juce::Colours::white };
     const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
-    //juce::Colour bgColor{juce::Colours::darkgrey.darker(0.999999f)};
-    const juce::Colour bgColor{ juce::Colours::black.withBrightness(0.09f) };
+    const juce::Colour bgColor{ juce::Colours::black.brighter(0.12f) };
     const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
     const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
     const juce::Colour mainFontColor{ juce::Colours::white };
@@ -271,19 +270,19 @@ public:
             g.setFont(textHeight);
 
             auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
-            g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() + 6).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() + 4).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto zeroDbPos = getSliderDecibelPosition(slider, 0.0f); //+ thumbOffset;
-            g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() + 8).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() + 4).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n5DbPos = getSliderDecibelPosition(slider, -5.0f); //+thumbOffset;
-            g.drawFittedText("-5", dbLineRect.withY(n5DbPos - textHeight / 2).withX(dbLineRect.getX() + 6).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-5", dbLineRect.withY(n5DbPos - textHeight / 2).withX(dbLineRect.getX() + 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n10DbPos = getSliderDecibelPosition(slider, -10.0f);// +thumbOffset;
-            g.drawFittedText("-10", dbLineRect.withY(n10DbPos - textHeight / 2).withX(dbLineRect.getX() + 5).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-10", dbLineRect.withY(n10DbPos - textHeight / 2).withX(dbLineRect.getX() + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n20DbPos = getSliderDecibelPosition(slider, -20.0f);// +thumbOffset;
-            g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() + 5).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             g.setColour(thumbColor);
             g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
@@ -309,19 +308,19 @@ public:
             g.setFont(textHeight);
 
             auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
-            g.drawFittedText("+2", dbLineRect.withX(twoDbPos - 4).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("+2", dbLineRect.withX(twoDbPos - 5).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto zeroDbPos = getSliderDecibelPosition(slider, 0.0f); //+ thumbOffset;
             g.drawFittedText("0", dbLineRect.withX(zeroDbPos).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n5DbPos = getSliderDecibelPosition(slider, -5.0f); //+thumbOffset;
-            g.drawFittedText("-5", dbLineRect.withX(n5DbPos - 2).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-5", dbLineRect.withX(n5DbPos - 3).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n10DbPos = getSliderDecibelPosition(slider, -10.0f);// +thumbOffset;
-            g.drawFittedText("-10", dbLineRect.withX(n10DbPos - 3).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-10", dbLineRect.withX(n10DbPos - 6).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n20DbPos = getSliderDecibelPosition(slider, -20.0f);// +thumbOffset;
-            g.drawFittedText("-20", dbLineRect.withX(n20DbPos - 3).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-20", dbLineRect.withX(n20DbPos - 6).withY(height + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
 
             g.setColour(thumbColor);

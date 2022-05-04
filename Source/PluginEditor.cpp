@@ -179,7 +179,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     bgGrade.addColour(juce::jlimit<double>(0.00001, 0.9999, outputGainProp), bgColor.brighter(0.037f));
 
     g.setGradientFill(bgGrade);*/
-    g.setColour(juce::Colours::black.brighter(0.12f));
+    g.setColour(Colors::bgColor);
     g.fillRect(area);
     
     //Title Image
@@ -269,8 +269,6 @@ void KrumSamplerAudioProcessorEditor::resized()
     presetsComboBox.setBounds(area.withLeft(area.getRight() - (EditorDimensions::presetsW + EditorDimensions::settingsButtonW + 30)).withTop(area.getY() + 10).withWidth(EditorDimensions::presetsW).withHeight(EditorDimensions::presetsH));
     settingsButton.setBounds(area.withLeft(presetsComboBox.getRight() + 15).withTop(presetsComboBox.getY() + 2).withWidth(EditorDimensions::settingsButtonW).withHeight(EditorDimensions::settingsButtonH));
 
-    //infoButton.setBounds(area.getRight() - (websiteButton.getWidth() + (infoButtonSize * 2)), EditorDimensions::madeByArea.getY() + 20, infoButtonSize, infoButtonSize);
-    
     if (!collapseBrowserButton.getToggleState())
     {
         //File Browser is Visible
@@ -288,8 +286,8 @@ void KrumSamplerAudioProcessorEditor::resized()
     moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage()).reduced(EditorDimensions::extraShrinkage()));
     moduleContainer.refreshModuleLayout();
 
-    infoButton.setBounds(area.withLeft(EditorDimensions::shrinkage).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage)).withHeight(EditorDimensions::infoButtonSize).withWidth(EditorDimensions::infoButtonSize).reduced(EditorDimensions::shrinkage));
-    InfoPanel::shared_instance().setBounds(area.withX(infoButton.getRight()).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage)).reduced(EditorDimensions::shrinkage));
+    infoButton.setBounds(area.withLeft(EditorDimensions::shrinkage).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage + 2)).withHeight(EditorDimensions::infoButtonSize).withWidth(EditorDimensions::infoButtonSize).reduced(EditorDimensions::shrinkage));
+    InfoPanel::shared_instance().setBounds(area.withX(infoButton.getRight()).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage)));
 
     outputGainSlider.setBounds(area.withTop(EditorDimensions::extraShrinkage(20)).withBottom(modulesBG.getBottom()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(area.getRight() - EditorDimensions::extraShrinkage(2)));
     keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));

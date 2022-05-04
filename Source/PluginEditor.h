@@ -47,7 +47,7 @@ namespace EditorDimensions
     const static int  topBar = 40;
     const static int shrinkage = 5;
     const juce::Rectangle<int> madeByArea{ 0, 0, 150, 35 };
-    const static int bottomBarH = 20;
+    const static int bottomBarH = 18;
 
     const static int moduleH = windowH * 0.68f;
     const static int moduleW = 120;

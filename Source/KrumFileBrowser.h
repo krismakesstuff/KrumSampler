@@ -64,7 +64,7 @@ namespace Dimensions
     const int fileIconSize = 19;
     const float fileIconAlpha = 0.5f;
     const int locationTabDepth = 22;
-    const int currentPathHeight = 18;
+    const int currentPathHeight = 20;
 }
 
 //namespace Colors
