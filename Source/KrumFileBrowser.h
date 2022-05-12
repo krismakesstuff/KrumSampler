@@ -37,24 +37,11 @@ class KrumTreeItem;
 class KrumTreeHeaderItem;
 class KrumTreeView;
 class FavoritesTreeView;
-//class SimpleAudioPreviewer;
 class KrumModuleContainer;
 class FileChooser;
 class KrumFileBrowser;
 class KrumSampler;
-//class juce::FileTreeComponent::FileListTreeItem;
 
-
-// 
-//strings to access different parts of the saved ValueTree, for saving and loading TreeView(s)
-//namespace FileBrowserValueTreeIds
-//{
-//    //Probably should move these into the DECLARE_IDs section in Plugin processor.
-//    //static const juce::String itemNameId{ "name" };
-//    //static const juce::String pathId{ "path" };
-//    //static const juce::String hiddenFilesId{ "hiddenFiles" };
-//
-//}
 
 namespace Dimensions
 {
@@ -65,15 +52,8 @@ namespace Dimensions
     const float fileIconAlpha = 0.5f;
     const int locationTabDepth = 22;
     const int currentPathHeight = 20;
+    const int previewerH = 45;
 }
-
-//namespace Colors
-//{
-//    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.2f).withAlpha(0.8f) };
-//    const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
-//    const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
-//    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };
-//}
 
 namespace FileBrowserInfoStrings
 {
@@ -173,7 +153,6 @@ private:
     class EditableComp : public juce::Label
     {
     public:
-        //EditableComp(KrumTreeItem& o, juce::String itemName, juce::Colour backColor = juce::Colour{});
         EditableComp(KrumTreeItem& o, juce::Colour backColor = juce::Colour{});
 
         void paint(juce::Graphics& g) override;
@@ -190,8 +169,6 @@ private:
         void mouseDrag(const juce::MouseEvent& e) override;
 
         static void handleResult(int result, EditableComp* comp);
-
-        //void setSelectedWithMods(const juce::MouseEvent& e, bool selected);
 
     private:
 
@@ -312,7 +289,6 @@ class RootHeaderItem :  public juce::TreeViewItem,
 {
 public:
     RootHeaderItem(juce::ValueTree& sectionValueTree, FavoritesTreeView* rootItem);
-    //SectionHeader();
     ~RootHeaderItem() override;
 
     void paintOpenCloseButton(juce::Graphics& g, const juce::Rectangle<float>& area, juce::Colour bgColor, bool isMouseOver) override;
@@ -396,8 +372,6 @@ public:
 
     void valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval) override;
 
-
-    //void paint(juce::Graphics& g) override;
     void resized() override;
     int getNumRows() override;
     
@@ -443,12 +417,9 @@ class FavoritesTreeView :   public juce::TreeView,
 {
 public:
 
-    //FavoritesTreeView(FileChooser* fc, SimpleAudioPreviewer* prev);
     FavoritesTreeView(KrumFileBrowser& fb);
     ~FavoritesTreeView();
 
-    /*void valueTreePropertyChanged(juce::ValueTree& treeChanged, const juce::Identifier& property) override;
-    */
     void valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval) override;
 
     void paint(juce::Graphics& g) override;
@@ -479,7 +450,6 @@ public:
     void addDummyChild(juce::TreeViewItem* nodeToAddTo = nullptr);
     bool hasAudioFormat(juce::String fileExtension);
 
-    //void updateValueTree(juce::String idString);
     void removeValueTreeItem(juce::String fullPathName, FileBrowserSectionIds browserSection);
     juce::ValueTree findTreeItem(juce::ValueTree parentTree, juce::String fullPathName);
     void updateOpenness();
@@ -559,8 +529,6 @@ public:
 
     void paint(juce::Graphics& g) override;
     void resized() override;
-    
-    //void addLocationTabsFromTree(juce::ValueTree& locationsTree);
 
     void setDirectory(juce::File newDirectory);
     void goUp();
@@ -577,7 +545,6 @@ public:
 
     void updatePathBoxDropDown();
     void addPaths();
-    //void addLocationPaths();
     void handleChosenPath();
 
     void animateAddPlace();
@@ -590,9 +557,7 @@ private:
     juce::String findPathFromName(juce::String itemName);
     juce::File getFileFromChosenPath();
 
-    //void getDefaultRoots(juce::StringArray& rootNames, juce::StringArray& rootPaths);
     void getPaths();
-    //void getLocations(juce::StringArray& locationNames, juce::StringArray& locationPaths);
     
     juce::File defaultLocation{ juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDesktopDirectory) };
     
@@ -616,8 +581,6 @@ private:
         void paint(juce::Graphics& g) override;
         void getIdealSize(int& idealWidth, int& idealHeight) override;
 
-        //void mouseEnter(const juce::MouseEvent& e) override;
-        //void mouseExit(const juce::MouseEvent& e) override;
         void mouseDown(const juce::MouseEvent& e) override;
 
         bool isSectionHeading = false;
@@ -625,9 +588,6 @@ private:
 
         juce::File getFile() { return juce::File(path); }
         juce::String path;
-
-
-        //void paint(juce::Graphics& g) override;
     private:
 
 
@@ -722,13 +682,8 @@ private:
     bool showCanDropFile = false;
     PanelCompId panelCompId;
 
-    //juce::TextButton expandButton;
-
-    //juce::ShapeButton arrowButton{ "arrowButton", juce::Colours::lightgrey, juce::Colours::lightgrey.darker(), juce::Colours::lightgrey.withAlpha(0.2f) };
-
     juce::ConcertinaPanel& panel;
     juce::String title;
-    //bool closed = false;
 
     void timerCallback() override;
 
@@ -779,7 +734,6 @@ public:
     bool doesPreviewerSupport(juce::String fileExtension);
     SimpleAudioPreviewer* getAudioPreviewer();
 
-    //void assignAudioPreviewer(SimpleAudioPreviewer* previewer);
     void assignModuleContainer(KrumModuleContainer* container);
 
     void rebuildBrowser(juce::ValueTree& newTree);
@@ -810,17 +764,9 @@ private:
 
     InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
     
-    juce::Colour fontColor{ juce::Colours::lightgrey };
-    
-    int titleH = 20;
-    int previewerH = 45;
-
     bool init = true;
 
     juce::File demoKit;
-
-    
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumFileBrowser)
 };

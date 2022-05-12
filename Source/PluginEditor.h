@@ -143,17 +143,11 @@ public:
 private:
 
     void updateOutputGainBubbleComp(juce::Component*);
-
     void setConstrainerLimits(bool checkBounds);
-
-    void setWindowSizeAndPosition();
     void collapseButtonClicked();
-
     void saveEditorDimensions();
-
     bool showWebsite();
 
-    bool needsToUpdateThumbs = false;
 
     friend class KrumModuleContainer;
     friend class KrumModuleEditor;
@@ -161,7 +155,6 @@ private:
 
     KrumLookAndFeel kLaf{};
 
-    //These should be one class called ModuleLookAndFeel?
     VolumeLookAndFeel vLaf{};
     PanLookAndFeel pLaf{};
     FileBrowserLookAndFeel fbLaf{};
@@ -193,53 +186,14 @@ private:
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
     InfoPanelTextButton websiteButton{"Website", "Clicking this will open my website. Go check it out yo!"};
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
-    
-
     InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore","", juce::DrawableButton::ButtonStyle::ImageStretched};
     
 
     InfoPanelComboBox presetsComboBox{"Presets", "COMING SOON!!"};
     InfoPanelDrawableButton settingsButton{ "Global Settings", "COMING SOON!!" };
-    
-    //class Constrainer : public juce::ComponentBoundsConstrainer
-    //{
-    //public:
-    //    Constrainer();
-    //    ~Constrainer() override;
-
-    //    void applyBoundsToComponent(juce::Component& comp, juce::Rectangle<int> bounds) override;
-
-    //    //void checkBounds(Rectangle< int >& bounds, const Rectangle< int >& previousBounds, const Rectangle< int >& limits, bool isStretchingTop, bool isStretchingLeft, bool isStretchingBottom, bool isStretchingRight)
-
-    //};
 
 
     juce::ComponentBoundsConstrainer constrainer;
-    class Positioner : public juce::Component::Positioner
-    {
-    public:
-        Positioner(KrumSamplerAudioProcessorEditor& comp);
-        ~Positioner() override;
-
-        void applyNewBounds(const juce::Rectangle<int>& bounds) override;
-    private:
-        KrumSamplerAudioProcessorEditor& editor;
-    };
-     
-    Positioner positioner{ *this };
-
-    class GlobalOutputSlider : public InfoPanelDrawableButton
-    {
-    public:
-
-
-        juce::Label label{ "Output" };
-
-    //private:
-    };
-    
-    //juce::DrawableButton collapseBrowserButton{ "Hide Broswer", juce::DrawableButton::ButtonStyle::ImageStretched};
-   
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessorEditor)
 };
