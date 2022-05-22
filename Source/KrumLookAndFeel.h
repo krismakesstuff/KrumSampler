@@ -406,7 +406,7 @@ public:
     }
 
     void drawComboBox(juce::Graphics& g, int width, int height, bool,
-        int, int, int, int, juce::ComboBox& box)
+        int, int, int, int, juce::ComboBox& box) override
     {
         auto cornerSize = box.findParentComponentOfClass<juce::ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
         juce::Rectangle<int> boxBounds(0, 0, width, height);
@@ -441,7 +441,7 @@ public:
         }
     }
 
-    void positionComboBoxText(juce::ComboBox& box, juce::Label& label)
+    void positionComboBoxText(juce::ComboBox& box, juce::Label& label) override
     {
         label.setJustificationType(juce::Justification::centredLeft);
         label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
@@ -827,7 +827,7 @@ public:
         //float thumbOffset = thumbH / 2;
         float thumbOffset = 0;//getSliderThumbRadius(slider) / 2;
         int textHeight = 12;
-        g.setFont({ (float)textHeight });
+        g.setFont( (float)textHeight );
         
         auto twoDbPos = getSliderDecibelPosition(slider, 2.0f) + thumbOffset;
         g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
@@ -928,7 +928,7 @@ public:
 
         if (slider.isHorizontal()) //module pan
         {
-            auto iy = height * 0.25f;
+            //auto iy = height * 0.25f;
             //juce::Rectangle<float> trackRect((float)x, iy, (float)width, height * 0.50f);
             juce::Rectangle<float> trackRect = bounds.toFloat();
 
@@ -944,7 +944,7 @@ public:
                      
             g.drawLine(zeroLine.toFloat(), 0.5f);
             
-            g.setFont({ 12.0f });
+            g.setFont( 12.0f );
             g.drawFittedText("L", trackRect.withX(cornerSize).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
             g.drawFittedText("R", trackRect.withX(trackRect.getRight() - (cornerSize * 3)).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
         }
@@ -952,7 +952,7 @@ public:
         {
             float trackWidth = width;// * 0.35f;
             //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
-            float ix = bounds.getCentreX() - (trackWidth / 2);
+            //float ix = bounds.getCentreX() - (trackWidth / 2);
             juce::Rectangle<float> trackRect(x - 2, (float)y - 5, trackWidth + 4, (float)height + 5);
 
             /*juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
@@ -1033,7 +1033,7 @@ class FileBrowserLookAndFeel : public KrumLookAndFeel
 public:
 
     void drawComboBox(juce::Graphics& g, int width, int height, bool,
-        int, int, int, int, juce::ComboBox& box)
+        int, int, int, int, juce::ComboBox& box) override
     {
         auto cornerSize = box.findParentComponentOfClass<juce::ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
         juce::Rectangle<int> boxBounds(0, 0, width, height);
@@ -1073,7 +1073,7 @@ public:
         return 5;
     }
 
-    void positionComboBoxText(juce::ComboBox& box, juce::Label& label)
+    void positionComboBoxText(juce::ComboBox& box, juce::Label& label) override
     {
         label.setJustificationType(juce::Justification::centred);
         label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 5);
@@ -1272,7 +1272,7 @@ public:
     }
 
     void drawTreeviewPlusMinusBox(juce::Graphics& g, const juce::Rectangle<float>& bounds,
-        juce::Colour backgroundColour, bool isOpen, bool isMouseOver)
+        juce::Colour backgroundColour, bool isOpen, bool isMouseOver) override
     {
 
     /*    Path p;

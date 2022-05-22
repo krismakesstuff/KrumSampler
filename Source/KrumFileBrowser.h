@@ -467,7 +467,7 @@ public:
 
     juce::Array<juce::ValueTree> getSelectedValueTrees();
 
-    juce::ValueTree& getFileBrowserValueTree();
+    //juce::ValueTree& getFileBrowserValueTree();
     RootHeaderItem* getRootNode();
 
     KrumTreeHeaderItem* findSectionHeaderParent(juce::TreeViewItem* item, juce::String& sectionName);
@@ -660,8 +660,8 @@ public:
 
     void mouseDown(const juce::MouseEvent& e) override;
 
-    bool isInterestedInFileDrag(const juce::StringArray& files);
-    void filesDropped(const juce::StringArray& files, int x, int y);
+    bool isInterestedInFileDrag(const juce::StringArray& files) override;
+    void filesDropped(const juce::StringArray& files, int x, int y) override;
 
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& details) override;
@@ -739,11 +739,13 @@ public:
     void rebuildBrowser(juce::ValueTree& newTree);
     void buildDemoKit();
 
-    juce::ValueTree& getFileBrowserValueTree();
+    juce::ValueTree getFileBrowserValueTree();
     juce::ValueTree& getStateValueTree();
     juce::AudioFormatManager& getFormatManager();
     PanelHeader* getPanelHeader(BrowserSections section);
 
+    void addFileBrowserTreeListener(juce::ValueTree::Listener* listener);
+    
 private:
 
     juce::ValueTree& fileBrowserValueTree;

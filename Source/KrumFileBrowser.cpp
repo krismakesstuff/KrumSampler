@@ -1535,10 +1535,12 @@ juce::Array<juce::ValueTree> FavoritesTreeView::getSelectedValueTrees()
     return selectedTrees;
 }
 
-juce::ValueTree& FavoritesTreeView::getFileBrowserValueTree()
-{
-    return favoritesValueTree.getParent();
-}
+//juce::ValueTree FavoritesTreeView::getFileBrowserValueTree()
+//{
+//
+//    //auto v = ;
+//    return favoritesValueTree.getParent();
+//}
 
 RootHeaderItem* FavoritesTreeView::getRootNode()
 {
@@ -1774,7 +1776,8 @@ void FileChooser::CurrentPathBox::addPathBoxItem(int itemId, std::unique_ptr<Pat
 {
     auto menu = getRootMenu();
     pathBoxItem->setName(title);
-    menu->addCustomItem(itemId, std::move(pathBoxItem), nullptr, title);
+    //menu->addCustomItem(itemId, std::move(pathBoxItem), nullptr, title);
+    menu->addCustomItem(itemId, std::move(pathBoxItem));
 }
 
 bool FileChooser::CurrentPathBox::isUserPlace(PathBoxItem* itemToTest)
@@ -1827,8 +1830,8 @@ void FileChooser::PathBoxItem::mouseDown(const juce::MouseEvent& e)
         {
             juce::PopupMenu menu;
             juce::PopupMenu::Options options;
-
-            options.withMousePosition();
+            options.withTargetComponent(this);
+            //options.withMousePosition();
             menu.addItem(1, "Remove Place");
 
 
@@ -1897,7 +1900,7 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     goUpButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
 
     fileTree.addListener(this);
-    fileBrowser.getFileBrowserValueTree().addListener(this);
+    fileBrowser.addFileBrowserTreeListener(this);
 }
 
 FileChooser::~FileChooser()
@@ -1955,7 +1958,9 @@ void FileChooser::fileClicked(const juce::File& file, const juce::MouseEvent& e)
         menu.addItem(RightClickMenuIds::revealInOS, "Reveal");
 
         //setCurrentTabIndex(tabIndex, false);
-        menu.showMenuAsync(menuOptions.withMousePosition(), juce::ModalCallbackFunction::create(handleRightClick, this));
+        menuOptions.withTargetComponent(this);
+        //with mouse Position??
+        menu.showMenuAsync(menuOptions, juce::ModalCallbackFunction::create(handleRightClick, this));
     }
     if (!file.isDirectory() && previewer.isAutoPlayActive() && fileBrowser.doesPreviewerSupport(file.getFileExtension()))
     {
@@ -2237,8 +2242,8 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
     {
         DBG("add to favorites");
 
-        auto& fbTree = fileChooser->fileBrowser.getFileBrowserValueTree();
-        auto favTree = fbTree.getChildWithName(TreeIDs::FAVORITES);
+        //auto& fbTree = fileChooser->fileBrowser.getFileBrowserValueTree();
+        //auto favTree = fbTree.getChildWithName(TreeIDs::FAVORITES);
 
         auto numFiles = fileChooser->fileTree.getNumSelectedFiles();
         auto& fileTree = fileChooser->fileTree;
@@ -2261,8 +2266,8 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
             selectedFile = selectedFile.getParentDirectory();
         }
 
-        auto& fbTree = fileChooser->fileBrowser.getFileBrowserValueTree();
-        auto& placesValueTree = fbTree.getChildWithName(TreeIDs::PLACES);
+        const auto fbTree = fileChooser->fileBrowser.getFileBrowserValueTree();
+        auto placesValueTree = fbTree.getChildWithName(TreeIDs::PLACES);
 
         //we make sure a Place doesn't already exist
         for (int i = 0; i < placesValueTree.getNumChildren(); ++i)
@@ -2324,9 +2329,12 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
     concertinaPanel.setCustomPanelHeader(&favoritesTreeView, &favoritesHeader, false);
     concertinaPanel.addPanel((int)BrowserSections::fileChooser, &fileChooser, false);
     concertinaPanel.setCustomPanelHeader(&fileChooser, &filechooserHeader, false);
-
-    recentFilesList.updateFileListFromTree(fbValueTree.getChildWithName(TreeIDs::RECENT));
-    favoritesTreeView.updateFavoritesFromTree(fbValueTree.getChildWithName(TreeIDs::FAVORITES));
+    
+    
+    auto recTree = fbValueTree.getChildWithName(TreeIDs::RECENT);
+    recentFilesList.updateFileListFromTree(recTree);
+    auto favTree =fbValueTree.getChildWithName(TreeIDs::FAVORITES);
+    favoritesTreeView.updateFavoritesFromTree(favTree);
 
     addAndMakeVisible(audioPreviewer);
     audioPreviewer.assignSampler(&s);
@@ -2540,7 +2548,7 @@ void KrumFileBrowser::buildDemoKit()
     
 }
 
-juce::ValueTree& KrumFileBrowser::getFileBrowserValueTree()
+juce::ValueTree KrumFileBrowser::getFileBrowserValueTree()
 {
     return fileBrowserValueTree;
 }
@@ -2553,6 +2561,11 @@ juce::ValueTree& KrumFileBrowser::getStateValueTree()
 juce::AudioFormatManager& KrumFileBrowser::getFormatManager()
 {
     return formatManager;
+}
+
+void KrumFileBrowser::addFileBrowserTreeListener(juce::ValueTree::Listener* listener)
+{
+    fileBrowserValueTree.addListener(listener);
 }
 
 //================================================================================================
@@ -2714,8 +2727,8 @@ void PanelHeader::mouseDown(const juce::MouseEvent& e)
     {
         juce::PopupMenu menu;
         juce::PopupMenu::Options options;
-        options.withMousePosition();
-
+        //options.withMousePosition();
+        options.withTargetComponent(this);
         menu.addItem(1, "Clear");
 
         DBG("Clear: " + juce::String(panelCompId));

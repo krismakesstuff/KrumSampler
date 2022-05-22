@@ -126,8 +126,10 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     setResizable(true, true);
     setConstrainer(&constrainer);
     setConstrainerLimits(false);
-    setSize(getSavedEditorWidth(), getSavedEditorHeight());
+    
+    //setSize(getSavedEditorWidth(), getSavedEditorHeight());
 
+    setSize(EditorDimensions::windowW, EditorDimensions::windowH);
 }
 
 KrumSamplerAudioProcessorEditor::~KrumSamplerAudioProcessorEditor()

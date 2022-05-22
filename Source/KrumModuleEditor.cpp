@@ -947,7 +947,7 @@ void KrumModuleEditor::filesDropped(const juce::StringArray &files, int x, int y
     }*/
 }
 
-bool KrumModuleEditor::handleNewFile(juce::ValueTree& fileTree, bool overlayShouldListen)
+bool KrumModuleEditor::handleNewFile(juce::ValueTree fileTree, bool overlayShouldListen)
 {
     auto file = juce::File{ fileTree.getProperty(TreeIDs::filePath).toString() };
     auto name = fileTree.getProperty(TreeIDs::fileName).toString();

@@ -137,7 +137,7 @@ public:
     
 
     //make handleNewFileDrop?
-    bool handleNewFile(juce::ValueTree& fileTree, bool overlayShouldListen = true);
+    bool handleNewFile(juce::ValueTree fileTree, bool overlayShouldListen = true);
     
     void setModuleFile(juce::File& newFile);
     void addFileToRecentsFolder(juce::File& file, juce::String name);
