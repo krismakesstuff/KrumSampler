@@ -174,7 +174,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     //Presets Label
     g.setColour(Colors::fontColor);
     g.setFont(16.0f);
-    g.drawFittedText("PRESETS", {presetsComboBox.getX() - 57, presetsComboBox.getY(), presetsComboBox.getWidth() /2, presetsComboBox.getHeight()}, juce::Justification::centredLeft, 1, 1.0f);
+    g.drawFittedText("PRESETS", {presetsComboBox.getX() - 60, presetsComboBox.getY(), presetsComboBox.getWidth() /2, presetsComboBox.getHeight()}, juce::Justification::centredLeft, 1, 1.0f);
 
 
     //Output Label
