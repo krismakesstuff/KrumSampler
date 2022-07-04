@@ -10,8 +10,7 @@
 
 #include <JuceHeader.h>
 #include "KrumSampler.h"
-#include "SimpleAudioPreviewer.h"
-
+#include "UI\FileBrowser\SimpleAudioPreviewer.h"
 
 
 //==============================================================================

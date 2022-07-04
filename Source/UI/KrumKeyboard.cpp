@@ -9,10 +9,10 @@
 */
 
 #include <JuceHeader.h>
-#include "KrumKeyboard.h"
-#include "KrumModuleContainer.h"
-#include "KrumModuleEditor.h"
-#include "InfoPanel.h"
+#include "UI\KrumKeyboard.h"
+#include "UI\KrumModuleContainer.h"
+#include "UI\KrumModule\KrumModuleEditor.h"
+#include "UI\InfoPanel.h"
 #include "PluginProcessor.h"
 
 //==============================================================================

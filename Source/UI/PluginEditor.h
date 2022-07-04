@@ -12,11 +12,11 @@
 #include "PluginProcessor.h"
 
 #include "KrumModule.h"
-#include "KrumKeyboard.h"
-#include "KrumLookAndFeel.h"
-#include "KrumFileBrowser.h"
-#include "KrumModuleContainer.h"
-#include "InfoPanel.h"
+#include "UI\KrumKeyboard.h"
+#include "UI\KrumLookAndFeel.h"
+#include "UI\FileBrowser\KrumFileBrowser.h"
+#include "UI\KrumModuleContainer.h"
+#include "UI\InfoPanel.h"
 
 
 //==============================================================================

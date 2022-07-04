@@ -8,11 +8,11 @@
   ==============================================================================
 */
 
-#include "KrumModuleContainer.h"
-#include "KrumModuleEditor.h"
-#include "PluginEditor.h"
-#include "InfoPanel.h"
-#include "KrumFileBrowser.h"
+#include "UI\KrumModuleContainer.h"
+#include "UI\KrumModule\KrumModuleEditor.h"
+#include "UI\PluginEditor.h"
+#include "UI\InfoPanel.h"
+#include "UI\FileBrowser\KrumFileBrowser.h"
 
 //==============================================================================
 RecentFilesList::RecentFilesList(KrumFileBrowser& fb, SimpleAudioPreviewer* p)
@@ -1777,7 +1777,7 @@ void FileChooser::CurrentPathBox::addPathBoxItem(int itemId, std::unique_ptr<Pat
     auto menu = getRootMenu();
     pathBoxItem->setName(title);
     //menu->addCustomItem(itemId, std::move(pathBoxItem), nullptr, title);
-    menu->addCustomItem(itemId, std::move(pathBoxItem));
+    menu->addCustomItem(itemId, std::move(pathBoxItem), nullptr, title);
 }
 
 bool FileChooser::CurrentPathBox::isUserPlace(PathBoxItem* itemToTest)
@@ -2073,14 +2073,17 @@ juce::File FileChooser::getFileFromChosenPath()
     int index = -1;
     for (int i = 0; i < pathBoxNames.size(); ++i)
     {
+        DBG("Path Box Name: " + pathBoxNames[i]);
         if (pathBoxNames[i].compare(currentName) == 0)
         {
             index = i;
+            DBG("Index = " + juce::String(index));
         }
     }
 
     if (index >= 0)
     {
+        DBG("PathBoxSelectedPath: " + pathBoxPaths[index]);
         return juce::File { pathBoxPaths[index] };
     }
 
@@ -2229,10 +2232,17 @@ void FileChooser::getPaths()
 
 void FileChooser::comboBoxChanged(juce::ComboBox* comboBox)
 {
+
     if (comboBox->getSelectedId() != lastSelectedId && !comboBox->isPopupActive())
     {
+        //int selectedId = comboBox->getSelectedId();
+        //DBG("ComboBoxID = " + juce::String(selectedId));
+        //DBG("ComboString = " + comboBox->getItemText(selectedId));
+        //DBG("LastSelectedID = " + juce::String(lastSelectedId));
         handleChosenPath();
         lastSelectedId = comboBox->getSelectedId();
+        //DBG("NewLastSelectedID = " + juce::String(lastSelectedId));
+
     }
 }
 

@@ -9,11 +9,11 @@
 */
 
 
-#include "KrumModuleEditor.h"
+#include "UI\KrumModule\KrumModuleEditor.h"
 #include "KrumModule.h"
-#include "PluginEditor.h"
-#include "KrumFileBrowser.h"
-#include "InfoPanel.h"
+#include "UI\PluginEditor.h"
+#include "UI\FileBrowser\KrumFileBrowser.h"
+#include "UI\InfoPanel.h"
 
 
 //===============================================================================================//

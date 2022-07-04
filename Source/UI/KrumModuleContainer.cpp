@@ -9,8 +9,8 @@
 */
 
 #include <JuceHeader.h>
-#include "KrumModuleContainer.h"
-#include "PluginEditor.h"
+#include "UI\KrumModuleContainer.h"
+#include "UI\PluginEditor.h"
 //#include "Log.h"
 
 //==============================================================================

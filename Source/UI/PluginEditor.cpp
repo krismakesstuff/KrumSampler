@@ -7,8 +7,8 @@
 */
 
 #include "PluginProcessor.h"
-#include "PluginEditor.h"
-#include "KrumFileBrowser.h"
+#include "UI\PluginEditor.h"
+#include "UI\FileBrowser\KrumFileBrowser.h"
 
 
 //==============================================================================

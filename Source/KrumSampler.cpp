@@ -10,7 +10,7 @@
 
 #include "KrumSampler.h"
 #include "PluginProcessor.h"
-#include "SimpleAudioPreviewer.h"
+#include "UI\FileBrowser\SimpleAudioPreviewer.h"
 
 
 KrumSound::KrumSound    (KrumModule* pModule, 
@@ -706,7 +706,7 @@ juce::AudioFormatManager& KrumSampler::getFormatManager()
 
 void KrumSampler::timerCallback()
 {
-    if (filePreviewer->wantsToPlayFile())
+    if (owner.getActiveEditor() != nullptr && filePreviewer->wantsToPlayFile())
     {
         playPreviewFile();
         filePreviewer->setWantsToPlayFile(false);

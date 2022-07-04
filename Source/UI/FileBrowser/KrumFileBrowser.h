@@ -533,7 +533,7 @@ public:
     void setDirectory(juce::File newDirectory);
     void goUp();
 
-    //void selectionChanged() override;
+    void selectionChanged() override;
     void fileClicked(const juce::File& file, const juce::MouseEvent& e) override;
     void fileDoubleClicked(const juce::File& file) override;
     void browserRootChanged(const juce::File& newRoot) override;

@@ -9,8 +9,8 @@
 */
 
 #include <JuceHeader.h>
-#include "ColorPalette.h"
-#include "ModuleSettingsOverlay.h"
+#include "UI\KrumModule\ColorPalette.h"
+#include "UI\KrumModule\ModuleSettingsOverlay.h"
 
 //==============================================================================
 

@@ -7,7 +7,7 @@
 */
 
 #include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "UI\PluginEditor.h"
 //#include "Log.h"
 
 //==============================================================================

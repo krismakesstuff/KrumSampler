@@ -183,7 +183,7 @@ public:
     //if there is no sound that has this module as a parent, nothing will happen
     void removeModuleSample(KrumModule* moduleToDelete);
 
-    //will remove the modules current sound(if it has one) and then add the sample set in the module
+    //will remove the module's old sound(if it has one) and then add the sample set in the module
     void updateModuleSample(KrumModule* updatedModule);
     
     void clearModules();

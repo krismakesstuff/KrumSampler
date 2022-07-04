@@ -10,8 +10,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "SimpleAudioPreviewer.h"
-#include "KrumLookAndFeel.h"
+#include "UI\FileBrowser\SimpleAudioPreviewer.h"
+#include "UI\KrumLookAndFeel.h"
 
 //==============================================================================
 
@@ -54,8 +54,8 @@ SimpleAudioPreviewer::~SimpleAudioPreviewer()
 
 void SimpleAudioPreviewer::paint (juce::Graphics& g)
 {
-    g.setColour(Colors::bgColor.darker(0.1f));
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), 5.0f);
+ //   g.setColour(Colors::bgColor.darker(0.1f));
+ //   g.fillRoundedRectangle(getLocalBounds().toFloat(), 5.0f);
     //g.drawRect(getLocalBounds());
 }
 
@@ -183,8 +183,8 @@ float SimpleAudioPreviewer::getSavedPreviewerGainState()
 
 void SimpleAudioPreviewer::refreshSettings()
 {
-    volumeSlider.setValue(getSavedPreviewerGainState(), juce::dontSendNotification);
-    autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
+    volumeSlider.setValue(getSavedPreviewerGainState(), juce::sendNotification);
+    autoPlayToggle.setToggleState(getSavedToggleState(), juce::sendNotification);
 }
 
 juce::File& SimpleAudioPreviewer::getCurrentFile()

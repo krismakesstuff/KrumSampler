@@ -9,7 +9,7 @@
 */
 
 #include "KrumModule.h"
-#include "PluginEditor.h"
+#include "UI\PluginEditor.h"
 
 KrumModule::KrumModule(KrumSampler& km, juce::ValueTree& valTree, juce::AudioProcessorValueTreeState* apvts)
     : moduleTree(valTree), parameters(apvts), sampler(km)
