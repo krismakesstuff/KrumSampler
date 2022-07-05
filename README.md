@@ -40,22 +40,25 @@
 
 ## How to use KrumSampler
 
-### - video walkthrough
-
-- easiest way to see all the features is to watch [this](https://www.youtube.com/watch?v=LSDDeG-BdvY)
-- most of this is covered in the video, this is here for reference
-
+This is a list of the features and what they do. It's more here for reference. I want to have videos with each update, but this one I'm behind on the video. You can still watch the older walkthrough [video](https://www.youtube.com/watch?v=LSDDeG-BdvY).
 
 ### - info panel
 - This responds to your mouse's position and gives a brief decscription of what you are hovering over. 
   - You can disable this by clicking the white "i" icon in the top right of the plug-in.  
-### - adding your own samples
-- Drag and drop files or folders from Finder/File Explorer directly to the File Browser, or you can use the "+" button to select some files manually. 
-- These will be added to the "Favorites" section of the browser.
-- Once files are in the File Browser, you can play them. Double-clicking the file will play it at the volume set by the slider underneath the File Browser.
-  - If Auto-Play is active, then the file will play everytime it's clicked.  
-- rename or delete files with a right-click.
-  - this doesn't rename or delete the actual files, just how they are represented in this plug-in. 
+ 
+### - File Management Area (adding your own samples)
+ - The left side of the plug-in is dedicated to file management. There are three sections, The File Browser, Favorites, and Recent sections. Each section header can be double-clicked to either maximize of minimize them. You can also drag them up or down to resize. 
+	- You can right click the Favorite and Recent Sections to clear them.
+	- Right click files to get a set of actions. 
+	- All audio files under 7 seconds(the sample length limit) in the File Management Area can be auditioned by double-clicking. If auto-play is on, it will audition with every click. 
+	- You can click the Hide browser button on the left and it will collapse the whole section.
+	- The File Browser section lets you browse the files on your computer and any external hard drives. 
+		- The arrow on the left of the File Browser will take your browser "up" a folder. 
+		- The address bar shows your currently viewed location, but can also be clicked on. Once clicked, a drop down list will appear and show your external drives, common places (Desktop, Documents, etc.), and user saved places. You can save a "place" by right clicking a folder and selecting "add to Places". You can additionally delete them by right clicking them in the address bar drop down list. 
+		- Add samples to the Favorites section, by right clicking and selecting "add to Favorites", you can also drag and drop them on the Favorites section. 
+	- The Favorites section is where you keep the samples you want to use for your session. These will save with your preset (in the next update!). For now, you have to put files into the Favorites section before you can use them. You can drag and drop files onto the Favorites section to add them, or you can right click them in the File Browser. Once you have files in the Favorites section, you can drag them to the "Drop Samples Here", to create a new module. You can right click the files to rename, reveal, or remove. 
+	- The Recent section is where the samples that have been made into modules get remebered. These will automatically populate as you assign samples.
+
 ### - create modules
 - Drag and drop one of the samples onto the empty module that says "Drop Samples Here".
   - The module will then show its "Module Settings Overlay". 
@@ -84,9 +87,9 @@
 - Title Box
   - You can rename the module by double clicking on the name at the top  
 ### - hot swap!
-- You can additionally "hot swap" samples by dragging a sample from the file browser and dropping it on the thumbnail of the desired module.
+- You can additionally "hot swap" samples by dragging a sample from the Favorites section and dropping it on the thumbnail of the desired module.
   - This makes it SUPER easy to change samples out. This is safe to do while playing, so loop your beat in your DAW and swap out the samples as you see fit. 
-  - It must be a file from the File Browser, for now the swapping doesn't support external drag and drops.
+  - It must be a file from the Favorites section, for now the hot swapping doesn't support external drag and drops.
 ### - aux outputs (new in 1.3.0-beta)
 - each module has it's own output. By default, everything goes out 1-2. But you have the ability to bus out your modules in groups or however you see fit.
   -  You have to set up channels in your DAW to recieve these outputs. If you don't know how to do that, I show it in my walkthrough video. It's very easy, and let's you put your own plug-ins on seperate outputs of the sampler. 
@@ -97,8 +100,7 @@
   - Click the arrow button on the left side of the plug-in to accomplish this. It will also disable the Info Panel.
 ### - notes
 - Some limitations
-  - The maximum file length a sample can be is 3 seconds. This is a restriction that keeps the voice count down. 
-    - if you had 10 7-second long files and triggered all of them and 2 seconds later you trigger them again, you would then be rendering 20 voices. The more Voices the more CPU you use. I'm trying to keep CPU to a minumum. That being said I will be increasing the max file length to 5(?) seconds. 
+  - The maximum file length a sample can be is 7 seconds. Just trying to keep voice count down.
   -  The maximum number of modules is 20. This theoritcally could be more, but things get tricky when we start to consider automation.
   -  The maximum number of voices that the sampler has is 14. This just means it can render 14 files at the same time (technically it's 15, but one voice is always preserved for the file previewing function). I don't think you'll need more than that, but now that I have this in a stable place I would consider adding more.  
     - In the future it would be cool to auto generate samples for different velocities and in that case I could see more voices being necessary.   
@@ -116,17 +118,3 @@
 ## support
 - If you want to support this project, you can buy me a coffee [here!](https://www.buymeacoffee.com/kriscrawford)
 
-## MAKE SURE TO CHECK THE ISSUES SECTION
-- Visit [issues](https://github.com/krismakesstuff/KrumSampler/issues). Shows the latest on current bugs and upcoming features! 
-
-## How To Download
-- Check out [releases](https://github.com/krismakesstuff/KrumSampler/releases) for the latest download. 
-  - I'm not currently using installers, so you'll have to put the appropriate plug-in into it's appropriate folder. (Once I update all the builds to the latest version I will make the installers)
-
-## How To Build
-- If you would like to build the plug-in and work on it yourself, you will need the [JUCE](https://github.com/juce-framework/JUCE) framework installed and up to date. 
-- Once you have that installed you can then open the krumsampler.jucer file in the projucer.  
-  - Make sure the Resources folder can be found by the projucer. You might have to remove the ones in the projucer and re-add the folder. 
-  - Click the "save and open IDE" button icon towards the top of the projucer window. 
-  - Please let me know if you run into any [issues!](https://github.com/krismakesstuff/KrumSampler/issues)
-- Compile and build in your IDE.
