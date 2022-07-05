@@ -2,19 +2,19 @@
 
 ### a simple to use drum sampler
 
-![image](https://github.com/krismakesstuff/KrumSampler/blob/dev/Screen%20Shot%202022-03-03%20at%2010.48.08%20AM.png)
+![image](https://github.com/krismakesstuff/KrumSampler/blob/dev/Screen%20Shot%202022-07-03%20at%202.37.28%20PM.png)
 
-## Newest Update: 1.4.0-beta [Release](https://github.com/krismakesstuff/KrumSampler/releases/tag/1.3.0-beta)
-- Check out my update [video](https://www.youtube.com/watch?v=LSDDeG-BdvY) 
-- You can also check out the 1.3.0 [video](https://www.youtube.com/watch?v=9vDSEBo0MJI) , it has a little more in-depth look at the features
+## Newest Update: 1.5.0-beta (video coming soon)
+- 1.4.0-Beta [video](https://www.youtube.com/watch?v=LSDDeG-BdvY) 
+- 1.3.0-Beta [video](https://www.youtube.com/watch?v=9vDSEBo0MJI) , it has a little more in-depth look at the features
 
 
 ## goals/motivations
 - I'm a working music [producer-engineer](https://krismakesmusic.com/) in NYC and I wanted to have complete control over my drum programming workflow.
 - Too often, drum sampling plug-ins are just way too complicated from a UI standpoint, so I wanted it to be simple and quick to use.
 - You also have limited flexibility with a lot of existing ones, so being able to change the code myself is amazing! 
-- 2 years ago, I didn't know how to code at all and wanted to learn as I'm very interested in how these tools are made. ALL music professionals rely on these technologies to make a living, yet most of them have no clue how their tools really work.
 - This project is part learning, part bespoke workflow building, but also part "Hey, look I can code! Hire me and let's build a plug-in!".
+- I'll probably only update this 1 or 2 more times. It's time to move on to other fun projects! 
 - Lastly, I feel that this has to be open-source. 
   - Because of the open source community of [JUCE](https://github.com/juce-framework/JUCE) as well as [learn](https://www.learncpp.com/) C++, I have been able to learn and build this stuff for free and by myself. The internet is truly an amazing place.
   - This is my way of "giving back" to those communities and hopefully any new comers can get some use out of my code and those communities as well!
