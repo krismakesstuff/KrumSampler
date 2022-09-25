@@ -6,9 +6,10 @@
   ==============================================================================
 */
 
-#include "PluginProcessor.h"
-#include "UI\PluginEditor.h"
-#include "UI\FileBrowser\KrumFileBrowser.h"
+//#include "PluginProcessor.h"
+//#include "../PluginProcessor.h"
+#include "../UI/PluginEditor.h"
+#include "../UI/FileBrowser/KrumFileBrowser.h"
 
 
 //==============================================================================

@@ -8,11 +8,15 @@
   ==============================================================================
 */
 
-#include "UI\KrumModuleContainer.h"
-#include "UI\KrumModule\KrumModuleEditor.h"
-#include "UI\PluginEditor.h"
-#include "UI\InfoPanel.h"
-#include "UI\FileBrowser\KrumFileBrowser.h"
+#include "KrumFileBrowser.h"
+#include "../KrumModuleContainer.h"
+#include "../KrumModule/KrumModuleEditor.h"
+#include "../PluginEditor.h"
+#include "../InfoPanel.h"
+
+//#include "KrumModuleContainer.h"
+
+
 
 //==============================================================================
 RecentFilesList::RecentFilesList(KrumFileBrowser& fb, SimpleAudioPreviewer* p)
@@ -21,7 +25,7 @@ RecentFilesList::RecentFilesList(KrumFileBrowser& fb, SimpleAudioPreviewer* p)
     listBox.setColour(juce::ListBox::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
     listBox.setRowHeight(Dimensions::rowHeight);
     listBox.setMultipleSelectionEnabled(true);
-    listBox.updateContent();
+    //listBox.updateContent();
     addAndMakeVisible(listBox);
 
     recentValueTree.addListener(this);
@@ -104,13 +108,11 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
     if (rowIsSelected)
     {
         g.setColour(Colors::highlightColor);
-        g.fillRect(area);
         fontC = Colors::highlightFontColor;
+        g.fillRect(area);
     }
-    /* else
-     {
-         g.setColour(juce::Colours::black.withAlpha(0.1f));
-     }*/
+    
+    
     g.setFont((float)height * (Dimensions::rowTextScalar - 0.1f));
     g.setColour(fontC);
     g.drawFittedText(getFileName(rowNumber), area.withX(Dimensions::fileIconSize + indent + spacer), juce::Justification::centredLeft, 1);
@@ -146,7 +148,7 @@ bool RecentFilesList::addFile(juce::File fileToAdd, juce::String name)
 void RecentFilesList::updateFileListFromTree(juce::ValueTree& recentsTree)
 {
     recentValueTree = recentsTree;
-    listBox.updateContent();
+    listBox.setModel(this);
 }
 
 int RecentFilesList::getNumSelectedRows()
@@ -1031,7 +1033,7 @@ void FavoritesTreeView::createNewFavoriteFile(const juce::String& fullPathName)
     {
         juce::ValueTree newFavValTree{ TreeIDs::File, {{TreeIDs::fileName, file.getFileName()}, {TreeIDs::filePath, file.getFullPathName()}} };
         favoritesValueTree.addChild(newFavValTree, -1, nullptr);
-
+        
         rootItem->addSubItem(new KrumTreeItem(newFavValTree, this, fileBrowser.getAudioPreviewer()));
     }
     else
@@ -1322,7 +1324,7 @@ void FavoritesTreeView::updateOpenness()
 
     //favoritesValueTree.removeAllChildren(nullptr);
     //favoritesValueTree.appendChild(juce::ValueTree::fromXml(xml->toString()), nullptr);
-    auto openTree = fileBrowser.getFileBrowserValueTree().setProperty(TreeIDs::OPENSTATE, juce::var(xml->toString()), nullptr);
+    //auto openTree = fileBrowser.getFileBrowserValueTree().setProperty(TreeIDs::OPENSTATE, juce::var(xml->toString()), nullptr);
 }
 
 
@@ -1900,7 +1902,7 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     goUpButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
 
     fileTree.addListener(this);
-    fileBrowser.addFileBrowserTreeListener(this);
+    //fileBrowser.addFileBrowserTreeListener(this);
 }
 
 FileChooser::~FileChooser()
@@ -1932,7 +1934,7 @@ void FileChooser::setDirectory(juce::File newDirectory)
     directoryList.refresh();
     currentPathBox.setText(newDirectory.getFullPathName(), juce::dontSendNotification);
 
-    fileBrowser.getFileBrowserValueTree().setProperty(TreeIDs::LASTOPENPATH, juce::var(newDirectory.getFullPathName()), nullptr);
+    //fileBrowser.getFileBrowserValueTree().setProperty(TreeIDs::LASTOPENPATH, juce::var(newDirectory.getFullPathName()), nullptr);
 
 }
 
@@ -2017,11 +2019,11 @@ juce::Array<juce::File> FileChooser::getSelectedFiles()
 
 }
 
-
-void FileChooser::valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild)
-{
-
-}
+//
+//void FileChooser::valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild)
+//{
+//    DBG("Parent: " + parentTree.getType().toString() + " added Child: " + addedChild.getType().toString());
+//}
 
 void FileChooser::handleChosenPath()
 {
@@ -2235,13 +2237,8 @@ void FileChooser::comboBoxChanged(juce::ComboBox* comboBox)
 
     if (comboBox->getSelectedId() != lastSelectedId && !comboBox->isPopupActive())
     {
-        //int selectedId = comboBox->getSelectedId();
-        //DBG("ComboBoxID = " + juce::String(selectedId));
-        //DBG("ComboString = " + comboBox->getItemText(selectedId));
-        //DBG("LastSelectedID = " + juce::String(lastSelectedId));
         handleChosenPath();
         lastSelectedId = comboBox->getSelectedId();
-        //DBG("NewLastSelectedID = " + juce::String(lastSelectedId));
 
     }
 }

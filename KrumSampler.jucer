@@ -6,7 +6,7 @@
               cppLanguageStandard="17" pluginManufacturer="Kris Crawford" pluginDesc="KrumSampler"
               pluginVST3Category="Sampler,Synth" pluginFormats="buildAAX,buildAU,buildStandalone,buildVST3"
               pluginAAXCategory="0" companyName="Kris Crawford" pluginAUMainType="'aumu'"
-              version="0.1.5" companyWebsite="www.krismakesmusic.com" companyEmail="kris@krismakesmusic.com"
+              version="0.1.6" companyWebsite="www.krismakesmusic.com" companyEmail="kris@krismakesmusic.com"
               pluginManufacturerCode="Kris" pluginCode="Krum">
   <MAINGROUP id="NTQyMJ" name="KrumSampler">
     <GROUP id="{EB4A4C0D-C950-9DF2-E178-9C3B37C020B8}" name="Resources">
@@ -95,6 +95,15 @@
             file="Resources/noun-unlock-white.svg"/>
     </GROUP>
     <GROUP id="{7467111A-3F07-D8FF-124A-27D753DAFADA}" name="Source">
+      <FILE id="k5UXZN" name="KrumModule.cpp" compile="1" resource="0" file="Source/KrumModule.cpp"/>
+      <FILE id="E9fB0u" name="KrumModule.h" compile="0" resource="0" file="Source/KrumModule.h"/>
+      <FILE id="RRhzsD" name="KrumSampler.cpp" compile="1" resource="0" file="Source/KrumSampler.cpp"/>
+      <FILE id="N9hl8V" name="KrumSampler.h" compile="0" resource="0" file="Source/KrumSampler.h"/>
+      <FILE id="w0Ykhc" name="Log.h" compile="0" resource="0" file="Source/Log.h"/>
+      <FILE id="fpHdUj" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="uH1PEB" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
       <GROUP id="{CE42607D-B2EB-4318-12B4-2CA77EE3E00F}" name="UI">
         <GROUP id="{B6E08433-F042-3F07-B8F0-3AD5BB7B61C9}" name="FileBrowser">
           <FILE id="ToR7q8" name="KrumFileBrowser.cpp" compile="1" resource="0"
@@ -141,17 +150,6 @@
         <FILE id="m2CQSH" name="PluginEditor.h" compile="0" resource="0" file="Source/UI/PluginEditor.h"/>
       </GROUP>
     </GROUP>
-    <FILE id="bdcl2s" name="KrumFileBrowser.h" compile="0" resource="0"
-          file="Source/KrumFileBrowser.h"/>
-    <FILE id="k5UXZN" name="KrumModule.cpp" compile="1" resource="0" file="Source/KrumModule.cpp"/>
-    <FILE id="E9fB0u" name="KrumModule.h" compile="0" resource="0" file="Source/KrumModule.h"/>
-    <FILE id="RRhzsD" name="KrumSampler.cpp" compile="1" resource="0" file="Source/KrumSampler.cpp"/>
-    <FILE id="N9hl8V" name="KrumSampler.h" compile="0" resource="0" file="Source/KrumSampler.h"/>
-    <FILE id="w0Ykhc" name="Log.h" compile="0" resource="0" file="Source/Log.h"/>
-    <FILE id="fpHdUj" name="PluginProcessor.cpp" compile="1" resource="0"
-          file="Source/PluginProcessor.cpp"/>
-    <FILE id="uH1PEB" name="PluginProcessor.h" compile="0" resource="0"
-          file="Source/PluginProcessor.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
   <EXPORTFORMATS>
@@ -197,6 +195,27 @@
         <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION isDebug="0" name="Release" enablePluginBinaryCopyStep="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_utils" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_dsp" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="C:\Users\krisc\Documents\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="C:\Users\krisc\Documents\JUCE\modules"/>
+      </MODULEPATHS>
+    </VS2022>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

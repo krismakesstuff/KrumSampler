@@ -9,11 +9,11 @@
 */
 
 #include <JuceHeader.h>
-#include "UI\KrumKeyboard.h"
-#include "UI\KrumModuleContainer.h"
-#include "UI\KrumModule\KrumModuleEditor.h"
-#include "UI\InfoPanel.h"
-#include "PluginProcessor.h"
+#include "../UI/KrumKeyboard.h"
+#include "../UI/KrumModuleContainer.h"
+#include "../UI/KrumModule\KrumModuleEditor.h"
+#include "../UI/InfoPanel.h"
+#include "../PluginProcessor.h"
 
 //==============================================================================
 KrumKeyboard::KrumKeyboard(juce::MidiKeyboardState& midiState, juce::MidiKeyboardComponent::Orientation ori , KrumModuleContainer& container, juce::ValueTree& valTree)

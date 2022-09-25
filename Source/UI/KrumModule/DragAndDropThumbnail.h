@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "UI\InfoPanel.h"
+#include "../InfoPanel.h"
 
 /*
 * This draws the thumbnail of the audioFile that the KrumModuleEditor (parentEditor) gives to it. 

@@ -11,11 +11,11 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "UI\KrumModule\ColorPalette.h"
-#include "UI\KrumModule\ModuleSettingsOverlay.h"
-#include "UI\KrumModule\DragAndDropThumbnail.h"
-#include "UI\InfoPanel.h"
-#include "UI\KrumModule\TimeHandle.h"
+#include "ColorPalette.h"
+#include "ModuleSettingsOverlay.h"
+#include "DragAndDropThumbnail.h"
+#include "../InfoPanel.h"
+#include "TimeHandle.h"
 
 //==============================================================================
 

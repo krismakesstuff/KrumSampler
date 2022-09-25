@@ -10,7 +10,7 @@
 
 #include "KrumSampler.h"
 #include "PluginProcessor.h"
-#include "UI\FileBrowser\SimpleAudioPreviewer.h"
+#include "UI/FileBrowser/SimpleAudioPreviewer.h"
 
 
 KrumSound::KrumSound    (KrumModule* pModule, 

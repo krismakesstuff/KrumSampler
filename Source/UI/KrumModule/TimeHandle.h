@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "UI\InfoPanel.h"
+#include "../InfoPanel.h"
 
 /*
 * This class is the two handles that live underneath the DragAndDropThumbnail. This will change the start and stop sample that the module's file will play from and to. 

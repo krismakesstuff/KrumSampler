@@ -7,7 +7,7 @@
 */
 
 #include "PluginProcessor.h"
-#include "UI\PluginEditor.h"
+#include "UI/PluginEditor.h"
 //#include "Log.h"
 
 //==============================================================================
@@ -76,7 +76,8 @@ juce::ValueTree createValueTree()
 
 juce::ValueTree createFileBrowserTree()
 {
-    juce::ValueTree retValTree{ TreeIDs::FILEBROWSERTREE, {}, };
+    juce::ValueTree retValTree{ TreeIDs::FILEBROWSER, {}, };
+
     juce::ValueTree recTree = { TreeIDs::RECENT ,{} };
     juce::ValueTree favTree = { TreeIDs::FAVORITES , {} };
     juce::ValueTree locationsTree = { TreeIDs::PLACES , {} };
@@ -95,73 +96,65 @@ juce::ValueTree createFileBrowserTree()
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
+
+
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
 
+    juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
+    //gainRange.setSkewForCentre(dBToGain(0.0f));
+    gainRange.symmetricSkew = true;
+
+    TreeIDs::gainRange = gainRange;
+
+    juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(30.0f), 0.01f };
+    clipGainRange.setSkewForCentre(dBToGain(0.0f));
+    //clipGainRange.symmetricSkew = true;
+
+    juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 0.5f };
+    pitchShiftRange.setSkewForCentre(0);
+    pitchShiftRange.symmetricSkew = true;
+    
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         juce::String index = juce::String(i);
 
-        juce::NormalisableRange<float> gainRange { dBToGain(-50.0f), dBToGain(2.0f), 0.0001f};
-        //gainRange.setSkewForCentre(dBToGain(0.0f));
-        gainRange.symmetricSkew = true;
 
-        TreeIDs::gainRange = gainRange;
-
-        juce::NormalisableRange<float> clipGainRange{ dBToGain(-30.0f), dBToGain(30.0f), 0.01f };
-        clipGainRange.setSkewForCentre(dBToGain(0.0f));
-        //clipGainRange.symmetricSkew = true;
-
-        juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 0.5f };
-        pitchShiftRange.setSkewForCentre(0);
-        pitchShiftRange.symmetricSkew = true;
-
-
-        auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain + index, "Module Gain" + index,
-                            gainRange, dBToGain(0.0f),
-                            "Module" + index + " Gain",
-                            juce::AudioProcessorParameter::genericParameter,
-                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
-                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+        auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain + index, "Module Gain" + index, gainRange, dBToGain(0.0f), 
+                                                                    juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
+                                                                    .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
         
-        auto clipGainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleClipGain + index, "Module ClipGain" + index,
-                            clipGainRange, dBToGain(0.0f),
-                            "Module" + index + " ClipGain",
-                            juce::AudioProcessorParameter::genericParameter,
-                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
-                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+        auto clipGainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleClipGain + index, "Module ClipGain" + index, clipGainRange, dBToGain(0.0f), 
+                                                                    juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
+                                                                    .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
 
         auto panParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePan + index, "Module Pan" + index,
-                            juce::NormalisableRange<float>{0.01f, 1.0f, 0.001f}, 0.5f,
-                            "Module" + index + " Pan",
-                            juce::AudioProcessorParameter::genericParameter,
-                            [](float value, int) {return panRangeFrom0To1(value); },
-                            [](juce::String text) {return panRangeTo0to1(text); });
+                                                                    juce::NormalisableRange<float>{0.01f, 1.0f, 0.001f}, 0.5f, 
+                                                                    juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return panRangeFrom0To1(value); })
+                                                                    .withValueFromStringFunction([](juce::String text) {return panRangeTo0to1(text); }));
 
         auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannel + index,
-                            "Module " + index + " OuputChannel",
-                            TreeIDs::outputStrings, 0);
+                                                                    "Module " + index + " OuputChannel",
+                                                                    TreeIDs::outputStrings, 0, juce::AudioParameterChoiceAttributes());
 
         auto pitchParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePitchShift + index, "Module PitchShift" + index,
-                            pitchShiftRange, 0,   
-                            "Module " + index + " Pitch Shift",
-                            juce::AudioProcessorParameter::genericParameter);
+                                                                    pitchShiftRange, 0, juce::AudioParameterFloatAttributes());
 
         auto reverseParam = std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleReverse + index, "Module Reverse" + index,
-                            false, "Module " + index + " Reverse");
+                                                                    false, juce::AudioParameterBoolAttributes());
 
-        auto muteParam =    std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleMute + index, "Module Mute" + index,
-                            false, "Module " + index + " Mute");
+        auto muteParam =  std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleMute + index, "Module Mute" + index,
+                                                                    false, juce::AudioParameterBoolAttributes());
 
         auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
-                            "Module" + juce::String(i),
-                            "|",
-                            std::move(gainParam),
-                            std::move(clipGainParam),
-                            std::move(panParam),
-                            std::move(outputParam),
-                            std::move(pitchParam),
-                            std::move(reverseParam),
-                            std::move(muteParam));
+                                                                    "Module" + juce::String(i),
+                                                                    "|",
+                                                                    std::move(gainParam),
+                                                                    std::move(clipGainParam),
+                                                                    std::move(panParam),
+                                                                    std::move(outputParam),
+                                                                    std::move(pitchParam),
+                                                                    std::move(reverseParam),
+                                                                    std::move(muteParam));
 
         paramsGroup.push_back(std::move(moduleGroup));
     }
@@ -172,19 +165,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     //outGainRange.setSkewForCentre(dBToGain(0.0f));
     outGainRange.symmetricSkew = true;
 
-    auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam.toString(), "Output Gain",
-                            outGainRange, dBToGain(0.0f),
-                            "OutputGain",
-                            juce::AudioProcessorParameter::genericParameter,
-                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
-                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+    auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam.toString(), "Output Gain", outGainRange, dBToGain(0.0f), 
+                                                                           juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
+                                                                           .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
 
-    auto previewerGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::previewerGainParam.toString(), "Previewer Gain",
-                            outGainRange, dBToGain(0.0f),
-                            "PreviewerGain",
-                            juce::AudioProcessorParameter::genericParameter,
-                            [](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1) + " dB"; },
-                            [](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); });
+    auto previewerGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::previewerGainParam.toString(), "Previewer Gain", outGainRange, dBToGain(0.0f), 
+                                                                            juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
+                                                                            .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
   
 
     auto globalGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Globals", "Global Parameters",
@@ -214,15 +201,12 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
                                         parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
 
 {
-    //juce::Logger::setCurrentLogger(Log::logger);
-    //juce::Logger::writeToLog("--BUILD VERSION: " + juce::String(KRUM_BUILD_VERSION));
     valueTree = createValueTree();
     fileBrowserValueTree = createFileBrowserTree();
     registerFormats();
     
     //value is blank here
     initSampler();
-    //previewer.assignSampler(&sampler);
 
 
     juce::Logger::writeToLog("----------------------------");
@@ -233,6 +217,10 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
     juce::Logger::writeToLog("MaxVoices: " + juce::String(MAX_VOICES));
     juce::Logger::writeToLog("MaxFileLengthInSeconds: " + juce::String(MAX_FILE_LENGTH_SECS));
     juce::Logger::writeToLog("----------------------------");
+
+    
+    //startTimerHz(1);
+    
 
 }
 
@@ -245,6 +233,9 @@ void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam);
     sampler.setCurrentPlaybackSampleRate(sampleRate);
+
+    
+    
     //juce::Logger::writeToLog("Processor prepared to play, sampleRate: " + juce::String(sampleRate) + ", samplesPerBlock: " +                      juce::String(samplesPerBlock));
 }
 
@@ -254,6 +245,13 @@ void KrumSamplerAudioProcessor::releaseResources()
 
 void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+
+   /* if (updateNumBufferChans)
+    {
+        numBufferChans = buffer.getNumChannels();
+        updateNumBufferChans = false;
+    }*/
+
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
     
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
@@ -297,16 +295,21 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
 #if SAVE_RELOAD_STATE
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
+    DBG("Set State Called");
+
     if (xmlState.get() != nullptr)
     {
         if (xmlState->hasTagName(valueTree.getType()))
         {
+            DBG("---SET STATE---");
+            DBG(juce::ValueTree::fromXml(*xmlState).toXmlString());
+
             //Audio parameters
             parameters.replaceState(juce::ValueTree::fromXml(*xmlState->getChildByName(TreeIDs::PARAMS)));
             xmlState->removeChildElement(xmlState->getChildByName(TreeIDs::PARAMS), true);
 
             //File Browser
-            auto xmlFileBrowserTree = xmlState->getChildByName(TreeIDs::FILEBROWSERTREE);
+            auto xmlFileBrowserTree = xmlState->getChildByName(TreeIDs::FILEBROWSER);
             if (xmlFileBrowserTree != nullptr)
             {
                 fileBrowserValueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlFileBrowserTree), nullptr);
@@ -321,8 +324,11 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
                     auto fileBrowser = editor->getFileBrowser();
                     fileBrowser->rebuildBrowser(fileBrowserValueTree);
                     fileBrowser->buildDemoKit();
-                    //fileBrowser.rebuildBrowser(fileBrowserValueTree);
                 }
+            }
+            else
+            {
+                DBG("FileBrowserTree Null");
             }
 
             //Remaining App/Modules Settings
@@ -366,7 +372,7 @@ void KrumSamplerAudioProcessor::updateModulesFromValueTree()
 {
     initSampler();
 
-    DBG("---- Updating Modules using this Tree vvvvv ----");
+    DBG("---- Updating Modules using this Tree ----");
     DBG(valueTree.toXmlString());
 
     auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
@@ -430,12 +436,42 @@ void KrumSamplerAudioProcessor::initSampler()
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool KrumSamplerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout) const
 {
+    const auto& outputs = layout.outputBuses;
 
-    for (const auto& bus : layout.outputBuses)
-        if (bus != juce::AudioChannelSet::stereo())
-            return false;
+    //DBG("Bus Count: " + juce::String(getBusCount(false)));
+    //
+    //for (int i = 0; i < outputs.size(); i++)
+    //{
+    //    auto chanSet = outputs.getReference(i);
+    //    DBG("ChannelSet " + juce::String(i) + " description: " + chanSet.getDescription());
+    //}
 
-    return layout.inputBuses.isEmpty() && 1 <= layout.outputBuses.size();
+    //if (layout.inputBuses.isEmpty()
+    //    && outputs.size() >= 1
+    //    && std::all_of(outputs.begin(), outputs.end(), [](const auto& bus)
+    //        {
+    //            return bus == juce::AudioChannelSet::stereo();
+    //        })
+    //    )
+    //{
+    //    DBG("Supported returned TRUE");
+    //    return true;
+    //}
+    //else
+    //{
+    //    DBG("Supported returned false");
+    //    return false;
+    //}
+
+    //return true;
+
+
+    return layout.inputBuses.isEmpty()
+            && outputs.size() >= 1
+            && std::all_of(outputs.begin(), outputs.end(), [](const auto& bus)
+                {
+                     return bus == juce::AudioChannelSet::stereo();
+                });
 }
 #endif
 

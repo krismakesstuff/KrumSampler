@@ -10,8 +10,7 @@
 
 #include <JuceHeader.h>
 #include "KrumSampler.h"
-#include "UI\FileBrowser\SimpleAudioPreviewer.h"
-
+#include "UI/FileBrowser/SimpleAudioPreviewer.h"
 
 //==============================================================================
 /*
@@ -33,7 +32,7 @@
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 7
 #define NUM_AUX_OUTS 20                     //mono channels
-#define SAVE_RELOAD_STATE 1                //quick way to enable and disable getStateInfo() and setStateInfo()
+#define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
 #define KRUM_BUILD_VERSION "1.5.0-Beta"     //File Browser Update
 
 
@@ -83,7 +82,7 @@ namespace TreeIDs
             DECLARE_ID(outputGainParam)
             DECLARE_ID(previewerGainParam)
 
-        DECLARE_ID(FILEBROWSERTREE) //File Browser Tree    
+        DECLARE_ID(FILEBROWSER) //File Browser Tree    
 
             DECLARE_ID(RECENT)
             DECLARE_ID(FAVORITES)
@@ -134,7 +133,7 @@ static juce::String panRangeFrom0To1(float value)
 {
     juce::NormalisableRange<float>range{ -100.0f, 100.0f, 0.01f };
     int converted = (int)range.convertFrom0to1(value);
-    juce::String returnString{};
+    juce::String returnString{}; 
 
     if (converted > 0)
     {
@@ -153,7 +152,8 @@ static juce::String panRangeFrom0To1(float value)
 }
 
 
-class KrumSamplerAudioProcessor  :  public juce::AudioProcessor
+class KrumSamplerAudioProcessor  :  public juce::AudioProcessor,
+                                    public juce::Timer
 {
 public:
 
@@ -207,15 +207,18 @@ public:
     int getNumModulesInSampler();
 
     juce::AudioThumbnailCache& getThumbnailCache();
-    //KrumFileBrowser& getFileBrowser();
-    //SimpleAudioPreviewer* getAudioPreviewer();
-
+    
 
 private:
     
     void registerFormats();
     void initSampler();
 
+    void timerCallback() override { DBG("Num Chans in buffer: " + juce::String(numBufferChans)); updateNumBufferChans = true; }
+    int numBufferChans = 0;
+    bool updateNumBufferChans = false;
+
+    
     juce::ValueTree valueTree{"AppState"};
     juce::AudioProcessorValueTreeState parameters; 
     juce::ValueTree fileBrowserValueTree{ "FileBrowserTree" }; 
@@ -236,9 +239,6 @@ private:
     juce::SharedResourcePointer<ThumbnailCache> thumbnailCache;
     juce::SharedResourcePointer <juce::AudioFormatManager> formatManager;
     
-    //move this to file browser
-    //SimpleAudioPreviewer previewer{formatManager, valueTree, parameters};
-
     KrumSampler sampler{ &valueTree, &parameters, formatManager.get(), *this };
 
     //==============================================================================

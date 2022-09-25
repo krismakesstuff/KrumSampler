@@ -8,9 +8,9 @@
   ==============================================================================
 */
 
-#include "UI\KrumModule\ModuleSettingsOverlay.h"
-#include "UI\KrumModule\KrumModuleEditor.h"
-#include "KrumModule.h"
+#include "ModuleSettingsOverlay.h"
+#include "KrumModuleEditor.h"
+#include "../Source/KrumModule.h"
 
 
 

@@ -10,10 +10,8 @@
 
 #pragma once
 #include <JuceHeader.h>
-//#include "InfoPanel.h"
-#include "UI\FileBrowser\SimpleAudioPreviewer.h"
-// 
-//#include "C:\Users\krisc\Documents\JUCE\modules\juce_gui_basics\filebrowser\juce_FileTreeComponent.cpp"
+#include "SimpleAudioPreviewer.h"
+
 /*
 * 
 * The File Browser holds folders and files chosen by the user for quick access. These file paths will save with the plugin as well as any custom names that are given to them. 
@@ -397,7 +395,8 @@ private:
     juce::String getFilePath(int rowNumber);
 
     bool expanded = false;
-    juce::ListBox listBox{ "Recent Files", this };
+    //pass the ListBoxModel to the ListBox in the updateFileListFromTree() function that gets called once the tree has been updated
+    juce::ListBox listBox{ "Recent Files", nullptr };
     juce::ValueTree recentValueTree;
 
     SimpleAudioPreviewer* previewer = nullptr;
@@ -435,7 +434,6 @@ public:
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& details) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails& details) override;
 
-    //void pickNewFavorite();
     void createNewFavoriteFile(const juce::String& fullPathName); 
     void createNewFavoriteFolder(const juce::String& fullPathName);
     void addNewFavoriteSubFolder(juce::File& folder, int& numHiddenFiles, KrumTreeHeaderItem* parentNode, juce::ValueTree& parentTree);
@@ -512,7 +510,6 @@ private:
 //class FileChooserTreeView : public juce::FileTreeComponent
 class FileChooser : public juce::Component,
                     public juce::FileBrowserListener,
-                    public juce::ValueTree::Listener,
                     public juce::ComboBox::Listener
 {
 public:
@@ -541,7 +538,7 @@ public:
     juce::File getSelectedFile();
     juce::Array<juce::File> getSelectedFiles();
 
-    void valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild) override;
+    //void valueTreeChildAdded(juce::ValueTree& parentTree, juce::ValueTree& addedChild) override;
 
     void updatePathBoxDropDown();
     void addPaths();

@@ -9,9 +9,9 @@
 */
 
 #include <JuceHeader.h>
-#include "PluginProcessor.h"
-#include "UI\FileBrowser\SimpleAudioPreviewer.h"
-#include "UI\KrumLookAndFeel.h"
+#include "../Source/PluginProcessor.h"
+#include "SimpleAudioPreviewer.h"
+#include "../KrumLookAndFeel.h"
 
 //==============================================================================
 

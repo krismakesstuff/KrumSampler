@@ -9,10 +9,10 @@
 */
 
 #include "DragAndDropThumbnail.h"
-#include "UI\KrumModule\KrumModuleEditor.h"
-#include "UI\PluginEditor.h"
-#include "KrumModule.h"
-#include "UI\KrumModule\TimeHandle.h"
+#include "KrumModuleEditor.h"
+#include "../PluginEditor.h"
+#include "../Source/KrumModule.h"
+#include "TimeHandle.h"
 
 
 

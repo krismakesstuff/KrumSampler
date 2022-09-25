@@ -9,8 +9,8 @@
 */
 
 #include <JuceHeader.h>
-#include "UI\InfoPanel.h"
-#include "UI\KrumLookAndFeel.h"
+#include "../UI/InfoPanel.h"
+#include "../UI/KrumLookAndFeel.h"
 
 //==============================================================================
 InfoPanel::InfoPanel()

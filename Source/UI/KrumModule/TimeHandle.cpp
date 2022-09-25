@@ -8,10 +8,9 @@
   ==============================================================================
 */
 
-#include "UI\KrumModule\TimeHandle.h"
-#include "UI\KrumModule\KrumModuleEditor.h"
-#include "UI\PluginEditor.h"
-
+#include "TimeHandle.h"
+#include "KrumModuleEditor.h"
+#include "../PluginEditor.h"
 
 TimeHandle::TimeHandle(KrumModuleEditor& e)
     : InfoPanelComponent("Time Handle", "Lets you adjust the playback start and end when this sample is triggered"),

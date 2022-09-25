@@ -10,8 +10,8 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "UI\KrumModule\ColorPalette.h"
-#include "UI\InfoPanel.h"
+#include "ColorPalette.h"
+#include "../InfoPanel.h"
 
 class KrumModuleEditor;
 

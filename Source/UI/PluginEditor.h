@@ -9,14 +9,14 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "PluginProcessor.h"
+#include "../PluginProcessor.h"
 
-#include "KrumModule.h"
-#include "UI\KrumKeyboard.h"
-#include "UI\KrumLookAndFeel.h"
-#include "UI\FileBrowser\KrumFileBrowser.h"
-#include "UI\KrumModuleContainer.h"
-#include "UI\InfoPanel.h"
+#include "../KrumModule.h"
+#include "../UI/KrumKeyboard.h"
+#include "../UI/KrumLookAndFeel.h"
+#include "../UI/FileBrowser/KrumFileBrowser.h"
+#include "../UI/KrumModuleContainer.h"
+#include "../UI/InfoPanel.h"
 
 
 //==============================================================================

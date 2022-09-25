@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "UI\FileBrowser\KrumFileBrowser.h"
+#include "../UI/FileBrowser/KrumFileBrowser.h"
 
 /*
 * 

@@ -11,7 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "UI\InfoPanel.h"
+#include "../InfoPanel.h"
 
 //==============================================================================
 /*
