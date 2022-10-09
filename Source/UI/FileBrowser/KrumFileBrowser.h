@@ -14,19 +14,19 @@
 
 /*
 * 
-* The File Browser holds folders and files chosen by the user for quick access. These file paths will save with the plugin as well as any custom names that are given to them. 
-* This holds the file path of the file and has a separate display name which can be changed by the user, but does not rename any actual files. 
-* There are two sections, the "Recent" and "Favorites" sections. The Recent section gets automatically updated when a file is dropped on a new module. It will only hold files.
-* The Favorites section is user selected and can be chosen from the "AddFavoriteButton", which will pull up a browser to choose files from. 
-* 
+* The File Browser holds folders and files chosen by the user for quick access. The file paths will save with the plugin as well as any custom names that are given to them by the user.
+* There is a separate display name which can be changed by the user, but does not rename any actual files.
+* There are three sections, the "Recent", "Favorites" and "File Browser sections. The Recent section gets automatically updated when a file is dropped on a new module. It will only hold files.
+* The Favorites section is user selected and can be chosen from the File Browser section, or by drag and drop from external apps.
+* The File Browser section gives the user acces to their whole computer and can also save favorite locations.
+ 
 * This class is a bit confusing... The KrumFileBrowser holds a KrumTreeView. The KrumTreeView holds TreeViewItems. There are two types of TreeViewItems, KrumTreeHeaderItem and KrumTreeItem. 
 * The KrumTreeHeaderItem is for folders and KrumTreeItem is for files. Both also have custom component subclasses that give them some custom functionality.
 * The state of the tree will be saved with each use and must be restored as well. 
 * This browser also connnects to the AudioPreviewer to preview files. 
 * 
 * TODO:
-* - Rebuild this whole thing. It could probably use it's own thread. This is one of the first things I built like 8 months ago and I hate it.
-* - Add "Drives" section, that would make it a little bit easier to add favorite folders. It would just always have your drives shown.
+* - give the favorites section it's own thread to handle big drag and drops.
 * - Fix the DemoKit building
 * 
 */

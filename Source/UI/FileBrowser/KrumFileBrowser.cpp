@@ -510,11 +510,7 @@ void KrumTreeItem::EditableComp::mouseUp(const juce::MouseEvent& e)
 
 void KrumTreeItem::EditableComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
-
-    //double clicks are being called twice on Mac.. this is a work around until I find the actual issue.
-#if JUCE_WINDOWS
     owner.itemDoubleClicked(e);
-#endif
 }
 
 void KrumTreeItem::EditableComp::mouseDrag(const juce::MouseEvent& e)
@@ -860,10 +856,7 @@ void KrumTreeHeaderItem::EditableHeaderComp::mouseDown(const juce::MouseEvent& e
 
 void KrumTreeHeaderItem::EditableHeaderComp::mouseDoubleClick(const juce::MouseEvent& e)
 {
-    //double clicks are being called twice on Mac.. this is a work around until I find the actual issue.
-#if JUCE_WINDOWS
     owner.itemDoubleClicked(e);
-#endif
 }
 
 void KrumTreeHeaderItem::EditableHeaderComp::handleResult(int result, EditableHeaderComp* comp)
