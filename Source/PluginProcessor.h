@@ -32,27 +32,29 @@
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 7
 #define NUM_AUX_OUTS 20                     //mono channels
-#define SAVE_RELOAD_STATE 1                 //quick way to enable and disable getStateInfo() and setStateInfo()
+#define SAVE_RELOAD_STATE 1                //quick way to enable and disable getStateInfo() and setStateInfo()
+#define PARAM_VERSION_HINT 5
 #define KRUM_BUILD_VERSION "1.5.0-Beta"     //File Browser Update
 
 
 //The general Tree structure
 namespace TreeIDs
 {
-#define DECLARE_ID(name) const juce::Identifier name(#name);
+//#define DECLARE_ID(name) const juce::Identifier name(#name);
+#define DECLARE_ID(name) const juce::ParameterID name(#name, PARAM_VERSION_HINT);
 
     DECLARE_ID(APPSTATE)
-
+            
         DECLARE_ID(GLOBALSETTINGS) //GlobalSettings tree
-
+            
             DECLARE_ID(previewerAutoPlay)
             DECLARE_ID(fileBrowserHidden)
             DECLARE_ID(infoPanelToggle)
             DECLARE_ID(editorWidth)
             DECLARE_ID(editorHeight)
-
+        
         DECLARE_ID(KRUMMODULES) //Module Tree
-
+        
             DECLARE_ID(MODULE)
 
                 DECLARE_ID(moduleName)

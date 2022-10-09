@@ -49,7 +49,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
     outputGainSlider.onValueChange = [this] { updateOutputGainBubbleComp(outputGainSlider.getCurrentPopupDisplay()); repaint(); };
     outputGainSlider.onDragEnd = [this] { outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue())); };
-    outputGainAttachment.reset(new SliderAttachment(parameters, TreeIDs::outputGainParam.toString(), outputGainSlider));
+    outputGainAttachment.reset(new SliderAttachment(parameters, TreeIDs::outputGainParam.getParamID(), outputGainSlider));
     
     addAndMakeVisible(keyboard);
     
@@ -279,19 +279,19 @@ void KrumSamplerAudioProcessorEditor::showFileBrowser()
 
 float KrumSamplerAudioProcessorEditor::getOutputGainValue()
 {
-    return *parameters.getRawParameterValue(TreeIDs::outputGainParam);
+    return *parameters.getRawParameterValue(TreeIDs::outputGainParam.getParamID());
 }
 
 void KrumSamplerAudioProcessorEditor::saveFileBrowserHiddenState()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);
-    globalTree.setProperty(TreeIDs::fileBrowserHidden, collapseBrowserButton.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());
+    globalTree.setProperty(TreeIDs::fileBrowserHidden.getParamID(), collapseBrowserButton.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
 }
 
 bool KrumSamplerAudioProcessorEditor::getSavedFileBrowserHiddenState()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);
-    return (int)globalTree.getProperty(TreeIDs::fileBrowserHidden) > 0;
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());
+    return (int)globalTree.getProperty(TreeIDs::fileBrowserHidden.getParamID()) > 0;
 }
 
 void KrumSamplerAudioProcessorEditor::infoButtonClicked()
@@ -302,38 +302,38 @@ void KrumSamplerAudioProcessorEditor::infoButtonClicked()
 
 bool KrumSamplerAudioProcessorEditor::getSavedInfoButtonState()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);
-    return (int)globalTree.getProperty(TreeIDs::infoPanelToggle) > 0;
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());
+    return (int)globalTree.getProperty(TreeIDs::infoPanelToggle.getParamID()) > 0;
 }
 
 void KrumSamplerAudioProcessorEditor::saveInfoButtonState()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);
-    globalTree.setProperty(TreeIDs::infoPanelToggle, infoButton.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());
+    globalTree.setProperty(TreeIDs::infoPanelToggle.getParamID(), infoButton.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
 }
 
 int KrumSamplerAudioProcessorEditor::getSavedEditorWidth()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
-    return (int)globalTree.getProperty(TreeIDs::editorWidth);
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());;
+    return (int)globalTree.getProperty(TreeIDs::editorWidth.getParamID());
 }
 
 void KrumSamplerAudioProcessorEditor::saveEditorWidth()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
-    globalTree.setProperty(TreeIDs::editorWidth, getWidth(), nullptr);
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());;
+    globalTree.setProperty(TreeIDs::editorWidth.getParamID(), getWidth(), nullptr);
 }
 
 int KrumSamplerAudioProcessorEditor::getSavedEditorHeight()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
-    return (int)globalTree.getProperty(TreeIDs::editorHeight);
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());;
+    return (int)globalTree.getProperty(TreeIDs::editorHeight.getParamID());
 }
 
 void KrumSamplerAudioProcessorEditor::saveEditorHeight()
 {
-    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS);;
-    globalTree.setProperty(TreeIDs::editorHeight, getHeight(), nullptr);
+    auto globalTree = getValueTree()->getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());;
+    globalTree.setProperty(TreeIDs::editorHeight.getParamID(), getHeight(), nullptr);
 }
 
 void KrumSamplerAudioProcessorEditor::updateOutputGainBubbleComp(juce::Component* comp)

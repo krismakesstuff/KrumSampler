@@ -81,10 +81,10 @@ void KrumModuleContainer::refreshModuleLayout()
 
 void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)
 {
-    if (property == TreeIDs::moduleState)
+    if (property == juce::Identifier(TreeIDs::moduleState.getParamID()))
     {
-        int state = treeWhoChanged.getProperty(TreeIDs::moduleState);
-        int index = treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex);
+        int state = treeWhoChanged.getProperty(TreeIDs::moduleState.getParamID());
+        int index = treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex.getParamID());
         if (state == KrumModule::ModuleState::empty && index > -1)
         {
             removeModuleEditor(getEditorFromDisplayIndex(index));
@@ -94,7 +94,7 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
             //moduleEditors[index]->repaint();
         }
     }
-    else if (property == TreeIDs::moduleDisplayIndex)
+    else if (property == juce::Identifier(TreeIDs::moduleDisplayIndex.getParamID()))
     {
         refreshModuleLayout();
     }
@@ -263,10 +263,10 @@ juce::OwnedArray<KrumModuleEditor>& KrumModuleContainer::getModuleDisplayOrder()
 int KrumModuleContainer::getNumActiveModules()
 {
     int count = 0;
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
     for(int i = 0; i < moduleEditors.size(); i++)
     {
-        if((int)modulesTree.getChild(i).getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::active)
+        if((int)modulesTree.getChild(i).getProperty(TreeIDs::moduleState.getParamID()) == KrumModule::ModuleState::active)
         {
             ++count;
         }
@@ -278,10 +278,10 @@ int KrumModuleContainer::getNumActiveModules()
 int KrumModuleContainer::getNumEmptyModules()
 {
     int count = 0;
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
-        if ((int)modulesTree.getChild(i).getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::empty)
+        if ((int)modulesTree.getChild(i).getProperty(TreeIDs::moduleState.getParamID()) == KrumModule::ModuleState::empty)
         {
             count++;
         }
@@ -372,11 +372,11 @@ void KrumModuleContainer::timerCallback()
 
 void KrumModuleContainer::showFirstEmptyModule()
 {
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto moduleTree = modulesTree.getChild(i);
-        if ((int)moduleTree.getProperty(TreeIDs::moduleState) == 0)
+        if ((int)moduleTree.getProperty(TreeIDs::moduleState.getParamID()) == 0)
         {
             addNewModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()));
             return;
@@ -386,12 +386,12 @@ void KrumModuleContainer::showFirstEmptyModule()
 
 void KrumModuleContainer::createModuleEditors()
 {
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
 
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto moduleTree = modulesTree.getChild(i);
-        int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
+        int state = (int)moduleTree.getProperty(TreeIDs::moduleState.getParamID());
         if (moduleTree.isValid() && ( state > 0)) //reference KrumModule::ModuleState, 0 is empty module
         {
             auto modEd = addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()));
@@ -401,19 +401,19 @@ void KrumModuleContainer::createModuleEditors()
 
 void KrumModuleContainer::updateModuleDisplayIndicesAfterDelete(int displayIndexDeleted)
 {
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto moduleTree = modulesTree.getChild(i);
-        int currentDisplayIndex = (int)moduleTree.getProperty(TreeIDs::moduleDisplayIndex);
+        int currentDisplayIndex = (int)moduleTree.getProperty(TreeIDs::moduleDisplayIndex.getParamID());
 
         if (currentDisplayIndex > displayIndexDeleted)
         {
-            moduleTree.setProperty(TreeIDs::moduleDisplayIndex, currentDisplayIndex - 1, nullptr);
+            moduleTree.setProperty(TreeIDs::moduleDisplayIndex.getParamID(), currentDisplayIndex - 1, nullptr);
         }
         else if (currentDisplayIndex == displayIndexDeleted)
         {
-            moduleTree.setProperty(TreeIDs::moduleDisplayIndex, -1, nullptr);
+            moduleTree.setProperty(TreeIDs::moduleDisplayIndex.getParamID(), -1, nullptr);
         }
     }
 }

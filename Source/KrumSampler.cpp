@@ -450,12 +450,12 @@ KrumSampler::~KrumSampler()
 
 void KrumSampler::initModules(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts)
 {
-    auto krumModulesTree = valTree->getChildWithName(TreeIDs::KRUMMODULES);
+    auto krumModulesTree = valTree->getChildWithName(juce::Identifier(TreeIDs::KRUMMODULES.getParamID()));
 
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         auto moduleTree = krumModulesTree.getChild(i);
-        moduleTree.setProperty(TreeIDs::moduleSamplerIndex, i, nullptr);
+        moduleTree.setProperty(TreeIDs::moduleSamplerIndex.getParamID(), i, nullptr);
         modules.add(new KrumModule(*this, moduleTree, apvts));
     }
     

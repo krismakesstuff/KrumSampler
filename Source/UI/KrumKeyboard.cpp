@@ -11,7 +11,7 @@
 #include <JuceHeader.h>
 #include "../UI/KrumKeyboard.h"
 #include "../UI/KrumModuleContainer.h"
-#include "../UI/KrumModule\KrumModuleEditor.h"
+#include "../UI/KrumModule/KrumModuleEditor.h"  
 #include "../UI/InfoPanel.h"
 #include "../PluginProcessor.h"
 
@@ -330,13 +330,13 @@ void KrumKeyboard::drawBlackNote(int midiNoteNumber, juce::Graphics& g, juce::Re
 
 bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
 {
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
 
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto modTree = modulesTree.getChild(i);
-        if ((int)modTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::active
-            && (int)modTree.getProperty(TreeIDs::moduleMidiNote) == midiNote)
+        if ((int)modTree.getProperty(TreeIDs::moduleState.getParamID()) == KrumModule::ModuleState::active
+            && (int)modTree.getProperty(TreeIDs::moduleMidiNote.getParamID()) == midiNote)
         {
             return true;
         }
@@ -347,23 +347,23 @@ bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
 
 void KrumKeyboard::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)
 {
-    if (treeWhoChanged.hasType(TreeIDs::MODULE) && (property == TreeIDs::moduleColor || property == TreeIDs::moduleMidiNote))
+    if (treeWhoChanged.hasType(TreeIDs::MODULE.getParamID()) && (property == juce::Identifier(TreeIDs::moduleColor.getParamID()) || property == juce::Identifier(TreeIDs::moduleMidiNote.getParamID())))
     {
-        repaint(getRectangleForKey(treeWhoChanged.getProperty(TreeIDs::moduleMidiNote)).toNearestInt());
+        repaint(getRectangleForKey(treeWhoChanged.getProperty(TreeIDs::moduleMidiNote.getParamID())).toNearestInt());
     }
 }
 
 int KrumKeyboard::getLowestKey()
 {
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
 
     int lowest = -1;
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto modTree = modulesTree.getChild(i);
-        if ((int)modTree.getProperty(TreeIDs::moduleState) == KrumModule::ModuleState::active)
+        if ((int)modTree.getProperty(TreeIDs::moduleState.getParamID()) == KrumModule::ModuleState::active)
         {
-            auto key = (int)modTree.getProperty(TreeIDs::moduleMidiNote);
+            auto key = (int)modTree.getProperty(TreeIDs::moduleMidiNote.getParamID());
             if (lowest == -1 || key < lowest)
             {
                 lowest = key;
@@ -378,14 +378,14 @@ juce::Array<juce::Colour> KrumKeyboard::getColorsForKey(int midiNote)
 {
     juce::Array<juce::Colour> retColors{};
 
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
 
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto modTree = modulesTree.getChild(i);
-        if ((int)modTree.getProperty(TreeIDs::moduleMidiNote) == midiNote)
+        if ((int)modTree.getProperty(TreeIDs::moduleMidiNote.getParamID()) == midiNote)
         {
-            retColors.add(juce::Colour::fromString(modTree.getProperty(TreeIDs::moduleColor).toString()));
+            retColors.add(juce::Colour::fromString(modTree.getProperty(TreeIDs::moduleColor.getParamID()).toString()));
         }
     }
 

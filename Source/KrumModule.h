@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "UI/KrumModule/KrumModuleEditor.h"
+#include "UI/KrumModule/KrumModuleEditor.h" 
 
 
 /*

@@ -26,39 +26,39 @@ float gainToDB(float decibels)
 //creates a blank ValueTree
 juce::ValueTree createValueTree()
 {
-    juce::ValueTree appStateValueTree{ TreeIDs::APPSTATE };
+    juce::ValueTree appStateValueTree{ TreeIDs::APPSTATE.getParamID() };
     
     //---------------- Global Settings ----------------------------
 
-    juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS };
+    juce::ValueTree globalSettingsTree{ TreeIDs::GLOBALSETTINGS.getParamID() };
 
-    globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay, juce::var(0), nullptr);
-    globalSettingsTree.setProperty(TreeIDs::fileBrowserHidden, juce::var(0), nullptr);
-    globalSettingsTree.setProperty(TreeIDs::infoPanelToggle, juce::var(1), nullptr);
-    globalSettingsTree.setProperty(TreeIDs::editorWidth, juce::var(EditorDimensions::windowW), nullptr);
-    globalSettingsTree.setProperty(TreeIDs::editorHeight, juce::var(EditorDimensions::windowH), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::previewerAutoPlay.getParamID(), juce::var(0), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::fileBrowserHidden.getParamID(), juce::var(0), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::infoPanelToggle.getParamID(), juce::var(1), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::editorWidth.getParamID(), juce::var(EditorDimensions::windowW), nullptr);
+    globalSettingsTree.setProperty(TreeIDs::editorHeight.getParamID(), juce::var(EditorDimensions::windowH), nullptr);
    
     appStateValueTree.addChild(globalSettingsTree, -1, nullptr);
     
     //----------------- Module Settings ---------------------------
 
-    juce::ValueTree krumModulesTree{ TreeIDs::KRUMMODULES };
+    juce::ValueTree krumModulesTree{ TreeIDs::KRUMMODULES.getParamID() };
     
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
         juce::String index = juce::String(i);
 
-        juce::ValueTree newModule { TreeIDs::MODULE, {{TreeIDs::moduleName,""}},{} }; 
-        newModule.setProperty(TreeIDs::moduleState, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleFile, juce::var(""), nullptr);
-        newModule.setProperty(TreeIDs::moduleMidiNote, juce::var(-1), nullptr);
-        newModule.setProperty(TreeIDs::moduleMidiChannel, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleColor, juce::var(""), nullptr);
-        newModule.setProperty(TreeIDs::moduleDisplayIndex, juce::var(-1), nullptr);
-        newModule.setProperty(TreeIDs::moduleSamplerIndex, juce::var(i), nullptr);
-        newModule.setProperty(TreeIDs::moduleStartSample, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleEndSample, juce::var(0), nullptr);
-        newModule.setProperty(TreeIDs::moduleNumSamplesLength, juce::var(0), nullptr);
+        juce::ValueTree newModule { TreeIDs::MODULE.getParamID(), {{TreeIDs::moduleName.getParamID(),""}},{} };
+        newModule.setProperty(TreeIDs::moduleState.getParamID(), juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleFile.getParamID(), juce::var(""), nullptr);
+        newModule.setProperty(TreeIDs::moduleMidiNote.getParamID(), juce::var(-1), nullptr);
+        newModule.setProperty(TreeIDs::moduleMidiChannel.getParamID(), juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleColor.getParamID(), juce::var(""), nullptr);
+        newModule.setProperty(TreeIDs::moduleDisplayIndex.getParamID(), juce::var(-1), nullptr);
+        newModule.setProperty(TreeIDs::moduleSamplerIndex.getParamID(), juce::var(i), nullptr);
+        newModule.setProperty(TreeIDs::moduleStartSample.getParamID(), juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleEndSample.getParamID(), juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleNumSamplesLength.getParamID(), juce::var(0), nullptr);
         /*newModule.setProperty(TreeIDs::moduleFadeIn, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);*/
 
@@ -76,13 +76,13 @@ juce::ValueTree createValueTree()
 
 juce::ValueTree createFileBrowserTree()
 {
-    juce::ValueTree retValTree{ TreeIDs::FILEBROWSER, {}, };
+    juce::ValueTree retValTree{ TreeIDs::FILEBROWSER.getParamID(), {}, };
 
-    juce::ValueTree recTree = { TreeIDs::RECENT ,{} };
-    juce::ValueTree favTree = { TreeIDs::FAVORITES , {} };
-    juce::ValueTree locationsTree = { TreeIDs::PLACES , {} };
-    juce::ValueTree openTree = { TreeIDs::OPENSTATE, {}};
-    juce::ValueTree lastOpenTree = { TreeIDs::LASTOPENPATH, {} };
+    juce::ValueTree recTree = { TreeIDs::RECENT.getParamID() ,{} };
+    juce::ValueTree favTree = { TreeIDs::FAVORITES.getParamID() , {} };
+    juce::ValueTree locationsTree = { TreeIDs::PLACES.getParamID() , {} };
+    juce::ValueTree openTree = { TreeIDs::OPENSTATE.getParamID(), {}};
+    juce::ValueTree lastOpenTree = { TreeIDs::LASTOPENPATH.getParamID(), {} };
 
     retValTree.addChild(recTree, -1, nullptr);
     retValTree.addChild(favTree, -1, nullptr);
@@ -118,31 +118,37 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     {
         juce::String index = juce::String(i);
 
-
-        auto gainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleGain + index, "Module Gain" + index, gainRange, dBToGain(0.0f), 
+        juce::ParameterID paramModuleGainID (TreeIDs::paramModuleGain.getParamID() + index, PARAM_VERSION_HINT);
+        auto gainParam = std::make_unique<juce::AudioParameterFloat>(paramModuleGainID, "Module Gain" + index, gainRange, dBToGain(0.0f),
                                                                     juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
                                                                     .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
         
-        auto clipGainParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModuleClipGain + index, "Module ClipGain" + index, clipGainRange, dBToGain(0.0f), 
+        juce::ParameterID paramModuleClipGainID (TreeIDs::paramModuleClipGain.getParamID() + index, PARAM_VERSION_HINT);
+        auto clipGainParam = std::make_unique<juce::AudioParameterFloat>(paramModuleClipGainID, "Module ClipGain" + index, clipGainRange, dBToGain(0.0f),
                                                                     juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
                                                                     .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
 
-        auto panParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePan + index, "Module Pan" + index,
+        juce::ParameterID paramModulePanID (TreeIDs::paramModulePan.getParamID() + index, PARAM_VERSION_HINT);
+        auto panParam = std::make_unique<juce::AudioParameterFloat>(paramModulePanID, "Module Pan" + index,
                                                                     juce::NormalisableRange<float>{0.01f, 1.0f, 0.001f}, 0.5f, 
                                                                     juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return panRangeFrom0To1(value); })
                                                                     .withValueFromStringFunction([](juce::String text) {return panRangeTo0to1(text); }));
 
-        auto outputParam = std::make_unique<juce::AudioParameterChoice>(TreeIDs::paramModuleOutputChannel + index,
+        juce::ParameterID paramModuleOutputChannelID(TreeIDs::paramModuleOutputChannel.getParamID() + index, PARAM_VERSION_HINT);
+        auto outputParam = std::make_unique<juce::AudioParameterChoice>(paramModuleOutputChannelID,
                                                                     "Module " + index + " OuputChannel",
                                                                     TreeIDs::outputStrings, 0, juce::AudioParameterChoiceAttributes());
 
-        auto pitchParam = std::make_unique<juce::AudioParameterFloat>(TreeIDs::paramModulePitchShift + index, "Module PitchShift" + index,
+        juce::ParameterID paramModulePitchShiftID (TreeIDs::paramModulePitchShift.getParamID() + index, PARAM_VERSION_HINT);
+        auto pitchParam = std::make_unique<juce::AudioParameterFloat>(paramModulePitchShiftID, "Module PitchShift" + index,
                                                                     pitchShiftRange, 0, juce::AudioParameterFloatAttributes());
 
-        auto reverseParam = std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleReverse + index, "Module Reverse" + index,
+        juce::ParameterID paramModuleReverseID (TreeIDs::paramModuleReverse.getParamID() + index, PARAM_VERSION_HINT);
+        auto reverseParam = std::make_unique<juce::AudioParameterBool>(paramModuleReverseID, "Module Reverse" + index,
                                                                     false, juce::AudioParameterBoolAttributes());
 
-        auto muteParam =  std::make_unique<juce::AudioParameterBool>(TreeIDs::paramModuleMute + index, "Module Mute" + index,
+        juce::ParameterID paramModuleMuteID (TreeIDs::paramModuleMute.getParamID() + index, PARAM_VERSION_HINT);
+        auto muteParam =  std::make_unique<juce::AudioParameterBool>(paramModuleMuteID, "Module Mute" + index,
                                                                     false, juce::AudioParameterBoolAttributes());
 
         auto moduleGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Module" + juce::String(i),
@@ -165,11 +171,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     //outGainRange.setSkewForCentre(dBToGain(0.0f));
     outGainRange.symmetricSkew = true;
 
-    auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::outputGainParam.toString(), "Output Gain", outGainRange, dBToGain(0.0f), 
+    juce::ParameterID outputGainParamID (TreeIDs::outputGainParam.getParamID(),PARAM_VERSION_HINT);
+    auto outputGainParameter = std::make_unique<juce::AudioParameterFloat>(outputGainParamID, "Output Gain", outGainRange, dBToGain(0.0f),
                                                                            juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
                                                                            .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
 
-    auto previewerGainParameter = std::make_unique<juce::AudioParameterFloat>(TreeIDs::previewerGainParam.toString(), "Previewer Gain", outGainRange, dBToGain(0.0f), 
+    juce::ParameterID previewerGainParamID (TreeIDs::previewerGainParam.getParamID(), PARAM_VERSION_HINT);
+    auto previewerGainParameter = std::make_unique<juce::AudioParameterFloat>(previewerGainParamID, "Previewer Gain", outGainRange, dBToGain(0.0f),
                                                                             juce::AudioParameterFloatAttributes().withStringFromValueFunction([](float value, int) {return juce::String(juce::Decibels::gainToDecibels(value), 1); }).withLabel(" dB")
                                                                             .withValueFromStringFunction([](juce::String text) {return juce::Decibels::decibelsToGain(text.dropLastCharacters(3).getFloatValue()); }));
   
@@ -177,8 +185,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     auto globalGroup = std::make_unique<juce::AudioProcessorParameterGroup>("Globals", "Global Parameters",
                             "|", std::move(outputGainParameter), std::move(previewerGainParameter));
 
+    
     paramsGroup.push_back(std::move(globalGroup));
-
+    
     return { paramsGroup.begin(), paramsGroup.end() };
 }
 
@@ -198,7 +207,7 @@ KrumSamplerAudioProcessor::KrumSamplerAudioProcessor()
                                         .withOutput("Output 15-16", juce::AudioChannelSet::stereo(), false)
                                         .withOutput("Output 17-18", juce::AudioChannelSet::stereo(), false)
                                         .withOutput("Output 19-20", juce::AudioChannelSet::stereo(), false)),
-                                        parameters(*this, nullptr, TreeIDs::PARAMS, createParameterLayout())
+                                        parameters(*this, nullptr, TreeIDs::PARAMS.getParamID(), createParameterLayout())
 
 {
     valueTree = createValueTree();
@@ -231,7 +240,7 @@ KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 
 void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam);
+    outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam.getParamID());
     sampler.setCurrentPlaybackSampleRate(sampleRate);
 
     
@@ -305,11 +314,11 @@ void KrumSamplerAudioProcessor::setStateInformation (const void* data, int sizeI
             DBG(juce::ValueTree::fromXml(*xmlState).toXmlString());
 
             //Audio parameters
-            parameters.replaceState(juce::ValueTree::fromXml(*xmlState->getChildByName(TreeIDs::PARAMS)));
-            xmlState->removeChildElement(xmlState->getChildByName(TreeIDs::PARAMS), true);
+            parameters.replaceState(juce::ValueTree::fromXml(*xmlState->getChildByName(TreeIDs::PARAMS.getParamID())));
+            xmlState->removeChildElement(xmlState->getChildByName(TreeIDs::PARAMS.getParamID()), true);
 
             //File Browser
-            auto xmlFileBrowserTree = xmlState->getChildByName(TreeIDs::FILEBROWSER);
+            auto xmlFileBrowserTree = xmlState->getChildByName(TreeIDs::FILEBROWSER.getParamID());
             if (xmlFileBrowserTree != nullptr)
             {
                 fileBrowserValueTree.copyPropertiesAndChildrenFrom(juce::ValueTree::fromXml(*xmlFileBrowserTree), nullptr);
@@ -375,16 +384,16 @@ void KrumSamplerAudioProcessor::updateModulesFromValueTree()
     DBG("---- Updating Modules using this Tree ----");
     DBG(valueTree.toXmlString());
 
-    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES);
+    auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
     
     for (int i = 0; i < modulesTree.getNumChildren(); i++)
     {
         auto moduleTree = modulesTree.getChild(i);
-        int state = (int)moduleTree.getProperty(TreeIDs::moduleState);
+        int state = (int)moduleTree.getProperty(TreeIDs::moduleState.getParamID());
 
         if (state > 0) 
         {            
-            auto mod = sampler.getModule(moduleTree.getProperty(TreeIDs::moduleSamplerIndex));
+            auto mod = sampler.getModule(moduleTree.getProperty(TreeIDs::moduleSamplerIndex.getParamID()));
             sampler.updateModuleSample(mod);
         }
         else

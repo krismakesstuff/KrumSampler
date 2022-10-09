@@ -43,7 +43,7 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::V
     
     volumeSlider.onValueChange = [this] { updateBubbleComp(&volumeSlider, volumeSlider.getCurrentPopupDisplay()); };
 
-    volumeSliderAttachment.reset(new SliderAttachment(apvts, TreeIDs::previewerGainParam.toString(), volumeSlider));
+    volumeSliderAttachment.reset(new SliderAttachment(apvts, TreeIDs::previewerGainParam.getParamID(), volumeSlider));
 
     setPaintingIsUnclipped(true);
 }
@@ -83,7 +83,7 @@ void SimpleAudioPreviewer::setCurrentGain()
 
 std::atomic<float>* SimpleAudioPreviewer::getCurrentGain()
 {
-    return apvts.getRawParameterValue(TreeIDs::previewerGainParam);
+    return apvts.getRawParameterValue(TreeIDs::previewerGainParam.getParamID());
 }
 
 juce::String SimpleAudioPreviewer::toText(double value)
@@ -160,25 +160,25 @@ juce::AudioFormatManager* SimpleAudioPreviewer::getFormatManager()
 
 void SimpleAudioPreviewer::saveToggleState()
 {
-    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
-    globalTree.setProperty(TreeIDs::previewerAutoPlay, autoPlayToggle.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
+    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());
+    globalTree.setProperty(TreeIDs::previewerAutoPlay.getParamID(), autoPlayToggle.getToggleState() ? juce::var(1) : juce::var(0), nullptr);
 }
 
 bool SimpleAudioPreviewer::getSavedToggleState()
 {
-    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS);
-    return (int)globalTree.getProperty(TreeIDs::previewerAutoPlay) > 0;
+    auto globalTree = valueTree.getChildWithName(TreeIDs::GLOBALSETTINGS.getParamID());
+    return (int)globalTree.getProperty(TreeIDs::previewerAutoPlay.getParamID()) > 0;
     
 }
 
 void SimpleAudioPreviewer::savePreviewerGainState()
 {
-    apvts.state.setProperty(TreeIDs::previewerGainParam, juce::var(volumeSlider.getValue()), nullptr);
+    apvts.state.setProperty(TreeIDs::previewerGainParam.getParamID(), juce::var(volumeSlider.getValue()), nullptr);
 }
 
 float SimpleAudioPreviewer::getSavedPreviewerGainState()
 {
-    return *apvts.getRawParameterValue(TreeIDs::previewerGainParam);
+    return *apvts.getRawParameterValue(TreeIDs::previewerGainParam.getParamID());
 }
 
 void SimpleAudioPreviewer::refreshSettings()

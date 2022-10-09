@@ -21,7 +21,7 @@ TimeHandle::TimeHandle(KrumModuleEditor& e)
     
     if (editor.getModuleState() > KrumModule::ModuleState::empty)
     {
-        setHandles(tree.getProperty(TreeIDs::moduleStartSample), tree.getProperty(TreeIDs::moduleEndSample));
+        setHandles(tree.getProperty(TreeIDs::moduleStartSample.getParamID()), tree.getProperty(TreeIDs::moduleEndSample.getParamID()));
     }
 }
 
@@ -95,12 +95,12 @@ void TimeHandle::mouseUp(const juce::MouseEvent& event)
 
 int TimeHandle::getStartPosition()
 {
-    return editor.moduleTree.getProperty(TreeIDs::moduleStartSample);
+    return editor.moduleTree.getProperty(TreeIDs::moduleStartSample.getParamID());
 }
 
 int TimeHandle::getEndPosition()
 {
-    return editor.moduleTree.getProperty(TreeIDs::moduleEndSample);
+    return editor.moduleTree.getProperty(TreeIDs::moduleEndSample.getParamID());
 }
 
 void TimeHandle::setHandles(int startSample, int endSample)
@@ -117,12 +117,12 @@ void TimeHandle::resetHandles()
 
 void TimeHandle::setStartPosition(int startPositionInSamples)
 {
-    editor.moduleTree.setProperty(TreeIDs::moduleStartSample, startPositionInSamples, nullptr);
+    editor.moduleTree.setProperty(TreeIDs::moduleStartSample.getParamID(), startPositionInSamples, nullptr);
 }
 
 void TimeHandle::setEndPosition(int endPositionInSamples)
 {
-    editor.moduleTree.setProperty(TreeIDs::moduleEndSample, endPositionInSamples, nullptr);
+    editor.moduleTree.setProperty(TreeIDs::moduleEndSample.getParamID(), endPositionInSamples, nullptr);
 }
 
 int TimeHandle::getSampleFromXPos(int x)

@@ -127,16 +127,16 @@ bool RecentFilesList::addFile(juce::File fileToAdd, juce::String name)
     for (int i = 0; i < recentValueTree.getNumChildren(); ++i)
     {
         auto rec = recentValueTree.getChild(i);
-        if (rec.getProperty(TreeIDs::filePath).toString().compare(fileToAdd.getFullPathName()) == 0)
+        if (rec.getProperty(TreeIDs::filePath.getParamID()).toString().compare(fileToAdd.getFullPathName()) == 0)
         {
             return false;
         }
     }
 
-    juce::ValueTree newFileTree{ TreeIDs::File };
+    juce::ValueTree newFileTree{ TreeIDs::File.getParamID() };
 
-    newFileTree.setProperty(TreeIDs::filePath, fileToAdd.getFullPathName(), nullptr);
-    newFileTree.setProperty(TreeIDs::fileName, name, nullptr);
+    newFileTree.setProperty(TreeIDs::filePath.getParamID(), fileToAdd.getFullPathName(), nullptr);
+    newFileTree.setProperty(TreeIDs::fileName.getParamID(), name, nullptr);
 
     recentValueTree.addChild(newFileTree, -1, nullptr);
 
@@ -181,9 +181,9 @@ juce::String RecentFilesList::getFileName(int rowNumber)
     for (int i = 0; i < recentValueTree.getNumChildren(); ++i)
     {
         auto recentFileTree = recentValueTree.getChild(rowNumber);
-        if (recentFileTree.getType() == TreeIDs::File)
+        if (recentFileTree.getType() == juce::Identifier(TreeIDs::File.getParamID()))
         {
-            return recentFileTree.getProperty(TreeIDs::fileName).toString();
+            return recentFileTree.getProperty(TreeIDs::fileName.getParamID()).toString();
         }
     }
 
@@ -195,9 +195,9 @@ juce::String RecentFilesList::getFilePath(int rowNumber)
     for (int i = 0; i < recentValueTree.getNumChildren(); ++i)
     {
         auto recentFileTree = recentValueTree.getChild(rowNumber);
-        if (recentFileTree.getType() == TreeIDs::File)
+        if (recentFileTree.getType() == juce::Identifier(TreeIDs::File.getParamID()))
         {
-            return recentFileTree.getProperty(TreeIDs::filePath).toString();
+            return recentFileTree.getProperty(TreeIDs::filePath.getParamID()).toString();
         }
     }
 
@@ -308,17 +308,17 @@ juce::String KrumTreeItem::getUniqueName() const
 
 juce::String KrumTreeItem::getFilePath() const
 {
-    return fileValueTree.getProperty(TreeIDs::filePath).toString();
+    return fileValueTree.getProperty(TreeIDs::filePath.getParamID()).toString();
 }
 
 juce::String KrumTreeItem::getItemName() const
 {
-    return fileValueTree.getProperty(TreeIDs::fileName).toString();
+    return fileValueTree.getProperty(TreeIDs::fileName.getParamID()).toString();
 }
 
 void KrumTreeItem::setItemName(juce::String newName)
 {
-    fileValueTree.setProperty(TreeIDs::fileName, newName, nullptr);
+    fileValueTree.setProperty(TreeIDs::fileName.getParamID(), newName, nullptr);
 }
 
 juce::File KrumTreeItem::getFile()
@@ -644,27 +644,27 @@ void KrumTreeHeaderItem::itemDoubleClicked(const juce::MouseEvent& e)
 
 juce::String KrumTreeHeaderItem::getFolderPath() const
 { 
-    return folderValueTree.getProperty(TreeIDs::folderPath).toString(); 
+    return folderValueTree.getProperty(TreeIDs::folderPath.getParamID()).toString();
 }
 
 juce::String KrumTreeHeaderItem::getItemHeaderName() const
 { 
-    return folderValueTree.getProperty(TreeIDs::folderName).toString(); 
+    return folderValueTree.getProperty(TreeIDs::folderName.getParamID()).toString();
 }
 
 void KrumTreeHeaderItem::setItemHeaderName(juce::String newName)
 {
-    folderValueTree.setProperty(TreeIDs::folderName, newName, nullptr);
+    folderValueTree.setProperty(TreeIDs::folderName.getParamID(), newName, nullptr);
 }
 
 void KrumTreeHeaderItem::setNumFilesExcluded(int numFilesHidden)
 {
-    folderValueTree.setProperty(TreeIDs::hiddenFiles, numFilesHidden, nullptr);
+    folderValueTree.setProperty(TreeIDs::hiddenFiles.getParamID(), numFilesHidden, nullptr);
 }
 
 int KrumTreeHeaderItem::getNumFilesExcluded()
 {
-    return (int)folderValueTree.getProperty(TreeIDs::hiddenFiles);
+    return (int)folderValueTree.getProperty(TreeIDs::hiddenFiles.getParamID());
 }
 
 juce::File KrumTreeHeaderItem::getFile()
@@ -1031,7 +1031,7 @@ void FavoritesTreeView::createNewFavoriteFile(const juce::String& fullPathName)
 
     if (hasAudioFormat(file.getFileExtension()))
     {
-        juce::ValueTree newFavValTree{ TreeIDs::File, {{TreeIDs::fileName, file.getFileName()}, {TreeIDs::filePath, file.getFullPathName()}} };
+        juce::ValueTree newFavValTree{ TreeIDs::File.getParamID(), {{TreeIDs::fileName.getParamID(), file.getFileName()}, {TreeIDs::filePath.getParamID(), file.getFullPathName()}} };
         favoritesValueTree.addChild(newFavValTree, -1, nullptr);
         
         rootItem->addSubItem(new KrumTreeItem(newFavValTree, this, fileBrowser.getAudioPreviewer()));
@@ -1049,10 +1049,10 @@ void FavoritesTreeView::createNewFavoriteFolder(const juce::String& fullPathName
     if (folder.isDirectory())
     {
 
-        juce::ValueTree newFolderValTree{ TreeIDs::Folder };
-        newFolderValTree.setProperty(TreeIDs::folderPath, fullPathName, nullptr);
-        newFolderValTree.setProperty(TreeIDs::folderName, folder.getFileName(), nullptr);
-        newFolderValTree.setProperty(TreeIDs::hiddenFiles, juce::String(0), nullptr);
+        juce::ValueTree newFolderValTree{ TreeIDs::Folder.getParamID() };
+        newFolderValTree.setProperty(TreeIDs::folderPath.getParamID(), fullPathName, nullptr);
+        newFolderValTree.setProperty(TreeIDs::folderName.getParamID(), folder.getFileName(), nullptr);
+        newFolderValTree.setProperty(TreeIDs::hiddenFiles.getParamID(), juce::String(0), nullptr);
         favoritesValueTree.addChild(newFolderValTree, -1, nullptr);
 
         auto newFavFolderNode = new KrumTreeHeaderItem(newFolderValTree, this);
@@ -1074,7 +1074,7 @@ void FavoritesTreeView::createNewFavoriteFolder(const juce::String& fullPathName
                 auto childFilePath = childFile.getFullPathName();
                 auto childFileName = childFile.getFileName();
                 //make value tree
-                juce::ValueTree childFileValTree{ TreeIDs::File, {{TreeIDs::fileName, childFileName}, {TreeIDs::filePath, childFilePath}} };
+                juce::ValueTree childFileValTree{ TreeIDs::File.getParamID(), {{TreeIDs::fileName.getParamID(), childFileName}, {TreeIDs::filePath.getParamID(), childFilePath}} };
                 newFolderValTree.addChild(childFileValTree, j, nullptr);
                 //make tree view
                 auto childFileNode = new KrumTreeItem(childFileValTree, this, fileBrowser.getAudioPreviewer());
@@ -1110,7 +1110,7 @@ void FavoritesTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHidd
 {
     if (folder.isDirectory())
     {
-        juce::ValueTree newSubFolderTree = { TreeIDs::Folder, {{ TreeIDs::folderName, folder.getFileName() }, {TreeIDs::folderPath, folder.getFullPathName()}, {TreeIDs::hiddenFiles, juce::String(0)}} };
+        juce::ValueTree newSubFolderTree = { TreeIDs::Folder.getParamID(), {{ TreeIDs::folderName.getParamID(), folder.getFileName() }, {TreeIDs::folderPath.getParamID(), folder.getFullPathName()}, {TreeIDs::hiddenFiles.getParamID(), juce::String(0)}} };
         parentFolderValTree.addChild(newSubFolderTree, -1 ,nullptr);
 
         auto newSubFolderNode = new KrumTreeHeaderItem(newSubFolderTree, this);
@@ -1131,7 +1131,7 @@ void FavoritesTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHidd
                 auto childFilePath = childFile.getFullPathName();
                 auto childFileName = childFile.getFileName();
 
-                juce::ValueTree newChildFileValTree = { TreeIDs::File, {{TreeIDs::fileName, childFileName}, {TreeIDs::filePath, childFilePath}} };
+                juce::ValueTree newChildFileValTree = { TreeIDs::File.getParamID(), {{TreeIDs::fileName.getParamID(), childFileName}, {TreeIDs::filePath.getParamID(), childFilePath}} };
                 newSubFolderTree.addChild(newChildFileValTree, i, nullptr);
                 
                 auto childFileNode = new KrumTreeItem(newChildFileValTree, this, fileBrowser.getAudioPreviewer());
@@ -1160,12 +1160,12 @@ void FavoritesTreeView::reCreateFavoritesFromValueTree()
     {
         auto childTree = favoritesValueTree.getChild(i);
 
-        if (childTree.getType() == TreeIDs::Folder)
+        if (childTree.getType() == juce::Identifier(TreeIDs::Folder.getParamID()))
         {
             reCreateFavoriteFolder(childTree);
         }
 
-        if (childTree.getType() == TreeIDs::File)
+        if (childTree.getType() == juce::Identifier(TreeIDs::File.getParamID()))
         {
             reCreateFavoriteFile(childTree);
         }
@@ -1191,13 +1191,13 @@ void FavoritesTreeView::reCreateFavoriteFolder(juce::ValueTree& folderValueTree)
     {
         auto childTree = folderValueTree.getChild(i);
 
-        if (childTree.getType() == TreeIDs::File)
+        if (childTree.getType() == juce::Identifier(TreeIDs::File.getParamID()))
         {
             auto childFileNode = new KrumTreeItem(childTree, this, fileBrowser.getAudioPreviewer());
             childFileNode->setLinesDrawnForSubItems(true);
             newFavFolderNode->addSubItem(childFileNode);
         }
-        else if (childTree.getType() == TreeIDs::Folder)
+        else if (childTree.getType() == juce::Identifier(TreeIDs::Folder.getParamID()))
         {
             reCreateFavoriteSubFolder(newFavFolderNode, childTree);
         }
@@ -1216,12 +1216,12 @@ void FavoritesTreeView::reCreateFavoriteSubFolder(KrumTreeHeaderItem* parentNode
     {
         auto childTree = folderValueTree.getChild(i);
 
-        if (childTree.getType() == TreeIDs::File)
+        if (childTree.getType() == juce::Identifier(TreeIDs::File.getParamID()))
         {
             auto childFile = new KrumTreeItem(childTree, this, fileBrowser.getAudioPreviewer());
             folderNode->addSubItem(childFile);
         }
-        else if (childTree.getType() == TreeIDs::Folder)
+        else if (childTree.getType() == juce::Identifier(TreeIDs::Folder.getParamID()))
         {
             reCreateFavoriteSubFolder(folderNode, childTree);
         }
@@ -1273,7 +1273,7 @@ void FavoritesTreeView::removeValueTreeItem(juce::String fullPathName, FileBrows
     for (int i = 0; i < favoritesValueTree.getNumChildren(); i++)
     {
         juce::ValueTree childTree = favoritesValueTree.getChild(i);
-        auto childTreePath = childTree.getProperty(TreeIDs::filePath);
+        auto childTreePath = childTree.getProperty(TreeIDs::filePath.getParamID());
 
         if (childTreePath.toString().compare(fullPathName) == 0)
         {
@@ -1301,13 +1301,13 @@ juce::ValueTree FavoritesTreeView::findTreeItem(juce::ValueTree parentTree, juce
     for (int i = 0; i < parentTree.getNumChildren(); i++)
     {
         auto childTree = parentTree.getChild(i);
-        auto childTreePath = childTree.getProperty(TreeIDs::filePath);
+        auto childTreePath = childTree.getProperty(TreeIDs::filePath.getParamID());
 
         if (childTreePath.toString().compare(fullPathName) == 0)
         {
             return childTree;
         }
-        else if (childTree.getType() == TreeIDs::Folder)
+        else if (childTree.getType() == juce::Identifier(TreeIDs::Folder.getParamID()))
         {
             return findTreeItem(childTree, fullPathName);
         }
@@ -1365,7 +1365,7 @@ void FavoritesTreeView::removeItem(juce::String idString)
             {
                 FileBrowserSectionIds browserSectionId = FileBrowserSectionIds::favoritesFolders_Ids;
                 
-                if (sectionName.compare(TreeIDs::RECENT.toString()) == 0)
+                if (sectionName.compare(TreeIDs::RECENT.getParamID()) == 0)
                 {
                     browserSectionId = FileBrowserSectionIds::recentFolders_Ids;
                 }
@@ -1596,9 +1596,9 @@ bool FavoritesTreeView::doesFolderExistInBrowser(juce::String fullPathName)
     {
         auto childTree = favoritesValueTree.getChild(i);
 
-        if (childTree.getType() == TreeIDs::Folder)
+        if (childTree.getType() == juce::Identifier(TreeIDs::Folder.getParamID()))
         {
-            auto folderPathVar = childTree.getProperty(TreeIDs::folderPath);
+            auto folderPathVar = childTree.getProperty(TreeIDs::folderPath.getParamID());
             if (folderPathVar.toString().compare(fullPathName) == 0)
             {
                 return true;
@@ -1640,8 +1640,8 @@ KrumTreeHeaderItem* FavoritesTreeView::findSectionHeaderParent(juce::TreeViewIte
             auto parentItem = static_cast<KrumTreeHeaderItem*>(headerItem->getParentItem());
             if (parentItem)
             {
-                bool fav = parentItem->getItemHeaderName().compare(TreeIDs::FAVORITES.toString()) == 0;
-                bool recent = parentItem->getItemHeaderName().compare(TreeIDs::RECENT.toString()) == 0;
+                bool fav = parentItem->getItemHeaderName().compare(TreeIDs::FAVORITES.getParamID()) == 0;
+                bool recent = parentItem->getItemHeaderName().compare(TreeIDs::RECENT.getParamID()) == 0;
                 if (fav || recent)
                 {
                     sectionName = parentItem->getItemHeaderName();
@@ -1660,8 +1660,8 @@ KrumTreeHeaderItem* FavoritesTreeView::findSectionHeaderParent(juce::TreeViewIte
         auto parentItem = static_cast<KrumTreeHeaderItem*>(item->getParentItem());
         if (parentItem)
         {
-            bool fav = parentItem->getItemHeaderName().compare(TreeIDs::FAVORITES.toString()) == 0;
-            bool recent = parentItem->getItemHeaderName().compare(TreeIDs::RECENT.toString()) == 0;
+            bool fav = parentItem->getItemHeaderName().compare(TreeIDs::FAVORITES.getParamID()) == 0;
+            bool recent = parentItem->getItemHeaderName().compare(TreeIDs::RECENT.getParamID()) == 0;
             if (fav || recent)
             {
                 sectionName = parentItem->getItemHeaderName();
@@ -1685,8 +1685,8 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
 
     if (selected.size() <= moduleContainer->getNumEmptyModules())
     {
-        auto modulesTree = fileBrowser.getStateValueTree().getChildWithName(TreeIDs::KRUMMODULES);
-        if (modulesTree.hasType(TreeIDs::KRUMMODULES))
+        auto modulesTree = fileBrowser.getStateValueTree().getChildWithName(TreeIDs::KRUMMODULES.getParamID());
+        if (modulesTree.hasType(TreeIDs::KRUMMODULES.getParamID()))
         {
             auto editor = moduleContainer->getEditor();
             for (int i = 0; i < selected.size(); ++i)
@@ -1694,12 +1694,12 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
                 for (int j = 0; j < modulesTree.getNumChildren(); j++)
                 {
                     auto itTree = modulesTree.getChild(j);
-                    if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
+                    if ((int)itTree.getProperty(TreeIDs::moduleState.getParamID()) == 0) //we grab the first empty module
                     {
                         KrumModuleEditor* modEd = nullptr;
                         if (i == 0)
                         {
-                            modEd = moduleContainer->getModuleEditor(itTree.getProperty(TreeIDs::moduleDisplayIndex));
+                            modEd = moduleContainer->getModuleEditor(itTree.getProperty(TreeIDs::moduleDisplayIndex.getParamID()));
                         }
                         else
                         {
@@ -1784,10 +1784,10 @@ void FileChooser::CurrentPathBox::addPathBoxItem(int itemId, std::unique_ptr<Pat
 
 bool FileChooser::CurrentPathBox::isUserPlace(PathBoxItem* itemToTest)
 {
-    auto placesTree = fileChooser.fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::PLACES);
+    auto placesTree = fileChooser.fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::PLACES.getParamID());
     for (int i = 0; i < placesTree.getNumChildren(); ++i)
     {
-        if (placesTree.getChild(i).getProperty(TreeIDs::placePath).toString().compare(itemToTest->path) == 0)
+        if (placesTree.getChild(i).getProperty(TreeIDs::placePath.getParamID()).toString().compare(itemToTest->path) == 0)
         {
             return true;
         }
@@ -1859,10 +1859,10 @@ void FileChooser::PathBoxItem::handleRightClick(int result, PathBoxItem* item)
 
 void FileChooser::PathBoxItem::removeThisPlace()
 {
-    auto placesTree = ownerComboBox.fileChooser.fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::PLACES);
+    auto placesTree = ownerComboBox.fileChooser.fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::PLACES.getParamID());
     for (int i = 0; i < placesTree.getNumChildren(); ++i)
     {
-        if (placesTree.getChild(i).getProperty(TreeIDs::placePath).toString().compare(path) == 0)
+        if (placesTree.getChild(i).getProperty(TreeIDs::placePath.getParamID()).toString().compare(path) == 0)
         {
             placesTree.removeChild(i, nullptr);
             ownerComboBox.fileChooser.animateRemovePlace();
@@ -2221,12 +2221,12 @@ void FileChooser::getPaths()
     pathBoxPaths.add({});
     pathBoxNames.add({});
 
-    auto locationsTree = fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::PLACES);
+    auto locationsTree = fileBrowser.getFileBrowserValueTree().getChildWithName(TreeIDs::PLACES.getParamID());
     for (int i = 0; i < locationsTree.getNumChildren(); ++i)
     {
         auto locationTree = locationsTree.getChild(i);
-        pathBoxPaths.add(locationTree.getProperty(TreeIDs::placePath).toString());
-        pathBoxNames.add(locationTree.getProperty(TreeIDs::placeName).toString());
+        pathBoxPaths.add(locationTree.getProperty(TreeIDs::placePath.getParamID()).toString());
+        pathBoxNames.add(locationTree.getProperty(TreeIDs::placeName.getParamID()).toString());
     }
 
 }
@@ -2274,13 +2274,13 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
         }
 
         const auto fbTree = fileChooser->fileBrowser.getFileBrowserValueTree();
-        auto placesValueTree = fbTree.getChildWithName(TreeIDs::PLACES);
+        auto placesValueTree = fbTree.getChildWithName(TreeIDs::PLACES.getParamID());
 
         //we make sure a Place doesn't already exist
         for (int i = 0; i < placesValueTree.getNumChildren(); ++i)
         {
             auto placeTree = placesValueTree.getChild(i);
-            auto path = placeTree.getProperty(TreeIDs::placePath).toString();
+            auto path = placeTree.getProperty(TreeIDs::placePath.getParamID()).toString();
 
             if (path.compare(selectedFile.getFullPathName()) == 0)
             {
@@ -2289,9 +2289,9 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
             }
         }
 
-        juce::ValueTree newPlace{ TreeIDs::Place };
-        newPlace.setProperty(TreeIDs::placeName, selectedFile.getFileName(), nullptr);
-        newPlace.setProperty(TreeIDs::placePath, selectedFile.getFullPathName(), nullptr);
+        juce::ValueTree newPlace{ TreeIDs::Place.getParamID() };
+        newPlace.setProperty(TreeIDs::placeName.getParamID(), selectedFile.getFileName(), nullptr);
+        newPlace.setProperty(TreeIDs::placePath.getParamID(), selectedFile.getFullPathName(), nullptr);
         placesValueTree.addChild(newPlace, -1, nullptr);
 
         fileChooser->getPaths();
@@ -2338,9 +2338,9 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
     concertinaPanel.setCustomPanelHeader(&fileChooser, &filechooserHeader, false);
     
     
-    auto recTree = fbValueTree.getChildWithName(TreeIDs::RECENT);
+    auto recTree = fbValueTree.getChildWithName(TreeIDs::RECENT.getParamID());
     recentFilesList.updateFileListFromTree(recTree);
-    auto favTree =fbValueTree.getChildWithName(TreeIDs::FAVORITES);
+    auto favTree =fbValueTree.getChildWithName(TreeIDs::FAVORITES.getParamID());
     favoritesTreeView.updateFavoritesFromTree(favTree);
 
     addAndMakeVisible(audioPreviewer);
@@ -2484,15 +2484,15 @@ void KrumFileBrowser::buildDemoKit()
     juce::String separator = juce::File::getSeparatorString();
     juce::File demoKitFolder{ specialLocation.getParentDirectory().getFullPathName() + separator + "DemoKit" };
 
-    auto favVt = fileBrowserValueTree.getChildWithName(TreeIDs::FAVORITES);
+    auto favVt = fileBrowserValueTree.getChildWithName(TreeIDs::FAVORITES.getParamID());
 
     for (int i = 0; i < favVt.getNumChildren(); i++)
     {
         auto childTree = favVt.getChild(i);
 
-        if (childTree.getType() == TreeIDs::Folder)
+        if (childTree.getType() == juce::Identifier(TreeIDs::Folder.getParamID()))
         {
-            auto name = childTree.getProperty(TreeIDs::folderName);
+            auto name = childTree.getProperty(TreeIDs::folderName.getParamID());
             if (name.toString().compare("DemoKit") == 0)
             {
                 return;

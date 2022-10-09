@@ -34,7 +34,7 @@ DragAndDropThumbnail::~DragAndDropThumbnail()
 
 void DragAndDropThumbnail::valueTreePropertyChanged(juce::ValueTree & treeWhoChanged, const juce::Identifier & property)
 {
-    if (treeWhoChanged == parentEditor.moduleTree && (property == TreeIDs::moduleStartSample || property == TreeIDs::moduleEndSample))
+    if (treeWhoChanged == parentEditor.moduleTree && (property == juce::Identifier(TreeIDs::moduleStartSample.getParamID()) || property == juce::Identifier(TreeIDs::moduleEndSample.getParamID())))
     {
         repaint();
     }
@@ -73,7 +73,7 @@ void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
 
 void DragAndDropThumbnail::moveDroppedFileToParent()
 {
-    parentEditor.moduleTree.setProperty(TreeIDs::moduleFile, droppedFile.getFullPathName(), nullptr);
+    parentEditor.moduleTree.setProperty(TreeIDs::moduleFile.getParamID(), droppedFile.getFullPathName(), nullptr);
     clipGainSlider.setValue(juce::Decibels::decibelsToGain(0.0));
     parentEditor.timeHandle.resetHandles();
 
