@@ -22,7 +22,7 @@
 
 namespace Colors
 {
-    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.2f).withAlpha(0.8f) };
+    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.4f).withAlpha(0.8f) };
     const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
     const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
     const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };

@@ -2677,24 +2677,28 @@ void PanelHeader::paint(juce::Graphics& g)
     else
     {
         g.setColour(mouseOver ? juce::Colours::black.withAlpha(0.4f) : juce::Colours::black.withAlpha(0.2f));
+        //g.setColour(mouseOver ? ColorPaletteColors::orangeRed.withAlpha(0.2f) : ColorPaletteColors::orangeRed.withAlpha(0.4f));
     }
 
     g.fillRect(area);
+    
 
 
     juce::Line<float> topLine{area.getBottomLeft().toFloat(), area.getBottomRight().toFloat() };
-    g.setColour(juce::Colours::lightgrey.darker(0.8f));
+    //g.setColour(juce::Colours::lightgrey.darker(0.8f));
+    g.setColour(juce::Colours::black);
     g.drawLine(topLine, 0.5f);
 
 
-    g.setColour(juce::Colours::lightgrey.darker(0.2f).withAlpha(0.7f));
+    //g.setColour(juce::Colours::lightgrey.darker(0.2f).withAlpha(0.7f));
+    g.setColour(juce::Colours::white.withAlpha(0.3f));
 
     if (klaf)
     {
         g.setFont(klaf->getMontBoldTypeface());
     }
 
-    g.drawFittedText(title, area.withLeft(5), juce::Justification::centredLeft, 1);
+    g.drawFittedText(title, area.withLeft(5), juce::Justification::centred, 1);
 
     if (showCanDropFile)
     {
