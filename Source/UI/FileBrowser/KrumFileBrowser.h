@@ -18,7 +18,7 @@
 * There is a separate display name which can be changed by the user, but does not rename any actual files.
 * There are three sections, the "Recent", "Favorites" and "File Browser sections. The Recent section gets automatically updated when a file is dropped on a new module. It will only hold files.
 * The Favorites section is user selected and can be chosen from the File Browser section, or by drag and drop from external apps.
-* The File Browser section gives the user acces to their whole computer and can also save favorite locations.
+* The File Browser section gives the user acces to their whole computer and can also save locations, called "Places".
  
 * This class is a bit confusing... The KrumFileBrowser holds a KrumTreeView. The KrumTreeView holds TreeViewItems. There are two types of TreeViewItems, KrumTreeHeaderItem and KrumTreeItem. 
 * The KrumTreeHeaderItem is for folders and KrumTreeItem is for files. Both also have custom component subclasses that give them some custom functionality.
@@ -43,13 +43,15 @@ class KrumSampler;
 
 namespace Dimensions
 {
-    const int rowHeight = 18;
-    const float rowTextScalar = 0.85f;
+    const int rowHeight = 22;
+    const float rowTextScalar = 0.60f;
+    const int rowHeaderHeight = 32;
+    const int panelHeaderCornerSize = 2.0f;
     const int titleH = 21;
     const int fileIconSize = 19;
     const float fileIconAlpha = 0.5f;
     const int locationTabDepth = 22;
-    const int currentPathHeight = 20;
+    const int currentPathHeight = 25;
     const int previewerH = 45;
 }
 
@@ -495,7 +497,7 @@ private:
     juce::ValueTree favoritesValueTree;
     std::unique_ptr<RootHeaderItem> rootItem;
 
-    juce::Colour fontColor{ juce::Colours::darkgrey };
+    //juce::Colour fontColor{ juce::Colours::darkgrey };
     juce::Colour bgColor{ juce::Colours::black };
     juce::Colour conLineColor{ juce::Colours::darkgrey };
 

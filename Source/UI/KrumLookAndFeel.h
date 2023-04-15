@@ -22,18 +22,33 @@
 
 namespace Colors
 {
-    const juce::Colour fontColor{ juce::Colours::lightgrey.darker(0.4f).withAlpha(0.8f) };
-    const juce::Colour highlightFontColor{ juce::Colours::lightgrey };
+    //general app 
+    const juce::Colour fontColor{ juce::Colours::black };
+    const juce::Colour highlightFontColor{ juce::Colours::black.brighter(0.2f)};
     const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
-    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.001f) };
-    //from ColorPalette.h
+    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.005f) };
+
+    //browser
+    const juce::Colour browserFontColor{ juce::Colours::white.withAlpha(0.5f)};
+    const juce::Colour browserBGColor{ juce::Colours::black.brighter(0.075f)};
+    const juce::Colour browserPathBoxColor{ Colors::browserBGColor.contrasting(0.075f) };
+
+    //action 
     const juce::Colour addAnimationColor{ juce::Colour::fromRGB(67, 170, 139) }; //zomp
     const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) }; //redSalsa
+    const juce::Colour canDropFileColor{ juce::Colours::green };
+    
+    //panel header 
+    const juce::Colour panelHeaderBGColor{ juce::Colours::grey.darker(0.8)};
+    const juce::Colour panelHeaderFontColor{ juce::Colours::black };
+    const juce::Colour panelHeaderLineColor{ juce::Colours::darkgrey};
 
+    //modules 
     const juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.5f) };
     const juce::Colour outlineColor{ juce::Colours::white };
     const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
+    //not sure, need to figure out
     const juce::Colour bgColor{ juce::Colours::black.brighter(0.12f) };
     const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
     const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
@@ -68,9 +83,23 @@ public:
 
     juce::Typeface::Ptr getMontBoldTypeface()
     {
-        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBold_ttf, BinaryData::MontserratBlack_ttfSize);
+        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBold_ttf, BinaryData::MontserratBold_ttfSize);
     }
 
+    juce::Typeface::Ptr getMontBlackTypeface()
+    {
+        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBlack_ttf, BinaryData::MontserratBlack_ttfSize);
+    }
+
+    juce::Typeface::Ptr getMontExtraBoldTypeFace()
+    {
+        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratExtraBold_ttf, BinaryData::MontserratExtraBold_ttfSize);
+    }
+
+    juce::Typeface::Ptr getFileBrowserFont()
+    {
+        return getMontRegularTypeface();
+    }
 
   /*  juce::Typeface::Ptr getTypefaceForFont(const juce::Font& f) override
     {
@@ -444,8 +473,9 @@ public:
     void positionComboBoxText(juce::ComboBox& box, juce::Label& label) override
     {
         label.setJustificationType(juce::Justification::centredLeft);
-        label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
-        label.setFont(getComboBoxFont(box));
+        label.setBounds(0, 0, box.getWidth(), box.getHeight());
+        //label.setFont(getComboBoxFont(box));
+        label.setFont(getMontMediumTypeface());
     }
 
     void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
@@ -1038,11 +1068,12 @@ public:
         auto cornerSize = box.findParentComponentOfClass<juce::ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
         juce::Rectangle<int> boxBounds(0, 0, width, height);
 
-        g.setColour(box.findColour(juce::ComboBox::backgroundColourId));
+        //g.setColour(box.findColour(juce::ComboBox::backgroundColourId));
+        g.setColour(Colors::browserPathBoxColor);
         g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
 
-        g.setColour(box.findColour(juce::ComboBox::outlineColourId));
-        g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+        //g.setColour(box.findColour(juce::ComboBox::outlineColourId));
+        //g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
 
         bool popUp = box.isPopupActive();
 
@@ -1076,16 +1107,18 @@ public:
     void positionComboBoxText(juce::ComboBox& box, juce::Label& label) override
     {
         label.setJustificationType(juce::Justification::centred);
-        label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 5);
-        //label.setFont(getMontRegularTypeface());
+        label.setBounds(1, 0, box.getWidth() - 10, box.getHeight());
         label.setFont(getMontBoldTypeface());
-        label.setColour(juce::Label::ColourIds::textColourId, juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
+        label.setFont(label.getHeight() * 0.8f);
+        //label.setFont(getMontBoldTypeface());
+        //label.setColour(juce::Label::ColourIds::textColourId, juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
+        label.setColour(juce::Label::ColourIds::textColourId, Colors::browserFontColor);
     }
 
     void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
     {
         //g.setColour(findColour(juce::ComboBox::ColourIds::backgroundColourId));
-        g.setColour(juce::Colours::black.withAlpha(0.9f));
+        g.setColour(Colors::browserBGColor);
         g.fillRect(0, 0, width, height);
 
         g.setColour(juce::Colours::darkgrey);
@@ -1243,10 +1276,15 @@ public:
 
         if (isItemSelected)
         {
-            g.setColour(juce::Colours::black.withAlpha(0.15f));
-            g.fillRect(area);
+            g.setColour(Colors::browserBGColor.withAlpha(0.85f));
+        }
+        else
+        {
+            g.setColour(Colors::browserBGColor);
         }
 
+        g.fillRect(area);
+        
         g.setColour(juce::Colours::white.withAlpha(0.4f));
         
         if (auto* d = isDirectory ? getDefaultFolderImage()
@@ -1260,13 +1298,12 @@ public:
         if (isItemSelected)
             g.setColour(Colors::highlightFontColor);
         else
-            g.setColour(Colors::fontColor);
+            g.setColour(Colors::browserFontColor);
 
-        g.setFont((float)height * 0.8f);
-
-        g.drawFittedText(filename,
-            area.withX(Dimensions::fileIconSize + 5),
-            juce::Justification::centredLeft, 1);
+        g.setFont(getFileBrowserFont());
+        g.setFont((float)height * 0.7f);
+       // g.drawFittedText(filename, area.withX(Dimensions::fileIconSize + 5), juce::Justification::centredLeft, 1);
+        g.drawText(filename, area.withX(Dimensions::fileIconSize + 5), juce::Justification::centredLeft, true);
 
         
     }
@@ -1281,6 +1318,9 @@ public:
         g.setColour(backgroundColour.contrasting().withAlpha(isMouseOver ? 0.5f : 0.3f));
         g.fillPath(p, p.getTransformToScaleToFit(area.reduced(2, area.getHeight() / 4), true));*/
 
+        g.setColour(Colors::browserBGColor);
+        g.fillRect(bounds);
+        
         juce::Path path;
         auto area = bounds.reduced(7, 5);
         g.setColour(juce::Colours::grey);
@@ -1296,6 +1336,7 @@ public:
             g.strokePath(path, juce::PathStrokeType(1.0f));
             g.fillPath(path);
         }
+
 
     }
 
@@ -1319,8 +1360,5 @@ public:
     std::unique_ptr<juce::Drawable> audioFileIconImage = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
 
 };
-
-
-
 
 //===========================================================================================================

@@ -44,8 +44,12 @@
               file="Resources/Fonts/Montserrat-Black.ttf"/>
         <FILE id="sS0jDA" name="Montserrat-Bold.ttf" compile="0" resource="1"
               file="Resources/Fonts/Montserrat-Bold.ttf"/>
+        <FILE id="l65pg1" name="Montserrat-ExtraBold.ttf" compile="0" resource="1"
+              file="Resources/Fonts/Montserrat-ExtraBold.ttf"/>
         <FILE id="vgVhmA" name="Montserrat-ExtraLight.ttf" compile="0" resource="1"
               file="Resources/Fonts/Montserrat-ExtraLight.ttf"/>
+        <FILE id="WA0qZJ" name="Montserrat-Italic-VariableFont_wght.ttf" compile="0"
+              resource="1" file="Resources/Fonts/Montserrat-Italic-VariableFont_wght.ttf"/>
         <FILE id="cn2OV0" name="Montserrat-Light.ttf" compile="0" resource="1"
               file="Resources/Fonts/Montserrat-Light.ttf"/>
         <FILE id="pzWzYO" name="Montserrat-Medium.ttf" compile="0" resource="1"
@@ -56,6 +60,8 @@
               file="Resources/Fonts/Montserrat-SemiBold.ttf"/>
         <FILE id="Y5bPeI" name="Montserrat-Thin.ttf" compile="0" resource="1"
               file="Resources/Fonts/Montserrat-Thin.ttf"/>
+        <FILE id="G0K2jF" name="Montserrat-VariableFont_wght.ttf" compile="0"
+              resource="1" file="Resources/Fonts/Montserrat-VariableFont_wght.ttf"/>
       </GROUP>
       <FILE id="M6o51Y" name="add-black-18dp.svg" compile="0" resource="1"
             file="Resources/add-black-18dp.svg"/>
