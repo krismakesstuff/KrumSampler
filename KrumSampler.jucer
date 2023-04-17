@@ -10,6 +10,10 @@
               pluginManufacturerCode="Kris" pluginCode="Krum">
   <MAINGROUP id="NTQyMJ" name="KrumSampler">
     <GROUP id="{EB4A4C0D-C950-9DF2-E178-9C3B37C020B8}" name="Resources">
+      <FILE id="r2MAVk" name="chevron_left_white.svg" compile="0" resource="1"
+            file="Resources/chevron_left_white.svg"/>
+      <FILE id="uMEbqZ" name="chevron_right_white.svg" compile="0" resource="1"
+            file="Resources/chevron_right_white.svg"/>
       <FILE id="MA8PRH" name="settings-grey-18dp.svg" compile="0" resource="1"
             file="Resources/settings-grey-18dp.svg"/>
       <FILE id="BbPjPx" name="settings-black-18dp.svg" compile="0" resource="1"

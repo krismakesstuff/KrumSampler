@@ -44,12 +44,12 @@ class KrumSampler;
 namespace Dimensions
 {
     const int rowHeight = 22;
-    const float rowTextScalar = 0.60f;
+    const float rowTextScalar = 0.70f;
     const int rowHeaderHeight = 32;
     const int panelHeaderCornerSize = 2.0f;
     const int titleH = 21;
     const int fileIconSize = 19;
-    const float fileIconAlpha = 0.5f;
+    const float fileIconAlpha = 0.6f;
     const int locationTabDepth = 22;
     const int currentPathHeight = 25;
     const int previewerH = 45;
@@ -596,8 +596,9 @@ private:
         CurrentPathBox& ownerComboBox;
     };
 
-    class CurrentPathBox :  public juce::ComboBox,
+    class CurrentPathBox :  public InfoPanelComboBox,
                             public juce::ValueTree::Listener
+                            
     {
     public:
         CurrentPathBox(FileChooser& fc);
@@ -621,7 +622,7 @@ private:
 
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
-    juce::DrawableButton goUpButton{"UpButton", juce::DrawableButton::ButtonStyle::ImageFitted};
+    InfoPanelDrawableButton goUpButton{"Up Button","Moves up one directory.","", juce::DrawableButton::ButtonStyle::ImageFitted};
 
     SimpleAudioPreviewer& previewer;
     KrumFileBrowser& fileBrowser;

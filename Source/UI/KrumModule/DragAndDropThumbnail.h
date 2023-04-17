@@ -58,6 +58,9 @@ public:
     void paintStartBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
     void paintEndBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
 
+    void setChannelColor(juce::Colour newColor);
+    void setThumbnailBGColor(juce::Colour newColor);
+
     void mouseDown(const juce::MouseEvent& e) override;
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
@@ -69,7 +72,7 @@ public:
 
     void updateThumbnailClipGain(float newVerticalZoom);
 
-    float verticalZoom = 1.0f;
+    float verticalZoom = 2.0f;
     juce::File droppedFile;
     bool checkDroppedFile = false;
     bool canAcceptFile = false;
@@ -80,6 +83,8 @@ public:
     std::unique_ptr<SliderAttachment> clipGainSliderAttachment;
 
     KrumModuleEditor& parentEditor;
+    juce::Colour thumbnailBGColor{ juce::Colours::white };
+    juce::Colour channelColor{ juce::Colours::blue };
     
 };
 

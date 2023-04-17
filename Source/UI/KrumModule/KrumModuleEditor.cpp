@@ -24,6 +24,9 @@ KrumModuleEditor::KrumModuleEditor(juce::ValueTree& modTree, KrumSamplerAudioPro
 {
     setPaintingIsUnclipped(true);
 
+    
+
+
     //We make a settings overlay in the ctor and keep it for the entire life of the module editor so we don't have to heap allocate when changing settings
     settingsOverlay.reset(new ModuleSettingsOverlay(*this));
     addChildComponent(settingsOverlay.get());
@@ -52,7 +55,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
     }
 
     auto area = getLocalBounds().reduced(EditorDimensions::shrinkage);
-    juce::Colour c = getModuleColor()/*.withAlpha(0.85f)*/;
+    juce::Colour c = getModuleColor().darker(0.4f);
 
     int moduleState = getModuleState();
 
@@ -66,7 +69,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
     }
     else if (moduleState == KrumModule::ModuleState::active) //if the moduleState is hasfile we will be showing the settingsOverlay
     {
-        juce::Colour bc = c.withSaturation(0.7f).darker(0.25f);
+        juce::Colour bc = c.withSaturation(0.7f).darker(0.4f);
 
         if (isModuleMuted())
         {
@@ -86,7 +89,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         }
 
         //auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
-        auto bgGrade = juce::ColourGradient::vertical(c.darker(0.35f), (float)area.getY(), bc, area.getBottom());
+        auto bgGrade = juce::ColourGradient::vertical(bc/*.darker(0.35f)*/, (float)area.getY(), c, area.getBottom());
 
         auto gain = getModuleGain();
         //auto adjustedGain = juce::jlimit<double>(0.0, 1.0, gain);
@@ -100,11 +103,11 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         juce::Rectangle<int> leftLabelRect{ area.getX() + 2, panSlider.getBottom() - 5, 20, 20 };
         juce::Rectangle<int> rightLabelRect{ area.getRight() - 22, panSlider.getBottom() - 5, 20, 20 };
 
-        g.setColour(c);
+       // g.setColour(Colors::modulesBGColor);
 
-        //g.setFont(11.0f);
-        //g.drawFittedText("L", leftLabelRect, juce::Justification::centred, 1);
-        //g.drawFittedText("R", rightLabelRect, juce::Justification::centred, 1);
+        /*g.setFont(11.0f);
+        g.drawFittedText("L", leftLabelRect, juce::Justification::centred, 1);
+        g.drawFittedText("R", rightLabelRect, juce::Justification::centred, 1);*/
 
 
         //auto sliderBounds = volumeSlider.getBoundsInParent().toFloat();
@@ -127,7 +130,7 @@ void KrumModuleEditor::resized()
     int width = area.getWidth();
 
 
-    int titleHeight = height * 0.09f;
+    int titleHeight = height * 0.10f;
 
     int spacer = 5;
     int thumbnailH = height * 0.25f;
@@ -260,14 +263,18 @@ void KrumModuleEditor::buildModule()
     //    addAndMakeVisible(dragHandle.get());
     //    dragHandle->setTooltip("Future Kris will make this drag and drop to re-arrange modules");
     //
+   
+
     addAndMakeVisible(titleBox);
     titleBox.setText(moduleTree.getProperty(TreeIDs::moduleName.getParamID()).toString(), juce::NotificationType::dontSendNotification);
-    titleBox.setFont({ 13.0f });
+    titleBox.setFont(editor.kLaf.getMontBlackTypeface());
+    titleBox.setFont({ 16.0f });
     titleBox.setColour(juce::Label::ColourIds::textColourId, titleFontColor);
     titleBox.setColour(juce::Label::ColourIds::textWhenEditingColourId, juce::Colours::black);
     titleBox.setColour(juce::TextEditor::ColourIds::highlightColourId, juce::Colours::lightgrey);
     titleBox.setColour(juce::CaretComponent::ColourIds::caretColourId, juce::Colours::black);
     titleBox.setJustificationType(juce::Justification::centred);
+    titleBox.setMinimumHorizontalScale(1.0f);
     titleBox.setEditable(false, true, false);
     titleBox.setTooltip("double-click to change name");
     
@@ -279,6 +286,7 @@ void KrumModuleEditor::buildModule()
    
     addAndMakeVisible(thumbnail);
     thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModuleClipGain.getParamID() + i, thumbnail.clipGainSlider));
+    
 
     addAndMakeVisible(timeHandle);
     
@@ -368,46 +376,49 @@ void KrumModuleEditor::setChildCompColors()
 {
     auto moduleColor = getModuleColor()/*.withAlpha(0.5f)*/;
 
+    auto accentColor = moduleColor.brighter(0.05f);
+    auto bgColor = Colors::moduleBGColor;
+
 //    dragHandle->setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
 //    dragHandle->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::transparentBlack);
 //    dragHandle->setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.99f));
 
-    panSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
-    panSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
-    panSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, moduleColor);
+    panSlider.setColour(juce::Slider::ColourIds::thumbColourId, bgColor);
+    panSlider.setColour(juce::Slider::ColourIds::trackColourId, accentColor);
+    panSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, bgColor);
     panSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
 
     //pitchSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
     //pitchSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
     //pitchSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
-    pitchSlider.setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colours::black);
-    pitchSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, moduleColor);
+    pitchSlider.setColour(juce::Slider::ColourIds::backgroundColourId, accentColor);
+    pitchSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, bgColor);
 
-    volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
-    volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor/*.darker(0.6f)*/);
+    volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, bgColor);
+    volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, accentColor);
     volumeSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
     volumeSlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, moduleColor.darker());
 
-    playButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-    playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
-    playButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
-    playButton.setColour(juce::TextButton::ColourIds::textColourOnId, moduleColor.brighter(0.2f));
+    playButton.setColour(juce::TextButton::ColourIds::buttonColourId, accentColor);
+    playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, accentColor);
+    playButton.setColour(juce::TextButton::ColourIds::textColourOffId, bgColor);
+    playButton.setColour(juce::TextButton::ColourIds::textColourOnId, bgColor.brighter(0.2f));
      
     //playButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     //playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
 
-    editButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-    editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
-    editButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
-    editButton.setColour(juce::TextButton::ColourIds::textColourOnId, moduleColor.brighter(0.2f));
+    editButton.setColour(juce::TextButton::ColourIds::buttonColourId, accentColor);
+    editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, accentColor);
+    editButton.setColour(juce::TextButton::ColourIds::textColourOffId, bgColor);
+    editButton.setColour(juce::TextButton::ColourIds::textColourOnId, bgColor.brighter(0.2f));
     
     //editButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     //editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
 
-    muteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+    muteButton.setColour(juce::TextButton::ColourIds::buttonColourId, accentColor);
     muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::red);
-    muteButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
-    muteButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+    muteButton.setColour(juce::TextButton::ColourIds::textColourOnId, accentColor);
+    muteButton.setColour(juce::TextButton::ColourIds::textColourOffId, bgColor);
 
     //muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.darker());
 
@@ -416,24 +427,30 @@ void KrumModuleEditor::setChildCompColors()
     reverseButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
     reverseButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor.darker());
     */
-    reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-    reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, moduleColor.brighter(0.9f));
-    reverseButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::black);
-    reverseButton.setColour(juce::TextButton::ColourIds::textColourOffId, moduleColor);
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonColourId, accentColor);
+    reverseButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, bgColor.brighter(0.9f));
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOnId, accentColor);
+    reverseButton.setColour(juce::TextButton::ColourIds::textColourOffId, bgColor);
 
-    titleBox.setColour(juce::Label::ColourIds::textColourId, moduleColor.brighter(0.5f));//*.darker(0.6f)*/.withAlpha(0.1f));
-    titleBox.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
+    titleBox.setColour(juce::Label::ColourIds::textColourId, bgColor);//*.darker(0.6f)*/.withAlpha(0.1f));
+    titleBox.setColour(juce::Label::ColourIds::backgroundColourId, accentColor);
     titleBox.setColour(juce::Label::ColourIds::backgroundWhenEditingColourId, moduleColor.darker(0.7f));
     titleBox.setColour(juce::Label::ColourIds::outlineWhenEditingColourId, moduleColor.darker());
     titleBox.setColour(juce::TextEditor::ColourIds::highlightedTextColourId, moduleColor.contrasting());
 
-    thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker().withAlpha(0.7f));
+
+    thumbnail.setChannelColor(bgColor);
+    thumbnail.setThumbnailBGColor(accentColor);
+    thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker(0.99f));
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::textBoxOutlineColourId, moduleColor.brighter().withAlpha(0.5f));
 
+    timeHandle.setTrackBackgroundColor(accentColor);
+    timeHandle.setHandleColor(bgColor);
+
     //outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, moduleColor.darker(0.55f).withAlpha(0.5f));
-    outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black);
-    outputCombo.setColour(juce::ComboBox::ColourIds::textColourId, moduleColor);
-    outputCombo.setColour(juce::ComboBox::ColourIds::arrowColourId, moduleColor);
+    outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, accentColor);
+    outputCombo.setColour(juce::ComboBox::ColourIds::textColourId, bgColor);
+    outputCombo.setColour(juce::ComboBox::ColourIds::arrowColourId, bgColor);
     outputCombo.setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.8f));
 
     //outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
@@ -443,8 +460,8 @@ void KrumModuleEditor::setChildCompColors()
     outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, juce::Colours::black);
     outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedTextColourId, moduleColor);
 
-    midiLabel.textColor = moduleColor;
-    
+    midiLabel.textColor = bgColor;
+    midiLabel.setColour(juce::Label::ColourIds::backgroundColourId, accentColor);
     //getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
 
 }
@@ -1185,7 +1202,7 @@ void KrumModuleEditor::MidiLabel::paint(juce::Graphics& g)
     juce::Rectangle<int> midiChanRect = area.withX(midiNoteRect.getRight() + spacer).withWidth(area.getWidth() * 0.5f);
 
 
-    g.setColour(juce::Colours::black);
+    g.setColour(findColour(juce::Label::ColourIds::backgroundColourId));
     g.fillRoundedRectangle(midiNoteRect.toFloat(), cornerSize);
 
 
@@ -1228,16 +1245,18 @@ void KrumModuleEditor::PitchSlider::paint(juce::Graphics& g)
     auto thick = len / 1.8f;
     int titleH = 12;
 
-    auto bgColor = findColour(juce::Slider::ColourIds::backgroundColourId);
+    //auto bgColor = findColour(juce::Slider::ColourIds::backgroundColourId);
+    auto moduleColor = findColour(juce::Slider::ColourIds::backgroundColourId);
+    auto bgColor = Colors::moduleBGColor;
     auto textColor = findColour(juce::Slider::ColourIds::textBoxTextColourId);
 
     if (isMouseOverOrDragging())
     {
-        bgColor = bgColor.withAlpha(0.7f);
+        moduleColor = moduleColor.withAlpha(0.7f);
         textColor = textColor.withAlpha(0.7f);
     }
 
-    g.setColour(bgColor);
+    g.setColour(moduleColor);
     g.fillRoundedRectangle(bounds, 5.0f);
 
     g.setColour(textColor);

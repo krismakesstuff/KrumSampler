@@ -104,7 +104,6 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
 
     juce::Rectangle<int> area = { spacer, 0, width - spacer, height };
     
-    audioFileIcon->drawWithin(g, area.withWidth(Dimensions::fileIconSize).reduced(3).toFloat(), juce::RectanglePlacement::stretchToFit, Dimensions::fileIconAlpha);
     
     juce::Colour fontC = Colors::browserFontColor;
 
@@ -126,6 +125,7 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
     //g.drawFittedText(getFileName(rowNumber), area.withX(Dimensions::fileIconSize + indent + spacer), juce::Justification::centredLeft, 1);
     g.drawText(getFileName(rowNumber), area.withX(Dimensions::fileIconSize + spacer), juce::Justification::centredLeft, true);
 
+    audioFileIcon->drawWithin(g, area.withWidth(Dimensions::fileIconSize).reduced(3).toFloat(), juce::RectanglePlacement::stretchToFit, Dimensions::fileIconAlpha);
 
 }
 
@@ -1754,7 +1754,7 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
 //=================================================================================================================================//
 
 FileChooser::CurrentPathBox::CurrentPathBox(FileChooser& fc)
-    : fileChooser(fc) 
+    : fileChooser(fc), InfoPanelComboBox("Current Path", "This displays your currently viewed file location. You can access your drives in the drop down menu. You can also save \"Places\" that will save in the menu.")
 {
     setRepaintsOnMouseActivity(true);
 
@@ -1835,7 +1835,7 @@ void FileChooser::PathBoxItem::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    g.setColour(isItemHighlighted() ? Colors::highlightColor : Colors::backgroundColor);
+    g.setColour(isItemHighlighted() ? Colors::highlightColor : Colors::sectionBGColor);
     g.fillRect(area);
 
     g.setColour(Colors::browserFontColor);
@@ -1916,7 +1916,7 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, Colors::browserBGColor);
     //currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::lightgrey);
     //currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black.withAlpha(0.2f));
-    currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, Colors::backOutlineColor);
+    currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, Colors::browserFontColor);
     currentPathBox.setColour(juce::ComboBox::ColourIds::arrowColourId, Colors::backOutlineColor);
     currentPathBox.setColour(juce::PopupMenu::textColourId, Colors::highlightFontColor);
     currentPathBox.setEditableText(false);
@@ -2389,8 +2389,8 @@ void KrumFileBrowser::paint(juce::Graphics& g)
     float cornerSize = 5.0f;
     float outline = 1.0f;
 
-    g.setColour(Colors::backgroundColor);
-    g.fillRoundedRectangle(area.toFloat(), cornerSize);
+    g.setColour(Colors::sectionBGColor);
+    g.fillRoundedRectangle(area.reduced(5).toFloat(), cornerSize);
 }
 
 void KrumFileBrowser::resized()
@@ -2722,10 +2722,20 @@ void PanelHeader::paint(juce::Graphics& g)
     }
     else
     {
-        g.setColour(mouseOver ? Colors::panelHeaderBGColor.brighter(0.14f) : Colors::panelHeaderBGColor);
+        if (mouseOver)
+        {
+            g.setColour(Colors::panelHeaderMouseOverBGColor);
+        }
+        else
+        {
+            juce::ColourGradient grade{ Colors::panelHeaderMouseOverBGColor , area.getTopLeft().toFloat(), Colors::panelHeaderBGColor , area.getBottomRight().toFloat(), false};
+            g.setGradientFill(grade);
+        }
+
+        //g.setColour(mouseOver ? Colors::panelHeaderBGColor.brighter(0.14f) : Colors::panelHeaderBGColor);
         //g.setColour(mouseOver ? ColorPaletteColors::orangeRed.withAlpha(0.2f) : ColorPaletteColors::orangeRed.withAlpha(0.4f));
     }
-
+    
     //g.fillRect(area);
     g.fillRoundedRectangle(area.reduced(1).toFloat(), Dimensions::panelHeaderCornerSize);
 

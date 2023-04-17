@@ -252,7 +252,7 @@ void InfoPanelComboBox::mouseEnter(const juce::MouseEvent& e)
 
 void InfoPanelComboBox::mouseExit(const juce::MouseEvent& e)
 {
-    InfoPanel::shared_instance().setInfoPanelText(compTitle, message, keycommand);
+    InfoPanel::shared_instance().clearPanelText();
     juce::ComboBox::mouseExit(e);
 }
 

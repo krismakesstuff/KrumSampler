@@ -46,6 +46,8 @@ public:
     void setHandles(int startSample, int endSample);
     void resetHandles();
 
+    void setTrackBackgroundColor(juce::Colour newColor);
+    void setHandleColor(juce::Colour newColor);
 
 private:
 
@@ -58,4 +60,7 @@ private:
     void setPositionsFromMouse(const juce::MouseEvent& event);
 
     KrumModuleEditor& editor;
+
+    juce::Colour trackBGColor{ juce::Colours::white };
+    juce::Colour handleColor{ juce::Colours::blue };
 };

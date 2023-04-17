@@ -23,15 +23,18 @@
 namespace Colors
 {
     //general app 
-    const juce::Colour fontColor{ juce::Colours::black };
-    const juce::Colour highlightFontColor{ juce::Colours::black.brighter(0.2f)};
-    const juce::Colour highlightColor{ juce::Colours::black.withAlpha(0.15f) };
-    const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.005f) };
+    const juce::Colour fontColor{ juce::Colours::white.withAlpha(0.5f) };
+    const juce::Colour highlightFontColor{ fontColor.darker(0.1f)};
+    const juce::Colour highlightColor{ juce::Colours::black.brighter(0.15f) };
+    //const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.005f) };
+    const juce::Colour sectionOutlineColor{ juce::Colours::grey };
+    const juce::Colour sectionBGColor{ juce::Colours::black.brighter(0.075f) };
+    const juce::Colour outputSliderBGColor{ Colors::sectionBGColor };
 
     //browser
     const juce::Colour browserFontColor{ juce::Colours::white.withAlpha(0.5f)};
-    const juce::Colour browserBGColor{ juce::Colours::black.brighter(0.075f)};
-    const juce::Colour browserPathBoxColor{ Colors::browserBGColor.contrasting(0.075f) };
+    const juce::Colour browserBGColor{ Colors::sectionBGColor };
+    const juce::Colour browserPathBoxColor{ juce::Colours::black.brighter(0.15f) };
 
     //action 
     const juce::Colour addAnimationColor{ juce::Colour::fromRGB(67, 170, 139) }; //zomp
@@ -40,12 +43,15 @@ namespace Colors
     
     //panel header 
     const juce::Colour panelHeaderBGColor{ juce::Colours::grey.darker(0.8)};
+    const juce::Colour panelHeaderMouseOverBGColor{ Colors::panelHeaderBGColor.brighter(0.19f) };
     const juce::Colour panelHeaderFontColor{ juce::Colours::black };
     const juce::Colour panelHeaderLineColor{ juce::Colours::darkgrey};
 
     //modules 
-    const juce::Colour modulesBGColor{ juce::Colours::darkgrey.darker(0.5f) };
+    const juce::Colour modulesBGColor{ Colors::sectionBGColor };
     const juce::Colour outlineColor{ juce::Colours::white };
+    const juce::Colour moduleBGColor{ juce::Colours::black };
+
     const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
     //not sure, need to figure out
@@ -149,17 +155,18 @@ public:
             decibelDistance *= -1;
         }
 
+        //currentdb is an index value, not the slider position. 
         for (float currentdb = startDecibel; currentdb > endDecibel; currentdb += decibelDistance)
         {
             float currentLinePos = getSliderDecibelPosition(slider, currentdb);
             
             if (slider.isHorizontal())
             {
-                g.drawLine({ currentLinePos, lineStart, currentLinePos, lineDistance }, lineThickness);
+                g.drawLine({ currentLinePos, lineStart, currentLinePos, lineStart + lineDistance }, lineThickness);
             }      
             else
             {
-                g.drawLine({ lineStart, currentLinePos, lineDistance, currentLinePos }, lineThickness);
+                g.drawLine({ lineStart, currentLinePos, lineStart + lineDistance, currentLinePos }, lineThickness);
 
             }
         }
@@ -185,7 +192,8 @@ public:
             drawLinearSliderThumb(g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
         }
     }
-
+    
+    //Vertical is Output Slider, Horizontal is Previewer Slider
     void drawLinearSliderBackground(juce::Graphics& g, int x, int y, int width, int height,
                                     float sliderPos, float minSliderPos, float maxSliderPos,
                                     const juce::Slider::SliderStyle style, juce::Slider& slider) override
@@ -223,7 +231,7 @@ public:
         if (slider.isHorizontal())
         {
             auto iy = height * 0.25f;
-            juce::Rectangle<float> trackRect ((float)x, iy, (float)width , height * 0.50f);
+            juce::Rectangle<float> trackRect ((float)x, iy, (float)width , height /** 0.50f*/);
 
             /*juce::ColourGradient horzRGrade (gradCol1, trackRect.getCentreX(), iy, gradCol2, trackRect.getRight()-2, iy, false);
             juce::ColourGradient horzLGrade (gradCol2, trackRect.getX(), iy, gradCol1, trackRect.getCentreX(), iy, false);
@@ -240,8 +248,8 @@ public:
             g.setGradientFill(horzLGrade);
             g.fillRoundedRectangle(trackRect.withRight(trackRect.getCentreX()), cornerSize);*/
             
-            g.setColour(gradCol1);
-            g.fillRoundedRectangle(trackRect, cornerSize);
+            //g.setColour(Colors::browserBGColor);
+            //g.fillRoundedRectangle(trackRect, cornerSize);
 
         }
         else //vertical 
@@ -266,7 +274,7 @@ public:
         //g.strokePath(indent, juce::PathStrokeType(0.5f));
     }
 
-
+    //Vertical is Output Slider, Horizontal is Previewer Slider
     void drawLinearSliderThumb(juce::Graphics& g, int x, int y, int width, int height,
                                 float sliderPos, float minSliderPos, float maxSliderPos,
                                 const juce::Slider::SliderStyle style, juce::Slider& slider) override
@@ -278,40 +286,45 @@ public:
         int dropRad = 5;
         int thumbX, thumbY, thumbH, thumbW;
         
+        //Output Slider
         if (style == juce::Slider::LinearVertical)
         {
             thumbH = getSliderThumbRadius(slider); //height * 0.07;// : height * 0.085f;
-            thumbW = 40; //width * 0.65f;
+            thumbW = width * 0.85f;
 
-            thumbX = x - 2;
+            thumbX = x - 4;
             thumbY = sliderPos - thumbH /2;
 
             auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
             juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
 
-            juce::Rectangle<int> dbLineRect{ x + thumbW, y, width + 7,height };
+            //juce::Rectangle<int> dbLineRect{ thumbX + thumbW + 5, y, width - thumbW, height };
+            juce::Rectangle<int> dbLineRect{ thumbW + 10, (int)maxSliderPos , width + 5, (int)minSliderPos - getSliderThumbRadius(slider) };
             float textHeight = 11.0f;
 
-            g.setColour(juce::Colours::white.withAlpha(0.2f));
-            drawVolumeLines(g, x + thumbW, width + 7, 2.0f, -60.0f, 0.5f, slider);
+            //g.setColour(juce::Colours::white.withAlpha(0.2f));
+            g.setColour(Colors::fontColor.darker(0.5f));
+            //drawVolumeLines(g, thumbX + thumbW , width - thumbW, 2.0f, -60.0f, 0.5f, slider)
+            drawVolumeLines(g, (float)dbLineRect.getX() - 2, (float)dbLineRect.getWidth() - 4, 2.0f, -60.0f, -0.5f, slider);
 
-            g.setColour(juce::Colours::white);
+            //g.setColour(juce::Colours::white);
+            g.setColour(Colors::fontColor);
             g.setFont(textHeight);
 
             auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
-            g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() + 4).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto zeroDbPos = getSliderDecibelPosition(slider, 0.0f); //+ thumbOffset;
-            g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() + 4).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n5DbPos = getSliderDecibelPosition(slider, -5.0f); //+thumbOffset;
-            g.drawFittedText("-5", dbLineRect.withY(n5DbPos - textHeight / 2).withX(dbLineRect.getX() + 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-5", dbLineRect.withY(n5DbPos - textHeight / 2).withX(dbLineRect.getX() + 0).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n10DbPos = getSliderDecibelPosition(slider, -10.0f);// +thumbOffset;
-            g.drawFittedText("-10", dbLineRect.withY(n10DbPos - textHeight / 2).withX(dbLineRect.getX() + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-10", dbLineRect.withY(n10DbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             auto n20DbPos = getSliderDecibelPosition(slider, -20.0f);// +thumbOffset;
-            g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+            g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
             g.setColour(thumbColor);
             g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
@@ -327,13 +340,13 @@ public:
             auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
             juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
 
-            juce::Rectangle<int> dbLineRect{ x, y + thumbH * 2, width, height + 3 };
+            juce::Rectangle<int> dbLineRect{ x, y + thumbH , width, (int)(height * 0.5f)};
             float textHeight = 9.0f;
 
-            g.setColour(juce::Colours::white.withAlpha(0.175f));
+            g.setColour(Colors::fontColor.darker(0.99f));
             drawVolumeLines(g, dbLineRect.getY(), dbLineRect.getHeight(), 2.0f, -60.0f, 0.5f, slider);
 
-            g.setColour(juce::Colours::white);
+            g.setColour(Colors::fontColor);
             g.setFont(textHeight);
 
             auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
@@ -776,7 +789,8 @@ public:
             //indent.addRoundedRectangle(trackRect, cornerSize);
             //g.fillPath(indent);
 
-            g.setColour(gradCol2);
+            //g.setColour(gradCol2);
+            g.setColour(trackColour);
             g.fillRoundedRectangle(bounds.expanded(getSliderThumbRadius(slider)).toFloat(), cornerSize);
         }
 
@@ -847,8 +861,8 @@ public:
         //drawVolumeLines(g, (float)dbLineRect.getX() - 5, (float)dbLineRect.getWidth() - 5, 2.0f, -50.0f, -0.5f, slider);
         drawVolumeLines(g, (float)dbLineRect.getX() - 5, (float)dbLineRect.getWidth() + 7, 2.0f, -50.0f, -0.5f, slider);
         
-        //g.setColour(thumbColor);
-        g.setColour(juce::Colours::black);
+        g.setColour(thumbColor);
+        //g.setColour(juce::Colours::black);
         
         g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
         
@@ -962,7 +976,7 @@ public:
             //juce::Rectangle<float> trackRect((float)x, iy, (float)width, height * 0.50f);
             juce::Rectangle<float> trackRect = bounds.toFloat();
 
-            g.setColour(gradCol1);
+            g.setColour(trackColour);
             g.fillRoundedRectangle(trackRect, cornerSize);
             
             //int zeroX = slider.getPositionOfValue(0);
@@ -1301,7 +1315,7 @@ public:
             g.setColour(Colors::browserFontColor);
 
         g.setFont(getFileBrowserFont());
-        g.setFont((float)height * 0.7f);
+        g.setFont((float)height * Dimensions::rowTextScalar);
        // g.drawFittedText(filename, area.withX(Dimensions::fileIconSize + 5), juce::Justification::centredLeft, 1);
         g.drawText(filename, area.withX(Dimensions::fileIconSize + 5), juce::Justification::centredLeft, true);
 

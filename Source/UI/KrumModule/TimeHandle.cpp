@@ -50,11 +50,11 @@ void TimeHandle::paint(juce::Graphics& g)
     int handleH = area.getHeight()/* * 0.7f*/;
     int handleW = (int)(handleH * 0.65f);
 
-    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    g.setColour(trackBGColor.darker(0.2f));
     g.fillRect(area);
 
     //g.setColour(juce::Colours::white.withAlpha(0.3f));
-    g.setColour(juce::Colours::black);
+    g.setColour(handleColor);
 
     juce::Rectangle<int> startRect{ getXFromSample(getStartPosition()), area.getY(), handleW, handleH };
     drawStartPosition(g, startRect);
@@ -113,6 +113,16 @@ void TimeHandle::resetHandles()
 {
     setStartPosition(0);
     setEndPosition(0);
+}
+
+void TimeHandle::setTrackBackgroundColor(juce::Colour newColor)
+{
+    trackBGColor = newColor;
+}
+
+void TimeHandle::setHandleColor(juce::Colour newColor)
+{
+    handleColor = newColor;
 }
 
 void TimeHandle::setStartPosition(int startPositionInSamples)

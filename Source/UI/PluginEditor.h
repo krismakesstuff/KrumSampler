@@ -54,8 +54,8 @@ namespace EditorDimensions
 
     //const static int addButtonH = 50;
     //const static int addButtonW = 100;
-    const static int collapseButtonH = 30;
-    const static int collapseButtonW = 13;
+    const static int collapseButtonH = 40;
+    const static int collapseButtonW = 15;
 
     const static int infoButtonSize = 25;
 
@@ -70,7 +70,7 @@ namespace EditorDimensions
     const static int keyboardH = 85;
 
     const static int titleImageW = 420; //nice
-
+    const static int titleSubTextOffset = 90;
     const static int fileBrowserW = 350;
 
     const static float cornerSize = 5.0f;
@@ -186,7 +186,7 @@ private:
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
     InfoPanelTextButton websiteButton{"Website", "Clicking this will open my website. Go check it out yo!"};
     InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
-    InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore","", juce::DrawableButton::ButtonStyle::ImageStretched};
+    InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore","", juce::DrawableButton::ButtonStyle::ImageFitted};
     
 
     InfoPanelComboBox presetsComboBox{"Presets", "COMING SOON!!"};
