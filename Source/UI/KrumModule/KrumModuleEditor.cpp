@@ -89,7 +89,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         }
 
         //auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
-        auto bgGrade = juce::ColourGradient::vertical(bc/*.darker(0.35f)*/, (float)area.getY(), c, area.getBottom());
+        auto bgGrade = juce::ColourGradient::vertical(c/*.darker(0.35f)*/, (float)area.getY(), bc, area.getBottom());
 
         auto gain = getModuleGain();
         //auto adjustedGain = juce::jlimit<double>(0.0, 1.0, gain);
@@ -376,7 +376,7 @@ void KrumModuleEditor::setChildCompColors()
 {
     auto moduleColor = getModuleColor()/*.withAlpha(0.5f)*/;
 
-    auto accentColor = moduleColor.brighter(0.05f);
+    auto accentColor = moduleColor.darker(0.1f);
     auto bgColor = Colors::moduleBGColor;
 
 //    dragHandle->setColour(juce::TextButton::ColourIds::buttonColourId, moduleColor.darker(0.99f));
