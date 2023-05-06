@@ -126,6 +126,7 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
     {
         if (*sound->getModuleMute() < 0.5f)
         {
+            //these variables will be applied in the render block
             pitchRatio = std::pow(2.0, ((*sound->getModulPitchShift() / 12.0)
                                     * sound->sourceSampleRate / getSampleRate()));
 
@@ -143,7 +144,6 @@ void KrumVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserS
                 sourceSamplePosition = endSample;
             }
 
-            //only storing this, it will be applied in the render block
             clipGain = sound->getModuleClipGain()->load();
 
             float moduleGain = *sound->getModuleGain();
@@ -195,6 +195,7 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int firs
     if (auto* playingSound = static_cast<KrumSound*> (getCurrentlyPlayingSound().get()))
     {
         auto& data = *playingSound->getAudioData();
+
         const float* const inL = data.getReadPointer(0);
         const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer(1) : nullptr;
 
@@ -247,6 +248,8 @@ void KrumVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int firs
                 }
 
                 sourceSamplePosition -= pitchRatio;
+
+                
                 //--sourceSamplePosition;
                 if (sourceSamplePosition > playingSound->length || sourceSamplePosition < startSample)
                 {

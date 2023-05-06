@@ -243,7 +243,7 @@ void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam.getParamID());
     sampler.setCurrentPlaybackSampleRate(sampleRate);
 
-    
+   // DBG("outputGainParameter: " + juce::String(*outputGainParameter));
     
     //juce::Logger::writeToLog("Processor prepared to play, sampleRate: " + juce::String(sampleRate) + ", samplesPerBlock: " +                      juce::String(samplesPerBlock));
 }
@@ -261,12 +261,15 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         updateNumBufferChans = false;
     }*/
 
+    
     midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
     
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
-    buffer.applyGain(*outputGainParameter);
-    
+    buffer.applyGain(outputGainParameter->load());
+
+    //getOutputGas
+
     //this does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
     midiMessages.clear();
 }

@@ -50,7 +50,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue()));
 
     outputGainSlider.onValueChange = [this] { updateOutputGainBubbleComp(outputGainSlider.getCurrentPopupDisplay()); repaint(); };
-    outputGainSlider.onDragEnd = [this] { outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue())); };
+    outputGainSlider.onDragEnd = [this] { outputGainSlider.setTooltip(outputGainSlider.getTextFromValue(outputGainSlider.getValue())); DBG("DragEnded, Value of outputGain = " + juce::String(getOutputGainValue())); };
     outputGainAttachment.reset(new SliderAttachment(parameters, TreeIDs::outputGainParam.getParamID(), outputGainSlider));
     
     //add keyboard
