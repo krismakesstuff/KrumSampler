@@ -61,7 +61,7 @@ public:
     juce::Array<KrumModuleEditor*> getModulesFromMidiNote(int midiNote);
 
     KrumSamplerAudioProcessorEditor* getEditor();
-    juce::OwnedArray<KrumModuleEditor>& getModuleDisplayOrder();
+    juce::OwnedArray<KrumModuleEditor>& getModuleEditors();
     
     int getNumActiveModules();
     int getNumModuleEditors();
@@ -78,11 +78,11 @@ public:
     void createModuleEditors();
 
 
+    KrumModuleEditor* getEditorFromDisplayIndex(int displayIndex);
 private:
 
     KrumModuleEditor* addModuleEditor(KrumModuleEditor* moduleToAdd, bool refreshLayout = true);
 
-    KrumModuleEditor* getEditorFromDisplayIndex(int displayIndex);
 
     void updateModuleDisplayIndicesAfterDelete(int displayIndexDeleted);
     int getNumVisibleModules();

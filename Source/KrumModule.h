@@ -46,10 +46,10 @@ public:
     
     enum ModuleState
     {
+        //numerical values are used in the value tree saving
         empty,      //0
         hasFile,    //1
         active,     //2
-        //numerical values are used in the value tree saving
     };
 
     

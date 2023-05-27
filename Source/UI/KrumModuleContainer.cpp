@@ -85,7 +85,7 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
     {
         int state = treeWhoChanged.getProperty(TreeIDs::moduleState.getParamID());
         int index = treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex.getParamID());
-        if (state == KrumModule::ModuleState::empty && index > -1)
+        if (state == KrumModule::ModuleState::empty && index > -1) //if we set this module to an empty state and the editor is still showing, we remove it
         {
             removeModuleEditor(getEditorFromDisplayIndex(index));
         }
@@ -255,10 +255,11 @@ KrumSamplerAudioProcessorEditor* KrumModuleContainer::getEditor()
     return editor;
 }
 
-juce::OwnedArray<KrumModuleEditor>& KrumModuleContainer::getModuleDisplayOrder()
+juce::OwnedArray<KrumModuleEditor>& KrumModuleContainer::getModuleEditors()
 {
     return moduleEditors;
 }
+
 
 int KrumModuleContainer::getNumActiveModules()
 {

@@ -1448,7 +1448,7 @@ void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
                 //auto containerPoint = event.getEventRelativeTo(moduleContainer);
                 if (moduleContainer->contains(event.getEventRelativeTo(moduleContainer).getPosition()))
                 {
-                    auto& modules = moduleContainer->getModuleDisplayOrder();
+                    auto& modules = moduleContainer->getModuleEditors();
                     for (int i = 0; i < modules.size(); i++)
                     {
                         auto modEd = modules[i];
@@ -1478,7 +1478,7 @@ void FavoritesTreeView::dragOperationEnded(const juce::DragAndDropTarget::Source
 {
     if (moduleContainer)
     {
-        auto& moduleEditors = moduleContainer->getModuleDisplayOrder();
+        auto& moduleEditors = moduleContainer->getModuleEditors();
         for (int i = 0; i < moduleEditors.size(); i++)
         {
             auto modEd = moduleEditors[i];
@@ -1702,33 +1702,36 @@ KrumTreeHeaderItem* FavoritesTreeView::findSectionHeaderParent(juce::TreeViewIte
 
 void FavoritesTreeView::makeModulesFromSelectedFiles()
 {
-    auto selected = getSelectedValueTrees();
+    auto selectedFileTrees = getSelectedValueTrees();
     bool showEmptyModule = false;
 
-    if (selected.size() <= moduleContainer->getNumEmptyModules())
+    if (selectedFileTrees.size() <= moduleContainer->getNumEmptyModules())
     {
         auto modulesTree = fileBrowser.getStateValueTree().getChildWithName(TreeIDs::KRUMMODULES.getParamID());
         if (modulesTree.hasType(TreeIDs::KRUMMODULES.getParamID()))
         {
             auto editor = moduleContainer->getEditor();
-            for (int i = 0; i < selected.size(); ++i)
+            //iterate through the currently selected files
+            for (int fileIndex = 0; fileIndex < selectedFileTrees.size(); ++fileIndex)
             {
-                for (int j = 0; j < modulesTree.getNumChildren(); j++)
+                //iterate through modulesTree to find an inactive tree
+                for (int moduleTreeIndex = 0; moduleTreeIndex < modulesTree.getNumChildren(); moduleTreeIndex++)
                 {
-                    auto itTree = modulesTree.getChild(j);
-                    if ((int)itTree.getProperty(TreeIDs::moduleState.getParamID()) == 0) //we grab the first empty module
+                    auto itTree = modulesTree.getChild(moduleTreeIndex);
+                    if ((int)itTree.getProperty(TreeIDs::moduleState.getParamID()) == 0) //we grab the first empty module tree
                     {
                         KrumModuleEditor* modEd = nullptr;
-                        if (i == 0)
+
+                        if (fileIndex == 0)
                         {
-                            modEd = moduleContainer->getModuleEditor(itTree.getProperty(TreeIDs::moduleDisplayIndex.getParamID()));
+                            modEd = moduleContainer->getModuleEditors().getLast();
                         }
                         else
                         {
                             modEd = moduleContainer->addNewModuleEditor(new KrumModuleEditor(itTree, *editor, fileBrowser.getFormatManager()));
                         }
 
-                        modEd->handleNewFile(selected[i]);
+                        modEd->handleNewFile(selectedFileTrees[fileIndex]);
                         showEmptyModule = true;
                         break;
                     }
