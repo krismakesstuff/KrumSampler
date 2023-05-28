@@ -57,6 +57,10 @@ public:
     void setModuleSelected(KrumModuleEditor* moduleToMakeActive);
     void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect);
     void deselectAllModules();
+    void setModuleSelectedWithShift(KrumModuleEditor* moduleToSelect);
+    void setModuleSelectedWithCommand(KrumModuleEditor* moduleToSelect);
+
+    bool isModuleSelected(KrumModuleEditor* moduleToCheck);
     
     juce::Array<KrumModuleEditor*> getModulesFromMidiNote(int midiNote);
 
@@ -95,6 +99,7 @@ private:
     friend class KrumSampler;
  
     juce::OwnedArray<KrumModuleEditor> moduleEditors{};
+    juce::OwnedArray<KrumModuleEditor> currentlySelectedModules{};
 
     KrumSamplerAudioProcessorEditor* editor = nullptr;
     

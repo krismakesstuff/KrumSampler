@@ -23,6 +23,7 @@ KrumModuleEditor::KrumModuleEditor(juce::ValueTree& modTree, KrumSamplerAudioPro
     thumbnail(*this, THUMBNAIL_RES, fm, e.getThumbnailCache())
 {
     setPaintingIsUnclipped(true);
+    setRepaintsOnMouseActivity(true);
 
     
 
@@ -82,10 +83,10 @@ void KrumModuleEditor::paint (juce::Graphics& g)
             bc = bc.brighter();
         }
 
-        if (mouseOver || mouseOverKey)
+        if (mouseOver || mouseOverKey || selected)
         {
-            g.setColour(juce::Colours::white.withAlpha(0.8f));
-            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 2.0f);
+            g.setColour(Colors::moduleActiveOutlineColor);
+            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 3.0f);
         }
 
         //auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
@@ -209,16 +210,39 @@ void KrumModuleEditor::mouseExit(const juce::MouseEvent& event)
 
 void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 {
-    if (settingsOverlay->isVisible())
+    
+    juce::Component::mouseDown(e);
+}
+
+void KrumModuleEditor::mouseUp(const juce::MouseEvent& e)
+{
+    auto& mc = editor.moduleContainer;
+
+    if (e.mods.isShiftDown())
     {
-        editor.moduleContainer.setModuleSelected(this);
+        mc.setModuleSelectedWithShift(this);
+    }
+    else if (e.mods.isCommandDown())
+    {
+        mc.setModuleSelectedWithCommand(this);
     }
     else
     {
-        editor.moduleContainer.deselectAllModules();
+       mc.deselectAllModules();
+       mc.setModuleSelected(this);
+    }
+    
+    if (selected)
+    {
+        DBG("Module: " + juce::String(getModuleDisplayIndex()) + " Selected.");
+    }
+    else
+    {
+        DBG("Module: " + juce::String(getModuleDisplayIndex()) + " NOT selected.");
     }
 
-    juce::Component::mouseDown(e);
+    juce::Component::mouseUp(e);
+    
 }
 
 //===============================================================================================================
@@ -466,12 +490,17 @@ void KrumModuleEditor::setChildCompColors()
 
 }
 
+//sets either the editor or the settings overlay to selected, they are seperate values
 void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
 {
     if (settingsOverlay != nullptr)
     {
         settingsOverlay->setOverlaySelected(isModuleSelected);
     }
+
+    selected = isModuleSelected;
+    repaint();
+    
 }
 
 void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
@@ -499,7 +528,9 @@ void KrumModuleEditor::showSettingsOverlay(bool keepCurrentColorOnExit, bool sel
     
     if (selectOverlay)
     {
-        //we have the container control selecting so it can clear the other selected modules
+        //need to clear the other modules that were previously selected
+        //unless you do want to, i.e. isShiftDown()
+        editor.getModuleContainer().deselectAllModules();
         editor.getModuleContainer().setModuleSelected(this);
         editor.keyboard.scrollToKey(getModuleMidiNote());
         repaint();

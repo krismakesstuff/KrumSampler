@@ -68,7 +68,8 @@ public:
     void mouseEnter(const juce::MouseEvent& event) override;
     void mouseExit(const juce::MouseEvent& event) override;
     void mouseDown(const juce::MouseEvent& e) override;
-    
+    void mouseUp(const juce::MouseEvent& e) override;
+
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
     
@@ -188,10 +189,11 @@ private:
     bool mouseOver = false;
     bool mouseOverKey = false;
 
+    bool modulePlaying = false;
+    bool selected = false;
+   
     juce::ValueTree moduleTree;
     KrumSamplerAudioProcessorEditor& editor;
-    
-    bool modulePlaying = false;
 
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour titleFontColor{ juce::Colours::black };

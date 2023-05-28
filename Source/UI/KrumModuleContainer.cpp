@@ -31,6 +31,7 @@ KrumModuleContainer::~KrumModuleContainer()
 {
     editor->removeKeyboardListener(this);
     valueTree.removeListener(this);
+    currentlySelectedModules.clear(false);
 }
 
 void KrumModuleContainer::paint (juce::Graphics& g)
@@ -103,22 +104,26 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
 
 void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
 {
-    auto mousePos = event.getMouseDownPosition();
+    //TODO:
+    //capture a mouseclick that isn't on any modules, that will clear all selected modules
     
-    for (int i = 0; i < moduleEditors.size(); i++)
-    {
-        auto modEd = moduleEditors[i];
-        auto modBounds = modEd->getBoundsInParent();
+    //auto mousePos = event.getMouseDownPosition();
+    
 
-        if (modBounds.contains(mousePos))
-        {
-            setModuleSelected(modEd);
-        }
-        else
-        {
-            setModuleUnselected(modEd);
-        }
-    }
+    //for (int i = 0; i < moduleEditors.size(); i++)
+    //{
+    //    auto modEd = moduleEditors[i];
+    //    auto modBounds = modEd->getBoundsInParent();
+
+    //    if (modBounds.contains(mousePos))
+    //    {
+    //        setModuleSelected(modEd);
+    //    }
+    //    else
+    //    {
+    //        setModuleUnselected(modEd);
+    //    }
+    //}
 }
 
 void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
@@ -211,24 +216,92 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
     
 }
 
-void KrumModuleContainer::setModuleSelected(KrumModuleEditor* moduleToMakeActive)
+//this deselects all other modules and then selects the module passed in
+void KrumModuleContainer::setModuleSelected(KrumModuleEditor* moduleToSelect)
 {
-    deselectAllModules();
-    moduleToMakeActive->setModuleSelected(true);
+    moduleToSelect->setModuleSelected(true);
+    currentlySelectedModules.add(moduleToSelect);
     //repaint();
 }
 
 void KrumModuleContainer::setModuleUnselected(KrumModuleEditor* moduleToDeselect)
 {
     moduleToDeselect->setModuleSelected(false);
+    currentlySelectedModules.removeObject(moduleToDeselect, false);
 }
 
 void KrumModuleContainer::deselectAllModules()
 {
+    currentlySelectedModules.clear(false);
+    
     for (int i = 0; i < moduleEditors.size(); i++)
     {
         moduleEditors[i]->setModuleSelected(false);
+        moduleEditors[i]->repaint();
     }
+
+}
+
+//selects the modules between your last selected module to the newly selected module
+void KrumModuleContainer::setModuleSelectedWithShift(KrumModuleEditor* moduleToSelect)
+{
+    //get the last selected module's display index
+    int lastSelectedDisplayIndex = currentlySelectedModules.getLast()->getModuleDisplayIndex();
+   
+    //get the current moduleTOSelect's dispaly index
+    int moduleToSelectDisplayIndex = moduleToSelect->getModuleDisplayIndex();
+
+    if (lastSelectedDisplayIndex < moduleToSelectDisplayIndex)
+    {
+        for (int i = 0; i < moduleEditors.size(); i++)
+        {
+            int displayIndex = moduleEditors[i]->getModuleDisplayIndex();
+            //we make sure the display index is in the range we want
+            if (displayIndex == moduleToSelectDisplayIndex ||  
+                (displayIndex > lastSelectedDisplayIndex && displayIndex < moduleToSelectDisplayIndex)) 
+            {
+                setModuleSelected(moduleEditors[i]);
+            }
+        }
+    }
+    else if (lastSelectedDisplayIndex > moduleToSelectDisplayIndex)
+    {
+        for (int i = 0; i < moduleEditors.size(); i++)
+        {
+            int displayIndex = moduleEditors[i]->getModuleDisplayIndex();
+            //we make sure the display index is in the range we want
+            if (displayIndex == moduleToSelectDisplayIndex || 
+                (displayIndex < lastSelectedDisplayIndex && displayIndex > moduleToSelectDisplayIndex))
+            {
+                setModuleSelected(moduleEditors[i]);
+            }
+        }
+    }
+    else
+    {
+        setModuleSelected(moduleToSelect);
+    }
+
+}
+
+void KrumModuleContainer::setModuleSelectedWithCommand(KrumModuleEditor* moduleToSelect)
+{
+    //could add more functationality here
+    setModuleSelected(moduleToSelect);
+}
+
+bool KrumModuleContainer::isModuleSelected(KrumModuleEditor* moduleToCheck)
+{
+
+    for (int i = 0; i < currentlySelectedModules.size(); i++)
+    {
+        if (moduleToCheck == currentlySelectedModules[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 juce::Array<KrumModuleEditor*> KrumModuleContainer::getModulesFromMidiNote(int midiNote)

@@ -241,7 +241,7 @@ KrumSamplerAudioProcessor::~KrumSamplerAudioProcessor()
 void KrumSamplerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     outputGainParameter = parameters.getRawParameterValue(TreeIDs::outputGainParam.getParamID());
-    sampler.setCurrentPlaybackSampleRate(sampleRate);
+    sampler.setSampleRate(sampleRate);
 
    // DBG("outputGainParameter: " + juce::String(*outputGainParameter));
     
@@ -254,21 +254,20 @@ void KrumSamplerAudioProcessor::releaseResources()
 
 void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    int startSample = 0;
+    buffer.clear();
 
-   /* if (updateNumBufferChans)
+    //for midiKeyboard
+    midiState.processNextMidiBuffer(midiMessages, startSample, buffer.getNumSamples(), true);
+
+    //actually renders the samples to the buffer
+    sampler.renderNextBlock(buffer, midiMessages, startSample, buffer.getNumSamples());
+
+    if (outputGainParameter != nullptr)
     {
-        numBufferChans = buffer.getNumChannels();
-        updateNumBufferChans = false;
-    }*/
-
-    
-    midiState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
-    
-    sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-
-    buffer.applyGain(outputGainParameter->load());
-
-    //getOutputGas
+        //applies output gain
+        buffer.applyGain(outputGainParameter->load());
+    }
 
     //this does not output midi, some hosts will freak out if you send them midi when you said you wouldn't
     midiMessages.clear();

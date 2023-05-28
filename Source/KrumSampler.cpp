@@ -472,18 +472,27 @@ void KrumSampler::initVoices()
     for (int i = 0; i < MAX_VOICES; i++)
     {
         auto newVoice = voices.add(new KrumVoice());
-        newVoice->setCurrentPlaybackSampleRate(getSampleRate());
     }
 
     for (int i = 0; i < NUM_PREVIEW_VOICES; i++)
     {
         auto newVoice = voices.add(new PreviewVoice());
-        newVoice->setCurrentPlaybackSampleRate(getSampleRate());
     }
     
     juce::Logger::writeToLog("Voices Initialized: " + juce::String(voices.size()));
     printVoices();
     
+}
+
+//must be called after initVoices()
+void KrumSampler::setSampleRate(double newSampleRate)
+{
+    setCurrentPlaybackSampleRate(newSampleRate);
+
+    /*for (int i = 0; i < voices.size(); i++)
+    {
+        voices[i]->setCurrentPlaybackSampleRate(newSampleRate);
+    }*/
 }
 
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 

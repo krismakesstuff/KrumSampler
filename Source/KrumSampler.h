@@ -171,6 +171,7 @@ public:
 
     void initModules(juce::ValueTree* valTree, juce::AudioProcessorValueTreeState* apvts);
     void initVoices();
+    void setSampleRate(double newSampleRate);
 
     void noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) override;
     void noteOff(const int midiChannel, const int midiNoteNumber, const float veloctiy, bool allowTailOff) override;

@@ -1745,6 +1745,7 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
         
     }
 
+    //this makes the last empty module to drop new files on
     if (showEmptyModule)
     {
         moduleContainer->showFirstEmptyModule();
