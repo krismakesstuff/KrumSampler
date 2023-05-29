@@ -74,8 +74,9 @@ namespace EditorDimensions
     const static int fileBrowserW = 350;
 
     const static float cornerSize = 5.0f;
-    const static float smallOutline = 1.0f;
-    const static float bigOutline = 2.0f;
+    const static float smallOutline = 0.75f;
+    const static float bigOutline = 1.5f;
+    const static float xlOutline = 3.5f;
 
 
     static int extraShrinkage(int extraMultplier = 2)
@@ -97,6 +98,7 @@ public:
     void paint (juce::Graphics&) override;
     void paintOutputVolumeLines(juce::Graphics& g, juce::Rectangle<float> bounds);
     void resized() override;
+
 
     static juce::String getMidiInfo(const juce::MidiMessage&);
 

@@ -42,6 +42,7 @@
 class KrumModule;
 class KrumModuleProcessor;
 class KrumSamplerAudioProcessorEditor;
+class KrumModuleContainer;
 class DragHandle;
 class ModuleSettingsOverlay;
 class KrumFileBrowser;
@@ -78,6 +79,7 @@ public:
 
     //void showSettingsMenu();
     void setModuleSelected(bool isModuleSelected);
+    bool isModuleSelected();
     void setModuleButtonsClickState(bool isClickable);
     
     void showNewSettingsOverlay();
@@ -167,6 +169,13 @@ public:
     bool getMouseOverKey();
     void setMouseOverKey(bool isMouseOverKey);
 
+    //tests if the given tree, is the same as this module's moduleTree;
+    bool isModuleTree(juce::ValueTree& treeToTest);
+
+    //for multi-selection synchronization
+    void addParamListener(KrumModuleContainer* Listener);
+    void removeParamListener(KrumModuleContainer* Listener);
+
 private:
 
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
@@ -174,6 +183,7 @@ private:
 
     friend class DragAndDropThumbnail;
     friend class TimeHandle;
+    friend class KrumModuleContainer;
 
     void zeroModuleTree();
     void timerCallback() override;
@@ -184,14 +194,17 @@ private:
     void handleOneShotButtonMouseUp(const juce::MouseEvent& e);
 
     
+
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
     bool mouseOver = false;
     bool mouseOverKey = false;
 
     bool modulePlaying = false;
-    bool selected = false;
+    bool moduleSelected = false;
    
+    bool sendToSelectedModules = false;
+
     juce::ValueTree moduleTree;
     KrumSamplerAudioProcessorEditor& editor;
 

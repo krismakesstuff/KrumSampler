@@ -20,7 +20,7 @@
 * There's probably a template way of handling this.. (?)
 */
 
-//static instance
+//static instance, this is where the text is drawn on screen
 class InfoPanel  : public juce::Component
 {
 public:

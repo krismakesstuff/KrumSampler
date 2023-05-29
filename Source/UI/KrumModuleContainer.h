@@ -32,7 +32,12 @@ class KrumSamplerAudioProcessorEditor;
 class KrumModuleContainer : public juce::Component,
                             public juce::Timer,
                             public juce::MidiKeyboardStateListener,
-                            public juce::ValueTree::Listener
+                            public juce::ValueTree::Listener,
+                            public juce::AudioProcessorValueTreeState::Listener,
+                            public juce::Slider::Listener,
+                            public juce::ComboBox::Listener,
+                            public juce::Button::Listener, 
+                            public juce::KeyListener
 {
 public:
     KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner, juce::ValueTree& valTree);
@@ -44,9 +49,24 @@ public:
     
     void refreshModuleLayout();
     
+    //valueTreeListener
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+    //APVTS Listener
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
     
+    //Slider Listener
+    void sliderValueChanged(juce::Slider* slider) override;
+    //ComboBoxListener
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
+    //Button::Listener
+    void buttonClicked(juce::Button* buttonClicked) override;
+    void buttonStateChanged(juce::Button* buttonChanged) override;
+    //Mouse Listener
     void mouseDown(const juce::MouseEvent& event) override;
+
+    //Key Listener
+    bool keyPressed(const juce::KeyPress& key, juce::Component* ogComp) override;
+    bool keyStateChanged(bool isKeyDown, juce::Component* ogComp) override;
 
     void handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
     void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
@@ -57,11 +77,15 @@ public:
     void setModuleSelected(KrumModuleEditor* moduleToMakeActive);
     void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect);
     void deselectAllModules();
-    void setModuleSelectedWithShift(KrumModuleEditor* moduleToSelect);
+    void setModulesSelectedToLastSelection(KrumModuleEditor* moduleToSelect);
     void setModuleSelectedWithCommand(KrumModuleEditor* moduleToSelect);
-
     bool isModuleSelected(KrumModuleEditor* moduleToCheck);
-    
+    bool multipleModulesSelected();
+
+    void applyChangesToSelectedModules(juce::ValueTree& treeWhoChanged, const juce::Identifier& propertyWhoChanged);
+    void clickOneShotOnSelectedModules(const juce::MouseEvent& mouseDownEvent, KrumModuleEditor* eventOrigin, bool mouseDown);
+
+
     juce::Array<KrumModuleEditor*> getModulesFromMidiNote(int midiNote);
 
     KrumSamplerAudioProcessorEditor* getEditor();
@@ -81,6 +105,8 @@ public:
     void showFirstEmptyModule();
     void createModuleEditors();
 
+    bool isMultiControlActive();
+
 
     KrumModuleEditor* getEditorFromDisplayIndex(int displayIndex);
 private:
@@ -88,12 +114,15 @@ private:
     KrumModuleEditor* addModuleEditor(KrumModuleEditor* moduleToAdd, bool refreshLayout = true);
 
 
+    bool findCompInSelectedModules(juce::Component* compToTest, int& origin, juce::String& type);
+
     void updateModuleDisplayIndicesAfterDelete(int displayIndexDeleted);
     int getNumVisibleModules();
 
     juce::ValueTree valueTree;
 
     void timerCallback() override;
+    void setMultiControlState(bool shouldControl);
 
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
@@ -106,6 +135,7 @@ private:
     juce::Colour bgColor{ juce::Colours::black };
 
     bool modulesOutside = false;
+    bool multiSelectControlState = false;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumModuleContainer)
 

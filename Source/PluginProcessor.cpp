@@ -59,6 +59,7 @@ juce::ValueTree createValueTree()
         newModule.setProperty(TreeIDs::moduleStartSample.getParamID(), juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleEndSample.getParamID(), juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleNumSamplesLength.getParamID(), juce::var(0), nullptr);
+        newModule.setProperty(TreeIDs::moduleSelected.getParamID(), juce::var(0), nullptr);
         /*newModule.setProperty(TreeIDs::moduleFadeIn, juce::var(0), nullptr);
         newModule.setProperty(TreeIDs::moduleFadeOut, juce::var(0), nullptr);*/
 
@@ -265,7 +266,7 @@ void KrumSamplerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 
     if (outputGainParameter != nullptr)
     {
-        //applies output gain
+        //applies output gain from the output slider
         buffer.applyGain(outputGainParameter->load());
     }
 

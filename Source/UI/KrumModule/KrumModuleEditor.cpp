@@ -14,6 +14,7 @@
 #include "../PluginEditor.h"
 #include "../FileBrowser/KrumFileBrowser.h"
 #include "../InfoPanel.h"
+#include "../Source/UI/KrumModuleContainer.h"
 
 
 //===============================================================================================//
@@ -37,9 +38,15 @@ KrumModuleEditor::KrumModuleEditor(juce::ValueTree& modTree, KrumSamplerAudioPro
     startTimerHz(30);
     setSize(EditorDimensions::moduleW, EditorDimensions::moduleH);
 
+    
+
     int state = getModuleState();
     
+    
+    
     valueTreePropertyChanged(moduleTree, TreeIDs::moduleState.getParamID());
+
+    
         
 }
 
@@ -83,10 +90,24 @@ void KrumModuleEditor::paint (juce::Graphics& g)
             bc = bc.brighter();
         }
 
-        if (mouseOver || mouseOverKey || selected)
+        if (mouseOver || mouseOverKey) 
         {
-            g.setColour(Colors::moduleActiveOutlineColor);
-            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, 3.0f);
+            g.setColour(Colors::moduleHoverOutlineColor);
+            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, EditorDimensions::bigOutline);
+        }
+
+        if (isModuleSelected())
+        {
+            if (editor.moduleContainer.isMultiControlActive())
+            {
+                g.setColour(Colors::moduleMultiControlAcitveColor);
+            }
+            else
+            {
+                g.setColour(Colors::moduleSelectedOutlineColor);
+            }
+
+            g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, EditorDimensions::xlOutline);
         }
 
         //auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), juce::Colours::black, area.getBottom());
@@ -210,7 +231,12 @@ void KrumModuleEditor::mouseExit(const juce::MouseEvent& event)
 
 void KrumModuleEditor::mouseDown(const juce::MouseEvent& e)
 {
-    
+    auto& mc = editor.moduleContainer;
+    if (mc.multipleModulesSelected() && isModuleSelected())
+    {
+
+    }
+
     juce::Component::mouseDown(e);
 }
 
@@ -220,7 +246,7 @@ void KrumModuleEditor::mouseUp(const juce::MouseEvent& e)
 
     if (e.mods.isShiftDown())
     {
-        mc.setModuleSelectedWithShift(this);
+        mc.setModulesSelectedToLastSelection(this);
     }
     else if (e.mods.isCommandDown())
     {
@@ -231,15 +257,7 @@ void KrumModuleEditor::mouseUp(const juce::MouseEvent& e)
        mc.deselectAllModules();
        mc.setModuleSelected(this);
     }
-    
-    if (selected)
-    {
-        DBG("Module: " + juce::String(getModuleDisplayIndex()) + " Selected.");
-    }
-    else
-    {
-        DBG("Module: " + juce::String(getModuleDisplayIndex()) + " NOT selected.");
-    }
+
 
     juce::Component::mouseUp(e);
     
@@ -270,13 +288,32 @@ void KrumModuleEditor::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged,
         {
             setChildCompColors();
         }
+        else if (property == juce::Identifier(TreeIDs::moduleSelected.getParamID()))
+        {
+            repaint();
+        }
+    
+        //this passes the data for the time handles, I don't think anything else gets here... not sure
+        if (editor.moduleContainer.multipleModulesSelected() && isModuleSelected())
+        {
+            editor.moduleContainer.applyChangesToSelectedModules(treeWhoChanged, property);
+        }
+
     }
+    else if (treeWhoChanged != moduleTree && treeWhoChanged.isValid() && isModuleSelected()) 
+    {
+        //this branch is when another module changes it's properties but we triggered this property callback manually using applyChangesToSelectedModules()
+        //drag handles seem to kind of work through this
+        moduleTree.setProperty(property, treeWhoChanged.getProperty(property), nullptr);
+        repaint();
+    }
+
+
 }
 //===============================================================================================================
 
 void KrumModuleEditor::buildModule()
 {
-    juce::String i = moduleTree.getProperty(TreeIDs::moduleSamplerIndex.getParamID()).toString();
 
     //    int dragHandleSize;
     //    auto dragHandleData = BinaryData::getNamedResource("drag_handleblack18dp_svg", dragHandleSize);
@@ -308,6 +345,8 @@ void KrumModuleEditor::buildModule()
         setModuleName(newName);
     };
    
+    juce::String i = moduleTree.getProperty(TreeIDs::moduleSamplerIndex.getParamID()).toString();
+
     addAndMakeVisible(thumbnail);
     thumbnail.clipGainSliderAttachment.reset(new SliderAttachment(editor.parameters, TreeIDs::paramModuleClipGain.getParamID() + i, thumbnail.clipGainSlider));
     
@@ -490,18 +529,7 @@ void KrumModuleEditor::setChildCompColors()
 
 }
 
-//sets either the editor or the settings overlay to selected, they are seperate values
-void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
-{
-    if (settingsOverlay != nullptr)
-    {
-        settingsOverlay->setOverlaySelected(isModuleSelected);
-    }
 
-    selected = isModuleSelected;
-    repaint();
-    
-}
 
 void KrumModuleEditor::removeSettingsOverlay(bool keepSettings)
 {
@@ -569,6 +597,25 @@ void KrumModuleEditor::showModule()
             child->setVisible(true);
         }
     }
+}
+
+//sets either the editor or the settings overlay to selected, they are seperate values
+void KrumModuleEditor::setModuleSelected(bool isModuleSelected)
+{
+    if (settingsOverlay != nullptr)
+    {
+        settingsOverlay->setOverlaySelected(isModuleSelected);
+    }
+
+    moduleTree.setProperty(TreeIDs::moduleSelected.getParamID(), isModuleSelected ? juce::var(1) : juce::var(0), nullptr);
+    moduleSelected = isModuleSelected;
+    repaint();
+
+}
+
+bool KrumModuleEditor::isModuleSelected()
+{
+    return (float)moduleTree.getProperty(TreeIDs::moduleSelected.getParamID()) > 0.5;
 }
 
 int KrumModuleEditor::getModuleState()
@@ -1050,10 +1097,45 @@ void KrumModuleEditor::setMouseOverKey(bool isMouseOverKey)
     mouseOverKey = isMouseOverKey;
 }
 
+bool KrumModuleEditor::isModuleTree(juce::ValueTree& treeToTest)
+{
+    if (treeToTest.isValid())
+    {
+        return moduleTree == treeToTest && (int)treeToTest.getProperty(TreeIDs::moduleSamplerIndex.getParamID()) == getModuleSamplerIndex();
+    }
+
+    return false;
+}
+
+void KrumModuleEditor::addParamListener(KrumModuleContainer* listener)
+{
+    volumeSlider.addListener(listener);
+    panSlider.addListener(listener);
+    outputCombo.addListener(listener);
+    pitchSlider.addListener(listener);
+    reverseButton.addListener(listener);
+    muteButton.addListener(listener);
+    playButton.addListener(listener);
+    editButton.addListener(listener);
+}
+
+void KrumModuleEditor::removeParamListener(KrumModuleContainer* listener)
+{
+    volumeSlider.removeListener(listener);
+    panSlider.removeListener(listener);
+    outputCombo.removeListener(listener);
+    pitchSlider.removeListener(listener);
+    reverseButton.removeListener(listener);
+    muteButton.removeListener(listener);
+    playButton.removeListener(listener);
+    editButton.removeListener(listener);
+}
+
 void KrumModuleEditor::addFileToRecentsFolder(juce::File& file, juce::String name)
 {
     editor.fileBrowser.addFileToRecent(file, name);
 }
+
 
 void KrumModuleEditor::zeroModuleTree()
 {
@@ -1089,6 +1171,9 @@ void KrumModuleEditor::timerCallback()
         mouseOver = false;
     }
 
+    sendToSelectedModules = editor.moduleContainer.multipleModulesSelected() && isModuleSelected();
+    
+
     if (mouseOverKey)
     {
         repaint();
@@ -1106,10 +1191,10 @@ void KrumModuleEditor::printValueAndPositionOfSlider()
 
 void KrumModuleEditor::handleOneShotButtonMouseDown(const juce::MouseEvent& e)
 {
-    if (e.mods.isShiftDown())
+    /*if (e.mods.isShiftDown())
     {
         editor.keyboard.scrollToKey(getModuleMidiNote());
-    }
+    }*/
 
     triggerMouseDownOnNote(e);
 }
@@ -1159,6 +1244,12 @@ void KrumModuleEditor::OneShotButton::paintButton(juce::Graphics & g, const bool
 void KrumModuleEditor::OneShotButton::mouseDown(const juce::MouseEvent& e)
 {
     Button::mouseDown(e);
+
+    if (e.mods.isShiftDown() && editor.editor.moduleContainer.isMultiControlActive())
+    {
+        editor.editor.moduleContainer.clickOneShotOnSelectedModules(e, &editor, true);
+    }
+
     if (onMouseDown)
     {
         onMouseDown(e);
@@ -1170,6 +1261,11 @@ void KrumModuleEditor::OneShotButton::mouseUp(const juce::MouseEvent& e)
 {
     Button::mouseUp(e);
     
+    if (e.mods.isShiftDown() && editor.editor.moduleContainer.isMultiControlActive())
+    {
+        editor.editor.moduleContainer.clickOneShotOnSelectedModules(e, &editor, false);
+    }
+
     if (onMouseUp)
     {
         onMouseUp(e);
@@ -1301,6 +1397,11 @@ void KrumModuleEditor::PitchSlider::paint(juce::Graphics& g)
 void KrumModuleEditor::PitchSlider::mouseDown(const juce::MouseEvent& e)
 {
 
+    if (e.mods.isShiftDown() && editor.editor.moduleContainer.isMultiControlActive())
+    {
+       // editor.editor.moduleContainer.set
+    }
+
    setMouseCursor(juce::MouseCursor::NoCursor);
    InfoPanelSlider::mouseDown(e);
 }
@@ -1312,6 +1413,9 @@ void KrumModuleEditor::PitchSlider::mouseUp(const juce::MouseEvent& e)
     juce::Desktop::getInstance().getMainMouseSource().setScreenPosition(e.source.getLastMouseDownPosition());
 
     setMouseCursor(juce::MouseCursor::NormalCursor);
+
+
+
     InfoPanelSlider::mouseUp(e);
 }
 

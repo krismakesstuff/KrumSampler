@@ -20,16 +20,18 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner,
 {
     setInterceptsMouseClicks(true, true);
     setRepaintsOnMouseActivity(true);
-    startTimerHz(30);
     editor->addKeyboardListener(this);
+    editor->addKeyListener(this);
     valueTree.addListener(this);
     refreshModuleLayout();
+    startTimerHz(30);
         
 }
 
 KrumModuleContainer::~KrumModuleContainer()
 {
     editor->removeKeyboardListener(this);
+    editor->removeKeyListener(this);
     valueTree.removeListener(this);
     currentlySelectedModules.clear(false);
 }
@@ -99,7 +101,164 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
     {
         refreshModuleLayout();
     }
+    
 
+    //we don't want selection changes, but we need to verify a module is selected before changing the other properties
+
+    //when a tree changes a property that is part of a multi-select action, we apply the same changes to the other selected Trees and modules. This will only handle moduleTree properties, real-time audio properties will be handled sepearately
+    /*if (currentlySelectedModules.size() > 1 && property == juce::Identifier(TreeIDs::moduleSelected.getParamID()) && (float)treeWhoChanged.getProperty(property) > 0.5f)
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            if ((int)treeWhoChanged.getProperty(TreeIDs::moduleSamplerIndex.getParamID()) != currentlySelectedModules[i]->getModuleSamplerIndex())
+            {
+                currentlySelectedModules[i]->valueTreePropertyChanged(treeWhoChanged, property);
+            }
+        }
+    }*/
+
+}
+
+void KrumModuleContainer::parameterChanged(const juce::String& paramterID, float newValue)
+{
+    //if (currentlySelectedModules.size() > 1)
+    //{
+    //    for (int i = 0; i < currentlySelectedModules.size(); i++)
+    //    {
+    //        //if ((int)treeWhoChanged.getProperty(TreeIDs::moduleSamplerIndex.getParamID()) != currentlySelectedModules[i]->getModuleSamplerIndex())
+    //        {
+    //            
+    //            editor->parameters.
+    //        }
+
+    //    }
+    //}
+}
+
+void KrumModuleContainer::sliderValueChanged(juce::Slider* slider)
+{
+    int sliderOrigin = -1;
+    juce::String sliderType{};
+
+    findCompInSelectedModules(slider, sliderOrigin, sliderType);
+
+    DBG("SliderType = " + sliderType);
+
+    if (sliderOrigin >= 0)
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            if (i != sliderOrigin)
+            {
+                if (sliderType == "Module Gain")
+                {
+                    currentlySelectedModules[i]->volumeSlider.setValue(slider->getValue());
+                }
+                else if (sliderType == "Pitch")
+                {
+                    currentlySelectedModules[i]->pitchSlider.setValue(slider->getValue());
+                }
+                else if (sliderType == "Module Pan")
+                {
+                    currentlySelectedModules[i]->panSlider.setValue(slider->getValue());
+                }
+            }
+        }
+    }
+
+}
+
+void KrumModuleContainer::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    int comboOrigin = -1;
+    juce::String comboType{};
+
+    findCompInSelectedModules(comboBoxThatHasChanged, comboOrigin, comboType);
+
+    DBG("comboType = " + comboType);
+
+    if (comboOrigin >= 0)
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            if (i != comboOrigin)
+            {
+                if (comboType == "Output Channel")
+                {
+                    currentlySelectedModules[i]->outputCombo.setSelectedId(comboBoxThatHasChanged->getSelectedId());
+                }
+            }
+        }
+    }
+}
+
+void KrumModuleContainer::buttonClicked(juce::Button* buttonClicked)
+{
+    int buttonOrigin = -1;
+    juce::String buttonType{};
+
+    findCompInSelectedModules(buttonClicked, buttonOrigin, buttonType);
+
+    DBG("buttonType =" + buttonType);
+
+    if (buttonOrigin >= 0)
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            if (i != buttonOrigin)
+            {
+
+                if (buttonType == "Reverse Button")
+                {
+                    currentlySelectedModules[i]->reverseButton.setToggleState(buttonClicked->getToggleState(),juce::sendNotificationSync);
+
+                }
+                else if (buttonType == "Mute")
+                {
+                    currentlySelectedModules[i]->muteButton.setToggleState(buttonClicked->getToggleState(), juce::sendNotificationSync);
+
+                }
+                else if (buttonType == "Settings")
+                {
+                    //show module's settings overlay. This will change
+                    //currentlySelectedModules[i]->editButton.triggerClick();
+                }
+                
+            }
+        }
+    }
+
+}
+
+void KrumModuleContainer::buttonStateChanged(juce::Button* buttonChanged)
+{
+
+    if (buttonChanged->getState() == juce::Button::buttonDown)
+    {
+        int buttonOrigin = -1;
+        juce::String buttonType{};
+
+        findCompInSelectedModules(buttonChanged, buttonOrigin, buttonType);
+
+       /* if (buttonOrigin >= 0)
+        {
+            for (int i = 0; i < currentlySelectedModules.size(); i++)
+            {
+                if (i != buttonOrigin)
+                {
+                    if (buttonType == "One Shot")
+                    {
+                        auto note = currentlySelectedModules[i]->getModuleMidiNote();
+                        auto chan = currentlySelectedModules[i]->getModuleMidiChannel();
+                        auto vel = currentlySelectedModules[i]->buttonClickVelocity;
+
+                        editor->sampler.noteOn(chan, note, vel);
+                    }
+                }
+            }
+        }*/
+
+    }
 }
 
 void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
@@ -124,6 +283,30 @@ void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
     //        setModuleUnselected(modEd);
     //    }
     //}
+}
+
+bool KrumModuleContainer::keyPressed(const juce::KeyPress& key, juce::Component* ogComp)
+{
+
+    return false;
+}
+
+bool KrumModuleContainer::keyStateChanged(bool isKeyDown, juce::Component* ogComp)
+{
+
+    auto modKeys = juce::ModifierKeys::currentModifiers;
+    if (modKeys.isShiftDown())
+    {
+        setMultiControlState(true);
+    }
+    else if (!isKeyDown && !modKeys.isShiftDown())
+    {
+        setMultiControlState(false);
+    }
+    
+
+
+    return false;
 }
 
 void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
@@ -216,11 +399,11 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
     
 }
 
-//this deselects all other modules and then selects the module passed in
 void KrumModuleContainer::setModuleSelected(KrumModuleEditor* moduleToSelect)
 {
     moduleToSelect->setModuleSelected(true);
     currentlySelectedModules.add(moduleToSelect);
+    moduleToSelect->addParamListener(this);
     //repaint();
 }
 
@@ -228,6 +411,7 @@ void KrumModuleContainer::setModuleUnselected(KrumModuleEditor* moduleToDeselect
 {
     moduleToDeselect->setModuleSelected(false);
     currentlySelectedModules.removeObject(moduleToDeselect, false);
+    moduleToDeselect->removeParamListener(this);
 }
 
 void KrumModuleContainer::deselectAllModules()
@@ -236,15 +420,24 @@ void KrumModuleContainer::deselectAllModules()
     
     for (int i = 0; i < moduleEditors.size(); i++)
     {
-        moduleEditors[i]->setModuleSelected(false);
-        moduleEditors[i]->repaint();
+        auto moduleEditor = moduleEditors[i];
+        moduleEditor->removeParamListener(this);
+        moduleEditor->setModuleSelected(false);
+        moduleEditor->repaint();
     }
 
 }
 
 //selects the modules between your last selected module to the newly selected module
-void KrumModuleContainer::setModuleSelectedWithShift(KrumModuleEditor* moduleToSelect)
+void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* moduleToSelect)
 {
+    if (currentlySelectedModules.size() < 1)
+    {
+        setModuleSelected(moduleToSelect);
+        //if there is no "Last Selection", there is nothing to select up to
+        return;
+    }
+
     //get the last selected module's display index
     int lastSelectedDisplayIndex = currentlySelectedModules.getLast()->getModuleDisplayIndex();
    
@@ -302,6 +495,43 @@ bool KrumModuleContainer::isModuleSelected(KrumModuleEditor* moduleToCheck)
     }
 
     return false;
+}
+
+bool KrumModuleContainer::multipleModulesSelected()
+{
+    return currentlySelectedModules.size() > 1;
+}
+
+void KrumModuleContainer::applyChangesToSelectedModules(juce::ValueTree& treeWhoChanged, const juce::Identifier& propertyWhoChanged)
+{
+    for (int i = 0; i < currentlySelectedModules.size(); i++)
+    {
+        if (!currentlySelectedModules[i]->isModuleTree(treeWhoChanged)) //we don't want to send a change message to a module that sent the message in the first place
+        {
+            currentlySelectedModules[i]->valueTreePropertyChanged(treeWhoChanged, propertyWhoChanged);
+        }
+    }
+}
+
+void KrumModuleContainer::clickOneShotOnSelectedModules(const juce::MouseEvent& mouseDownEvent, KrumModuleEditor* eventOrigin, bool mouseDown)
+{
+    for (int i = 0; i < currentlySelectedModules.size(); i++)
+    {
+        auto mod = currentlySelectedModules[i];
+        if (mod != eventOrigin)
+        {
+            if (mouseDown)
+            {
+                mod->handleOneShotButtonMouseDown(mouseDownEvent.getEventRelativeTo(mod));
+            }
+            else
+            {
+                mod->handleOneShotButtonMouseUp(mouseDownEvent.getEventRelativeTo(mod));
+            }
+        }
+    }
+
+
 }
 
 juce::Array<KrumModuleEditor*> KrumModuleContainer::getModulesFromMidiNote(int midiNote)
@@ -436,12 +666,18 @@ void KrumModuleContainer::timerCallback()
         }
     }
 
+
     if (editor && (!mouseOver))
     {
         editor->keyboard.clearHighlightedKey();
     }
 
     repaint();
+}
+
+void KrumModuleContainer::setMultiControlState(bool shouldControl)
+{
+    multiSelectControlState = shouldControl;
 }
 
 void KrumModuleContainer::showFirstEmptyModule()
@@ -471,6 +707,26 @@ void KrumModuleContainer::createModuleEditors()
             auto modEd = addModuleEditor(new KrumModuleEditor(moduleTree, *editor, editor->sampler.getFormatManager()));
         }
     }
+}
+
+bool KrumModuleContainer::isMultiControlActive()
+{
+    return multiSelectControlState && multipleModulesSelected();
+}
+
+bool KrumModuleContainer::findCompInSelectedModules(juce::Component* compToTest, int& origin, juce::String& type)
+{
+    for (int i = 0; i < currentlySelectedModules.size(); i++)
+    {
+        if (compToTest->getParentComponent() == currentlySelectedModules[i])
+        {
+            origin = i;
+            type = compToTest->getName();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void KrumModuleContainer::updateModuleDisplayIndicesAfterDelete(int displayIndexDeleted)

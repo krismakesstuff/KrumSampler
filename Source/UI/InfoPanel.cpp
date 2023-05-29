@@ -177,7 +177,7 @@ void InfoPanelToggleButton::mouseExit(const juce::MouseEvent& event)
 //=============================================================================
 
 InfoPanelSlider::InfoPanelSlider(juce::String title, juce::String newMessage, juce::String newKeycommand)
-    : compTitle(title), message(newMessage), keycommand(newKeycommand)
+    : compTitle(title), message(newMessage), keycommand(newKeycommand), juce::Slider(title)
 {}
 
 InfoPanelSlider::~InfoPanelSlider() {}
@@ -217,7 +217,7 @@ void InfoPanelLabel::mouseExit(const juce::MouseEvent& e)
 //=============================================================================
 
 InfoPanelTextButton::InfoPanelTextButton(juce::String title, juce::String m, juce::String kc)
-    :compTitle(title), message(m), keycommand(kc)
+    :compTitle(title), message(m), keycommand(kc), juce::TextButton(title)
 {}
 
 InfoPanelTextButton::~InfoPanelTextButton()
@@ -238,7 +238,7 @@ void InfoPanelTextButton::mouseExit(const juce::MouseEvent& e)
 //=============================================================================
 
 InfoPanelComboBox::InfoPanelComboBox(juce::String title, juce::String m, juce::String kc)
-    :compTitle(title), message(m), keycommand(kc)
+    :compTitle(title), message(m), keycommand(kc), juce::ComboBox(title)
 {}
 
 InfoPanelComboBox::~InfoPanelComboBox()

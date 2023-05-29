@@ -51,8 +51,9 @@ namespace Colors
     const juce::Colour modulesBGColor{ Colors::sectionBGColor };
     const juce::Colour outlineColor{ juce::Colours::white };
     const juce::Colour moduleBGColor{ juce::Colours::black };
-    const juce::Colour moduleActiveOutlineColor{ juce::Colours::white.withAlpha(0.8f) };
-    const juce::Colour moduleHoverOutliveColor{ juce::Colours::white.withAlpha(0.8f).darker(0.2f) };
+    const juce::Colour moduleSelectedOutlineColor{ juce::Colours::white.withAlpha(0.9f) };
+    const juce::Colour moduleHoverOutlineColor{ juce::Colours::white.withAlpha(0.7f) };
+    const juce::Colour moduleMultiControlAcitveColor{ juce::Colours::red.withAlpha(0.95f) };
 
 
     const juce::Colour backOutlineColor{ juce::Colours::darkgrey };

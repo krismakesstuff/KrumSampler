@@ -68,6 +68,7 @@ namespace TreeIDs
                 DECLARE_ID(moduleStartSample)
                 DECLARE_ID(moduleEndSample)
                 DECLARE_ID(moduleNumSamplesLength)
+                DECLARE_ID(moduleSelected)
            /*     DECLARE_ID(moduleFadeIn)
                 DECLARE_ID(moduleFadeOut) */
 

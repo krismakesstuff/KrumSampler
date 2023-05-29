@@ -116,6 +116,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
     moduleContainer.createModuleEditors();
     moduleContainer.showFirstEmptyModule();
+    //parameters.addParameterListener(moduleContainer
     
     keyboard.scrollToKey(keyboard.getLowestKey());
     keyboard.repaint();
@@ -137,7 +138,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     setConstrainerLimits(false);
     
     //setSize(getSavedEditorWidth(), getSavedEditorHeight());
-
     setSize(EditorDimensions::windowW, EditorDimensions::windowH);
 }
 
