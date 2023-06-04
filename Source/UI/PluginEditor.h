@@ -51,9 +51,9 @@ namespace EditorDimensions
 
     const static int moduleH = windowH * 0.68f;
     const static int moduleW = 120;
+    
+    const static int dropSampleAreaW = moduleW * 0.30f;
 
-    //const static int addButtonH = 50;
-    //const static int addButtonW = 100;
     const static int collapseButtonH = 40;
     const static int collapseButtonW = 15;
 
@@ -102,7 +102,7 @@ public:
 
     static juce::String getMidiInfo(const juce::MidiMessage&);
 
-    void addNextModuleEditor();
+    //void addNextModuleEditor();
     KrumModuleContainer& getModuleContainer();
 
     void printModules();
@@ -134,6 +134,7 @@ public:
     juce::AudioThumbnailCache& getThumbnailCache();
 
     KrumSampler& getSampler();
+    KrumKeyboard& getKeyboard();
     juce::ValueTree* getValueTree();
     juce::AudioProcessorValueTreeState* getParameters();
     KrumFileBrowser* getFileBrowser();
@@ -141,6 +142,9 @@ public:
 
     juce::SharedResourcePointer<juce::TooltipWindow> toolTipWindow;
 
+    KrumLookAndFeel* getKrumLaf();
+    VolumeLookAndFeel* getVolumeLaf();
+    PanLookAndFeel* getPanLaf();
 
 private:
 
@@ -152,8 +156,9 @@ private:
 
 
     friend class KrumModuleContainer;
-    friend class KrumModuleEditor;
+    //friend class KrumModuleEditor;
     friend class DragAndDropThumbnail;
+    
 
     KrumLookAndFeel kLaf{};
 
@@ -187,12 +192,12 @@ private:
     juce::String madeByString{ "Made by Kris Crawford" };
     juce::URL websiteURL{ "https://www.krismakesmusic.com" };
     InfoPanelTextButton websiteButton{"Website", "Clicking this will open my website. Go check it out yo!"};
-    InfoPanelDrawableButton infoButton {"Info Button", "Toggles this Info Panel Box"};
-    InfoPanelDrawableButton collapseBrowserButton {"Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore","", juce::DrawableButton::ButtonStyle::ImageFitted};
+    InfoPanelDrawableButton infoButton { juce::DrawableButton::ButtonStyle::ImageStretched, "Info Button", "Toggles this Info Panel Box"};
+    InfoPanelDrawableButton collapseBrowserButton { juce::DrawableButton::ButtonStyle::ImageFitted, "Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore"};
     
 
     InfoPanelComboBox presetsComboBox{"Presets", "COMING SOON!!"};
-    InfoPanelDrawableButton settingsButton{ "Global Settings", "COMING SOON!!" };
+    InfoPanelDrawableButton settingsButton{ juce::DrawableButton::ButtonStyle::ImageFitted, "Global Settings", "COMING SOON!!" };
 
 
     juce::ComponentBoundsConstrainer constrainer;

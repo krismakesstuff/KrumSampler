@@ -23,6 +23,7 @@
 namespace Colors
 {
     //general app 
+    const juce::Colour bgColor{ juce::Colours::black.brighter(0.12f) };
     const juce::Colour fontColor{ juce::Colours::white.withAlpha(0.5f) };
     const juce::Colour highlightFontColor{ fontColor.darker(0.1f)};
     const juce::Colour highlightColor{ juce::Colours::black.brighter(0.15f) };
@@ -36,7 +37,7 @@ namespace Colors
     const juce::Colour browserBGColor{ Colors::sectionBGColor };
     const juce::Colour browserPathBoxColor{ juce::Colours::black.brighter(0.15f) };
 
-    //action 
+    //contextual
     const juce::Colour addAnimationColor{ juce::Colour::fromRGB(67, 170, 139) }; //zomp
     const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) }; //redSalsa
     const juce::Colour canDropFileColor{ juce::Colours::green };
@@ -49,17 +50,19 @@ namespace Colors
 
     //modules 
     const juce::Colour modulesBGColor{ Colors::sectionBGColor };
+    const juce::Colour moduleDefaultColor{ juce::Colours::grey.darker() };
     const juce::Colour outlineColor{ juce::Colours::white };
     const juce::Colour moduleBGColor{ juce::Colours::black };
     const juce::Colour moduleSelectedOutlineColor{ juce::Colours::white.withAlpha(0.9f) };
-    const juce::Colour moduleHoverOutlineColor{ juce::Colours::white.withAlpha(0.7f) };
-    const juce::Colour moduleMultiControlAcitveColor{ juce::Colours::red.withAlpha(0.95f) };
-
-
+    const juce::Colour moduleHoverOutlineColor{ juce::Colours::white.withAlpha(0.79f) };
+    const juce::Colour moduleMultiControlAcitveColor{ juce::Colours::red.withAlpha(0.99f) };
+    const juce::Colour moduleMidiListeningColor{ moduleMultiControlAcitveColor };
+    const juce::Colour moduleMuteActiveColor{ juce::Colours::red.withAlpha(0.7f) };
+    const juce::Colour modulePlayingHightlightColor{ juce::Colours::white.withAlpha(0.5f)};
+    const juce::Colour moduleOutputMenuBG{ juce::Colours::black.withAlpha(0.7f) };
     const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
-    //not sure, need to figure out
-    const juce::Colour bgColor{ juce::Colours::black.brighter(0.12f) };
+    //somewhere...
     const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
     const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
     const juce::Colour mainFontColor{ juce::Colours::white };

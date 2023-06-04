@@ -177,5 +177,10 @@ void KrumModule::removeSamplerSound()
 
 juce::String KrumModule::getIndexString()
 {
-    return juce::String(getModuleSamplerIndex());
+    int i = getModuleSamplerIndex();
+    if (i < 10)
+    {
+        return "0" + juce::String{ i };
+    }
+    return juce::String{i};
 }

@@ -88,11 +88,10 @@ private:
 };
 
 //==============================================================================
-
 class InfoPanelDrawableButton : public juce::DrawableButton
 {
 public:
-    InfoPanelDrawableButton(juce::String title, juce::String message, juce::String keycommand = juce::String(), juce::DrawableButton::ButtonStyle buttonStyle = juce::DrawableButton::ButtonStyle::ImageStretched);
+    InfoPanelDrawableButton(juce::DrawableButton::ButtonStyle buttonStyle, juce::String title, juce::String message, juce::String keycommand = juce::String());
     ~InfoPanelDrawableButton() override;
 
     void mouseEnter(const juce::MouseEvent& e) override;

@@ -413,9 +413,9 @@ void KrumKeyboard::setModulesMouseOverKey(const juce::MouseEvent& e, bool mouseO
 
 void KrumKeyboard::clearModulesMouseOverKeys()
 {
-    for (int i = 0; i < moduleContainer.getNumModuleEditors(); ++i)
+    for (int i = 0; i < moduleContainer.getNumActiveModules(); ++i)
     {
-        moduleContainer.getModuleEditor(i)->setMouseOverKey(false);
+        moduleContainer.getActiveModuleEditor(i)->setMouseOverKey(false);
     }
 }
 

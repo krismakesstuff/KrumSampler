@@ -10,6 +10,7 @@
 
 #include "ModuleSettingsOverlay.h"
 #include "KrumModuleEditor.h"
+#include "../KrumModuleContainer.h"
 #include "../Source/KrumModule.h"
 
 
@@ -18,7 +19,7 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent)
     : parentEditor(parent), colorPalette(*this)
 {
 
-    addAndMakeVisible(titleBox);
+    /*addAndMakeVisible(titleBox);
     titleBox.setText(parentEditor.getModuleName(), juce::dontSendNotification);
     titleBox.setFont(18.0f);
     titleBox.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
@@ -65,33 +66,49 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent)
     midiListenButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     midiListenButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::darkred);
     midiListenButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);
-    midiListenButton.onClick = [this] { midiListenButtonClicked(); };
+    midiListenButton.onClick = [this] { midiListenButtonClicked(); };*/
 
-    addChildComponent(cancelButton);
-    cancelButton.setButtonText("Cancel");
+    //addChildComponent(cancelButton);
+    auto cancelImage = juce::Drawable::createFromImageData(BinaryData::cancel_opsz24_svg, BinaryData::cancel_opsz24_svgSize);
+    cancelImage->replaceColour(juce::Colours::black, juce::Colours::white.withAlpha(0.5f));
+    addAndMakeVisible(cancelButton);
+    cancelButton.setImages(cancelImage.get());
+    cancelButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    cancelButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::darkgrey);
+
+    /*cancelButton.setButtonText("Cancel");
     cancelButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-    cancelButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);
-    cancelButton.onClick = [this] { cancelSettings(); };
+    cancelButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);*/
+    cancelButton.onClick = [this] { cancelButtonClicked(); };
 
-    addChildComponent(deleteButton);
-    deleteButton.setButtonText("Delete");
+    auto deleteImage = juce::Drawable::createFromImageData(BinaryData::trash_wgt200_svg, BinaryData::trash_wgt200_svgSize);
+    deleteImage->replaceColour(juce::Colours::black, juce::Colours::white.withAlpha(0.5f));
+    addAndMakeVisible(deleteButton);
+    deleteButton.setImages(deleteImage.get());
+    deleteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    deleteButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::red.darker(0.2f));
+    deleteButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::red.darker());
+    /*deleteButton.setButtonText("Delete");
     deleteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::darkred.darker());
-    deleteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);
-    deleteButton.onClick = [this] { parentEditor.setModuleState(0); };
+    deleteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);*/
+    deleteButton.onClick = [this] { deleteButtonClicked(); };
    
-    addChildComponent(confirmButton);
+
+    /*addChildComponent(confirmButton);
     confirmButton.setButtonText("Confirm");
     confirmButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
     confirmButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);
-    confirmButton.onClick = [this] { confirmButtonClicked(); };
+    confirmButton.onClick = [this] { confirmButtonClicked(); };*/
     
 
-    addChildComponent(&colorPalette);
+    //addChildComponent(&colorPalette);
+    addAndMakeVisible(colorPalette);
+
     
-    setMidiLabels();
+    //setMidiLabels();
 
     setRepaintsOnMouseActivity(true);
-    startTimerHz(30);
+    //startTimerHz(30);
 }
 
 ModuleSettingsOverlay::~ModuleSettingsOverlay()
@@ -100,10 +117,10 @@ ModuleSettingsOverlay::~ModuleSettingsOverlay()
 void ModuleSettingsOverlay::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
-    g.setColour(juce::Colours::black.withAlpha(0.75f));
+    g.setColour(juce::Colours::black.withAlpha(0.85f));
     g.fillRoundedRectangle(area.toFloat(), cornerSize);
 
-    juce::Rectangle<int> botTextArea = area.withTop(area.getBottom() - 75).reduced(3);
+    /*juce::Rectangle<int> botTextArea = area.withTop(area.getBottom() - 75).reduced(3);
 
     moduleSelectedColor = colorPalette.getSelectedColor();
 
@@ -117,7 +134,7 @@ void ModuleSettingsOverlay::paint(juce::Graphics& g)
         g.setColour(juce::Colours::darkgrey.darker());
     }
 
-    g.drawRoundedRectangle(area.toFloat(), cornerSize, outlineSize);
+    g.drawRoundedRectangle(area.toFloat(), cornerSize, outlineSize);*/
 }
 
 void ModuleSettingsOverlay::resized()
@@ -127,17 +144,20 @@ void ModuleSettingsOverlay::resized()
     int spacer = 5;
     int titleBoxH = area.getHeight() * 0.11f;
     int midiListenButtonH = area.getHeight() * 0.056f;
-    int paletteH = area.getHeight() * 0.18; 
+    int paletteH = area.getHeight() * 0.28; 
     int noteNumberH = area.getHeight() * 0.145f;
     int noteTitleH = area.getHeight() * 0.078f;
 
-    int confirmButtonWidth = area.getWidth() / 1.25;
+    int buttonWidth = area.getWidth() * 0.325f;
+    int buttonHeight = area.getHeight() * 0.275f;
+
+    /*int confirmButtonWidth = area.getWidth() / 1.25;
     int confirmButtonHeight = area.getHeight() * 0.078f; 
 
     int cancelButtonWidth = (area.getWidth() - (spacer * 2)) / 2;
-    int cancelButtonHeight = area.getHeight() * 0.056f;
+    int cancelButtonHeight = area.getHeight() * 0.3f;*/
 
-    titleBox.setBounds(area.withBottom(titleBoxH));
+    /*titleBox.setBounds(area.withBottom(titleBoxH));
 
     midiNoteNumberLabel.setBounds(area.getX(), titleBox.getBottom() + (spacer * 5), area.getWidth(), noteNumberH);
     midiNoteTitleLabel.setBounds(area.getX(), midiNoteNumberLabel.getBottom() + spacer, midiNoteNumberLabel.getWidth(), noteTitleH);
@@ -145,13 +165,13 @@ void ModuleSettingsOverlay::resized()
     midiChannelNumberLabel.setBounds(midiNoteTitleLabel.getX(), midiNoteTitleLabel.getBottom(), midiNoteTitleLabel.getWidth(), midiChannelNumberLabel.getFont().getHeight());
     midiChannelTitleLabel.setBounds(midiChannelNumberLabel.getX(), midiChannelNumberLabel.getBottom() + spacer, midiChannelNumberLabel.getWidth(), midiChannelTitleLabel.getFont().getHeight());
     
-    midiListenButton.setBounds(area.getX() + spacer, midiChannelTitleLabel.getBottom() + (spacer * 3), area.getWidth() - (spacer * 2), midiListenButtonH);
+    midiListenButton.setBounds(area.getX() + spacer, midiChannelTitleLabel.getBottom() + (spacer * 3), area.getWidth() - (spacer * 2), midiListenButtonH);*/
 
-    colorPalette.setBounds(area.getX(), midiListenButton.getBottom() , area.getWidth() - spacer, paletteH);
+    colorPalette.setBounds(area.getX(), area.getY() - spacer, area.getWidth(), area.getHeight() - buttonHeight);
 
-    confirmButton.setBounds(area.getCentreX() - confirmButtonWidth / 2, colorPalette.getBottom() + (spacer * 2), confirmButtonWidth, confirmButtonHeight);
-    deleteButton.setBounds(area.getX() + spacer, confirmButton.getBottom() + (spacer * 2), cancelButtonWidth - spacer, cancelButtonHeight);
-    cancelButton.setBounds(deleteButton.getRight() + spacer, deleteButton.getY(), cancelButtonWidth, cancelButtonHeight);
+//    confirmButton.setBounds(area.getCentreX() - confirmButtonWidth / 2, colorPalette.getBottom() + (spacer * 2), confirmButtonWidth, confirmButtonHeight);
+    deleteButton.setBounds(area.getX() + spacer, colorPalette.getBottom()/* + (spacer * 2)*/, buttonWidth - spacer, buttonHeight);
+    cancelButton.setBounds(deleteButton.getRight() + spacer, deleteButton.getY(), buttonWidth - spacer, buttonHeight);
 
 }
 
@@ -169,231 +189,235 @@ void ModuleSettingsOverlay::mouseExit(const juce::MouseEvent& e)
     juce::Component::mouseExit(e);
 }
 
-void ModuleSettingsOverlay::handleMidiInput(int midiChannelNumber, int midiNoteNumber)
+//void ModuleSettingsOverlay::handleMidiInput(int midiChannelNumber, int midiNoteNumber)
+//{
+//    if (moduleOverlaySelected && midiListenButton.getToggleState())
+//    {
+//        setMidi(midiNoteNumber, midiChannelNumber);
+//    }
+//}
+//
+//void ModuleSettingsOverlay::setOverlaySelected(bool isSelected)
+//{
+//    if (isSelected && isVisible())
+//    {
+//        showButtons();
+//    }
+//    else
+//    {
+//        hideButtons();
+//    }
+//    moduleOverlaySelected = isSelected;
+//}
+//
+//bool ModuleSettingsOverlay::isOverlaySelected()
+//{
+//    return moduleOverlaySelected;
+//}
+//
+//void ModuleSettingsOverlay::confirmButtonClicked()
+//{
+//    juce::Colour color;
+//
+//    //this logic works out the context of leaving the moduleSettingsOverlay.
+//    //essentially we only want to change moduleColor if a new one has been selected or if the module was just made, then we get a random color
+//    
+//    juce::String name = titleBox.getText(true); //compiler reasons
+//    parentEditor.setModuleName(name);
+//    
+//    if (parentEditor.getModuleState() != KrumModule::ModuleState::active)
+//    {
+//        parentEditor.setModuleState(KrumModule::ModuleState::active); //important to set the state before setting the color and midiNote
+//    }
+//    
+//    if (colorChanged)
+//    {
+//        color = colorPalette.getSelectedColor();
+//        parentEditor.setModuleColor(color);
+//    }
+//    else if (!keepColorOnExit) //when we make a new module but don't select a new color, we grab a random one,
+//    {
+//        color = colorPalette.getRandomColor();
+//        parentEditor.setModuleColor(color);
+//    }
+//
+//    parentEditor.setModuleMidiNote(midiNoteNum);
+//    parentEditor.setModuleMidiChannel(midiChanNum);
+//    parentEditor.removeSettingsOverlay(true);
+//}
+//
+//void ModuleSettingsOverlay::showConfirmButton() 
+//{
+//    confirmButton.setVisible(true);
+//    showingConfirmButton = true;
+//}
+
+//void ModuleSettingsOverlay::showButtons()
+//{
+//    setInterceptsMouseClicks(false, true);
+//    setButtonVisibilities(true);
+//
+//    if (showingConfirmButton && !confirmButton.isVisible())
+//    {
+//        confirmButton.setVisible(true);
+//    }
+//}
+//
+//void ModuleSettingsOverlay::hideButtons()
+//{
+//    setInterceptsMouseClicks(false, false);
+//    setButtonVisibilities(false);
+//
+//    if (confirmButton.isVisible())
+//    {
+//        showingConfirmButton = true; //if the confirm button was visible before we hide, we set a flag to remeber to show it when the module gets re-selected
+//        confirmButton.setVisible(false);
+//    }
+//}
+
+void ModuleSettingsOverlay::colorButtonClicked(juce::Colour newColor)
 {
-    if (moduleOverlaySelected && midiListenButton.getToggleState())
+    parentEditor.setModuleColor(newColor);
+}
+
+void ModuleSettingsOverlay::cancelButtonClicked()
+{
+    parentEditor.removeSettingsOverlay();
+
+    if (parentEditor.isModuleSelected() && parentEditor.moduleContainer.isMultiControlActive())
     {
-        setMidi(midiNoteNumber, midiChannelNumber);
+        parentEditor.moduleContainer.setSettingsOverlayOnSelectedModules(false, &parentEditor);
     }
 }
 
-void ModuleSettingsOverlay::setOverlaySelected(bool isSelected)
+void ModuleSettingsOverlay::deleteButtonClicked()
 {
-    if (isSelected && isVisible())
-    {
-        showButtons();
-    }
-    else
-    {
-        hideButtons();
-    }
-    moduleOverlaySelected = isSelected;
+    parentEditor.setModuleState(KrumModule::ModuleState::empty);
 }
 
-bool ModuleSettingsOverlay::isOverlaySelected()
-{
-    return moduleOverlaySelected;
-}
+//
+//juce::Colour ModuleSettingsOverlay::getSelectedColor()
+//{
+//    return moduleSelectedColor;
+//}
+//
+//bool ModuleSettingsOverlay::isModuleOverlaySelected()
+//{
+//    return moduleOverlaySelected;
+//}
 
-void ModuleSettingsOverlay::confirmButtonClicked()
-{
-    juce::Colour color;
+//void ModuleSettingsOverlay::setMidiListen(bool shouldListen)
+//{
+//    midiListenButton.setToggleState(shouldListen, juce::sendNotification);
+//    midiListenButtonClicked();
+//}
+//
+//void ModuleSettingsOverlay::setMidi(int midiNote, int midiChannel)
+//{
+//    midiNoteNum = midiNote;
+//    midiChanNum = midiChannel;
+//    updateMidiLabels = true;
+//}
+//
+//void ModuleSettingsOverlay::setMidiLabels()
+//{
+//    juce::String midiNoteString; 
+//    juce::String midiChanString; 
+//
+//    if (midiNoteNum == 0)
+//    {
+//        midiNoteString = "None";
+//        midiChanString = "None";
+//        midiNoteNumberLabel.setFont(20.0f);
+//    }
+//    else
+//    {
+//        midiNoteString = juce::String(juce::MidiMessage::getMidiNoteName(midiNoteNum, true, true, 3));
+//        midiChanString = juce::String(midiChanNum);
+//        midiNoteNumberLabel.setFont(50.0f);
+//
+//        if (midiNoteNum != parentEditor.getModuleMidiNote() || midiChanNum != parentEditor.getModuleMidiChannel())
+//        {
+//            showConfirmButton();
+//        }
+//    }
+//
+//    midiNoteNumberLabel.setText(midiNoteString, juce::dontSendNotification);
+//    midiChannelNumberLabel.setText(midiChanString, juce::dontSendNotification);
+//  
+//    setMidiLabelColors();
+//    updateMidiLabels = false;
+//}
+//
+//bool ModuleSettingsOverlay::hasMidi()
+//{
+//    return midiNoteNum > 0;
+//}
+//
+//void ModuleSettingsOverlay::setTitle(juce::String& newTitle)
+//{
+//    titleBox.setText(newTitle, juce::dontSendNotification);
+//}
 
-    //this logic works out the context of leaving the moduleSettingsOverlay.
-    //essentially we only want to change moduleColor if a new one has been selected or if the module was just made, then we get a random color
-    
-    juce::String name = titleBox.getText(true); //compiler reasons
-    parentEditor.setModuleName(name);
-    
-    if (parentEditor.getModuleState() != KrumModule::ModuleState::active)
-    {
-        parentEditor.setModuleState(KrumModule::ModuleState::active); //important to set the state before setting the color and midiNote
-    }
-    
-    if (colorChanged)
-    {
-        color = colorPalette.getSelectedColor();
-        parentEditor.setModuleColor(color);
-    }
-    else if (!keepColorOnExit) //when we make a new module but don't select a new color, we grab a random one,
-    {
-        color = colorPalette.getRandomColor();
-        parentEditor.setModuleColor(color);
-    }
+//void ModuleSettingsOverlay::keepCurrentColor(bool keepColor)
+//{
+//    keepColorOnExit = keepColor;
+//}
+//
+//void ModuleSettingsOverlay::colorWasChanged(bool colorWasChanged)
+//{
+//    colorChanged = colorWasChanged;
+//    midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
+//    midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
+//}
 
-    parentEditor.setModuleMidiNote(midiNoteNum);
-    parentEditor.setModuleMidiChannel(midiChanNum);
-    parentEditor.removeSettingsOverlay(true);
-}
+//void ModuleSettingsOverlay::timerCallback()
+//{
+//    if (updateMidiLabels)
+//    {
+//        setMidiLabels();
+//    }
+//
+//    repaint();
+//}
 
-void ModuleSettingsOverlay::showConfirmButton() 
-{
-    confirmButton.setVisible(true);
-    showingConfirmButton = true;
-}
+//void ModuleSettingsOverlay::midiListenButtonClicked()
+//{
+//    setMidiLabelColors();
+//}
+//
+//void ModuleSettingsOverlay::setButtonVisibilities(bool shouldBeVisible)
+//{
+//    colorPalette.setVisible(shouldBeVisible);
+//    cancelButton.setVisible(shouldBeVisible);
+//    deleteButton.setVisible(shouldBeVisible);
+//    midiListenButton.setVisible(shouldBeVisible);
+//}
 
-void ModuleSettingsOverlay::showButtons()
-{
-    setInterceptsMouseClicks(false, true);
-    setButtonVisibilities(true);
-
-    if (showingConfirmButton && !confirmButton.isVisible())
-    {
-        confirmButton.setVisible(true);
-    }
-}
-
-void ModuleSettingsOverlay::hideButtons()
-{
-    setInterceptsMouseClicks(false, false);
-    setButtonVisibilities(false);
-
-    if (confirmButton.isVisible())
-    {
-        showingConfirmButton = true; //if the confirm button was visible before we hide, we set a flag to remeber to show it when the module gets re-selected
-        confirmButton.setVisible(false);
-    }
-}
-
-void ModuleSettingsOverlay::cancelSettings()
-{
-    if (parentEditor.getModuleMidiNote() > 0)
-    {
-        parentEditor.removeSettingsOverlay(false);
-        DBG("Removed Settings");
-    }
-    else
-    {
-        parentEditor.setModuleState(0); // 0 is empty module state
-        DBG("Deleted");
-    }
-
-}
-
-juce::Colour ModuleSettingsOverlay::getSelectedColor()
-{
-    return moduleSelectedColor;
-}
-
-bool ModuleSettingsOverlay::isModuleOverlaySelected()
-{
-    return moduleOverlaySelected;
-}
-
-void ModuleSettingsOverlay::setMidiListen(bool shouldListen)
-{
-    midiListenButton.setToggleState(shouldListen, juce::sendNotification);
-    midiListenButtonClicked();
-}
-
-void ModuleSettingsOverlay::setMidi(int midiNote, int midiChannel)
-{
-    midiNoteNum = midiNote;
-    midiChanNum = midiChannel;
-    updateMidiLabels = true;
-}
-
-void ModuleSettingsOverlay::setMidiLabels()
-{
-    juce::String midiNoteString; 
-    juce::String midiChanString; 
-
-    if (midiNoteNum == 0)
-    {
-        midiNoteString = "None";
-        midiChanString = "None";
-        midiNoteNumberLabel.setFont(20.0f);
-    }
-    else
-    {
-        midiNoteString = juce::String(juce::MidiMessage::getMidiNoteName(midiNoteNum, true, true, 3));
-        midiChanString = juce::String(midiChanNum);
-        midiNoteNumberLabel.setFont(50.0f);
-
-        if (midiNoteNum != parentEditor.getModuleMidiNote() || midiChanNum != parentEditor.getModuleMidiChannel())
-        {
-            showConfirmButton();
-        }
-    }
-
-    midiNoteNumberLabel.setText(midiNoteString, juce::dontSendNotification);
-    midiChannelNumberLabel.setText(midiChanString, juce::dontSendNotification);
-  
-    setMidiLabelColors();
-    updateMidiLabels = false;
-}
-
-bool ModuleSettingsOverlay::hasMidi()
-{
-    return midiNoteNum > 0;
-}
-
-void ModuleSettingsOverlay::setTitle(juce::String& newTitle)
-{
-    titleBox.setText(newTitle, juce::dontSendNotification);
-}
-
-void ModuleSettingsOverlay::keepCurrentColor(bool keepColor)
-{
-    keepColorOnExit = keepColor;
-}
-
-void ModuleSettingsOverlay::colorWasChanged(bool colorWasChanged)
-{
-    colorChanged = colorWasChanged;
-    midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
-    midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, colorPalette.getSelectedColor());
-}
-
-void ModuleSettingsOverlay::timerCallback()
-{
-    if (updateMidiLabels)
-    {
-        setMidiLabels();
-    }
-
-    repaint();
-}
-
-void ModuleSettingsOverlay::midiListenButtonClicked()
-{
-    setMidiLabelColors();
-}
-
-void ModuleSettingsOverlay::setButtonVisibilities(bool shouldBeVisible)
-{
-    colorPalette.setVisible(shouldBeVisible);
-    cancelButton.setVisible(shouldBeVisible);
-    deleteButton.setVisible(shouldBeVisible);
-    midiListenButton.setVisible(shouldBeVisible);
-}
-
-void ModuleSettingsOverlay::setMidiLabelColors()
-{
-    if (midiListenButton.getToggleState())
-    {
-        auto color = juce::Colours::white;
-            
-        midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, color);
-        midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, color);
-    }
-    else
-    {
-        midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::darkgrey);
-        midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::darkgrey);
-    }
-}
-
+//void ModuleSettingsOverlay::setMidiLabelColors()
+//{
+//    if (midiListenButton.getToggleState())
+//    {
+//        auto color = juce::Colours::white;
+//            
+//        midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, color);
+//        midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, color);
+//    }
+//    else
+//    {
+//        midiNoteNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::darkgrey);
+//        midiChannelNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::darkgrey);
+//    }
+//}
+//
 void ModuleSettingsOverlay::visibilityChanged()
 {
-    if (!isVisible())
+    if (isVisible())
     {
-        midiListenButton.setToggleState(false, juce::sendNotification);
-        confirmButton.setVisible(false);
-        showingConfirmButton = false;
+        setInterceptsMouseClicks(false, true);
     }
     else
     {
-        titleBox.setText(parentEditor.getModuleName(), juce::dontSendNotification);
+        setInterceptsMouseClicks(false, false);
     }
 }

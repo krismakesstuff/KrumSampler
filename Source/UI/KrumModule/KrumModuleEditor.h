@@ -16,6 +16,7 @@
 #include "DragAndDropThumbnail.h"
 #include "../InfoPanel.h"
 #include "TimeHandle.h"
+#include "Handler.h"
 
 //==============================================================================
 
@@ -49,15 +50,13 @@ class KrumFileBrowser;
 
 
 
-class KrumModuleEditor  :   public juce::Component,
-                            public juce::DragAndDropTarget,
-                            public juce::FileDragAndDropTarget,
-                            public juce::DragAndDropContainer,
+class KrumModuleEditor  :   public juce::Component,                            public juce::DragAndDropContainer,
                             public juce::Timer,
                             public juce::ValueTree::Listener
 {
 public:
-    KrumModuleEditor(juce::ValueTree& moduleTree, KrumSamplerAudioProcessorEditor& e, juce::AudioFormatManager& fm/*, int state = 0*/); 
+    //KrumModuleEditor(juce::ValueTree& moduleTree, KrumSamplerAudioProcessorEditor& e, juce::AudioFormatManager& fm); 
+    KrumModuleEditor(juce::ValueTree& moduleTree, KrumModuleContainer& mc, juce::AudioFormatManager& fm); 
     ~KrumModuleEditor() override;
 
     void paint (juce::Graphics&) override;
@@ -72,7 +71,7 @@ public:
     void mouseUp(const juce::MouseEvent& e) override;
 
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
-
+   
     
     void buildModule();
     void setChildCompColors();
@@ -82,9 +81,9 @@ public:
     bool isModuleSelected();
     void setModuleButtonsClickState(bool isClickable);
     
-    void showNewSettingsOverlay();
-    void showSettingsOverlay(bool keepCurrentColorOnExit, bool selectOverlay = false);
-    void removeSettingsOverlay(bool keepSettings);
+    //void showNewSettingsOverlay();
+    void showSettingsOverlay();
+    void removeSettingsOverlay();
 
 
     void hideModule();
@@ -93,6 +92,7 @@ public:
     int getModuleState();
      
     int getModuleSamplerIndex();
+    juce::String getSamplerIndexString();
 
     void setModuleState(int newState);
 
@@ -140,10 +140,10 @@ public:
     
 
     //make handleNewFileDrop?
-    bool handleNewFile(juce::ValueTree fileTree, bool overlayShouldListen = true);
+   // bool handleNewFile(juce::ValueTree fileTree, bool overlayShouldListen = true);
     
     void setModuleFile(juce::File& newFile);
-    void addFileToRecentsFolder(juce::File& file, juce::String name);
+   // void addFileToRecentsFolder(juce::File& file, juce::String name);
 
     bool shouldCheckDroppedFile();
     void handleLastDroppedFile();
@@ -156,12 +156,7 @@ public:
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
 
     void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
-    
-    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
-    void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
-    
-    bool isInterestedInFileDrag(const juce::StringArray& files) override;
-    void filesDropped(const juce::StringArray& files, int x, int y) override;
+
     
     bool shouldModuleAcceptFileDrop();
     
@@ -172,11 +167,10 @@ public:
     //tests if the given tree, is the same as this module's moduleTree;
     bool isModuleTree(juce::ValueTree& treeToTest);
 
-    //for multi-selection synchronization
-    void addParamListener(KrumModuleContainer* Listener);
-    void removeParamListener(KrumModuleContainer* Listener);
-
+    
 private:
+
+    void toggleMenuButton();
 
     void updateBubbleComp(juce::Slider* slider, juce::Component* comp);
     double normalizeGainValue(double gain);
@@ -184,6 +178,9 @@ private:
     friend class DragAndDropThumbnail;
     friend class TimeHandle;
     friend class KrumModuleContainer;
+    friend class ModuleSettingsOverlay;
+
+    void setModuleListeningForMidi(bool shouldListen);
 
     void zeroModuleTree();
     void timerCallback() override;
@@ -206,7 +203,10 @@ private:
     bool sendToSelectedModules = false;
 
     juce::ValueTree moduleTree;
-    KrumSamplerAudioProcessorEditor& editor;
+    KrumModuleContainer& moduleContainer;
+    //KrumSamplerAudioProcessorEditor& pluginEditor;
+    //Handler handler;
+
 
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour titleFontColor{ juce::Colours::black };
@@ -248,12 +248,20 @@ private:
 
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
                          const bool shouldDrawButtonAsDown) override;
+
+       // void mouseDown(const juce::MouseEvent& event) override;
+       // void mouseUp(const juce::MouseEvent& event) override;
+        //void mouseEnter(const juce::MouseEvent& e) override;
+        //void mouseExit(const juce::MouseEvent& e) override;
+
     private:
         KrumModuleEditor& editor;
     };
 
     CustomToggleButton reverseButton{ "Reverse Button", "Plays the sample in reverse, active when highlighted", *this };
     CustomToggleButton muteButton{ "Mute", "Mutes this sample from being played.", *this };
+
+    //KComp<juce::TextButton> muteButton {"Mute", "Mutes this sample from being played.", "M"};
 
     class OneShotButton : public InfoPanelDrawableButton
     {
@@ -281,6 +289,9 @@ private:
 
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
                             const bool shouldDrawButtonAsDown) override;
+
+        void mouseUp(const juce::MouseEvent& e) override;
+
     private:
         KrumModuleEditor& editor;
     };
@@ -294,6 +305,7 @@ private:
         ~PitchSlider();
 
         void paint(juce::Graphics& g) override;
+
         void mouseDown(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
 
@@ -305,7 +317,7 @@ private:
     PitchSlider pitchSlider{ *this };
     //PitchButton pitchButton{  *this };
     
-    class MidiLabel :   public juce::Component,
+    class MidiLabel :   public InfoPanelComponent,
                         public juce::SettableTooltipClient
     {
     public:
@@ -315,23 +327,38 @@ private:
         void paint(juce::Graphics& g) override;
         //juce::String getTooltip() override;
         //void setStrings(juce::String note, juce::String channel);
+        //void mouseEnter(const juce::MouseEvent& e) override;
+        //void mouseExit(const juce::MouseEvent& e) override;
+
         
+        void mouseDown(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
         
         juce::String noteNumber;
         juce::String channelNumber;
-        
-        KrumModuleEditor* moduleEditor = nullptr;
-    //private:
-        float fontSize = 13.0f;
+
+        //static void handleResult(int result, MidiLabel* label);
+
+        bool isListeningForMidi();
+        void setListeningForMidi(bool shouldListen);
+
         juce::Colour textColor = juce::Colours::white;
+
+    private:
+        bool listeningForMidi = false;
+        KrumModuleEditor* moduleEditor = nullptr;
+        float fontSize = 13.0f;
+        
+        
     };
     
     MidiLabel midiLabel{this};
     
     OneShotButton playButton{ *this };
-    MenuButton editButton { *this};
+    MenuButton menuButton { *this};
     
-    friend class ColorPalette;
+    //friend class ColorPalette;
+    //ColorPalette colorPalette;
     
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
     

@@ -45,9 +45,9 @@ ColorPalette::~ColorPalette()
 void ColorPalette::resized()
 {
     auto area = getLocalBounds();
-    int buttonW = area.getWidth() * 0.18f;
+    int buttonW = area.getWidth() * 0.19f;
     int buttonH = buttonW;
-    int space = area.getWidth() * 0.10f;
+    int space = 2; //area.getWidth() * 0.10f;
     int displayIndex = 0;                   //using as second row x placement
 
     for (int i = 0; i < colorButtons.size(); i++)
@@ -55,7 +55,7 @@ void ColorPalette::resized()
         auto button = colorButtons[i];
 
         int bx = (i * buttonW) + space;
-        int by = buttonH + space;
+        int by = buttonH/* + space*/;
 
         if (bx + buttonW  > area.getWidth())
         {
@@ -75,12 +75,15 @@ void ColorPalette::resized()
 
 void ColorPalette::colorClicked(juce::Colour clickedColor, juce::ShapeButton* buttonClicked)
 {
-    selectedColor = clickedColor;
+    /*selectedColor = clickedColor;
     parent.colorWasChanged(true);
     if (parent.hasMidi())
     {
         parent.showConfirmButton();
-    }
+    }*/
+
+    parent.colorButtonClicked(clickedColor);
+
 }
 
 juce::Colour ColorPalette::getSelectedColor()

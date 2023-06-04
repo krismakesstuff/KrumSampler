@@ -60,7 +60,7 @@ void DragAndDropThumbnail::itemDropped(const SourceDetails& dragSourceDetails)
 void DragAndDropThumbnail::addDroppedFile(juce::File& newFile)
 {
     canAcceptFile = false;
-    if (newFile.existsAsFile() && (parentEditor.editor.getAudioFormatManager().findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
+    if (newFile.existsAsFile() && (parentEditor.moduleContainer.getPluginEditor()->getAudioFormatManager().findFormatForFileExtension(newFile.getFileExtension()) != nullptr))
     {
         droppedFile = newFile;
         moveDroppedFileToParent();
@@ -201,7 +201,7 @@ void DragAndDropThumbnail::mouseDown(const juce::MouseEvent& e)
 
 void DragAndDropThumbnail::mouseEnter(const juce::MouseEvent& e)
 {
-    parentEditor.editor.moduleContainer.showModuleClipGainSlider(&parentEditor);
+    parentEditor.moduleContainer.showModuleClipGainSlider(&parentEditor);
     InfoPanelComponent::mouseEnter(e);
 }
 

@@ -79,7 +79,6 @@ public:
     juce::Colour getSelectedColor();
     bool isColorSelected();
 
-
     juce::Colour* getLastRandomColor();
 
 

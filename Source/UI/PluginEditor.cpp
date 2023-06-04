@@ -16,6 +16,9 @@
 KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAudioProcessor& p, KrumSampler& s, juce::AudioProcessorValueTreeState& apvts, juce::ValueTree& valTree, juce::ValueTree& fileBrowserTree)
     : AudioProcessorEditor (&p), audioProcessor (p), sampler(s), parameters(apvts), valueTree(valTree), fileBrowser(fileBrowserTree, getAudioFormatManager(), valTree, apvts, s)
 {
+
+    setName("Plugin Editor");
+
     //load the image of the title from binary data
     titleImage = juce::ImageFileFormat::loadFrom(BinaryData::KrumSamplerTitle_png, BinaryData::KrumSamplerTitle_pngSize);
 
@@ -115,8 +118,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
 
     moduleContainer.createModuleEditors();
-    moduleContainer.showFirstEmptyModule();
-    //parameters.addParameterListener(moduleContainer
     
     keyboard.scrollToKey(keyboard.getLowestKey());
     keyboard.repaint();
@@ -152,7 +153,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     auto area = getLocalBounds();
     int spacer = 5;
 
-
+    //app background
     g.setColour(Colors::bgColor);
     g.fillRect(area);
     
@@ -253,10 +254,10 @@ void KrumSamplerAudioProcessorEditor::resized()
     saveEditorDimensions();
 }
 
-void KrumSamplerAudioProcessorEditor::addNextModuleEditor()
-{
-    moduleContainer.showFirstEmptyModule();
-}
+//void KrumSamplerAudioProcessorEditor::addNextModuleEditor()
+//{
+//    moduleContainer.showFirstEmptyModule();
+//}
 
 KrumModuleContainer& KrumSamplerAudioProcessorEditor::getModuleContainer()
 {
@@ -431,6 +432,11 @@ KrumSampler& KrumSamplerAudioProcessorEditor::getSampler()
     return sampler;
 }
 
+KrumKeyboard& KrumSamplerAudioProcessorEditor::getKeyboard()
+{
+    return keyboard;
+}
+
 juce::AudioFormatManager& KrumSamplerAudioProcessorEditor::getAudioFormatManager()
 {
     return *audioProcessor.getFormatManager();
@@ -461,4 +467,17 @@ juce::Viewport* KrumSamplerAudioProcessorEditor::getModuleViewport()
     return &modulesViewport; 
 }
 
+KrumLookAndFeel* KrumSamplerAudioProcessorEditor::getKrumLaf()
+{
+    return &kLaf;
+}
 
+VolumeLookAndFeel* KrumSamplerAudioProcessorEditor::getVolumeLaf()
+{
+    return &vLaf;
+}
+
+PanLookAndFeel* KrumSamplerAudioProcessorEditor::getPanLaf()
+{
+    return &pLaf;
+}

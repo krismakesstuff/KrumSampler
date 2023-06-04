@@ -497,7 +497,7 @@ void KrumTreeItem::EditableComp::mouseDown(const juce::MouseEvent& e)
         juce::String menuName{ "Make Module" };
         if (owner.parentTreeView->getNumSelectedItems(3) > 1)
         {
-            menuName = menuName + "s";
+            menuName += "s";
         }
 
         menu.addItem(RightClickMenuIds::assignToModule, menuName);
@@ -1448,7 +1448,7 @@ void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
                 //auto containerPoint = event.getEventRelativeTo(moduleContainer);
                 if (moduleContainer->contains(event.getEventRelativeTo(moduleContainer).getPosition()))
                 {
-                    auto& modules = moduleContainer->getModuleEditors();
+                    auto& modules = moduleContainer->getActiveModuleEditors();
                     for (int i = 0; i < modules.size(); i++)
                     {
                         auto modEd = modules[i];
@@ -1478,7 +1478,7 @@ void FavoritesTreeView::dragOperationEnded(const juce::DragAndDropTarget::Source
 {
     if (moduleContainer)
     {
-        auto& moduleEditors = moduleContainer->getModuleEditors();
+        auto& moduleEditors = moduleContainer->getActiveModuleEditors();
         for (int i = 0; i < moduleEditors.size(); i++)
         {
             auto modEd = moduleEditors[i];
@@ -1710,32 +1710,36 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
         auto modulesTree = fileBrowser.getStateValueTree().getChildWithName(TreeIDs::KRUMMODULES.getParamID());
         if (modulesTree.hasType(TreeIDs::KRUMMODULES.getParamID()))
         {
-            auto editor = moduleContainer->getEditor();
+            auto editor = moduleContainer->getPluginEditor();
+
+
             //iterate through the currently selected files
             for (int fileIndex = 0; fileIndex < selectedFileTrees.size(); ++fileIndex)
             {
+                moduleContainer->handleNewFile(selectedFileTrees[fileIndex]);
+
                 //iterate through modulesTree to find an inactive tree
-                for (int moduleTreeIndex = 0; moduleTreeIndex < modulesTree.getNumChildren(); moduleTreeIndex++)
-                {
-                    auto itTree = modulesTree.getChild(moduleTreeIndex);
-                    if ((int)itTree.getProperty(TreeIDs::moduleState.getParamID()) == 0) //we grab the first empty module tree
-                    {
-                        KrumModuleEditor* modEd = nullptr;
+                //for (int moduleTreeIndex = 0; moduleTreeIndex < modulesTree.getNumChildren(); moduleTreeIndex++)
+                //{
+                //    auto itTree = modulesTree.getChild(moduleTreeIndex);
+                //    if ((int)itTree.getProperty(TreeIDs::moduleState.getParamID()) == 0) //we grab the first empty module tree
+                //    {
+                //        KrumModuleEditor* modEd = nullptr;
 
-                        if (fileIndex == 0)
-                        {
-                            modEd = moduleContainer->getModuleEditors().getLast();
-                        }
-                        else
-                        {
-                            modEd = moduleContainer->addNewModuleEditor(new KrumModuleEditor(itTree, *editor, fileBrowser.getFormatManager()));
-                        }
+                //        if (fileIndex == 0)
+                //        {
+                //            modEd = moduleContainer->getModuleEditors().getLast();
+                //        }
+                //        else
+                //        {
+                //            modEd = moduleContainer->addNewModuleEditor(new KrumModuleEditor(itTree, *editor, fileBrowser.getFormatManager()));
+                //        }
 
-                        modEd->handleNewFile(selectedFileTrees[fileIndex]);
-                        showEmptyModule = true;
-                        break;
-                    }
-                }
+                //        modEd->handleNewFile(selectedFileTrees[fileIndex]);
+                //        showEmptyModule = true;
+                //        break;
+                //    }
+                //}
             }
         }
         else
@@ -1746,10 +1750,10 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
     }
 
     //this makes the last empty module to drop new files on
-    if (showEmptyModule)
-    {
-        moduleContainer->showFirstEmptyModule();
-    }
+    //if (showEmptyModule)
+    //{
+    //    moduleContainer->showFirstEmptyModule();
+    //}
 
 }
 //==================================================================================================

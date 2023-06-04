@@ -136,7 +136,7 @@ void InfoPanelButton::mouseExit(const juce::MouseEvent& e)
 
 //=============================================================================
 
-InfoPanelDrawableButton::InfoPanelDrawableButton(juce::String title, juce::String newMessage, juce::String newKeycommand,  juce::DrawableButton::ButtonStyle buttonStyle)
+InfoPanelDrawableButton::InfoPanelDrawableButton(juce::DrawableButton::ButtonStyle buttonStyle, juce::String title, juce::String newMessage, juce::String newKeycommand)
     : compTitle(title), message(newMessage), keycommand(newKeycommand), juce::DrawableButton(title, buttonStyle)
 {}
 

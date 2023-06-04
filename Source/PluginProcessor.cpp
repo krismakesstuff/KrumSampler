@@ -97,7 +97,7 @@ juce::ValueTree createFileBrowserTree()
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-
+    //Realtime audio parameters that can be changed by the DAW or user.
 
     std::vector<std::unique_ptr<juce::AudioProcessorParameterGroup>> paramsGroup;
 
@@ -117,7 +117,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     
     for (int i = 0; i < MAX_NUM_MODULES; i++)
     {
-        juce::String index = juce::String(i);
+        juce::String index{};
+            
+        if (i < 10)
+        {
+            index = "0" + juce::String(i);
+        }
+        else
+        {
+            index = juce::String(i);
+
+        } 
 
         juce::ParameterID paramModuleGainID (TreeIDs::paramModuleGain.getParamID() + index, PARAM_VERSION_HINT);
         auto gainParam = std::make_unique<juce::AudioParameterFloat>(paramModuleGainID, "Module Gain" + index, gainRange, dBToGain(0.0f),

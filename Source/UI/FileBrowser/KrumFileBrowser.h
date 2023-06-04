@@ -622,7 +622,7 @@ private:
 
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
-    InfoPanelDrawableButton goUpButton{"Up Button","Moves up one directory.","", juce::DrawableButton::ButtonStyle::ImageFitted};
+    InfoPanelDrawableButton goUpButton{ juce::DrawableButton::ButtonStyle::ImageFitted, "Up Button","Moves up one directory." };
 
     SimpleAudioPreviewer& previewer;
     KrumFileBrowser& fileBrowser;
@@ -764,7 +764,7 @@ private:
     PanelHeader filechooserHeader{ "FILE BROWSER", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
     FileChooser fileChooser{*this, audioPreviewer};
 
-    InfoPanelDrawableButton addFavoriteButton {"Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section", "", juce::DrawableButton::ButtonStyle::ImageOnButtonBackground};
+    InfoPanelDrawableButton addFavoriteButton { juce::DrawableButton::ButtonStyle::ImageOnButtonBackground, "Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section"};
     
     bool init = true;
 
