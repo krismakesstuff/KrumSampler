@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "ColorPalette.h"
 #include "ModuleSettingsOverlay.h"
+#include "../KrumLookAndFeel.h"
+
 
 //==============================================================================
 
@@ -19,6 +21,7 @@ ColorPalette::ColorPalette(ModuleSettingsOverlay& pm)
 {
     setInterceptsMouseClicks(false, true);
     setPaintingIsUnclipped(true);
+
 
     for (int i = 0; i < ColorPaletteColors::colorArray.size(); i++)
     {

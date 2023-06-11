@@ -16,7 +16,6 @@
 #include "DragAndDropThumbnail.h"
 #include "../InfoPanel.h"
 #include "TimeHandle.h"
-#include "Handler.h"
 
 //==============================================================================
 
@@ -83,7 +82,7 @@ public:
     
     //void showNewSettingsOverlay();
     void showSettingsOverlay();
-    void removeSettingsOverlay();
+    void hideSettingsOverlay();
 
 
     void hideModule();
@@ -97,7 +96,7 @@ public:
     void setModuleState(int newState);
 
     int getModuleDisplayIndex();
-    void setModuleDisplayIndex(int newDisplayIndex);
+    void setModuleDisplayIndex(int newDisplayIndex, bool sendChange = true);
 
     void setModuleName(juce::String& newName);
     juce::String getModuleName();
@@ -190,7 +189,7 @@ private:
     void handleOneShotButtonMouseDown(const juce::MouseEvent& e);
     void handleOneShotButtonMouseUp(const juce::MouseEvent& e);
 
-    
+    void setChildCompMuteColors();
 
     bool drawThumbnail = false;
     bool needsToBuildModuleEditor = false;
@@ -200,7 +199,7 @@ private:
     bool modulePlaying = false;
     bool moduleSelected = false;
    
-    bool sendToSelectedModules = false;
+    // sendToSelectedModules = false;
 
     juce::ValueTree moduleTree;
     KrumModuleContainer& moduleContainer;
@@ -257,6 +256,8 @@ private:
     private:
         KrumModuleEditor& editor;
     };
+
+    void muteButtonClicked();
 
     CustomToggleButton reverseButton{ "Reverse Button", "Plays the sample in reverse, active when highlighted", *this };
     CustomToggleButton muteButton{ "Mute", "Mutes this sample from being played.", *this };
@@ -321,7 +322,7 @@ private:
                         public juce::SettableTooltipClient
     {
     public:
-        MidiLabel(KrumModuleEditor* parentEditor);
+        MidiLabel(KrumModuleEditor& parentEditor);
         ~MidiLabel() override;
         
         void paint(juce::Graphics& g) override;
@@ -346,26 +347,41 @@ private:
 
     private:
         bool listeningForMidi = false;
-        KrumModuleEditor* moduleEditor = nullptr;
+        KrumModuleEditor& moduleEditor;
         float fontSize = 13.0f;
         
         
     };
     
-    MidiLabel midiLabel{this};
+    MidiLabel midiLabel{*this};
     
     OneShotButton playButton{ *this };
     MenuButton menuButton { *this};
     
-    //friend class ColorPalette;
-    //ColorPalette colorPalette;
+    class DragHandle : public InfoPanelDrawableButton
+    {
+    public:
+        DragHandle(KrumModuleEditor& parentEditor);
+        ~DragHandle() override;
+
+        /*void setImage(juce::Drawable* newImage);
+
+        void paint(juce::Graphics& g) override;
+        void resized() override;*/
+
+        void mouseDown(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
+        void mouseDrag(const juce::MouseEvent& e) override;
+
+    private:
+        KrumModuleEditor& moduleEditor;
+    };
+
+    DragHandle dragHandle{ *this };
     
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
     
-    //For Later..
-//    std::unique_ptr<DragHandle> dragHandle;
-//    friend class DragHandle;
-//    bool forcedMouseUp = false;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumModuleEditor)
 };

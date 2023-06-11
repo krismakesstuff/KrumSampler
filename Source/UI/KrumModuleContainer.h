@@ -70,10 +70,12 @@ public:
     void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
 
     KrumModuleEditor* addNewModuleEditor(KrumModuleEditor* newModuleEditor);
+    KrumModuleEditor* insertNewModuleEditor(KrumModuleEditor* newModuleEditor, int indexToInsert);
+    
     void removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout = true);
 
-    void setModuleSelected(KrumModuleEditor* moduleToMakeActive);
-    void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect);
+    void setModuleSelectedFromClick(KrumModuleEditor* moduleToMakeActive, bool setSelected ,const juce::MouseEvent& event);
+    //void setModuleUnselected(KrumModuleEditor* moduleToMakeDeselect, const juce::MouseEvent& event);
     void deselectAllModules();
     void setModulesSelectedToLastSelection(KrumModuleEditor* moduleToSelect);
     void setModuleSelectedWithCommand(KrumModuleEditor* moduleToSelect);
@@ -119,36 +121,22 @@ public:
     juce::AudioProcessorValueTreeState* getAPVTS();
 
     bool handleNewFile(juce::ValueTree fileTree);
+    bool handleNewExternalFile(juce::String fullPathName);
+
+    void startDraggingEditor(KrumModuleEditor* editorToDrag, const juce::MouseEvent& event);
+    void dragEditor(KrumModuleEditor* editorToDrag, const juce::MouseEvent& event);
+    
+
+    void draggingMouseUp(const juce::MouseEvent& event);
+    bool isModuleDragging();
 
 private:
 
+    KrumModuleEditor* isMouseDragOverActiveEditor(KrumModuleEditor* eventOrigin ,const juce::MouseEvent& event);
+    
 
-    class DropSampleArea : public InfoPanelComponent,
-        public juce::DragAndDropTarget,
-        public juce::FileDragAndDropTarget
-    {
-    public:
-        DropSampleArea(KrumModuleContainer* mc);
-        ~DropSampleArea() override;
-
-        void paint(juce::Graphics& g) override;
-
-    private:
-
-        //void mouseDown(const juce::MouseEvent& e) override;
-        void mouseUp(const juce::MouseEvent& e) override;
-
-        bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
-        void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
-
-        bool isInterestedInFileDrag(const juce::StringArray& files) override;
-        void filesDropped(const juce::StringArray& files, int x, int y) override;
-
-        KrumModuleContainer* moduleContainer = nullptr;
-
-    };
-
-    DropSampleArea dropSampleArea{ this };
+    //this will need to support 
+    void swapModuleEditorsDisplayIndex(int firstIndex, int secondIndex);
 
     void clearActiveModuleSettingsOverlays();
 
@@ -156,8 +144,9 @@ private:
     void removeParamListeners();
     
     void setMultiControlState(bool shouldControl);
-
-    KrumModuleEditor* addModuleEditor(KrumModuleEditor* moduleToAdd, bool refreshLayout = true);
+    void setModuleSelectedState(KrumModuleEditor* moduleToSelect, bool shouldSelect);
+    
+    KrumModuleEditor* addModuleEditor(KrumModuleEditor* moduleToAdd, int indexToInsert = -1, bool refreshLayout = true);
 
     bool findChildCompInSelectedModules(juce::Component* compToTest, int& origin, juce::String& type);
 
@@ -169,9 +158,9 @@ private:
     juce::ValueTree valueTree;
 
     void addFileToRecentsFolder(juce::File& file, juce::String name);
+    void addFileToFavoritesFolder(juce::File& file, juce::String name);
 
     void timerCallback() override;
-    //void setMultiControlState(bool shouldControl);
 
     void addModuleParamIDs(KrumModuleEditor* module);
     void removeModuleParamIDs(KrumModuleEditor* module);
@@ -194,6 +183,18 @@ private:
     bool applyNextParamChange = false;
     //ParamIDValue ParamChange{};
 
+    void loadMidiToModulesListening(int channel, int note);
+
+    struct MidiMessage
+    {
+        int midiNote = 0;
+        int midiChannel = 0;
+    };
+    
+    MidiMessage nextMidiMessage{};
+    bool applyMidi = false;
+
+    
     friend class KrumSamplerAudioProcessorEditor;
     friend class KrumSampler;
  
@@ -207,8 +208,13 @@ private:
     bool modulesOutside = false;
     bool multiSelectControlState = false;
 
-    
 
+    juce::ComponentDragger dragger;
+
+    // need to consider multi-selection
+    juce::ComponentBoundsConstrainer* moduleEditorConstrainer = nullptr;
+    bool moduleDragging = false;
+    KrumModuleEditor* currentEditorDragging = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumModuleContainer)
 

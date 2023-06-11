@@ -31,6 +31,8 @@ namespace Colors
     const juce::Colour sectionOutlineColor{ juce::Colours::grey };
     const juce::Colour sectionBGColor{ juce::Colours::black.brighter(0.075f) };
     const juce::Colour outputSliderBGColor{ Colors::sectionBGColor };
+    const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
+    const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
 
     //browser
     const juce::Colour browserFontColor{ juce::Colours::white.withAlpha(0.5f)};
@@ -50,7 +52,7 @@ namespace Colors
 
     //modules 
     const juce::Colour modulesBGColor{ Colors::sectionBGColor };
-    const juce::Colour moduleDefaultColor{ juce::Colours::grey.darker() };
+    const juce::Colour moduleDefaultColor{ juce::Colours::grey.brighter(0.1f)};
     const juce::Colour outlineColor{ juce::Colours::white };
     const juce::Colour moduleBGColor{ juce::Colours::black };
     const juce::Colour moduleSelectedOutlineColor{ juce::Colours::white.withAlpha(0.9f) };
@@ -58,17 +60,48 @@ namespace Colors
     const juce::Colour moduleMultiControlAcitveColor{ juce::Colours::red.withAlpha(0.99f) };
     const juce::Colour moduleMidiListeningColor{ moduleMultiControlAcitveColor };
     const juce::Colour moduleMuteActiveColor{ juce::Colours::red.withAlpha(0.7f) };
-    const juce::Colour modulePlayingHightlightColor{ juce::Colours::white.withAlpha(0.5f)};
+    const juce::Colour modulePlayingHightlightColor{ juce::Colours::white.withAlpha(0.4f)};
     const juce::Colour moduleOutputMenuBG{ juce::Colours::black.withAlpha(0.7f) };
     const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
 
-    //somewhere...
-    const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
-    const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
-    const juce::Colour mainFontColor{ juce::Colours::white };
-    const juce::Colour backFontColor{ juce::Colours::darkgrey };
-
 }
+
+namespace ColorPaletteColors
+{
+    static juce::Colour redSalsa = juce::Colour::fromRGB(249, 65, 68);
+    //static juce::Colour orangeRed =     juce::Colour::fromRGB(243, 114, 44);
+    static juce::Colour orangePeel = juce::Colour::fromRGB(248, 164, 65);
+    //static juce::Colour yellowOrange =  juce::Colour::fromRGB(248, 150, 30);
+    static juce::Colour mangoTango = juce::Colour::fromRGB(249, 132, 74);
+    //static juce::Colour maize =         juce::Colour::fromRGB(249, 199, 79);
+    //static juce::Colour pistachio =     juce::Colour::fromRGB(144, 190, 109);
+    static juce::Colour zomp = juce::Colour::fromRGB(67, 170, 139);
+    //static juce::Colour cadetBlue =     juce::Colour::fromRGB(77, 144, 142);
+    //static juce::Colour queenBlue =     juce::Colour::fromRGB(87, 117, 144);
+    static juce::Colour cgBlue = juce::Colour::fromRGB(39, 125, 161);
+
+    //static juce::Array<juce::Colour> colorArray{ redSalsa, orangeRed, yellowOrange, mangoTango, maize,
+    //                                           pistachio, zomp, cadetBlue, queenBlue, cgBlue };
+    static juce::Array<juce::Colour> colorArray{ redSalsa, orangePeel, mangoTango, zomp, cgBlue, Colors::moduleDefaultColor };
+
+    static juce::ColourGradient makeGradientFromAllColors(bool radial, juce::Point<float> pointOne, juce::Point<float> pointTwo)
+    {
+        juce::ColourGradient retGrade;
+        juce::NormalisableRange<double> colorRange{ 0, (double)colorArray.size() };
+        for (int i = 0; i < colorArray.size(); i++)
+        {
+            retGrade.addColour(colorRange.convertTo0to1(i), colorArray[i]);
+        }
+
+        retGrade.isRadial = radial;
+        retGrade.point1 = pointOne;
+        retGrade.point2 = pointTwo;
+
+        return retGrade;
+    }
+}
+
+
 
 class KrumLookAndFeel : public juce::LookAndFeel_V4
 {
@@ -163,7 +196,7 @@ public:
         }
 
         //currentdb is an index value, not the slider position. 
-        for (float currentdb = startDecibel; currentdb > endDecibel; currentdb += decibelDistance)
+        for (float currentdb = startDecibel; currentdb >= endDecibel; currentdb += decibelDistance)
         {
             float currentLinePos = getSliderDecibelPosition(slider, currentdb);
             
@@ -764,9 +797,10 @@ public:
         }
 
         const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
-        juce::Colour gradCol1(juce::Colours::black);
+        juce::Colour gradCol1(trackColour.darker());
         //juce::Colour gradCol1(trackColour.brighter(0.1f));
-        juce::Colour gradCol2(trackColour.darker());
+        //juce::Colour gradCol2(juce::Colours::black.withAlpha(0.4f));
+        juce::Colour gradCol2(trackColour.darker(0.7));
         //juce::Colour gradCol1(juce::Colours::blue);
         //juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
         juce::Path indent;
@@ -792,13 +826,15 @@ public:
             juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
             //vertGrade.addColour(0.5, trackColour.brighter(0.2f));
 
-            //g.setGradientFill(vertGrade);
+            g.setGradientFill(vertGrade);
             //indent.addRoundedRectangle(trackRect, cornerSize);
             //g.fillPath(indent);
 
             //g.setColour(gradCol2);
-            g.setColour(trackColour);
-            g.fillRoundedRectangle(bounds.expanded(getSliderThumbRadius(slider)).toFloat(), cornerSize);
+            //g.setColour(trackColour);
+            //g.drawRoundedRectangle(bounds.expanded(getSliderThumbRadius(slider)).toFloat(), cornerSize, 2.5);
+            //g.fillRoundedRectangle(bounds.expanded(getSliderThumbRadius(slider)).toFloat(), cornerSize);
+            g.fillRoundedRectangle(bounds.expanded(getSliderThumbRadius(slider)).withTrimmedRight(21).toFloat().withTop(sliderPos), cornerSize);
         }
 
         //g.setColour(trackColour.contrasting(0.6f));
@@ -822,10 +858,12 @@ public:
         if (style == juce::Slider::LinearVertical)
         {
             thumbH = getSliderThumbRadius(slider) + 1; //height * 0.07;// : height * 0.085f;
-            thumbW = 38; //width * 0.65f;
-
+            //thumbH = 5; //height * 0.07;// : height * 0.085f;
+            thumbW = 42; //width * 0.65f;
+            //thumbW = width + 10/** 0.5f*/;
             //thumbX = (x + width * 0.5f) - (thumbW * 0.5f);
-            thumbX = (x - thumbH/ 2);
+            //thumbX = (x - thumbH/ 2);
+            thumbX = (x - 8);
             thumbY = sliderPos - thumbH / 2;
 
             line.setStart({ (float)thumbX , (float)thumbY + (thumbH / 2) });
@@ -862,7 +900,8 @@ public:
 
         
         //vertical
-        juce::Rectangle<int> dbLineRect{thumbW + 10, (int)maxSliderPos , width + 5, (int)minSliderPos - getSliderThumbRadius(slider)};
+        //juce::Rectangle<int> dbLineRect{thumbW + 10, (int)maxSliderPos , width + 5, (int)minSliderPos - getSliderThumbRadius(slider)};
+        juce::Rectangle<int> dbLineRect{48, (int)maxSliderPos , width + 5, (int)minSliderPos/* - getSliderThumbRadius(slider)*/};
         
         g.setColour(slider.findColour(juce::Slider::ColourIds::trackColourId).darker(0.99f));
         //drawVolumeLines(g, (float)dbLineRect.getX() - 5, (float)dbLineRect.getWidth() - 5, 2.0f, -50.0f, -0.5f, slider);
@@ -896,6 +935,8 @@ public:
         g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() - 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
         
        
+        auto n50DbPos = getSliderDecibelPosition(slider, -50.0f) + thumbOffset;
+        g.drawFittedText("-50", dbLineRect.withY(n50DbPos - textHeight / 2).withX(dbLineRect.getX() - 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
     }
 };
@@ -970,10 +1011,28 @@ public:
 
         const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
         juce::Colour textColor = slider.findColour(juce::Slider::ColourIds::textBoxTextColourId);
-        juce::Colour gradCol1(juce::Colours::black);
+        juce::Colour gradCol1(juce::Colours::black.withAlpha(0.4f));
+        
         //juce::Colour gradCol1(juce::Colours::red);
-        juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
+        juce::Colour gradCol2(trackColour.darker());
         juce::Path indent;
+
+        juce::Rectangle<float> trackRect{};
+        int mid = width / 2;
+        float midLineThick = 1.0f;
+        
+        
+        if (sliderPos < mid)
+        {
+            trackRect = bounds.withLeft(sliderPos).withRight(mid).toFloat();
+            gradCol1 = trackColour.darker();
+            gradCol2 = juce::Colours::black.withAlpha(0.4f);
+        }
+        else if(sliderPos > mid)
+        {
+            trackRect = bounds.withLeft(mid - midLineThick).withRight(sliderPos).toFloat();
+        }
+
 
         float cornerSize = 4.0f;
 
@@ -981,11 +1040,13 @@ public:
         {
             //auto iy = height * 0.25f;
             //juce::Rectangle<float> trackRect((float)x, iy, (float)width, height * 0.50f);
-            juce::Rectangle<float> trackRect = bounds.toFloat();
+            //juce::Rectangle<float> trackRect = bounds.toFloat();
 
-            g.setColour(trackColour);
+            juce::ColourGradient hGrade(gradCol1, trackRect.getX(), y, gradCol2, trackRect.getRight(), y, false);
+            //g.setColour(trackColour);
+            g.setGradientFill(hGrade);
             g.fillRoundedRectangle(trackRect, cornerSize);
-            
+             
             //int zeroX = slider.getPositionOfValue(0);
             int zeroX = bounds.getCentreX() - 3;
             juce::Line<int> zeroLine{ zeroX, y + 2, zeroX, height - 4 };
@@ -993,11 +1054,13 @@ public:
 
             g.setColour(textColor);
                      
-            g.drawLine(zeroLine.toFloat(), 0.5f);
+            //g.drawLine(zeroLine.toFloat(), midLineThick);
             
             g.setFont( 12.0f );
-            g.drawFittedText("L", trackRect.withX(cornerSize).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
-            g.drawFittedText("R", trackRect.withX(trackRect.getRight() - (cornerSize * 3)).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
+            g.drawFittedText("L", {x + getSliderThumbRadius(slider), y, 10,height}, juce::Justification::centred, 1);
+            g.drawFittedText("R", { width - 10, y, 10,height }, juce::Justification::centred, 1);
+            //g.drawFittedText("L", trackRect.withX(cornerSize).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
+            //g.drawFittedText("R", trackRect.withX(trackRect.getRight() - (cornerSize * 3)).withY(cornerSize / 2).withWidth(cornerSize * 2).withHeight(trackRect.getHeight() * 0.55f).toNearestInt(), juce::Justification::centred, 1);
         }
         else //vertical 
         {

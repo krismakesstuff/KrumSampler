@@ -105,15 +105,17 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
     }
 
     //auto barColor = juce::Colours::white.withAlpha(0.3f);
-    auto barColor = thumbnailBGColor.darker();
+    auto barColor = parentEditor.getModuleColor().darker().withAlpha(0.4f);
+    auto fillColor = thumbnailBGColor.darker(0.9f).withAlpha(0.5f);
+    //auto fillColor = barColor.darker(0.5f).withAlpha(0.3f);
     int barWidth = 1;
 
-    paintStartBar(g, area, barColor, barWidth);
-    paintEndBar(g, area, barColor, barWidth);
+    paintStartBar(g, area, barColor, fillColor, barWidth);
+    paintEndBar(g, area, barColor, fillColor,  barWidth);
 
     if (canAcceptFile)
     {
-        g.setColour(juce::Colours::red);
+        g.setColour(Colors::canDropFileColor);
         g.drawRect(area, 2);
     }
 
@@ -138,7 +140,7 @@ void DragAndDropThumbnail::paintIfFileLoaded(juce::Graphics& g, const juce::Rect
     drawChannels(g, thumbnailBounds, 0.0, getTotalLength(), verticalZoom);
 }
 
-void DragAndDropThumbnail::paintStartBar(juce::Graphics& g, juce::Rectangle<int>& area, juce::Colour barColor, int barWidth)
+void DragAndDropThumbnail::paintStartBar(juce::Graphics& g, juce::Rectangle<int>& area, juce::Colour barColor, juce::Colour fillColor, int barWidth)
 {
     auto& timeHandle = parentEditor.timeHandle;
     int startX = timeHandle.getXFromSample(timeHandle.getStartPosition());
@@ -146,14 +148,14 @@ void DragAndDropThumbnail::paintStartBar(juce::Graphics& g, juce::Rectangle<int>
     juce::Rectangle<int> barRect{ startX, area.getY(), barWidth, area.getHeight() };
     juce::Rectangle<int> startToBarRect { area.getX(), area.getY(), startX, area.getHeight() };
 
-    g.setColour(thumbnailBGColor.darker(0.5f).withAlpha(0.5f));
+    g.setColour(fillColor);
     g.fillRect(startToBarRect);
 
     g.setColour(barColor);
     g.fillRect(barRect);
 }
 
-void DragAndDropThumbnail::paintEndBar(juce::Graphics& g, juce::Rectangle<int>& area, juce::Colour barColor, int barWidth)
+void DragAndDropThumbnail::paintEndBar(juce::Graphics& g, juce::Rectangle<int>& area, juce::Colour barColor, juce::Colour fillColor, int barWidth)
 {
     auto& timeHandle = parentEditor.timeHandle;
     int endX = timeHandle.getXFromSample(timeHandle.getEndPosition());
@@ -161,9 +163,10 @@ void DragAndDropThumbnail::paintEndBar(juce::Graphics& g, juce::Rectangle<int>& 
     juce::Rectangle<int> barRect{ endX - barWidth, area.getY(), barWidth, area.getHeight() };
     juce::Rectangle<int> endToBarRect = barRect.withWidth(area.getWidth() - (endX - barWidth));
 
-    g.setColour(thumbnailBGColor.darker(0.5f).withAlpha(0.5f));
+    g.setColour(fillColor);
     g.fillRect(endToBarRect);
 
+    //g.setColour(barColor);
     g.setColour(barColor);
     g.fillRect(barRect);
 }

@@ -18,6 +18,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 {
 
     setName("Plugin Editor");
+    //setInterceptsMouseClicks(true, true);
 
     //load the image of the title from binary data
     titleImage = juce::ImageFileFormat::loadFrom(BinaryData::KrumSamplerTitle_png, BinaryData::KrumSamplerTitle_pngSize);
@@ -84,6 +85,10 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     //add Info panel so we can display
     addAndMakeVisible(InfoPanel::shared_instance());
     
+    //add DropSampleArea
+    addAndMakeVisible(dropSampleArea);
+    //addMouseListener(&dropSampleArea, false);
+
     //add File Browser
     fileBrowser.setLookAndFeel(&fbLaf);
     fileBrowser.assignModuleContainer(&moduleContainer);
@@ -91,8 +96,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     addAndMakeVisible(fileBrowser);
 
     //load collapse Images and add button
-    auto collapseLeftIm = juce::Drawable::createFromImageData(BinaryData::chevron_left_white_svg, BinaryData::chevron_left_white_svgSize);
-    auto collapseRightIm = juce::Drawable::createFromImageData(BinaryData::chevron_right_white_svg, BinaryData::chevron_right_white_svgSize);
+    auto collapseRightIm = juce::Drawable::createFromImageData(BinaryData::chevron_left_white_svg, BinaryData::chevron_left_white_svgSize);
+    auto collapseLeftIm = juce::Drawable::createFromImageData(BinaryData::chevron_right_white_svg, BinaryData::chevron_right_white_svgSize);
 
     collapseBrowserButton.setImages(collapseRightIm.get(), collapseRightIm.get(), collapseRightIm.get(), collapseRightIm.get(),
                                     collapseLeftIm.get());
@@ -144,6 +149,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
 
 KrumSamplerAudioProcessorEditor::~KrumSamplerAudioProcessorEditor()
 {
+    //removeMouseListener(&dropSampleArea);
 }
 
 //==============================================================================
@@ -227,6 +233,8 @@ void KrumSamplerAudioProcessorEditor::resized()
     presetsComboBox.setBounds(area.withLeft(area.getRight() - (EditorDimensions::presetsW + EditorDimensions::settingsButtonW + 30)).withTop(area.getY() + 10).withWidth(EditorDimensions::presetsW).withHeight(EditorDimensions::presetsH));
     settingsButton.setBounds(area.withLeft(presetsComboBox.getRight() + 15).withTop(presetsComboBox.getY() + 2).withWidth(EditorDimensions::settingsButtonW).withHeight(EditorDimensions::settingsButtonH));
 
+
+
     if (!collapseBrowserButton.getToggleState())
     {
         //File Browser is Visible
@@ -236,12 +244,15 @@ void KrumSamplerAudioProcessorEditor::resized()
     else
     {
         //File Browser is Hidden
-        modulesBG = area.withTop(EditorDimensions::topBar).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::shrinkage).withBottom(getHeight() - EditorDimensions::bottomBarH).reduced(EditorDimensions::extraShrinkage());
+        modulesBG = area.withTop(EditorDimensions::topBar).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::shrinkage).withBottom(getHeight() - EditorDimensions::bottomBarH).reduced(EditorDimensions::shrinkage);
     }
 
-    modulesViewport.setBounds(modulesBG.withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage(3)).reduced(EditorDimensions::extraShrinkage()));
-    moduleContainer.setBounds(modulesBG.withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage(3)).reduced(EditorDimensions::extraShrinkage()));
+    dropSampleArea.setBounds(modulesBG.withLeft(modulesBG.getX() + EditorDimensions::shrinkage).withWidth(EditorDimensions::dropSampleAreaW).withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).reduced(EditorDimensions::shrinkage, EditorDimensions::extraShrinkage()));
+    
+    modulesViewport.setBounds(modulesBG.withLeft(dropSampleArea.getRight() - EditorDimensions::extraShrinkage()).withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage(3)).reduced(EditorDimensions::extraShrinkage()));
+    moduleContainer.setBounds(modulesBG.withLeft(dropSampleArea.getRight() - EditorDimensions::extraShrinkage()).withBottom(area.getBottom() - (EditorDimensions::keyboardH + EditorDimensions::bottomBarH)).withRight(area.getRight() - EditorDimensions::outputW - EditorDimensions::extraShrinkage(3)).reduced(EditorDimensions::extraShrinkage()));
     moduleContainer.refreshModuleLayout();
+
 
     infoButton.setBounds(area.withLeft(EditorDimensions::shrinkage).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage + 2)).withHeight(EditorDimensions::infoButtonSize).withWidth(EditorDimensions::infoButtonSize).reduced(EditorDimensions::shrinkage));
     InfoPanel::shared_instance().setBounds(area.withX(infoButton.getRight()).withTop(area.getBottom() - (EditorDimensions::bottomBarH + EditorDimensions::shrinkage)));
@@ -249,7 +260,7 @@ void KrumSamplerAudioProcessorEditor::resized()
     outputGainSlider.setBounds(area.withTop(EditorDimensions::extraShrinkage(20)).withBottom(modulesBG.getBottom() - EditorDimensions::extraShrinkage()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage(4)).withRight(area.getRight() - EditorDimensions::extraShrinkage(4)));
     keyboard.setBounds(modulesBG.withTop(modulesBG.getBottom() - EditorDimensions::keyboardH).withRight(modulesBG.getRight()).reduced(EditorDimensions::extraShrinkage()));
 
-    collapseBrowserButton.setBounds(area.withTop(area.getHeight() / 2).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
+    collapseBrowserButton.setBounds(area.withTop(EditorDimensions::topBar).withRight(area.getX() + EditorDimensions::collapseButtonW).withHeight(EditorDimensions::collapseButtonH));
 
     saveEditorDimensions();
 }
@@ -467,6 +478,12 @@ juce::Viewport* KrumSamplerAudioProcessorEditor::getModuleViewport()
     return &modulesViewport; 
 }
 
+KrumSamplerAudioProcessorEditor::DropSampleArea* KrumSamplerAudioProcessorEditor::getDropSampleArea()
+{
+    return &dropSampleArea;
+}
+
+
 KrumLookAndFeel* KrumSamplerAudioProcessorEditor::getKrumLaf()
 {
     return &kLaf;
@@ -480,4 +497,209 @@ VolumeLookAndFeel* KrumSamplerAudioProcessorEditor::getVolumeLaf()
 PanLookAndFeel* KrumSamplerAudioProcessorEditor::getPanLaf()
 {
     return &pLaf;
+}
+
+//==============================================================================================================================
+//==============================================================================================================================
+
+KrumSamplerAudioProcessorEditor::DropSampleArea::DropSampleArea(KrumModuleContainer* mc)
+    : moduleContainer(mc), InfoPanelComponent("Drop Sample Area", "Drop samples here to make new modules")
+{
+    setRepaintsOnMouseActivity(true);
+    startTimerHz(30);
+}
+
+KrumSamplerAudioProcessorEditor::DropSampleArea::~DropSampleArea()
+{}
+
+void KrumSamplerAudioProcessorEditor::DropSampleArea::paint(juce::Graphics& g)
+{
+    auto area = getLocalBounds();
+
+    juce::Colour bgColor = Colors::modulesBGColor;
+    juce::Colour borderColor = Colors::moduleHoverOutlineColor.withAlpha(0.4f);
+
+
+    juce::ColourGradient hGrade{ bgColor.brighter(0.1f), area.getTopLeft().toFloat(), bgColor, area.getTopRight().toFloat(), false};
+
+    juce::Path p{};
+    p.addRoundedRectangle(area.getX(), area.getY(), area.getWidth(), area.getHeight(), EditorDimensions::cornerSize, EditorDimensions::cornerSize, true, false, true, false);
+
+    if (isMouseOver() || draggingMouseOver)
+    {
+        g.setColour(bgColor.brighter(0.1f));
+        //g.fillRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize);
+        //g.setColour(borderColor);
+        //g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, EditorDimensions::bigOutline);
+    }
+    else
+    {
+        //g.setColour(bgColor);
+        g.setGradientFill(hGrade);
+        //g.fillRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize);
+    }
+
+    g.fillPath(p);
+
+
+    g.setColour(borderColor);
+
+    g.addTransform(juce::AffineTransform::rotation(-juce::MathConstants<float>::halfPi, getWidth() * 0.5f, getHeight() * 0.5f));
+    g.drawText("Drop Samples Here", area.expanded(EditorDimensions::extraShrinkage(8)), juce::Justification::centred);
+
+}
+
+void KrumSamplerAudioProcessorEditor::DropSampleArea::setDraggingMouseOver(bool isMouseOver)
+{
+    if (isMouseOver != draggingMouseOver)
+    {
+        needsRepaint = true;
+    }
+    
+    draggingMouseOver = isMouseOver;
+}
+
+
+void KrumSamplerAudioProcessorEditor::DropSampleArea::mouseUp(const juce::MouseEvent& event)
+{
+    moduleContainer->deselectAllModules();
+}
+
+//void KrumSamplerAudioProcessorEditor::DropSampleArea::mouseEnter(const juce::MouseEvent& event)
+//{
+//    
+//    InfoPanelComponent::mouseEnter(event);
+//}
+//
+//
+//void KrumSamplerAudioProcessorEditor::DropSampleArea::mouseExit(const juce::MouseEvent& event)
+//{
+//    InfoPanelComponent::mouseExit(event);
+//
+//}
+
+
+
+//Files from Favorites or Recents 
+bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails)
+{
+    
+    auto desc = dragDetails.description.toString();
+    return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) || desc.contains(DragStrings::recentsDragString));
+
+    return false;
+}
+
+//Files from Favorites or Recents, Drag and Drop Target
+void KrumSamplerAudioProcessorEditor::DropSampleArea::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails)
+{
+    auto desc = dragDetails.description.toString();
+    bool addNextModule = false;                         //set flag true if files are accepted by module, otherwise leave false
+    auto& sampler = moduleContainer->pluginEditor->sampler;
+    juce::Array<juce::ValueTree> selectedTrees;
+
+    //grab the correct valueTree from the file browser
+    if (desc.contains(DragStrings::favoritesDragString))
+    {
+        selectedTrees = moduleContainer->pluginEditor->fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::favorites);
+    }
+    else if (desc.contains(DragStrings::recentsDragString))
+    {
+        selectedTrees = moduleContainer->pluginEditor->fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::recent);
+    }
+
+    //checks to make sure we have enough modules
+    if (selectedTrees.size() <= moduleContainer->getNumEmptyModules())
+    {
+        for (int i = 0; i < selectedTrees.size(); ++i)
+        {
+            auto fileTree = selectedTrees[i];
+
+            if (!moduleContainer->handleNewFile(fileTree))
+            {
+                DBG("handling new file failed");
+            }
+
+        }
+    }
+    else
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not enough modules available", "");
+    }
+
+}
+
+//EXTERNAL File Drag and Drop Target
+bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInFileDrag(const juce::StringArray& files)
+{
+    bool isInterested = false;
+    //return shouldModuleAcceptFileDrop();
+    for(auto file : files)
+    {
+        juce::String fileExtension{ juce::File{file}.getFileExtension() };
+        DBG("File Extension: " + fileExtension);
+
+        auto format = moduleContainer->pluginEditor->getAudioFormatManager().findFormatForFileExtension(fileExtension);
+        
+        if (format)
+        {
+            DBG("Format valid");
+            isInterested = true;
+            break;
+        }
+        else
+        {
+            DBG("Format NULL");
+        }
+        
+        //return format != nullptr;
+    }
+
+    if (isInterested)
+    {
+        setDraggingMouseOver(true);
+    }
+
+    return isInterested;
+}
+
+//EXTERNAL File Drag and Drop Target
+void KrumSamplerAudioProcessorEditor::DropSampleArea::filesDropped(const juce::StringArray& files, int x, int y)
+{
+    setDraggingMouseOver(false);
+    //load the strings into file objects
+    //not sure we need to do this, we pass a string path name to the handleNewExternalFile function
+    juce::Array<juce::File> droppedFiles{};
+
+    for (int i = 0; i < files.size(); i++)
+    {
+        droppedFiles.add(juce::File{ files[i] });
+    }
+
+
+    //test each file for it's extension
+    
+
+    if (droppedFiles.size() <= moduleContainer->getNumEmptyModules())
+    {
+        for (int i = 0; i < droppedFiles.size(); i++)
+        {
+            if (!moduleContainer->handleNewExternalFile(droppedFiles[i].getFullPathName()))
+            {
+                DBG("New External File failed");
+            }
+        }
+        
+    }
+}
+
+
+void KrumSamplerAudioProcessorEditor::DropSampleArea::timerCallback()
+{
+    if (needsRepaint)
+    {
+        repaint();
+        needsRepaint = false;
+        //draggingMouseOver = false;
+    }
 }

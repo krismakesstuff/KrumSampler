@@ -17,44 +17,7 @@
 * 
 * A class the represents the color buttons that show up with a ModuleSettingsOverlay. This is where the color scheme is set.
 * 
-* 
-* TODO: 
-* - Fix getRandomColor() and make sure the color is not the same as the color before it. 
-* - bigger/different color buttons? 
 */
-
-namespace ColorPaletteColors
-{
-    static juce::Colour redSalsa =      juce::Colour::fromRGB(249, 65, 68);
-    static juce::Colour orangeRed =     juce::Colour::fromRGB(243, 114, 44);
-    static juce::Colour yellowOrange =  juce::Colour::fromRGB(248, 150, 30);
-    static juce::Colour mangoTango =    juce::Colour::fromRGB(249, 132, 74);
-    static juce::Colour maize =         juce::Colour::fromRGB(249, 199, 79);
-    static juce::Colour pistachio =     juce::Colour::fromRGB(144, 190, 109);
-    static juce::Colour zomp =          juce::Colour::fromRGB(67, 170, 139);
-    static juce::Colour cadetBlue =     juce::Colour::fromRGB(77, 144, 142);
-    static juce::Colour queenBlue =     juce::Colour::fromRGB(87, 117, 144);
-    static juce::Colour cgBlue =        juce::Colour::fromRGB(39, 125, 161);
-
-    static juce::Array<juce::Colour> colorArray{ redSalsa, orangeRed, yellowOrange, mangoTango, maize,
-                                                pistachio, zomp, cadetBlue, queenBlue, cgBlue };
-
-    static juce::ColourGradient makeGradientFromAllColors(bool radial, juce::Point<float> pointOne, juce::Point<float> pointTwo)
-    {
-        juce::ColourGradient retGrade;
-        juce::NormalisableRange<double> colorRange {0, (double)colorArray.size()};
-        for(int i = 0; i < colorArray.size(); i++)
-        {
-            retGrade.addColour(colorRange.convertTo0to1(i), colorArray[i]);
-        }
-        
-        retGrade.isRadial = radial;
-        retGrade.point1 = pointOne;
-        retGrade.point2 = pointTwo;
-        
-        return retGrade;
-    }
-}
 
 
 class ModuleSettingsOverlay;
@@ -83,32 +46,32 @@ public:
 
 
     //need to fix this function
-    static juce::Colour* getRandomColor(juce::Colour* lastRandom)
-    {
-        juce::Random random;
-        int randIt = random.nextInt(juce::Range<int>(0, ColorPaletteColors::colorArray.size() - 1));
-        auto randColor = ColorPaletteColors::colorArray[randIt];
+    //static juce::Colour* getRandomColor(juce::Colour* lastRandom)
+    //{
+    //    juce::Random random;
+    //    int randIt = random.nextInt(juce::Range<int>(0, ColorPaletteColors::colorArray.size() - 1));
+    //    auto randColor = ColorPaletteColors::colorArray[randIt];
 
-//        if (randColor != *lastRandom)
-//        {
-//            *lastRandom = randColor;
-//        }
-//        else //avoids duplicates in succession
-//        {
-//            *lastRandom = randIt == ColorPaletteColors::colorArray.size() - 1 ?     ColorPaletteColors::colorArray[0] :                                                                                                        ColorPaletteColors::colorArray[++randIt];
-//        }
+    //    if (randColor != *lastRandom)
+    //    {
+    //        *lastRandom = randColor;
+    //    }
+    //    else //avoids duplicates in succession
+    //    {
+    //        *lastRandom = randIt == ColorPaletteColors::colorArray.size() - 1 ?     ColorPaletteColors::colorArray[0] :                                                                                                        ColorPaletteColors::colorArray[++randIt];
+    //    }
 
-        *lastRandom = randColor;
-        
-        return lastRandom;
-    }
+    //    *lastRandom = randColor;
+    //    
+    //    return lastRandom;
+    //}
 
-    static juce::Colour getRandomColor()
-    {
-        juce::Random random;
-        int randIt = random.nextInt(juce::Range<int>(0, ColorPaletteColors::colorArray.size() - 1));
-        return ColorPaletteColors::colorArray[randIt];
-    }
+    //static juce::Colour getRandomColor()
+    //{
+    //    juce::Random random;
+    //    int randIt = random.nextInt(juce::Range<int>(0, ColorPaletteColors::colorArray.size() - 1));
+    //    return ColorPaletteColors::colorArray[randIt];
+    //}
 
 private:
     ModuleSettingsOverlay& parent;

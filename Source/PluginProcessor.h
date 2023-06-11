@@ -111,7 +111,7 @@ namespace TreeIDs
     static juce::NormalisableRange<float> gainRange;
     static const float defaultPan = 0.5f;
     static const int defaultOutput = 1;
-    static const juce::StringArray outputStrings{ "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14", "15-16", "17-18", "19-20" };
+    static const juce::StringArray outputStrings{ "Out 1-2", "Out 3-4", "Out 5-6", "Out 7-8", "Out 9-10", "Out 11-12", "Out 13-14", "Out 15-16", "Out 17-18", "Out 19-20" };
 
 
 }

@@ -26,7 +26,8 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner,
     pluginEditor->addKeyListener(this);
     valueTree.addListener(this);
 
-    addAndMakeVisible(dropSampleArea);
+
+    //moduleEditorConstrainer->setBoundsForComponent()
 
     refreshModuleLayout();
     startTimerHz(30);
@@ -35,6 +36,7 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner,
 
 KrumModuleContainer::~KrumModuleContainer()
 {
+    currentEditorDragging = nullptr;
     pluginEditor->removeKeyboardListener(this);
     pluginEditor->removeKeyListener(this);
     valueTree.removeListener(this);
@@ -71,13 +73,11 @@ void KrumModuleContainer::refreshModuleLayout()
     //MUST set this size before we reposition the modules. Otherwise viewport won't scroll!
     setSize(newWidth, viewportHeight);
 
-    dropSampleArea.setBounds(EditorDimensions::extraShrinkage(), EditorDimensions::extraShrinkage(), EditorDimensions::dropSampleAreaW, EditorDimensions::moduleH - EditorDimensions::extraShrinkage());
-
 
     for (int i = 0; i < numModules; i++)
     {
         auto modEd = activeModuleEditors[i];
-        modEd->setTopLeftPosition(((modEd->getModuleDisplayIndex() * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage()) + dropSampleArea.getWidth() + EditorDimensions::shrinkage, EditorDimensions::shrinkage); //set position based off of stored index
+        modEd->setTopLeftPosition(((modEd->getModuleDisplayIndex() * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage()), EditorDimensions::shrinkage); //set position based off of stored index
         DBG("Module Editor " + juce::String(modEd->getModuleDisplayIndex()) +" set position to: " + juce::String(modEd->getBoundsInParent().toString()));
     }
 
@@ -100,7 +100,15 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
     }
     else if (property == juce::Identifier(TreeIDs::moduleDisplayIndex.getParamID()))
     {
-        refreshModuleLayout();
+        //all other cases we don't want to refresh layout
+        if (currentEditorDragging && currentEditorDragging != getEditorFromDisplayIndex(treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex.getParamID())))
+        {
+            refreshModuleLayout();
+        }
+        else if(!isModuleDragging())
+        {
+            refreshModuleLayout();
+        }
     }
     
 
@@ -139,173 +147,21 @@ void KrumModuleContainer::parameterChanged(const juce::String& parameterID, floa
         }
     }
 }
-//
-//void KrumModuleContainer::sliderValueChanged(juce::Slider* slider)
-//{
-//    int sliderOrigin = -1;
-//    juce::String sliderType{};
-//
-//    findChildCompInSelectedModules(slider, sliderOrigin, sliderType);
-//
-//    DBG("SliderType = " + sliderType);
-//
-//    if (sliderOrigin >= 0)
-//    {
-//        for (int i = 0; i < currentlySelectedModules.size(); i++)
-//        {
-//            if (i != sliderOrigin)
-//            {
-//                if (sliderType == "Module Gain")
-//                {
-//                    currentlySelectedModules[i]->volumeSlider.setValue(slider->getValue());
-//                }
-//                else if (sliderType == "Pitch")
-//                {
-//                    currentlySelectedModules[i]->pitchSlider.setValue(slider->getValue());
-//                }
-//                else if (sliderType == "Module Pan")
-//                {
-//                    currentlySelectedModules[i]->panSlider.setValue(slider->getValue());
-//                }
-//            }
-//        }
-//    }
-//
-//}
-//
-//void KrumModuleContainer::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
-//{
-//    int comboOrigin = -1;
-//    juce::String comboType{};
-//
-//    findChildCompInSelectedModules(comboBoxThatHasChanged, comboOrigin, comboType);
-//
-//    DBG("comboType = " + comboType);
-//
-//    if (comboOrigin >= 0)
-//    {
-//        for (int i = 0; i < currentlySelectedModules.size(); i++)
-//        {
-//            if (i != comboOrigin)
-//            {
-//                if (comboType == "Output Channel")
-//                {
-//                    currentlySelectedModules[i]->outputCombo.setSelectedId(comboBoxThatHasChanged->getSelectedId());
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//void KrumModuleContainer::buttonClicked(juce::Button* buttonClicked)
-//{
-//    int buttonOrigin = -1;
-//    juce::String buttonType{};
-//
-//    findChildCompInSelectedModules(buttonClicked, buttonOrigin, buttonType);
-//
-//    DBG("buttonType =" + buttonType);
-//
-//    if (buttonOrigin >= 0)
-//    {
-//        for (int i = 0; i < currentlySelectedModules.size(); i++)
-//        {
-//            if (i != buttonOrigin)
-//            {
-//
-//                if (buttonType == "Reverse Button")
-//                {
-//                    currentlySelectedModules[i]->reverseButton.setToggleState(buttonClicked->getToggleState(),juce::sendNotificationSync);
-//
-//                }
-//                else if (buttonType == "Mute")
-//                {
-//                    currentlySelectedModules[i]->muteButton.setToggleState(buttonClicked->getToggleState(), juce::sendNotificationSync);
-//
-//                }
-//                else if (buttonType == "Settings")
-//                {
-//                    //show module's settings overlay. This will change
-//                    //currentlySelectedModules[i]->editButton.triggerClick();
-//                }
-//                
-//            }
-//        }
-//    }
-//
-//}
-//
-//void KrumModuleContainer::buttonStateChanged(juce::Button* buttonChanged)
-//{
-//
-//    if (buttonChanged->getState() == juce::Button::buttonDown)
-//    {
-//        int buttonOrigin = -1;
-//        juce::String buttonType{};
-//
-//        findChildCompInSelectedModules(buttonChanged, buttonOrigin, buttonType);
-//
-//       /* if (buttonOrigin >= 0)
-//        {
-//            for (int i = 0; i < currentlySelectedModules.size(); i++)
-//            {
-//                if (i != buttonOrigin)
-//                {
-//                    if (buttonType == "One Shot")
-//                    {
-//                        auto note = currentlySelectedModules[i]->getModuleMidiNote();
-//                        auto chan = currentlySelectedModules[i]->getModuleMidiChannel();
-//                        auto vel = currentlySelectedModules[i]->buttonClickVelocity;
-//
-//                        editor->sampler.noteOn(chan, note, vel);
-//                    }
-//                }
-//            }
-//        }*/
-//
-//    }
-//}
+
 //
 void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
 {
-    //TODO:
     //capture a mouseclick that isn't on any modules, that will clear all selected modules
     deselectAllModules();
     clearActiveModuleSettingsOverlays();
     
-    //auto mousePos = event.getMouseDownPosition();
-    
 
-    //for (int i = 0; i < moduleEditors.size(); i++)
-    //{
-    //    auto modEd = moduleEditors[i];
-    //    auto modBounds = modEd->getBoundsInParent();
-
-    //    if (modBounds.contains(mousePos))
-    //    {
-    //        setModuleSelected(modEd);
-    //    }
-    //    else
-    //    {
-    //        setModuleUnselected(modEd);
-    //    }
-    //}
 
 }
 //
 bool KrumModuleContainer::keyPressed(const juce::KeyPress& key, juce::Component* ogComp)
 {
-    //DBG("KeyPressed");
-    //if (key.getModifiers().isShiftDown())
-    //{
-    //    DBG("keyStateChanged mcmk is down");
-    //    //setMultiControlState(true);
-    //}
-    //else /*if (!isKeyDown)*/
-    //{
-    //    DBG("keyStateChanged mcmk is up");
-    //    //setMultiControlState(false);
-    //} 
+
 
     return false;
 }
@@ -329,15 +185,12 @@ bool KrumModuleContainer::keyStateChanged(bool isKeyDown, juce::Component* ogCom
     return false;
 }
 
+//this gets called by the realtime thread, need to copy data and return. No painting.
 void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
 {
     bool alreadySentMidi = false;
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
-        //take this out for multi-selection
-        /*if (alreadySentMidi)
-            return;*/
-
         auto modEd = activeModuleEditors[i];
         if (modEd->getModuleState() == KrumModule::ModuleState::active && modEd->getModuleMidiNote() == midiNoteNumber)
         {
@@ -346,12 +199,10 @@ void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midi
         }
         else if (modEd->doesEditorWantMidi())
         {
-            modEd->handleMidi(midiChannel, midiNoteNumber);
-            if (isMultiControlActive())
-            {
-
-            }
-            alreadySentMidi = true; //restricting this to only pass the midi message to one module, but removing this could pass the midi to multiple selected modules
+            nextMidiMessage.midiChannel = midiChannel;
+            nextMidiMessage.midiNote = midiNoteNumber;
+            applyMidi = true;
+            return; //since we have the midi information and we know atleast one module wants the info, we can return here and the timercallback will distribute the midi to the modules that want it
         }
     }
 }
@@ -368,13 +219,21 @@ void KrumModuleContainer::handleNoteOff(juce::MidiKeyboardState* source, int mid
     }
 }
 
-KrumModuleEditor* KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, bool refreshLayout)
+KrumModuleEditor* KrumModuleContainer::addModuleEditor(KrumModuleEditor* newModuleEditor, int indexToInsert, bool refreshLayout)
 {
     if (newModuleEditor != nullptr)
     {
         addAndMakeVisible(newModuleEditor);
-        activeModuleEditors.add(newModuleEditor);
-        
+
+        if (indexToInsert > -1)
+        {
+            activeModuleEditors.insert(indexToInsert, newModuleEditor);
+        }
+        else
+        {
+            activeModuleEditors.add(newModuleEditor);
+        }
+
         if (refreshLayout) //defaults true
         {
             refreshModuleLayout();
@@ -409,6 +268,23 @@ KrumModuleEditor* KrumModuleContainer::addNewModuleEditor(KrumModuleEditor* newM
      return newModuleEditor;
 }
 
+KrumModuleEditor* KrumModuleContainer::insertNewModuleEditor(KrumModuleEditor* newModuleEditor, int indexToInsert)
+{
+    newModuleEditor->setModuleDisplayIndex(indexToInsert);
+    
+    //we are changing all of the editor's displayIndexes to reflect the new insertion. We push everything back
+    for (int i = indexToInsert; i < activeModuleEditors.size(); i++)
+    {
+        auto mod = activeModuleEditors[i];
+        int currentDisplayIndex = mod->getModuleDisplayIndex();
+        mod->setModuleDisplayIndex(currentDisplayIndex + 1);
+        
+    }
+
+    return addModuleEditor(newModuleEditor, indexToInsert);
+  
+}
+
 void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, bool refreshLayout)
 {
     if (moduleToRemove)
@@ -428,22 +304,62 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
     
 }
 
-void KrumModuleContainer::setModuleSelected(KrumModuleEditor* moduleToSelect)
-{
-    moduleToSelect->setModuleSelected(true);
-    currentlySelectedModules.add(moduleToSelect);
-    addModuleParamIDs(moduleToSelect);
 
-    
+void KrumModuleContainer::setModuleSelectedFromClick(KrumModuleEditor* moduleToSelect, bool setSelected, const juce::MouseEvent& e)
+{
+
+    bool shiftDown = e.mods.isShiftDown();
+    bool cmdDown = e.mods.isCommandDown();
+    bool multControl = isMultiControlActive();
+
+    if (setSelected)
+    {
+        if (shiftDown)
+        {
+            setModulesSelectedToLastSelection(moduleToSelect);
+        }
+        else if (cmdDown)
+        {
+            setModuleSelectedState(moduleToSelect, true);
+        }
+        else
+        {
+            deselectAllModules();
+            setModuleSelectedState(moduleToSelect, true);
+        }
+
+    }
+    else
+    {
+
+        if (shiftDown)
+        {
+            deselectAllModules();
+        }
+
+        setModuleSelectedState(moduleToSelect, false);
+
+    }
+
     //repaint();
 }
 
-void KrumModuleContainer::setModuleUnselected(KrumModuleEditor* moduleToDeselect)
+//intended to be an internal function, use setModuleSelectedFromClick() if possible
+void KrumModuleContainer::setModuleSelectedState(KrumModuleEditor* moduleToSelect, bool shouldSelect)
 {
-    moduleToDeselect->setModuleSelected(false);
-    currentlySelectedModules.removeObject(moduleToDeselect, false);
-    removeModuleParamIDs(moduleToDeselect);
-    
+    moduleToSelect->setModuleSelected(shouldSelect);
+
+    if (shouldSelect)
+    {
+        currentlySelectedModules.add(moduleToSelect);
+        addModuleParamIDs(moduleToSelect);
+    }
+    else
+    {
+        currentlySelectedModules.removeObject(moduleToSelect, false);
+        removeModuleParamIDs(moduleToSelect);
+    }
+
 }
 
 void KrumModuleContainer::deselectAllModules()
@@ -451,10 +367,10 @@ void KrumModuleContainer::deselectAllModules()
     
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
-        setModuleUnselected(activeModuleEditors[i]);
+        setModuleSelectedState(activeModuleEditors[i], false);
     }
     
-    //this should be redundant
+    //this is redundant, shoul be an assertion?
     currentlySelectedModules.clear(false);
     paramIDs.clear();
     DBG("ParamIDs cleared, size: " + paramIDs.size());
@@ -465,7 +381,7 @@ void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* mo
 {
     if (currentlySelectedModules.size() < 1)
     {
-        setModuleSelected(moduleToSelect);
+        setModuleSelectedState(moduleToSelect, true);
         //if there is no "Last Selection", there is nothing to select up to
         return;
     }
@@ -473,23 +389,24 @@ void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* mo
     //get the last selected module's display index
     int lastSelectedDisplayIndex = currentlySelectedModules.getLast()->getModuleDisplayIndex();
    
-    //get the current moduleTOSelect's dispaly index
+    //get the current moduleToSelect's dispaly index
     int moduleToSelectDisplayIndex = moduleToSelect->getModuleDisplayIndex();
 
+    //we are selecting to the right
     if (lastSelectedDisplayIndex < moduleToSelectDisplayIndex)
     {
         for (int i = 0; i < activeModuleEditors.size(); i++)
         {
             int displayIndex = activeModuleEditors[i]->getModuleDisplayIndex();
-            //we make sure the display index is in the range we want
+            //we make sure the display index is in the range we want (if the index is between the selectedModule Indexes
             if (displayIndex == moduleToSelectDisplayIndex ||  
                 (displayIndex > lastSelectedDisplayIndex && displayIndex < moduleToSelectDisplayIndex)) 
             {
-                setModuleSelected(activeModuleEditors[i]);
+                setModuleSelectedState(activeModuleEditors[i], true);
             }
         }
     }
-    else if (lastSelectedDisplayIndex > moduleToSelectDisplayIndex)
+    else if (lastSelectedDisplayIndex > moduleToSelectDisplayIndex) //we are selecting to the left
     {
         for (int i = 0; i < activeModuleEditors.size(); i++)
         {
@@ -498,13 +415,13 @@ void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* mo
             if (displayIndex == moduleToSelectDisplayIndex || 
                 (displayIndex < lastSelectedDisplayIndex && displayIndex > moduleToSelectDisplayIndex))
             {
-                setModuleSelected(activeModuleEditors[i]);
+                setModuleSelectedState(activeModuleEditors[i], true);
             }
         }
     }
     else
     {
-        setModuleSelected(moduleToSelect);
+        setModuleSelectedState(moduleToSelect, true);
     }
 
     //this assumes the shift key was down in order for this function to get called
@@ -515,7 +432,7 @@ void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* mo
 void KrumModuleContainer::setModuleSelectedWithCommand(KrumModuleEditor* moduleToSelect)
 {
     //could add more functationality here
-    setModuleSelected(moduleToSelect);
+    setModuleSelectedState(moduleToSelect, true);
 }
 
 bool KrumModuleContainer::isModuleSelected(KrumModuleEditor* moduleToCheck)
@@ -541,9 +458,10 @@ void KrumModuleContainer::applyValueTreeChangesToSelectedModules(juce::ValueTree
 {
     for (int i = 0; i < currentlySelectedModules.size(); i++)
     {
-        if (!currentlySelectedModules[i]->isModuleTree(treeWhoChanged)) //we don't want to send a change message to a module that sent the message in the first place
+        auto mod = currentlySelectedModules[i];
+        if (!mod->isModuleTree(treeWhoChanged)) //we don't want to send a change message to a module that triggered the message in the first place
         {
-            currentlySelectedModules[i]->valueTreePropertyChanged(treeWhoChanged, propertyWhoChanged);
+            mod->valueTreePropertyChanged(treeWhoChanged, propertyWhoChanged);
         }
     }
 }
@@ -595,7 +513,7 @@ void KrumModuleContainer::setSettingsOverlayOnSelectedModules(bool show, KrumMod
         {
             if (show)
             {
-                mod->removeSettingsOverlay();
+                mod->hideSettingsOverlay();
             }
             else
             {
@@ -624,17 +542,6 @@ void KrumModuleContainer::clickOneShotOnSelectedModules(const juce::MouseEvent& 
     }
 }
 
-//void KrumModuleContainer::sendMouseEventToSelectedComponents(juce::Component* compToExlcude, const juce::MouseEvent& event)
-//{
-//    for (int i = 0; i < currentlySelectedModules.size(); i++)
-//    {
-//        auto mod = currentlySelectedModules[i];
-//        if (mod != compToExlcude)
-//        {
-//            mod->mouseDown(event.getEventRelativeTo(mod));
-//        }
-//    }
-//}
 
 void KrumModuleContainer::setListeningForMidiOnSelectedModules(bool shouldListen, KrumModuleEditor* originComp)
 {
@@ -732,6 +639,7 @@ void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEdito
 
 void KrumModuleContainer::showModulePitchSlider(KrumModuleEditor* moduleEditor)
 {
+    //clears all pitchsliders
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
         auto modEd = activeModuleEditors.getUnchecked(i);
@@ -765,8 +673,8 @@ void KrumModuleContainer::hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor
 
 void KrumModuleContainer::timerCallback()
 {
-    bool mouseOver = false;
 
+    bool mouseOver = false;
     for (int i = 0; i < activeModuleEditors.size(); ++i)
     {
         auto modEd = activeModuleEditors[i];
@@ -783,18 +691,47 @@ void KrumModuleContainer::timerCallback()
         pluginEditor->keyboard.clearHighlightedKey();
     }
 
+    //for multi-control selection syncing
     if (applyNextParamChange)
     {
         applyParameterChangeToSelectedModules(nextParamChange.paramID, nextParamChange.value);
         applyNextParamChange = false;
     }
 
+    if (applyMidi)
+    {
+        loadMidiToModulesListening(nextMidiMessage.midiChannel, nextMidiMessage.midiNote);
+        applyMidi = false;
+    }
+
+    if (moduleDragging)
+    {
+
+    }
+
     repaint();
+}
+
+void KrumModuleContainer::loadMidiToModulesListening(int channel, int note)
+{
+    for (int i = 0; i < activeModuleEditors.size(); i++)
+    {
+        auto mod = activeModuleEditors[i];
+        if (mod->doesEditorWantMidi())
+        {
+            mod->handleMidi(channel, note);
+        }
+    }
 }
 
 void KrumModuleContainer::addFileToRecentsFolder(juce::File& file, juce::String name)
 {
     pluginEditor->fileBrowser.addFileToRecent(file, name);
+}
+
+void KrumModuleContainer::addFileToFavoritesFolder(juce::File& file, juce::String name)
+{
+    pluginEditor->fileBrowser.addFileToFavorites(file);
 }
 
 void KrumModuleContainer::createModuleEditors()
@@ -1012,13 +949,13 @@ bool KrumModuleContainer::handleNewFile(juce::ValueTree fileTree)
 
         if (modTree.isValid())
         {
-            auto newMod = addNewModuleEditor(new KrumModuleEditor(modTree, *this, pluginEditor->getAudioFormatManager()));
+            //auto newMod = addNewModuleEditor(new KrumModuleEditor(modTree, *this, pluginEditor->getAudioFormatManager()));
+            auto newMod = insertNewModuleEditor(new KrumModuleEditor(modTree, *this, pluginEditor->getAudioFormatManager()), 0); //could maybe make this index an on-screen position?
             newMod->setModuleFile(file); //this should turn the state to "hasfile" if necessary
             newMod->setNumSamplesOfFile(numSamples);
-            //newMod->setModuleState(KrumModule::ModuleState::hasFile);
 
             newMod->setModuleName(name);
-            addFileToRecentsFolder(file, name); //should this be handle directly by the container?
+            addFileToRecentsFolder(file, name); 
 
             return true;
         }
@@ -1030,6 +967,42 @@ bool KrumModuleContainer::handleNewFile(juce::ValueTree fileTree)
     }
 
     return false;
+}
+
+bool KrumModuleContainer::handleNewExternalFile(juce::String filePathName)
+{
+    auto file = juce::File{ filePathName };
+    juce::int64 numSamples = 0;
+    
+    if (pluginEditor->sampler.isFileAcceptable(file, numSamples))
+    {
+        auto modTree = getFirstEmptyModuleTree();
+
+        if (modTree.isValid())
+        {
+            //auto newMod = addNewModuleEditor(new KrumModuleEditor(modTree, *this, pluginEditor->getAudioFormatManager()));
+            auto newMod = insertNewModuleEditor(new KrumModuleEditor(modTree, *this, pluginEditor->getAudioFormatManager()), 0); //could maybe make this index an on-screen position?
+            newMod->setModuleFile(file); //this should turn the state to "hasfile" if necessary
+            newMod->setNumSamplesOfFile(numSamples);
+
+            newMod->setModuleName(filePathName);
+            
+            //this could be a global setting
+            //if(auto add external drops to favorites
+            addFileToFavoritesFolder(file, filePathName);
+            addFileToRecentsFolder(file, filePathName);
+
+            return true;
+        }
+    }
+    else
+    {
+        DBG("External File Not Supported");
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not Supported", "Either you dropped a folder on here or the file you dropped isn't a supported format");
+    }
+
+    return false;
+
 }
 
 juce::ValueTree& KrumModuleContainer::getFirstEmptyModuleTree()
@@ -1052,7 +1025,7 @@ void KrumModuleContainer::clearSelectedSettingsOverlays()
 {
     for (int i = 0; i < currentlySelectedModules.size(); i++)
     {
-        currentlySelectedModules[i]->removeSettingsOverlay();
+        currentlySelectedModules[i]->hideSettingsOverlay();
     }
 }
 
@@ -1060,189 +1033,125 @@ void KrumModuleContainer::clearActiveModuleSettingsOverlays()
 {
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
-        activeModuleEditors[i]->removeSettingsOverlay();
+        activeModuleEditors[i]->hideSettingsOverlay();
     }
 }
 
-//===================================================================================================================================
-//===================================================================================================================================
-
-
-KrumModuleContainer::DropSampleArea::DropSampleArea(KrumModuleContainer* mc)
-    : moduleContainer(mc), InfoPanelComponent("Drop Sample Area", "Drop samples here to make new modules")
+void KrumModuleContainer::startDraggingEditor(KrumModuleEditor* editorToDrag, const juce::MouseEvent& event)
 {
-}
-
-KrumModuleContainer::DropSampleArea::~DropSampleArea()
-{}
-
-void KrumModuleContainer::DropSampleArea::paint(juce::Graphics& g)
-{
-    auto area = getLocalBounds();
-
-    juce::Colour bgColor = Colors::modulesBGColor;
-    juce::Colour borderColor = Colors::moduleHoverOutlineColor;
-
-    if (isMouseOver())
+    if (editorToDrag->isModuleSelected() && isMultiControlActive())
     {
-        g.setColour(bgColor.brighter());
+        //startDraggingSelectedComponents(editorToDrag, event);
     }
     else
     {
-        g.setColour(bgColor);
+        dragger.startDraggingComponent(editorToDrag, event);
+        currentEditorDragging = editorToDrag;
     }
 
-    g.fillRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize);
-
-    g.setColour(borderColor);
-    g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, EditorDimensions::bigOutline);
-
-
-
-}
-
-void KrumModuleContainer::DropSampleArea::mouseUp(const juce::MouseEvent& event)
-{
-    moduleContainer->deselectAllModules();
-}
-
-
-//Files from Favorites or Recents 
-bool KrumModuleContainer::DropSampleArea::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails)
-{
-    auto desc = dragDetails.description.toString();
-    return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) || desc.contains(DragStrings::recentsDragString));
     
-    return false;
 }
 
-//Files from Favorites or Recents, Drag and Drop Target
-void KrumModuleContainer::DropSampleArea::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails)
+void KrumModuleContainer::dragEditor(KrumModuleEditor* editorToDrag, const juce::MouseEvent& event)
 {
-    auto desc = dragDetails.description.toString();
-    bool addNextModule = false;                         //set flag true if files are accepted by module, otherwise leave false
-    auto& sampler = moduleContainer->pluginEditor->sampler;
-    juce::Array<juce::ValueTree> selectedTrees;
+    moduleDragging = true;
+    //this needs to handle moving the modules around underneath this one based off of the mouse position
+    
 
-    //grab the correct valueTree from the file browser
-    if (desc.contains(DragStrings::favoritesDragString))
+    //conastrain the events y value.
+    auto newEvent = event.withNewPosition(juce::Point<int>(event.position.getX(), event.getMouseDownPosition().getY()));
+    dragger.dragComponent(editorToDrag, newEvent, moduleEditorConstrainer);
+    
+    //if mousePosition is over a component, which side of the comp is it on? You can change this range to fine tune dragging feel
+    auto mod = isMouseDragOverActiveEditor(editorToDrag, event.getEventRelativeTo(this));
+    if (mod != nullptr)
     {
-        selectedTrees = moduleContainer->pluginEditor->fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::favorites);
-    }
-    else if (desc.contains(DragStrings::recentsDragString))
-    {
-        selectedTrees = moduleContainer->pluginEditor->fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::recent);
-    }
-
-    //checks to make sure we have enough modules
-    if (selectedTrees.size() <= moduleContainer->getNumEmptyModules())
-    {
-        for (int i = 0; i < selectedTrees.size(); ++i)
+        if (editorToDrag->isModuleSelected() && isMultiControlActive())
         {
-            auto fileTree = selectedTrees[i];
+            //swap indexs while moving all the selected modules
+            //we might need to base the mouse hittest off of the combined area of the selected modules, instead of the mouse event
+            
+        }
+        else
+        {
 
-            if (!moduleContainer->handleNewFile(fileTree))
+            auto e = event.getEventRelativeTo(mod);
+            int displayIndex = mod->getModuleDisplayIndex();
+
+            if (mod->getMouseXYRelative().getX() < (mod->getWidth() / 2))
             {
-                DBG("handling new file failed");
+                swapModuleEditorsDisplayIndex(displayIndex -1, displayIndex);
             }
-
-            //if (i == 0)
-            //{
-            //}
-            //else
-            //{
-            //    auto modulesTree = moduleTree.getParent();
-            //    if (modulesTree.hasType(TreeIDs::KRUMMODULES.getParamID()))
-            //    {
-            //        for (int j = 0; j < modulesTree.getNumChildren(); j++)
-            //        {
-            //            auto itTree = modulesTree.getChild(j);
-            //            if ((int)itTree.getProperty(TreeIDs::moduleState.getParamID()) == 0) //we grab the first empty module
-            //            {
-            //                auto newModEd = pluginEditor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, pluginEditor, sampler.getFormatManager()));
-            //                newModEd->handleNewFile(fileTree);
-            //                addNextModule = true;
-            //                break;
-            //            }
-            //        }
-            //    }
-            //}
+            else
+            {
+                swapModuleEditorsDisplayIndex(displayIndex, displayIndex + 1);
+            }
         }
     }
-    else
+    else if(!contains(getMouseXYRelative()))
     {
-        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not enough modules available", "");
+        //need to scroll the moduleViewport
+        // account for when the mouse is either negative or positive coordinates and scroll accordingly
+        // mouse should stay held down and it will not stop scrolling until the end
+        // 
+        
+        //pluginEditor->getModuleViewport()->setViewPosition(pluginEditor->getMouseXYRelative());
+        
+        
+        //DBG("NULL-----");
+        //this means the mouse is in between components, maybe draw something?
+    }
+}
+
+KrumModuleEditor* KrumModuleContainer::isMouseDragOverActiveEditor(KrumModuleEditor* eventOrigin, const juce::MouseEvent& event)
+{
+    for (int i = 0; i < activeModuleEditors.size(); i++)
+    {
+        auto mod = activeModuleEditors[i];
+        if (mod != eventOrigin && mod->contains(mod->getMouseXYRelative()))
+        {
+            return mod;
+        }
     }
 
-
-    //if (addNextModule)
-    //{
-    //    pluginEditor.addNextModuleEditor();
-    //}
+    return nullptr;
 }
 
-//EXTERNAL File Drag and Drop Target
-bool KrumModuleContainer::DropSampleArea::isInterestedInFileDrag(const juce::StringArray& files)
+
+void KrumModuleContainer::swapModuleEditorsDisplayIndex(int firstIndex, int secondIndex)
 {
-    //return shouldModuleAcceptFileDrop();
-    return false;
+
+    auto firstMod = getEditorFromDisplayIndex(firstIndex);
+    auto secondMod = getEditorFromDisplayIndex(secondIndex);
+
+
+    firstMod->setModuleDisplayIndex(secondIndex);
+    secondMod->setModuleDisplayIndex(firstIndex);
+
+
 }
 
-//EXTERNAL File Drag and Drop Target
-void KrumModuleContainer::DropSampleArea::filesDropped(const juce::StringArray& files, int x, int y)
+bool KrumModuleContainer::isModuleDragging()
 {
-    //bool addNextModule = false; //set flag true if files are accepted by module, otherwise leave false
-    //auto& sampler = editor.sampler;
-    //int numFilesDropped = files.size();
+    return moduleDragging;
+}
 
-    //if(numFilesDropped <= editor.moduleContainer.getNumEmptyModules())
-    //{
-    //    for (int i = 0; i < files.size(); i++)
-    //    {
-    //        juce::File audioFile {files[i]};
-    //        juce::String fileName = audioFile.getFileName();
-    //        juce::int64 numSamples = 0;
-    //        if(!audioFile.isDirectory() && sampler.isFileAcceptable(audioFile, numSamples))
-    //        {
-    //            if (i == 0)
-    //            {
-    //                handleNewFile(fileName, audioFile, numSamples);
-    //                addNextModule = true;
-    //                continue;
-    //            }
-
-    //            auto modulesTree = moduleTree.getParent();
-    //            if (modulesTree.hasType(TreeIDs::KRUMMODULES))
-    //            {
-    //                for (int j = 0; j < modulesTree.getNumChildren(); j++)
-    //                {
-    //                    auto itTree = modulesTree.getChild(j);
-    //                    if ((int)itTree.getProperty(TreeIDs::moduleState) == 0) //we grab the first empty module
-    //                    {
-    //                        auto newModEd = editor.moduleContainer.addNewModuleEditor(new KrumModuleEditor(itTree, editor, sampler.getFormatManager()));
-    //                        newModEd->handleNewFile(fileName, audioFile, numSamples);
-    //                        addNextModule = true;
-
-    //                        DBG("-------");
-    //                        DBG("Module Sampler Index: " + itTree.getProperty(TreeIDs::moduleSamplerIndex).toString());
-    //                        DBG("Item: " + audioFile.getFullPathName());
-
-    //                        break;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        else
-    //        {
-    //            DBG("External File Not Acceptable");
-    //            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not Supported", "Either you dropped a folder on here or the file you dropped isn't a supported format");
-
-    //        }
-    //    }
-    //}
-
-    /*if (addNextModule)
+void KrumModuleContainer::draggingMouseUp(const juce::MouseEvent& event)
+{
+    if (moduleDragging)
     {
-        editor.addNextModuleEditor();
-    }*/
+        moduleDragging = false;
+        refreshModuleLayout();
+    }
+
+    if (currentEditorDragging)
+    {
+        currentEditorDragging = nullptr;
+    }
 }
+
+//===================================================================================================================================
+//===================================================================================================================================
+
+
+

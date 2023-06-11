@@ -88,6 +88,17 @@ void KrumKeyboard::mouseUpOnKey(int midiNoteNumber, const juce::MouseEvent& e)
     }
 }
 
+
+void KrumKeyboard::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)
+{
+    if (treeWhoChanged.hasType(TreeIDs::MODULE.getParamID()) && 
+        (property == juce::Identifier(TreeIDs::moduleColor.getParamID()) || property == juce::Identifier(TreeIDs::moduleMidiNote.getParamID())))
+    {
+        repaint(getRectangleForKey(treeWhoChanged.getProperty(TreeIDs::moduleMidiNote.getParamID())).toNearestInt());
+        //repaint();
+    }
+}
+
 void KrumKeyboard::scrollToKey(int midiNoteNumber)
 {
     bool isKeyVisible = midiNoteNumber > getLowestVisibleKey() && midiNoteNumber < (getNoteAtPosition(getBounds().getTopRight().toFloat()));
@@ -343,14 +354,6 @@ bool KrumKeyboard::isMidiNoteAssigned(int midiNote)
     }
 
     return false;
-}
-
-void KrumKeyboard::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged, const juce::Identifier& property)
-{
-    if (treeWhoChanged.hasType(TreeIDs::MODULE.getParamID()) && (property == juce::Identifier(TreeIDs::moduleColor.getParamID()) || property == juce::Identifier(TreeIDs::moduleMidiNote.getParamID())))
-    {
-        repaint(getRectangleForKey(treeWhoChanged.getProperty(TreeIDs::moduleMidiNote.getParamID())).toNearestInt());
-    }
 }
 
 int KrumKeyboard::getLowestKey()

@@ -156,7 +156,9 @@ int KrumModule::getModuleOutputChannelNumber()
 {
     auto outputString = TreeIDs::outputStrings.getReference((int)*getModuleOutputChannel());
 
-    return outputString.dropLastCharacters(2).getIntValue();
+    auto number = outputString.removeCharacters("Out");
+
+    return number.dropLastCharacters(2).getIntValue();
 }
 
 void KrumModule::setNumSamplesInFile(int numSamples)

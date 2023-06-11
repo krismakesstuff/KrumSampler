@@ -52,10 +52,10 @@ namespace EditorDimensions
     const static int moduleH = windowH * 0.68f;
     const static int moduleW = 120;
     
-    const static int dropSampleAreaW = moduleW * 0.30f;
+    const static int dropSampleAreaW = moduleW * 0.45f;
 
-    const static int collapseButtonH = 40;
-    const static int collapseButtonW = 15;
+    const static int collapseButtonH = 45;
+    const static int collapseButtonW = 12;
 
     const static int infoButtonSize = 25;
 
@@ -84,6 +84,9 @@ namespace EditorDimensions
         return shrinkage * extraMultplier;
     }
 };
+
+
+
 
 class KrumSamplerAudioProcessorEditor  :    public juce::AudioProcessorEditor,
                                             public juce::DragAndDropContainer
@@ -146,6 +149,42 @@ public:
     VolumeLookAndFeel* getVolumeLaf();
     PanLookAndFeel* getPanLaf();
 
+
+    class DropSampleArea : public InfoPanelComponent,
+        public juce::DragAndDropTarget,
+        public juce::FileDragAndDropTarget,
+        public juce::Timer
+    {
+    public:
+        DropSampleArea(KrumModuleContainer* mc);
+        ~DropSampleArea() override;
+
+        void paint(juce::Graphics& g) override;
+
+        void setDraggingMouseOver(bool isMouseOver);
+
+    private:
+
+        //void mouseDown(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
+        //void mouseEnter(const juce::MouseEvent& e) override;
+        //void mouseExit(const juce::MouseEvent& e) override;
+
+        bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
+        void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails) override;
+
+        bool isInterestedInFileDrag(const juce::StringArray& files) override;
+        void filesDropped(const juce::StringArray& files, int x, int y) override;
+
+        void timerCallback() override;
+
+        KrumModuleContainer* moduleContainer = nullptr;
+        bool draggingMouseOver = false;
+        bool needsRepaint = false;
+    };
+
+    DropSampleArea* getDropSampleArea();
+
 private:
 
     void updateOutputGainBubbleComp(juce::Component*);
@@ -158,7 +197,7 @@ private:
     friend class KrumModuleContainer;
     //friend class KrumModuleEditor;
     friend class DragAndDropThumbnail;
-    
+    //friend class FavoritesTreeView;
 
     KrumLookAndFeel kLaf{};
 
@@ -199,8 +238,13 @@ private:
     InfoPanelComboBox presetsComboBox{"Presets", "COMING SOON!!"};
     InfoPanelDrawableButton settingsButton{ juce::DrawableButton::ButtonStyle::ImageFitted, "Global Settings", "COMING SOON!!" };
 
-
     juce::ComponentBoundsConstrainer constrainer;
+
+
+    
+
+    DropSampleArea dropSampleArea{ &moduleContainer };
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KrumSamplerAudioProcessorEditor)
 };

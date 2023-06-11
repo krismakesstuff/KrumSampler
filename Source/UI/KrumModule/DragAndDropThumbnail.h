@@ -55,8 +55,8 @@ public:
     void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
     void paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, juce::Colour bgColor);
 
-    void paintStartBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
-    void paintEndBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, int barWidth);
+    void paintStartBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, juce::Colour fillColor, int barWidth);
+    void paintEndBar(juce::Graphics& g, juce::Rectangle<int>& thumbnailBounds, juce::Colour barColor, juce::Colour fillColor,  int barWidth);
 
     void setChannelColor(juce::Colour newColor);
     void setThumbnailBGColor(juce::Colour newColor);

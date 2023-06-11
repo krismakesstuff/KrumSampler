@@ -1443,9 +1443,9 @@ void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
         }
         else
         {
+            //manages the sample swap highlighting on the module, see ModuleContainer::showModuleCanAcceptFile()
             if (moduleContainer)
             {
-                //auto containerPoint = event.getEventRelativeTo(moduleContainer);
                 if (moduleContainer->contains(event.getEventRelativeTo(moduleContainer).getPosition()))
                 {
                     auto& modules = moduleContainer->getActiveModuleEditors();
@@ -1453,9 +1453,10 @@ void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
                     {
                         auto modEd = modules[i];
                         auto relPoint = event.getEventRelativeTo(modEd);
+                        
                         if (modEd->contains(event.getEventRelativeTo(modEd).getPosition()))
                         {
-                            if (modEd->thumbnailHitTest(event) /*&& modEd->canThumbnailAcceptFile()*/)
+                            if (modEd->thumbnailHitTest(event))
                             {
                                 moduleContainer->showModuleCanAcceptFile(modEd);
                             }
@@ -1464,12 +1465,22 @@ void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
                                 moduleContainer->hideModuleCanAcceptFile(modEd);
                             }
                         }
+
+                        
                     }
                 }
             }
 
+            auto dropComp = moduleContainer->getPluginEditor()->getDropSampleArea();
 
-
+            if (dropComp->contains(event.getEventRelativeTo(dropComp).getPosition()))
+            {
+                dropComp->setDraggingMouseOver(true);
+            }
+            else
+            {
+                dropComp->setDraggingMouseOver(false);
+            }
         }
     }
 }
@@ -1485,6 +1496,10 @@ void FavoritesTreeView::dragOperationEnded(const juce::DragAndDropTarget::Source
             moduleContainer->hideModuleCanAcceptFile(modEd);
         }
     }
+
+    auto dropComp = moduleContainer->getPluginEditor()->getDropSampleArea();
+    dropComp->setDraggingMouseOver(false);
+
 }
 
 void FavoritesTreeView::setItemEditing(juce::String idString, bool isEditing)
