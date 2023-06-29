@@ -41,19 +41,7 @@ class KrumFileBrowser;
 class KrumSampler;
 
 
-namespace Dimensions
-{
-    const int rowHeight = 22;
-    const float rowTextScalar = 0.70f;
-    const int rowHeaderHeight = 32;
-    const int panelHeaderCornerSize = 2.0f;
-    const int titleH = 21;
-    const int fileIconSize = 19;
-    const float fileIconAlpha = 0.6f;
-    const int locationTabDepth = 22;
-    const int currentPathHeight = 25;
-    const int previewerH = 45;
-}
+
 
 namespace FileBrowserInfoStrings
 {

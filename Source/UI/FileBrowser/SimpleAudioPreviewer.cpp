@@ -20,9 +20,9 @@ SimpleAudioPreviewer::SimpleAudioPreviewer(juce::AudioFormatManager* fm, juce::V
 {
     addAndMakeVisible(autoPlayToggle);
     autoPlayToggle.setButtonText("Auto-Play");
-    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::textColourId, Colors::browserFontColor);
-    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::tickDisabledColourId, Colors::fontColor);
-    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::tickColourId, Colors::browserFontColor);
+    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::textColourId, Colors::getBrowserFontColor());
+    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::tickDisabledColourId, Colors::getFontColor());
+    autoPlayToggle.setColour(juce::ToggleButton::ColourIds::tickColourId, Colors::getBrowserFontColor());
     autoPlayToggle.setToggleState(getSavedToggleState(), juce::dontSendNotification);
     autoPlayToggle.setTooltip("double-click files to preview, auto-play will preview as it's selected");
     autoPlayToggle.onStateChange = [this] { saveToggleState(); };
@@ -56,7 +56,7 @@ void SimpleAudioPreviewer::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    g.setColour(Colors::browserBGColor.brighter(0.05f));
+    g.setColour(Colors::getBrowserBGColor().brighter(0.05f));
     g.fillRoundedRectangle(area.toFloat(), 3.0f);
  //   g.setColour(Colors::bgColor.darker(0.1f));
  //   g.fillRoundedRectangle(getLocalBounds().toFloat(), 5.0f);

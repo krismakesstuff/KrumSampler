@@ -13,16 +13,14 @@
 #include "../KrumModule/KrumModuleEditor.h"
 #include "../PluginEditor.h"
 #include "../InfoPanel.h"
-
-//#include "KrumModuleContainer.h"
-
+#include "../KrumLookAndFeel.h"
 
 
 //==============================================================================
 RecentFilesList::RecentFilesList(KrumFileBrowser& fb, SimpleAudioPreviewer* p)
     : previewer(p), fileBrowser(fb)
 {
-    listBox.setColour(juce::ListBox::ColourIds::backgroundColourId, Colors::browserBGColor);
+    listBox.setColour(juce::ListBox::ColourIds::backgroundColourId, Colors::getBrowserBGColor());
     listBox.setRowHeight(Dimensions::rowHeight);
     listBox.setMultipleSelectionEnabled(true);
     //listBox.updateContent();
@@ -105,17 +103,17 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
     juce::Rectangle<int> area = { spacer, 0, width - spacer, height };
     
     
-    juce::Colour fontC = Colors::browserFontColor;
+    juce::Colour fontC = Colors::getBrowserFontColor();
 
     if (rowIsSelected)
     {
-        g.setColour(Colors::highlightColor);
-        fontC = Colors::highlightFontColor;
+        g.setColour(Colors::getHighlightColor());
+        fontC = Colors::getHighlightFontColor();
         g.fillRect(area);
     }
     else
     {
-        g.setColour(Colors::browserBGColor.darker());
+        g.setColour(Colors::getBrowserBGColor().darker());
         g.drawRect(area);
     }
     
@@ -390,16 +388,16 @@ void KrumTreeItem::EditableComp::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    juce::Colour fontC = Colors::browserFontColor;
+    juce::Colour fontC = Colors::getBrowserFontColor();
 
     if (owner.isSelected())
     {
-        g.setColour(Colors::highlightColor);
-        fontC = Colors::highlightFontColor;
+        g.setColour(Colors::getHighlightColor());
+        fontC = Colors::getHighlightFontColor();
     }
     else
     {
-        g.setColour(Colors::browserBGColor);
+        g.setColour(Colors::getBrowserBGColor());
     }
     
     g.fillRect(area);
@@ -599,7 +597,7 @@ std::unique_ptr<juce::Component> KrumTreeHeaderItem::createItemComponent()
 void KrumTreeHeaderItem::paintOpenCloseButton(juce::Graphics& g, const juce::Rectangle< float >& buttonArea, juce::Colour backgroundColour, bool isMouseOver)
 {
 
-    g.setColour(Colors::browserBGColor);
+    g.setColour(Colors::getBrowserBGColor());
     g.fillRect(buttonArea);
 
     juce::Path path;
@@ -790,16 +788,16 @@ void KrumTreeHeaderItem::EditableHeaderComp::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    juce::Colour fontC = Colors::browserFontColor;
+    juce::Colour fontC = Colors::getBrowserFontColor();
 
     if (owner.isSelected())
     {
-        g.setColour(Colors::highlightColor);
-        fontC = Colors::highlightFontColor;
+        g.setColour(Colors::getHighlightColor());
+        fontC = Colors::getHighlightFontColor();
     }
     else
     {
-        g.setColour(Colors::browserBGColor);
+        g.setColour(Colors::getBrowserBGColor());
     }
     
     g.fillRect(area);
@@ -939,7 +937,7 @@ void FavoritesTreeView::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    g.setColour(Colors::browserBGColor);
+    g.setColour(Colors::getBrowserBGColor());
     g.fillRect(area.toFloat());
 
     juce::TreeView::paint(g);
@@ -1658,7 +1656,7 @@ juce::Colour FavoritesTreeView::getConnectedLineColor()
 
 juce::Colour FavoritesTreeView::getFontColor()
 {
-    return Colors::browserFontColor;
+    return Colors::getBrowserFontColor();
 }
 
 void FavoritesTreeView::updateFavoritesFromTree(juce::ValueTree& newFavsTree)
@@ -1816,7 +1814,7 @@ void FileChooser::CurrentPathBox::paint(juce::Graphics& g)
 
     if (isMouseOver())
     {
-        g.setColour(Colors::highlightColor);
+        g.setColour(Colors::getHighlightColor());
         g.drawRect(area);
     }
 }
@@ -1858,10 +1856,10 @@ void FileChooser::PathBoxItem::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    g.setColour(isItemHighlighted() ? Colors::highlightColor : Colors::sectionBGColor);
+    g.setColour(isItemHighlighted() ? Colors::getHighlightColor() : Colors::getSectionBGColor());
     g.fillRect(area);
 
-    g.setColour(Colors::browserFontColor);
+    g.setColour(Colors::getBrowserFontColor());
     
     g.drawFittedText(getName(), area, juce::Justification::centredLeft, 1);
 
@@ -1927,7 +1925,7 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     
     fileTree.setItemHeight(Dimensions::rowHeight);
     fileTree.setMultiSelectEnabled(true);
-    fileTree.setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, Colors::highlightColor);
+    fileTree.setColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId, Colors::getHighlightColor());
     fileTree.setDragAndDropDescription(DragStrings::fileChooserDragString);
     fileTree.refresh();
 
@@ -1936,12 +1934,12 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     addAndMakeVisible(fileTree);
 
     addAndMakeVisible(currentPathBox);
-    currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, Colors::browserBGColor);
+    currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, Colors::getBrowserBGColor());
     //currentPathBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::lightgrey);
     //currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black.withAlpha(0.2f));
-    currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, Colors::browserFontColor);
-    currentPathBox.setColour(juce::ComboBox::ColourIds::arrowColourId, Colors::backOutlineColor);
-    currentPathBox.setColour(juce::PopupMenu::textColourId, Colors::highlightFontColor);
+    currentPathBox.setColour(juce::ComboBox::ColourIds::outlineColourId, Colors::getBrowserFontColor());
+    currentPathBox.setColour(juce::ComboBox::ColourIds::arrowColourId, Colors::getBackOutlineColor());
+    currentPathBox.setColour(juce::PopupMenu::textColourId, Colors::getHighlightFontColor());
     currentPathBox.setEditableText(false);
     currentPathBox.addListener(this);
 
@@ -1950,7 +1948,7 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     goUpButton.setImages(upArrowImage.get());
     goUpButton.onClick = [this] { goUp(); };
     goUpButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
-    goUpButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, Colors::browserPathBoxColor);
+    goUpButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, Colors::getBrowserPathBoxColor());
 
     fileTree.addListener(this);
     //fileBrowser.addFileBrowserTreeListener(this);
@@ -1963,7 +1961,7 @@ FileChooser::~FileChooser()
 void FileChooser::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
-    g.setColour(Colors::browserBGColor);
+    g.setColour(Colors::getBrowserBGColor());
     g.fillRect(area.toFloat());
 }
 
@@ -2361,7 +2359,7 @@ void FileChooser::handleRightClick(int result, FileChooser* fileChooser)
 
 void FileChooser::animateAddPlace()
 {
-    animationColor = Colors::addAnimationColor;
+    animationColor = Colors::getAddAnimationColor();
     auto& animator = juce::Desktop::getInstance().getAnimator();
     animator.fadeOut(&currentPathBox, 500);
     animator.fadeIn(&currentPathBox, 500);
@@ -2369,7 +2367,7 @@ void FileChooser::animateAddPlace()
 
 void FileChooser::animateRemovePlace()
 {
-    animationColor = Colors::removeAnimationColor;
+    animationColor = Colors::getRemoveAnimationColor();
     auto& animator = juce::Desktop::getInstance().getAnimator();
     animator.fadeOut(&currentPathBox, 500);
     animator.fadeIn(&currentPathBox, 500);
@@ -2412,7 +2410,8 @@ void KrumFileBrowser::paint(juce::Graphics& g)
     float cornerSize = 5.0f;
     float outline = 1.0f;
 
-    g.setColour(Colors::sectionBGColor);
+    g.setColour(Colors::getSectionBGColor());
+    //g.setColour(juce::Colours::black);
     g.fillRoundedRectangle(area.reduced(5).toFloat(), cornerSize);
 }
 
@@ -2747,11 +2746,11 @@ void PanelHeader::paint(juce::Graphics& g)
     {
         if (mouseOver)
         {
-            g.setColour(Colors::panelHeaderMouseOverBGColor);
+            g.setColour(Colors::getPanelHeaderMouseOverBGColor());
         }
         else
         {
-            juce::ColourGradient grade{ Colors::panelHeaderMouseOverBGColor , area.getTopLeft().toFloat(), Colors::panelHeaderBGColor , area.getBottomRight().toFloat(), false};
+            juce::ColourGradient grade{ Colors::getPanelHeaderMouseOverBGColor() , area.getTopLeft().toFloat(), Colors::getPanelHeaderBGColor() , area.getBottomRight().toFloat(), false};
             g.setGradientFill(grade);
         }
 
@@ -2768,7 +2767,7 @@ void PanelHeader::paint(juce::Graphics& g)
     //g.drawLine(topLine, 0.5f);
 
     //Font
-    g.setColour(Colors::panelHeaderFontColor);
+    g.setColour(Colors::getPanelHeaderFontColor());
 
     if (klaf)
     {
@@ -2782,7 +2781,7 @@ void PanelHeader::paint(juce::Graphics& g)
     //outline if needed
     if (showCanDropFile)
     {
-        g.setColour(Colors::canDropFileColor);
+        g.setColour(Colors::getCanDropFileColor());
         g.drawRect(area);
         
     }
@@ -2937,7 +2936,7 @@ void PanelHeader::itemDropped(const juce::DragAndDropTarget::SourceDetails& deta
 
 void PanelHeader::animateAddFile()
 {
-    animationColor = Colors::addAnimationColor;
+    animationColor = Colors::getAddAnimationColor();
 
     auto& animator = juce::Desktop::getInstance().getAnimator();
     animator.fadeOut(this, 500);
@@ -2946,7 +2945,7 @@ void PanelHeader::animateAddFile()
 
 void PanelHeader::animateRemoveFile()
 {
-    animationColor = Colors::removeAnimationColor;
+    animationColor = Colors::getRemoveAnimationColor();
 
     auto& animator = juce::Desktop::getInstance().getAnimator();
     animator.fadeOut(this, 500);

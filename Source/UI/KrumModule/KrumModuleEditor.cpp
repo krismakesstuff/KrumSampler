@@ -78,12 +78,12 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         }
         else if (modulePlaying)
         {
-            c = c.overlaidWith(Colors::modulePlayingHightlightColor);
+            c = c.overlaidWith(Colors::getModulePlayingHightlightColor());
         }
 
         if (mouseOver || mouseOverKey) 
         {
-            g.setColour(Colors::moduleHoverOutlineColor);
+            g.setColour(Colors::getModuleHoverOutlineColor());
             g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, EditorDimensions::bigOutline);
         }
 
@@ -91,11 +91,11 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         {
             if (moduleContainer.isMultiControlActive())
             {
-                g.setColour(Colors::moduleMultiControlAcitveColor);
+                g.setColour(Colors::getModuleMultiControlAcitveColor());
             }
             else
             {
-                g.setColour(Colors::moduleSelectedOutlineColor);
+                g.setColour(Colors::getModuleSelectedOutlineColor());
             }
 
             g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, EditorDimensions::xlOutline);
@@ -237,7 +237,7 @@ void KrumModuleEditor::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged,
             {
                 
                 buildModule();
-                setModuleColor(Colors::moduleDefaultColor);
+                setModuleColor(Colors::getModuleDefaultColor());
                 setModuleListeningForMidi(true);
                 showSettingsOverlay(); 
 
@@ -385,7 +385,7 @@ void KrumModuleEditor::buildModule()
     muteButton.setButtonText("MUTE");
     muteButton.setToggleState(isModuleMuted(), juce::dontSendNotification);
     muteButton.setClickingTogglesState(true);
-    muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, Colors::moduleMuteActiveColor);
+    muteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, Colors::getModuleMuteActiveColor());
     muteButton.onClick = [this] { muteButtonClicked(); };
     muteButtonAttachment.reset(new ButtonAttachment(parameters, TreeIDs::paramModuleMute.getParamID() + i, muteButton));
     
@@ -402,8 +402,8 @@ void KrumModuleEditor::buildModule()
 
     addAndMakeVisible(outputCombo);
     outputCombo.addItemList(TreeIDs::outputStrings, 1);
-    outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, Colors::moduleOutputMenuBG);
-    outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, Colors::moduleOutputMenuBG);
+    outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, Colors::getModuleOutputMenuBG());
+    outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, Colors::getModuleOutputMenuBG());
     outputComboAttachment.reset(new ComboBoxAttachment(parameters, TreeIDs::paramModuleOutputChannel.getParamID() + i, outputCombo));
 
     addAndMakeVisible(dragHandle);
@@ -437,7 +437,7 @@ void KrumModuleEditor::setChildCompColors()
 {
     auto moduleColor = getModuleColor()/*.withAlpha(0.5f)*/;
 
-    auto bgColor = Colors::moduleBGColor.overlaidWith(moduleColor.withAlpha(0.5f));
+    auto bgColor = Colors::getModuleBGColor().overlaidWith(moduleColor.withAlpha(0.5f));
     auto titleTextColor = moduleColor.darker(0.1f);
     auto textColor = juce::Colours::black;
 
@@ -853,7 +853,7 @@ void KrumModuleEditor::handleMidi(int midiChannel, int midiNote)
         if (getModuleState() == KrumModule::ModuleState::hasFile)
         {
             setModuleState(KrumModule::ModuleState::active);
-            if (getModuleColor() != Colors::moduleDefaultColor)
+            if (getModuleColor() != Colors::getModuleDefaultColor())
             {
                 toggleMenuButton();
             }
@@ -1035,7 +1035,7 @@ void KrumModuleEditor::setChildCompMuteColors()
 {
     auto moduleColor = getModuleColor()/*.withAlpha(0.5f)*/;
 
-    auto bgColor = Colors::moduleBGColor;
+    auto bgColor = Colors::getModuleBGColor();
     auto textColor = moduleColor.darker(0.1f);
 
     dragHandle.setColour(juce::DrawableButton::ColourIds::backgroundColourId, moduleColor.darker(0.99f));
@@ -1448,7 +1448,7 @@ void KrumModuleEditor::PitchSlider::paint(juce::Graphics& g)
 
     //auto bgColor = findColour(juce::Slider::ColourIds::backgroundColourId);
     auto moduleColor = findColour(juce::Slider::ColourIds::backgroundColourId);
-    auto bgColor = Colors::moduleBGColor;
+    auto bgColor = Colors::getModuleBGColor();
     auto textColor = findColour(juce::Slider::ColourIds::textBoxTextColourId);
 
     if (isMouseOverOrDragging())

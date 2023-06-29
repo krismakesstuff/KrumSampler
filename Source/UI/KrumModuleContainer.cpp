@@ -47,8 +47,8 @@ void KrumModuleContainer::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
     
-   // g.setColour(bgColor.withAlpha(0.3f));
-   // g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
+   g.setColour(Colors::getModuleBGColor());
+   g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
 
 }
 
@@ -130,10 +130,16 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
 
 void KrumModuleContainer::parameterChanged(const juce::String& parameterID, float newValue)
 {
-    //this function gets called for every parameter change on the APVTS, so we need to filter.
-    //if we are actually interested in control other modules && are we changing a parameter that is from our moduleEditor
-    if (isMultiControlActive() && doesParamIDsContain(parameterID))
+    //this function gets called for every parameter change from any selected module, so we need to filter.
+    //if we are actually interested in control other modules && 
+    //are we changing a parameter that is from our moduleEditor &&
+    //the sourceParamChange.paramID has not been assigned
+
+    if (isMultiControlActive() && doesParamIDsContain(parameterID) && sourceParamChange.paramID.isEmpty())
     {
+        //we take note of which paramID caused this callback
+        sourceParamChange.paramID = parameterID;
+        
         //set the data to be applied to the other selected Modules
         nextParamChange.paramID = parameterID;
         nextParamChange.value = newValue;
@@ -141,7 +147,6 @@ void KrumModuleContainer::parameterChanged(const juce::String& parameterID, floa
         //this tells the timer callback to get the data from nextParaChange, which we set above. see timerCallback()
         applyNextParamChange = true;
 
-        //DBG("PARAMID CONTAINS: ParameterID = " + parameterID + ". With value = " + juce::String(newValue));
     }
 }
 
@@ -465,7 +470,6 @@ void KrumModuleContainer::applyValueTreeChangesToSelectedModules(juce::ValueTree
 
 void KrumModuleContainer::applyParameterChangeToSelectedModules(const juce::String& parameterID, float newValue)
 {
-
     auto apvts = pluginEditor->getParameters();
     juce::String moduleSamplerIndex{};
 
@@ -692,9 +696,13 @@ void KrumModuleContainer::timerCallback()
     //for multi-control selection 
     if (applyNextParamChange)
     {
-        
         applyParameterChangeToSelectedModules(nextParamChange.paramID, nextParamChange.value);
+
+        nextParamChange = ParamIDValue{};
+        sourceParamChange = ParamIDValue{};
+
         applyNextParamChange = false;
+
     }
 
     if (applyMidi)

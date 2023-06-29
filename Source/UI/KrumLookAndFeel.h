@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "../UI/FileBrowser/KrumFileBrowser.h"
+//#include "../UI/FileBrowser/KrumFileBrowser.h"
 
 /*
 * 
@@ -20,71 +20,151 @@
 * 
 */
 
+//FileBrowser Dimensions
+namespace Dimensions
+{
+    const int rowHeight = 22;
+    const float rowTextScalar = 0.70f;
+    const int rowHeaderHeight = 32;
+    const int panelHeaderCornerSize = 2.0f;
+    const int titleH = 21;
+    const int fileIconSize = 19;
+    const float fileIconAlpha = 0.6f;
+    const int locationTabDepth = 22;
+    const int currentPathHeight = 25;
+    const int previewerH = 45;
+}
+
+
 namespace Colors
 {
     //general app 
-    const juce::Colour bgColor{ juce::Colours::black.brighter(0.12f) };
-    const juce::Colour fontColor{ juce::Colours::white.withAlpha(0.5f) };
-    const juce::Colour highlightFontColor{ fontColor.darker(0.1f)};
-    const juce::Colour highlightColor{ juce::Colours::black.brighter(0.15f) };
+    //const juce::Colour bgColor{ juce::Colours::black.brighter(0.12f) };
+    inline juce::Colour getbgColor(){return juce::Colours::black.brighter(0.12f);}
+    //const juce::Colour fontColor{ juce::Colours::white.withAlpha(0.5f) };
+    inline juce::Colour getFontColor(){return juce::Colours::white.withAlpha(0.5f);}
+    //const juce::Colour highlightFontColor{ fontColor.darker(0.1f)};
+    inline juce::Colour getHighlightFontColor(){return getFontColor().darker(0.1f); }
+    //const juce::Colour highlightColor{ juce::Colours::black.brighter(0.15f) };
+    inline juce::Colour getHighlightColor(){return juce::Colours::black.brighter(0.15f);}
     //const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.005f) };
-    const juce::Colour sectionOutlineColor{ juce::Colours::grey };
-    const juce::Colour sectionBGColor{ juce::Colours::black.brighter(0.075f) };
-    const juce::Colour outputSliderBGColor{ Colors::sectionBGColor };
-    const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
-    const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
+    //const juce::Colour sectionOutlineColor{ juce::Colours::grey };
+    inline juce::Colour getSectionOutlineColor(){return juce::Colours::grey;}
+
+    inline juce::Colour getSectionBGColor(){return juce::Colours::black.brighter(0.075f);}
+    
+    
+    //const juce::Colour outputSliderBGColor{ Colors::getSectionBGColor()};
+    inline juce::Colour getOutputSliderBGColor() { return getSectionBGColor(); }
+    //const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
+    inline juce::Colour getOutputThumbColor() { return juce::Colours::cadetblue; }
+
+    //const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
+    inline juce::Colour getOutputTrackColor() { return juce::Colours::darkgrey; }
+
 
     //browser
-    const juce::Colour browserFontColor{ juce::Colours::white.withAlpha(0.5f)};
-    const juce::Colour browserBGColor{ Colors::sectionBGColor };
-    const juce::Colour browserPathBoxColor{ juce::Colours::black.brighter(0.15f) };
+    //const juce::Colour browserFontColor{ juce::Colours::white.withAlpha(0.5f)};
+    //const juce::Colour browserBGColor{ Colors::getSectionBGColor()};
+    //const juce::Colour browserPathBoxColor{ juce::Colours::black.brighter(0.15f) };
+
+    inline juce::Colour getBrowserFontColor() { return juce::Colours::white.withAlpha(0.5f); }
+    inline juce::Colour getBrowserBGColor() { return Colors::getSectionBGColor(); }
+    inline juce::Colour getBrowserPathBoxColor() { return juce::Colours::black.brighter(0.15f); }
+
 
     //contextual
-    const juce::Colour addAnimationColor{ juce::Colour::fromRGB(67, 170, 139) }; //zomp
-    const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) }; //redSalsa
-    const juce::Colour canDropFileColor{ juce::Colours::green };
+    //const juce::Colour addAnimationColor{ juce::Colour::fromRGB(67, 170, 139) }; //zomp
+    //const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) }; //redSalsa
+    //const juce::Colour canDropFileColor{ juce::Colours::green };
+
+    inline juce::Colour getAddAnimationColor() { return juce::Colour::fromRGB(67, 170, 139); } //zomp
+    inline juce::Colour getRemoveAnimationColor() { return juce::Colour::fromRGB(249, 65, 68); } //redSalsa
+    inline juce::Colour getCanDropFileColor() { return juce::Colours::black.brighter(0.15f); }
+
     
     //panel header 
-    const juce::Colour panelHeaderBGColor{ juce::Colours::grey.darker(0.8)};
-    const juce::Colour panelHeaderMouseOverBGColor{ Colors::panelHeaderBGColor.brighter(0.19f) };
-    const juce::Colour panelHeaderFontColor{ juce::Colours::black };
-    const juce::Colour panelHeaderLineColor{ juce::Colours::darkgrey};
+    //const juce::Colour panelHeaderBGColor{ juce::Colours::grey.darker(0.8)};
+    //const juce::Colour panelHeaderMouseOverBGColor{ Colors::panelHeaderBGColor.brighter(0.19f) };
+    //const juce::Colour panelHeaderFontColor{ juce::Colours::black };
+    //const juce::Colour panelHeaderLineColor{ juce::Colours::darkgrey};
+
+    inline juce::Colour getPanelHeaderBGColor() { return juce::Colours::grey.darker(0.8); }
+    inline juce::Colour getPanelHeaderMouseOverBGColor() { return getPanelHeaderBGColor().brighter(0.19f); }
+    inline juce::Colour getPanelHeaderFontColor() { return juce::Colours::black; }
+    inline juce::Colour getPanelHeaderLineColor() { return juce::Colours::darkgrey; }
+
 
     //modules 
-    const juce::Colour modulesBGColor{ Colors::sectionBGColor };
-    const juce::Colour moduleDefaultColor{ juce::Colours::grey.brighter(0.1f)};
-    const juce::Colour outlineColor{ juce::Colours::white };
-    const juce::Colour moduleBGColor{ juce::Colours::black };
-    const juce::Colour moduleSelectedOutlineColor{ juce::Colours::white.withAlpha(0.9f) };
-    const juce::Colour moduleHoverOutlineColor{ juce::Colours::white.withAlpha(0.79f) };
-    const juce::Colour moduleMultiControlAcitveColor{ juce::Colours::red.withAlpha(0.99f) };
-    const juce::Colour moduleMidiListeningColor{ moduleMultiControlAcitveColor };
-    const juce::Colour moduleMuteActiveColor{ juce::Colours::red.withAlpha(0.7f) };
-    const juce::Colour modulePlayingHightlightColor{ juce::Colours::white.withAlpha(0.4f)};
-    const juce::Colour moduleOutputMenuBG{ juce::Colours::black.withAlpha(0.7f) };
-    const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
+   // const juce::Colour moduleoutlineColor{ juce::Colours::white };
+    //const juce::Colour modulesBGColor{ getSectionOutlineColor() };
+    //const juce::Colour moduleDefaultColor{ juce::Colours::grey.brighter(0.1f)};
+    //const juce::Colour moduleBGColor{ juce::Colours::black };
+    //const juce::Colour moduleSelectedOutlineColor{ juce::Colours::white.withAlpha(0.9f) };
+    //const juce::Colour moduleHoverOutlineColor{ juce::Colours::white.withAlpha(0.79f) };
+    //const juce::Colour moduleMultiControlAcitveColor{ juce::Colours::red.withAlpha(0.99f) };
+    //const juce::Colour moduleMidiListeningColor{ moduleMultiControlAcitveColor };
+    //const juce::Colour moduleMuteActiveColor{ juce::Colours::red.withAlpha(0.7f) };
+    //const juce::Colour modulePlayingHightlightColor{ juce::Colours::white.withAlpha(0.4f)};
+    //const juce::Colour moduleOutputMenuBG{ juce::Colours::black.withAlpha(0.7f) };
+    //const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
+
+    inline juce::Colour getModuleOutlineColor() { return juce::Colours::white; }
+    //inline juce::Colour getModulesBGColor() { return getSectionOutlineColor(); }
+    inline juce::Colour getModuleDefaultColor() { return juce::Colours::grey.brighter(0.1f); }
+    inline juce::Colour getModuleBGColor() { return juce::Colours::black; }
+    inline juce::Colour getModuleSelectedOutlineColor() { return juce::Colours::white.withAlpha(0.9f); }
+    inline juce::Colour getModuleHoverOutlineColor() { return juce::Colours::white.withAlpha(0.79f); }
+    inline juce::Colour getModuleMultiControlAcitveColor() { return juce::Colours::red.withAlpha(0.99f); }
+    inline juce::Colour getModuleMidiListeningColor() { return getModuleMultiControlAcitveColor(); }
+    inline juce::Colour getModuleMuteActiveColor() { return juce::Colours::red.withAlpha(0.7f); }
+    inline juce::Colour getModulePlayingHightlightColor() { return  juce::Colours::white.withAlpha(0.4f); }
+    inline juce::Colour getModuleOutputMenuBG() { return juce::Colours::black.withAlpha(0.7f); }
+    inline juce::Colour getBackOutlineColor() { return juce::Colours::darkgrey; }
+
 
 }
 
 namespace ColorPaletteColors
 {
-    static juce::Colour redSalsa = juce::Colour::fromRGB(249, 65, 68);
+    const juce::Colour redSalsa = juce::Colour::fromRGB(249, 65, 68);
+    //inline juce::Colour getRedSalsa() { return juce::Colour::fromRGB(249, 65, 68); }
+    // 
     //static juce::Colour orangeRed =     juce::Colour::fromRGB(243, 114, 44);
-    static juce::Colour orangePeel = juce::Colour::fromRGB(248, 164, 65);
+    const juce::Colour orangePeel = juce::Colour::fromRGB(248, 164, 65);
+    //inline juce::Colour getOrangePeel() { return juce::Colour::fromRGB(248, 164, 65); }
+
     //static juce::Colour yellowOrange =  juce::Colour::fromRGB(248, 150, 30);
-    static juce::Colour mangoTango = juce::Colour::fromRGB(249, 132, 74);
+    const  juce::Colour mangoTango = juce::Colour::fromRGB(249, 132, 74);
+    //inline juce::Colour getMangoTango() { return juce::Colour::fromRGB(249, 132, 74); }
+    
     //static juce::Colour maize =         juce::Colour::fromRGB(249, 199, 79);
     //static juce::Colour pistachio =     juce::Colour::fromRGB(144, 190, 109);
-    static juce::Colour zomp = juce::Colour::fromRGB(67, 170, 139);
+    const juce::Colour zomp = juce::Colour::fromRGB(67, 170, 139);
+    //inline juce::Colour getZomp() { return juce::Colour::fromRGB(67, 170, 139); }
+
     //static juce::Colour cadetBlue =     juce::Colour::fromRGB(77, 144, 142);
     //static juce::Colour queenBlue =     juce::Colour::fromRGB(87, 117, 144);
-    static juce::Colour cgBlue = juce::Colour::fromRGB(39, 125, 161);
+    const juce::Colour cgBlue = juce::Colour::fromRGB(39, 125, 161);
+    //inline juce::Colour getcgBlue() { return juce::Colour::fromRGB(39, 125, 161); }
+
+    const juce::Colour defaultColor = Colors::getModuleDefaultColor();
 
     //static juce::Array<juce::Colour> colorArray{ redSalsa, orangeRed, yellowOrange, mangoTango, maize,
     //                                           pistachio, zomp, cadetBlue, queenBlue, cgBlue };
-    static juce::Array<juce::Colour> colorArray{ redSalsa, orangePeel, mangoTango, zomp, cgBlue, Colors::moduleDefaultColor };
+    const juce::Array<juce::Colour> colorArray{ redSalsa, orangePeel, mangoTango, zomp, cgBlue, defaultColor };
+    //juce::OwnedArray<juce::Colour> getColorArray() { return  juce::OwnedArray<juce::Colour>{ getRedSalsa(), getOrangePeel(), getMangoTango(), getZomp(), getcgBlue(), Colors::getModuleDefaultColor }; };
+    //juce::OwnedArray<juce::Colour> colorArray{};
 
-    static juce::ColourGradient makeGradientFromAllColors(bool radial, juce::Point<float> pointOne, juce::Point<float> pointTwo)
+   /* void addColorsToColorArray()
+    {
+        colorArray.add(&getRedSalsa());
+        colorArray.add(&getOrangePeel());
+        colorArray.add(&getMangoTango());
+        colorArray.add(&getZomp());
+        colorArray.add(&getcgBlue());
+    }*/
+    /*static juce::ColourGradient makeGradientFromAllColors(bool radial, juce::Point<float> pointOne, juce::Point<float> pointTwo)
     {
         juce::ColourGradient retGrade;
         juce::NormalisableRange<double> colorRange{ 0, (double)colorArray.size() };
@@ -98,7 +178,7 @@ namespace ColorPaletteColors
         retGrade.point2 = pointTwo;
 
         return retGrade;
-    }
+    }*/
 }
 
 
@@ -343,12 +423,12 @@ public:
             float textHeight = 11.0f;
 
             //g.setColour(juce::Colours::white.withAlpha(0.2f));
-            g.setColour(Colors::fontColor.darker(0.5f));
+            g.setColour(Colors::getFontColor().darker(0.5f));
             //drawVolumeLines(g, thumbX + thumbW , width - thumbW, 2.0f, -60.0f, 0.5f, slider)
             drawVolumeLines(g, (float)dbLineRect.getX() - 2, (float)dbLineRect.getWidth() - 4, 2.0f, -60.0f, -0.5f, slider);
 
             //g.setColour(juce::Colours::white);
-            g.setColour(Colors::fontColor);
+            g.setColour(Colors::getFontColor());
             g.setFont(textHeight);
 
             auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
@@ -383,10 +463,10 @@ public:
             juce::Rectangle<int> dbLineRect{ x, y + thumbH , width, (int)(height * 0.5f)};
             float textHeight = 9.0f;
 
-            g.setColour(Colors::fontColor.darker(0.99f));
+            g.setColour(Colors::getFontColor().darker(0.99f));
             drawVolumeLines(g, dbLineRect.getY(), dbLineRect.getHeight(), 2.0f, -60.0f, 0.5f, slider);
 
-            g.setColour(Colors::fontColor);
+            g.setColour(Colors::getFontColor());
             g.setFont(textHeight);
 
             auto twoDbPos = getSliderDecibelPosition(slider, 2.0f);  //+ thumbOffset;
@@ -1067,7 +1147,7 @@ public:
             float trackWidth = width;// * 0.35f;
             //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
             //float ix = bounds.getCentreX() - (trackWidth / 2);
-            juce::Rectangle<float> trackRect(x - 2, (float)y - 5, trackWidth + 4, (float)height + 5);
+            trackRect = juce::Rectangle<float>{(float) x - 2, (float)y - 5, (float)trackWidth + 4, (float)height + 5 };
 
             /*juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
             vertGrade.addColour(sliderPorp, gradCol1);
@@ -1153,7 +1233,7 @@ public:
         juce::Rectangle<int> boxBounds(0, 0, width, height);
 
         //g.setColour(box.findColour(juce::ComboBox::backgroundColourId));
-        g.setColour(Colors::browserPathBoxColor);
+        g.setColour(Colors::getBrowserPathBoxColor());
         g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
 
         //g.setColour(box.findColour(juce::ComboBox::outlineColourId));
@@ -1196,13 +1276,13 @@ public:
         label.setFont(label.getHeight() * 0.8f);
         //label.setFont(getMontBoldTypeface());
         //label.setColour(juce::Label::ColourIds::textColourId, juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
-        label.setColour(juce::Label::ColourIds::textColourId, Colors::browserFontColor);
+        label.setColour(juce::Label::ColourIds::textColourId, Colors::getBrowserFontColor());
     }
 
     void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
     {
         //g.setColour(findColour(juce::ComboBox::ColourIds::backgroundColourId));
-        g.setColour(Colors::browserBGColor);
+        g.setColour(Colors::getBrowserBGColor());
         g.fillRect(0, 0, width, height);
 
         g.setColour(juce::Colours::darkgrey);
@@ -1222,7 +1302,7 @@ public:
             r.removeFromTop(juce::roundToInt(((float)r.getHeight() * 0.5f) - 0.5f));
 
             //g.setColour(findColour(juce::PopupMenu::textColourId).withAlpha(0.3f));
-            g.setColour(Colors::fontColor);
+            g.setColour(Colors::getFontColor());
             g.fillRect(r.removeFromTop(1));
         }
         else
@@ -1360,11 +1440,11 @@ public:
 
         if (isItemSelected)
         {
-            g.setColour(Colors::browserBGColor.withAlpha(0.85f));
+            g.setColour(Colors::getBrowserBGColor().withAlpha(0.85f));
         }
         else
         {
-            g.setColour(Colors::browserBGColor);
+            g.setColour(Colors::getBrowserBGColor());
         }
 
         g.fillRect(area);
@@ -1380,9 +1460,9 @@ public:
         }
 
         if (isItemSelected)
-            g.setColour(Colors::highlightFontColor);
+            g.setColour(Colors::getHighlightFontColor());
         else
-            g.setColour(Colors::browserFontColor);
+            g.setColour(Colors::getBrowserFontColor());
 
         g.setFont(getFileBrowserFont());
         g.setFont((float)height * Dimensions::rowTextScalar);
@@ -1402,7 +1482,7 @@ public:
         g.setColour(backgroundColour.contrasting().withAlpha(isMouseOver ? 0.5f : 0.3f));
         g.fillPath(p, p.getTransformToScaleToFit(area.reduced(2, area.getHeight() / 4), true));*/
 
-        g.setColour(Colors::browserBGColor);
+        g.setColour(Colors::getBrowserBGColor());
         g.fillRect(bounds);
         
         juce::Path path;

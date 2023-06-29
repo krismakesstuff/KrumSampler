@@ -240,9 +240,6 @@ private:
 
     juce::ComponentBoundsConstrainer constrainer;
 
-
-    
-
     DropSampleArea dropSampleArea{ &moduleContainer };
 
 

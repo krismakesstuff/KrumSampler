@@ -178,7 +178,7 @@ private:
     };
 
     ParamIDValue nextParamChange{};
-    ParamIDValue lastParamChange{}; //use this for handling relative slider moves?
+    ParamIDValue sourceParamChange{}; //use this for handling relative slider moves?
 
     bool applyNextParamChange = false;
     //ParamIDValue ParamChange{};
@@ -203,7 +203,7 @@ private:
 
     KrumSamplerAudioProcessorEditor* pluginEditor = nullptr;
     
-    juce::Colour bgColor{ juce::Colours::black };
+    //juce::Colour bgColor{ juce::Colours::black };
 
     bool modulesOutside = false;
     bool multiSelectControlState = false;

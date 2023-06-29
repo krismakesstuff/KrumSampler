@@ -102,7 +102,7 @@ void ModuleSettingsOverlay::mouseExit(const juce::MouseEvent& e)
 
 void ModuleSettingsOverlay::colorButtonClicked(juce::Colour newColor)
 {
-    if (parentEditor.getModuleColor() == Colors::moduleDefaultColor && newColor != Colors::moduleDefaultColor)
+    if (parentEditor.getModuleColor() == Colors::getModuleDefaultColor() && newColor != Colors::getModuleDefaultColor())
     {
         parentEditor.hideSettingsOverlay();
     }

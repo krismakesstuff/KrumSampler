@@ -35,8 +35,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     websiteButton.setButtonText(madeByString);
     websiteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::transparentBlack);
     websiteButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
-    websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, Colors::fontColor.darker(0.1f));
-    websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, Colors::highlightFontColor);
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOffId, Colors::getFontColor().darker(0.1f));
+    websiteButton.setColour(juce::TextButton::ColourIds::textColourOnId, Colors::getHighlightFontColor());
     websiteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     websiteButton.onClick = [this] { websiteURL.launchInDefaultBrowser(); };
 
@@ -45,9 +45,9 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     outputGainSlider.setScrollWheelEnabled(false);
     outputGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     outputGainSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, true, 10, 10);
-    outputGainSlider.setColour(juce::Slider::ColourIds::thumbColourId, Colors::outputThumbColor);
-    outputGainSlider.setColour(juce::Slider::ColourIds::trackColourId, Colors::outputTrackColor);
-    outputGainSlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, Colors::outlineColor);
+    outputGainSlider.setColour(juce::Slider::ColourIds::thumbColourId, Colors::getOutputThumbColor());
+    outputGainSlider.setColour(juce::Slider::ColourIds::trackColourId, Colors::getOutputTrackColor());
+    outputGainSlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, Colors::getModuleOutlineColor());
     
     outputGainSlider.setNumDecimalPlacesToDisplay(2);
     outputGainSlider.setPopupDisplayEnabled(true, false, this);
@@ -65,8 +65,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     presetsComboBox.setTextWhenNothingSelected("Coming Soon!!");
     presetsComboBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
     presetsComboBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black);
-    presetsComboBox.setColour(juce::ComboBox::ColourIds::arrowColourId, Colors::fontColor);
-    presetsComboBox.setColour(juce::ComboBox::ColourIds::textColourId, Colors::fontColor);
+    presetsComboBox.setColour(juce::ComboBox::ColourIds::arrowColourId, Colors::getFontColor());
+    presetsComboBox.setColour(juce::ComboBox::ColourIds::textColourId, Colors::getFontColor());
 
     //load settings image and add button
     addAndMakeVisible(settingsButton);
@@ -106,8 +106,8 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     collapseBrowserButton.setToggleState(getSavedFileBrowserHiddenState(), juce::sendNotification);
     collapseBrowserButton.setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnLeft);
     collapseBrowserButton.onClick = [this] { collapseButtonClicked(); };
-    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, Colors::browserBGColor);
-    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, Colors::browserBGColor);
+    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, Colors::getBrowserBGColor());
+    collapseBrowserButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, Colors::getBrowserBGColor());
     collapseBrowserButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(collapseBrowserButton);
 
@@ -160,33 +160,33 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     int spacer = 5;
 
     //app background
-    g.setColour(Colors::bgColor);
+    g.setColour(Colors::getbgColor());
     g.fillRect(area);
     
     //Title Image
     auto titleRect = area.withTop(EditorDimensions::shrinkage).withLeft(EditorDimensions::extraShrinkage(4)).withHeight(EditorDimensions::topBar).withWidth(EditorDimensions::titleImageW).toFloat();
     g.drawImage(titleImage, titleRect.toFloat(), juce::RectanglePlacement::xLeft );
 
-    auto moduleBGGrade = juce::ColourGradient::vertical(Colors::modulesBGColor.darker(0.1f), Colors::modulesBGColor, modulesBG);
+    //auto moduleBGGrade = juce::ColourGradient::vertical(Colors::getModulesBGColor().darker(0.1f), Colors::getModulesBGColor(), modulesBG);
 
     //Module Container Outline
-    g.setColour(Colors::sectionOutlineColor);
+    g.setColour(Colors::getSectionOutlineColor());
     g.drawRoundedRectangle(modulesBG.toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     
     //Module Container Fill
-    g.setColour(Colors::modulesBGColor);
+    g.setColour(Colors::getModuleBGColor());
     g.fillRoundedRectangle(modulesViewport.getBounds().toFloat(), EditorDimensions::cornerSize);
     
     //Output Slider Outline
-    g.setColour(Colors::sectionOutlineColor);
+    g.setColour(Colors::getSectionOutlineColor());
     g.drawRoundedRectangle(area.withTop(modulesBG.getY()).withBottom(modulesBG.getBottom()).withLeft(modulesBG.getRight() + EditorDimensions::extraShrinkage()).withRight(area.getRight()- EditorDimensions::extraShrinkage()).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     
     //Output Slider Fill
-    g.setColour(Colors::outputSliderBGColor);
+    g.setColour(Colors::getOutputSliderBGColor());
     g.fillRoundedRectangle(outputGainSlider.getBounds().withTop(modulesBG.getY() + EditorDimensions::extraShrinkage()).toFloat(), EditorDimensions::cornerSize);
 
     //Output Label
-    g.setColour(Colors::fontColor);
+    g.setColour(Colors::getFontColor());
     g.setFont(kLaf.getMontBoldTypeface());
     g.setFont(13.0f);
     g.drawText("OUTPUT", outputGainSlider.getBounds().withTop(modulesBG.getY() + EditorDimensions::extraShrinkage()).withHeight(g.getCurrentFont().getHeight() + EditorDimensions::shrinkage),
@@ -195,19 +195,19 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
     //FileBrowser Outline
     if (!collapseBrowserButton.getToggleState())
     {
-        g.setColour(Colors::sectionOutlineColor);
+        g.setColour(Colors::getSectionOutlineColor());
         g.drawRoundedRectangle(fileBrowser.getBounds().withY(fileBrowser.getBounds().getY()).withBottom(fileBrowser.getBounds().getBottom()).expanded(EditorDimensions::extraShrinkage(1), EditorDimensions::extraShrinkage(1)).toFloat(), EditorDimensions::cornerSize, EditorDimensions::smallOutline);
     }
     
     //Presets Label
-    g.setColour(Colors::fontColor);
+    g.setColour(Colors::getFontColor());
     g.setFont(16.0f);
     g.drawFittedText("PRESETS", {presetsComboBox.getX() - 60, presetsComboBox.getY(), presetsComboBox.getWidth() /2, presetsComboBox.getHeight()}, juce::Justification::centredLeft, 1, 1.0f);
 
     //Version text
     if (showWebsite())
     {
-        g.setColour(Colors::fontColor.darker(0.1f));
+        g.setColour(Colors::getFontColor().darker(0.1f));
         g.setFont(12.0f);
         juce::String versionString = "Build Version: " + juce::String(KRUM_BUILD_VERSION);
         int versionW = g.getCurrentFont().getStringWidth(versionString);
@@ -516,8 +516,8 @@ void KrumSamplerAudioProcessorEditor::DropSampleArea::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    juce::Colour bgColor = Colors::modulesBGColor;
-    juce::Colour borderColor = Colors::moduleHoverOutlineColor.withAlpha(0.4f);
+    juce::Colour bgColor = Colors::getModuleBGColor();
+    juce::Colour borderColor = Colors::getModuleHoverOutlineColor().withAlpha(0.4f);
 
 
     juce::ColourGradient hGrade{ bgColor.brighter(0.1f), area.getTopLeft().toFloat(), bgColor, area.getTopRight().toFloat(), false};

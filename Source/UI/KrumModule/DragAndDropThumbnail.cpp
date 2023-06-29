@@ -115,7 +115,7 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
 
     if (canAcceptFile)
     {
-        g.setColour(Colors::canDropFileColor);
+        g.setColour(Colors::getCanDropFileColor());
         g.drawRect(area, 2);
     }
 
