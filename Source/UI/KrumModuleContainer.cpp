@@ -130,21 +130,18 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
 
 void KrumModuleContainer::parameterChanged(const juce::String& parameterID, float newValue)
 {
-    //see if we are actually interested in control other modules
-    if (multipleModulesSelected() && isMultiControlActive())
+    //this function gets called for every parameter change on the APVTS, so we need to filter.
+    //if we are actually interested in control other modules && are we changing a parameter that is from our moduleEditor
+    if (isMultiControlActive() && doesParamIDsContain(parameterID))
     {
-        //make sure we changin a parameter that is from our moduleEditor
-        if (doesParamIDsContain(parameterID))
-        {
-            //set the data to be applied to the other selected Modules
-            nextParamChange.paramID = parameterID;
-            nextParamChange.value = newValue;
+        //set the data to be applied to the other selected Modules
+        nextParamChange.paramID = parameterID;
+        nextParamChange.value = newValue;
 
-            //this tells the timer callback to get the data from nextParaChange, which we set above. see timerCallback()
-            applyNextParamChange = true;
+        //this tells the timer callback to get the data from nextParaChange, which we set above. see timerCallback()
+        applyNextParamChange = true;
 
-            //DBG("PARAMID CONTAINS: ParameterID = " + parameterID + ". With value = " + juce::String(newValue));
-        }
+        //DBG("PARAMID CONTAINS: ParameterID = " + parameterID + ". With value = " + juce::String(newValue));
     }
 }
 
@@ -466,7 +463,6 @@ void KrumModuleContainer::applyValueTreeChangesToSelectedModules(juce::ValueTree
     }
 }
 
-//this should probably be triggered by a timercallback. It should NOT be triggered by the APVTS listener call back
 void KrumModuleContainer::applyParameterChangeToSelectedModules(const juce::String& parameterID, float newValue)
 {
 
@@ -494,7 +490,9 @@ void KrumModuleContainer::applyParameterChangeToSelectedModules(const juce::Stri
             
             //set the new parameterID with the newValue
             //apvts->state.setProperty({ newParamString }, newValue, nullptr);
+            //apvts->getParameter(newParamString)->beginChangeGesture();
             apvts->getParameter(newParamString)->setValueNotifyingHost(newValue);
+            //apvts->getParameter(newParamString)->endChangeGesture();
 
             DBG("newParamString = " + newParamString);
             DBG("setProperty with: " + juce::String(newValue));
@@ -691,9 +689,10 @@ void KrumModuleContainer::timerCallback()
         pluginEditor->keyboard.clearHighlightedKey();
     }
 
-    //for multi-control selection syncing
+    //for multi-control selection 
     if (applyNextParamChange)
     {
+        
         applyParameterChangeToSelectedModules(nextParamChange.paramID, nextParamChange.value);
         applyNextParamChange = false;
     }
@@ -888,14 +887,15 @@ void KrumModuleContainer::removeModuleParamIDs(KrumModuleEditor* module)
         //juce::String index = juce::String(module->getModuleSamplerIndex());
 
         paramIDs.removeString(TreeIDs::paramModuleGain.getParamID() + index);
-paramIDs.removeString(TreeIDs::paramModuleClipGain.getParamID() + index);
-paramIDs.removeString(TreeIDs::paramModulePan.getParamID() + index);
-paramIDs.removeString(TreeIDs::paramModuleOutputChannel.getParamID() + index);
-paramIDs.removeString(TreeIDs::paramModulePitchShift.getParamID() + index);
-paramIDs.removeString(TreeIDs::paramModuleReverse.getParamID() + index);
-paramIDs.removeString(TreeIDs::paramModuleMute.getParamID() + index);
+        paramIDs.removeString(TreeIDs::paramModuleClipGain.getParamID() + index);
+        paramIDs.removeString(TreeIDs::paramModulePan.getParamID() + index);
+        paramIDs.removeString(TreeIDs::paramModuleOutputChannel.getParamID() + index);
+        paramIDs.removeString(TreeIDs::paramModulePitchShift.getParamID() + index);
+        paramIDs.removeString(TreeIDs::paramModuleReverse.getParamID() + index);
+        paramIDs.removeString(TreeIDs::paramModuleMute.getParamID() + index);
 
-DBG("ParamIDs removed for module at SamplerIndex: " + index);
+        DBG("ParamIDs removed for module at SamplerIndex: " + index);
+
     }
 
 

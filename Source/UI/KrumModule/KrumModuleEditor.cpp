@@ -67,7 +67,8 @@ void KrumModuleEditor::paint (juce::Graphics& g)
     if (moduleState == KrumModule::ModuleState::active || moduleState == KrumModule::ModuleState::hasFile) 
     {
         //juce::Colour bc = c.darker(0.8f)/*.withSaturation(0.5f)*/;
-        juce::Colour bc = juce::Colours::black;
+        juce::Colour bc = juce::Colours::black.brighter(0.075f);
+        //juce::Colour bc = c.darker(0.9f);
 
         if (isModuleMuted())
         {
@@ -502,11 +503,13 @@ void KrumModuleEditor::setChildCompColors()
 
 
     thumbnail.setChannelColor(titleTextColor);
+    //thumbnail.setChannelColor(juce::Colours::black);
     thumbnail.setThumbnailBGColor(bgColor.withAlpha(0.4f));
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker(0.99f));
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::textBoxOutlineColourId, moduleColor.brighter().withAlpha(0.5f));
 
     timeHandle.setTrackBackgroundColor(moduleColor.darker(0.9f));
+    //timeHandle.setTrackBackgroundColor(ju);
     timeHandle.setHandleColor(titleTextColor.darker(0.2f));
 
     //outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, moduleColor.darker(0.55f).withAlpha(0.5f));
