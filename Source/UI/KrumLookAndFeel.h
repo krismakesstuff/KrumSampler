@@ -39,56 +39,34 @@ namespace Dimensions
 namespace Colors
 {
     //general app 
-    //const juce::Colour bgColor{ juce::Colours::black.brighter(0.12f) };
     inline juce::Colour getbgColor(){return juce::Colours::black.brighter(0.12f);}
-    //const juce::Colour fontColor{ juce::Colours::white.withAlpha(0.5f) };
-    inline juce::Colour getFontColor(){return juce::Colours::white.withAlpha(0.5f);}
-    //const juce::Colour highlightFontColor{ fontColor.darker(0.1f)};
-    inline juce::Colour getHighlightFontColor(){return getFontColor().darker(0.1f); }
-    //const juce::Colour highlightColor{ juce::Colours::black.brighter(0.15f) };
-    inline juce::Colour getHighlightColor(){return juce::Colours::black.brighter(0.15f);}
-    //const juce::Colour backgroundColor{ juce::Colours::black.withAlpha(0.005f) };
-    //const juce::Colour sectionOutlineColor{ juce::Colours::grey };
-    inline juce::Colour getSectionOutlineColor(){return juce::Colours::grey;}
 
+    inline juce::Colour getFontColor(){return juce::Colours::white.withAlpha(0.5f);}
+    inline juce::Colour getHighlightFontColor(){return getFontColor().darker(0.1f); }
+    inline juce::Colour getHighlightColor(){return juce::Colours::black.brighter(0.15f);}
+
+    inline juce::Colour getSectionOutlineColor(){return juce::Colours::grey;}
     inline juce::Colour getSectionBGColor(){return juce::Colours::black.brighter(0.075f);}
     
-    
-    //const juce::Colour outputSliderBGColor{ Colors::getSectionBGColor()};
     inline juce::Colour getOutputSliderBGColor() { return getSectionBGColor(); }
-    //const juce::Colour outputThumbColor{ juce::Colours::cadetblue };
     inline juce::Colour getOutputThumbColor() { return juce::Colours::cadetblue; }
-
-    //const juce::Colour outputTrackColor{ juce::Colours::darkgrey };
     inline juce::Colour getOutputTrackColor() { return juce::Colours::darkgrey; }
 
+    inline juce::Colour getDropShadowColor() { return juce::Colours::black; }
 
     //browser
-    //const juce::Colour browserFontColor{ juce::Colours::white.withAlpha(0.5f)};
-    //const juce::Colour browserBGColor{ Colors::getSectionBGColor()};
-    //const juce::Colour browserPathBoxColor{ juce::Colours::black.brighter(0.15f) };
-
     inline juce::Colour getBrowserFontColor() { return juce::Colours::white.withAlpha(0.5f); }
     inline juce::Colour getBrowserBGColor() { return Colors::getSectionBGColor(); }
     inline juce::Colour getBrowserPathBoxColor() { return juce::Colours::black.brighter(0.15f); }
 
 
     //contextual
-    //const juce::Colour addAnimationColor{ juce::Colour::fromRGB(67, 170, 139) }; //zomp
-    //const juce::Colour removeAnimationColor{ juce::Colour::fromRGB(249, 65, 68) }; //redSalsa
-    //const juce::Colour canDropFileColor{ juce::Colours::green };
-
     inline juce::Colour getAddAnimationColor() { return juce::Colour::fromRGB(67, 170, 139); } //zomp
     inline juce::Colour getRemoveAnimationColor() { return juce::Colour::fromRGB(249, 65, 68); } //redSalsa
     inline juce::Colour getCanDropFileColor() { return juce::Colours::black.brighter(0.15f); }
 
     
-    //panel header 
-    //const juce::Colour panelHeaderBGColor{ juce::Colours::grey.darker(0.8)};
-    //const juce::Colour panelHeaderMouseOverBGColor{ Colors::panelHeaderBGColor.brighter(0.19f) };
-    //const juce::Colour panelHeaderFontColor{ juce::Colours::black };
-    //const juce::Colour panelHeaderLineColor{ juce::Colours::darkgrey};
-
+    //concertina panel header 
     inline juce::Colour getPanelHeaderBGColor() { return juce::Colours::grey.darker(0.8); }
     inline juce::Colour getPanelHeaderMouseOverBGColor() { return getPanelHeaderBGColor().brighter(0.19f); }
     inline juce::Colour getPanelHeaderFontColor() { return juce::Colours::black; }
@@ -96,26 +74,12 @@ namespace Colors
 
 
     //modules 
-   // const juce::Colour moduleoutlineColor{ juce::Colours::white };
-    //const juce::Colour modulesBGColor{ getSectionOutlineColor() };
-    //const juce::Colour moduleDefaultColor{ juce::Colours::grey.brighter(0.1f)};
-    //const juce::Colour moduleBGColor{ juce::Colours::black };
-    //const juce::Colour moduleSelectedOutlineColor{ juce::Colours::white.withAlpha(0.9f) };
-    //const juce::Colour moduleHoverOutlineColor{ juce::Colours::white.withAlpha(0.79f) };
-    //const juce::Colour moduleMultiControlAcitveColor{ juce::Colours::red.withAlpha(0.99f) };
-    //const juce::Colour moduleMidiListeningColor{ moduleMultiControlAcitveColor };
-    //const juce::Colour moduleMuteActiveColor{ juce::Colours::red.withAlpha(0.7f) };
-    //const juce::Colour modulePlayingHightlightColor{ juce::Colours::white.withAlpha(0.4f)};
-    //const juce::Colour moduleOutputMenuBG{ juce::Colours::black.withAlpha(0.7f) };
-    //const juce::Colour backOutlineColor{ juce::Colours::darkgrey };
-
     inline juce::Colour getModuleOutlineColor() { return juce::Colours::white; }
-    //inline juce::Colour getModulesBGColor() { return getSectionOutlineColor(); }
     inline juce::Colour getModuleDefaultColor() { return juce::Colours::grey.brighter(0.1f); }
     inline juce::Colour getModuleBGColor() { return juce::Colours::black; }
-    inline juce::Colour getModuleSelectedOutlineColor() { return juce::Colours::white.withAlpha(0.9f); }
+    inline juce::Colour getModuleSelectedOutlineColor() { return juce::Colours::white.withAlpha(0.65f); }
     inline juce::Colour getModuleHoverOutlineColor() { return juce::Colours::white.withAlpha(0.79f); }
-    inline juce::Colour getModuleMultiControlAcitveColor() { return juce::Colours::red.withAlpha(0.99f); }
+    inline juce::Colour getModuleMultiControlAcitveColor() { return juce::Colours::red.brighter().withAlpha(0.9f); }
     inline juce::Colour getModuleMidiListeningColor() { return getModuleMultiControlAcitveColor(); }
     inline juce::Colour getModuleMuteActiveColor() { return juce::Colours::red.withAlpha(0.7f); }
     inline juce::Colour getModulePlayingHightlightColor() { return  juce::Colours::white.withAlpha(0.4f); }
@@ -128,57 +92,14 @@ namespace Colors
 namespace ColorPaletteColors
 {
     const juce::Colour redSalsa = juce::Colour::fromRGB(249, 65, 68);
-    //inline juce::Colour getRedSalsa() { return juce::Colour::fromRGB(249, 65, 68); }
-    // 
-    //static juce::Colour orangeRed =     juce::Colour::fromRGB(243, 114, 44);
     const juce::Colour orangePeel = juce::Colour::fromRGB(248, 164, 65);
-    //inline juce::Colour getOrangePeel() { return juce::Colour::fromRGB(248, 164, 65); }
-
-    //static juce::Colour yellowOrange =  juce::Colour::fromRGB(248, 150, 30);
     const  juce::Colour mangoTango = juce::Colour::fromRGB(249, 132, 74);
-    //inline juce::Colour getMangoTango() { return juce::Colour::fromRGB(249, 132, 74); }
-    
-    //static juce::Colour maize =         juce::Colour::fromRGB(249, 199, 79);
-    //static juce::Colour pistachio =     juce::Colour::fromRGB(144, 190, 109);
     const juce::Colour zomp = juce::Colour::fromRGB(67, 170, 139);
-    //inline juce::Colour getZomp() { return juce::Colour::fromRGB(67, 170, 139); }
-
-    //static juce::Colour cadetBlue =     juce::Colour::fromRGB(77, 144, 142);
-    //static juce::Colour queenBlue =     juce::Colour::fromRGB(87, 117, 144);
     const juce::Colour cgBlue = juce::Colour::fromRGB(39, 125, 161);
-    //inline juce::Colour getcgBlue() { return juce::Colour::fromRGB(39, 125, 161); }
-
     const juce::Colour defaultColor = Colors::getModuleDefaultColor();
 
-    //static juce::Array<juce::Colour> colorArray{ redSalsa, orangeRed, yellowOrange, mangoTango, maize,
-    //                                           pistachio, zomp, cadetBlue, queenBlue, cgBlue };
     const juce::Array<juce::Colour> colorArray{ redSalsa, orangePeel, mangoTango, zomp, cgBlue, defaultColor };
-    //juce::OwnedArray<juce::Colour> getColorArray() { return  juce::OwnedArray<juce::Colour>{ getRedSalsa(), getOrangePeel(), getMangoTango(), getZomp(), getcgBlue(), Colors::getModuleDefaultColor }; };
-    //juce::OwnedArray<juce::Colour> colorArray{};
-
-   /* void addColorsToColorArray()
-    {
-        colorArray.add(&getRedSalsa());
-        colorArray.add(&getOrangePeel());
-        colorArray.add(&getMangoTango());
-        colorArray.add(&getZomp());
-        colorArray.add(&getcgBlue());
-    }*/
-    /*static juce::ColourGradient makeGradientFromAllColors(bool radial, juce::Point<float> pointOne, juce::Point<float> pointTwo)
-    {
-        juce::ColourGradient retGrade;
-        juce::NormalisableRange<double> colorRange{ 0, (double)colorArray.size() };
-        for (int i = 0; i < colorArray.size(); i++)
-        {
-            retGrade.addColour(colorRange.convertTo0to1(i), colorArray[i]);
-        }
-
-        retGrade.isRadial = radial;
-        retGrade.point1 = pointOne;
-        retGrade.point2 = pointTwo;
-
-        return retGrade;
-    }*/
+    
 }
 
 
@@ -299,12 +220,21 @@ public:
 
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
-        if (slider.isBar())
+        if (slider.isBar()) 
         {
-            g.setColour(slider.findColour(juce::Slider::trackColourId));
-            //g.setColour(juce::Colours::white);
-            g.fillRect(slider.isHorizontal() ? juce::Rectangle<float>(static_cast<float> (x), (float)y + 0.5f, sliderPos - (float)x, (float)height - 1.0f)
+            
+            //if (slider.getSliderStyle() == juce::Slider::LinearBar) //pitchSlider
+            //{
+
+            //}
+            //else if (slider.getSliderStyle() == juce::Slider::LinearBarVertical) // moduleClipGainSlider
+            //{
+                g.setColour(slider.findColour(juce::Slider::trackColourId));
+                //g.setColour(juce::Colours::white);
+                g.fillRect(slider.isHorizontal() ? juce::Rectangle<float>(static_cast<float> (x), (float)y + 0.5f, sliderPos - (float)x, (float)height - 1.0f)
                             /*vertical*/ : juce::Rectangle<float>((float)x + 0.5f, sliderPos, (float)width - 1.0f, (float)y + ((float)height - sliderPos)));
+
+            //}
         }
         else
         {
@@ -1091,9 +1021,11 @@ public:
 
         const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
         juce::Colour textColor = slider.findColour(juce::Slider::ColourIds::textBoxTextColourId);
-        juce::Colour gradCol1(juce::Colours::black.withAlpha(0.4f));
-        
+        //juce::Colour gradCol1(juce::Colours::black.withAlpha(0.4f));
         //juce::Colour gradCol1(juce::Colours::red);
+        
+        
+        juce::Colour gradCol1(trackColour.darker(0.7));
         juce::Colour gradCol2(trackColour.darker());
         juce::Path indent;
 
@@ -1105,8 +1037,10 @@ public:
         if (sliderPos < mid)
         {
             trackRect = bounds.withLeft(sliderPos).withRight(mid).toFloat();
-            gradCol1 = trackColour.darker();
-            gradCol2 = juce::Colours::black.withAlpha(0.4f);
+            juce::Colour temp{ gradCol1 };
+            gradCol1 = gradCol2;
+            gradCol2 = temp;
+            
         }
         else if(sliderPos > mid)
         {
@@ -1170,7 +1104,8 @@ public:
         float sliderPos, float minSliderPos, float maxSliderPos,
         const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
-        float cornerSize = 1.0f;
+        //TODO: make EditorDimensions::cornerSize namespace accessible from here? review
+        float cornerSize = 3.0f;
         juce::Line<float> line;
         juce::Point<int> dropPoint;
 
@@ -1192,11 +1127,11 @@ public:
         }
         else // horizontal
         {
-            thumbH = height * 0.9f; //height - 3;
-            thumbW = 4;
+            thumbH = height /** 0.9f*/; //height - 3;
+            thumbW = 5;
 
             thumbX = sliderPos - thumbW / 2;
-            thumbY = y + 1;
+            thumbY = y;
 
             line.setStart({ (float)thumbX + (thumbW / 2), (float)thumbY });
             line.setEnd({ (float)thumbX + (thumbW / 2), (float)thumbY + thumbH });
@@ -1208,8 +1143,8 @@ public:
         auto thumbColor = slider.findColour(juce::Slider::ColourIds::thumbColourId);
         juce::Rectangle<int> thumb(thumbX, thumbY, thumbW, thumbH);
 
-        juce::DropShadow ds{ juce::Colours::black, dropRad, dropPoint };
-        ds.drawForRectangle(g, thumb/*.withBottom(thumb.getBottom() + 3)*/);
+        //juce::DropShadow ds{ Colors::getDropShadowColor(), dropRad, dropPoint};
+        //ds.drawForRectangle(g, thumb/*.withBottom(thumb.getBottom() + 3)*/);
 
         g.setColour(thumbColor);
         g.fillRoundedRectangle(thumb.toFloat(), cornerSize);

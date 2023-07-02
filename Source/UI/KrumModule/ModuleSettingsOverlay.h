@@ -19,8 +19,6 @@ class KrumModuleEditor;
 * This class represents the overlay that lives on top of the modules when settings are being changed. 
 * Midi and color can be changed from this overlay and it is shown by default when a module is created.  
 * 
-* TODO:
-* - Redeisgn GUI (feels crowded)
 * 
 */
 

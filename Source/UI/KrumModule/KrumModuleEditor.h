@@ -28,11 +28,6 @@
 * This class handles all GUI interaction and painting. 
 * The GUI can enter a ModuleSettingsOverlay state which allows the user to change the midi assignment as well as change the color of the module (redesigned settings menu to come).
 * 
-* TODO:
-* - Redisgn the ModuleSettingsOverlay GUI
-*   - Better Color Pallette
-*   - Should be simple and quick to use
-*   - Icons for buttons?
 * 
 * 
 */
@@ -149,7 +144,7 @@ public:
     bool isMouseOverThumbnail();
     bool thumbnailHitTest(const juce::MouseEvent& mouseEvent);
     void setClipGainSliderVisibility(bool sliderShouldBeVisible);
-    void setPitchSliderVisibility(bool sliderShouldBeVisible);
+    //void setPitchSliderVisibility(bool sliderShouldBeVisible);
 
     bool canThumbnailAcceptFile();
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
@@ -166,8 +161,19 @@ public:
     //tests if the given tree, is the same as this module's moduleTree;
     bool isModuleTree(juce::ValueTree& treeToTest);
 
-    
 private:
+    
+    void reassignSliderAttachment(juce::Slider* sliderToAssign, bool beginGesture = true);
+    void updateSliderFromMultiControl(juce::Slider* sourceSlider);
+    void resetSliderAttachments();
+
+    void reassignButtonAttachment(juce::Button* button, bool beginGesrture);
+    //void updateButtonFromMultiControl(juce::Button* sourceButton);
+    void resetButtonAttachments();
+
+    void reassignComboAttachment(juce::ComboBox* combo, bool beginGesrture);
+    void updateComboFromMultiControl(juce::ComboBox* sourceCombo);
+    void resetComboAttachments();
 
     void toggleMenuButton();
 
@@ -211,14 +217,45 @@ private:
     juce::Colour titleFontColor{ juce::Colours::black };
 
     InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
-    InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
-    //InfoPanelSender <juce::Slider> volumeSlider{ "Module Gain", "Sliders can be double-clicked to zero out, or CMD + click" };
-    InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
-    InfoPanelComboBox outputCombo{ "Output Channel", "Select which output bus you would like this module to go to. Default is Main Bus (1-2)" };
+    
+    class MultiControlSlider : public InfoPanelSlider
+    {
+    public:
+        MultiControlSlider(KrumModuleEditor& e, juce::String title, juce::String message);
+        ~MultiControlSlider() override;
+        
+        //TODO: for multi control, change the slider attachments, and return when done
+        //will probably have to write some functions in the moduleContainer as well
+        void mouseDown(const juce::MouseEvent& e) override;
+        //void mouseDrag(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
+
+
+
+    private:
+        
+        KrumModuleEditor& editor;
+    };
+    
+    //InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
+    //InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
+    MultiControlSlider volumeSlider {*this, "Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
+    MultiControlSlider panSlider {*this, "Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
+    
+    class MultiControlComboBox : public InfoPanelComboBox
+    {
+    public:
+        MultiControlComboBox(KrumModuleEditor& e, juce::String title, juce::String message);
+        ~MultiControlComboBox();
+
+        void mouseDown(const juce::MouseEvent& e) override;
+        void mouseUp(const juce::MouseEvent& e) override;
+    private:
+        KrumModuleEditor& editor;
+    };
+
+    MultiControlComboBox outputCombo{*this, "Output Channel", "Select which output bus you would like this module to go to. Default is Main Bus (1-2)" };
    
-    //InfoPanelSlider pitchSlider{"Pitch Shift", "Change the pitch of this sample in semi-tone increments"};
-    //InfoPanelTextButton reverseButton{"Reverse Button", "Plays the sample in reverse, active when highlighted"};
-    //InfoPanelTextButton muteButton{"Mute", "Mutes this sample from being played."};
 
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -248,8 +285,8 @@ private:
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
                          const bool shouldDrawButtonAsDown) override;
 
-       // void mouseDown(const juce::MouseEvent& event) override;
-       // void mouseUp(const juce::MouseEvent& event) override;
+       void mouseDown(const juce::MouseEvent& event) override;
+       void mouseUp(const juce::MouseEvent& event) override;
         //void mouseEnter(const juce::MouseEvent& e) override;
         //void mouseExit(const juce::MouseEvent& e) override;
 
@@ -308,11 +345,15 @@ private:
         void paint(juce::Graphics& g) override;
 
         void mouseDown(const juce::MouseEvent& e) override;
+        void mouseDrag(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
 
-        //void mouseExit(const juce::MouseEvent& e) override;
+        void mouseEnter(const juce::MouseEvent& e) override;
+        void mouseExit(const juce::MouseEvent& e) override;
+
     private:
         KrumModuleEditor& editor;
+        juce::BubbleMessageComponent bubbleComp{};
     };
 
     PitchSlider pitchSlider{ *this };
@@ -352,7 +393,8 @@ private:
         
         
     };
-    
+
+    //TODO: change these classes to take the Infopanel info in the ctor like the sliders
     MidiLabel midiLabel{*this};
     
     OneShotButton playButton{ *this };
@@ -368,6 +410,8 @@ private:
 
         void paint(juce::Graphics& g) override;
         void resized() override;*/
+        void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
+            const bool shouldDrawButtonAsDown) override;
 
         void mouseDown(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;

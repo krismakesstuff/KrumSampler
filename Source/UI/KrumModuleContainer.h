@@ -103,7 +103,7 @@ public:
     KrumModuleEditor* getActiveModuleEditor(int index);
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
-    void showModulePitchSlider(KrumModuleEditor* moduleEditor);
+    //void showModulePitchSlider(KrumModuleEditor* moduleEditor);
 
     void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
@@ -130,18 +130,33 @@ public:
     void draggingMouseUp(const juce::MouseEvent& event);
     bool isModuleDragging();
 
+    void reassignSelectedSliderAttachments(KrumModuleEditor* sourceEditor, juce::Slider* slider);
+    void updateSlidersIfBeingMultiControlled(KrumModuleEditor* editor, juce::Slider* slider);
+    
+    void reassignSelectedButtonAttachments(KrumModuleEditor* sourceEditor, juce::Button* button);
+    //void updateButtonIfBeingMultiControlled(KrumModuleEditor* editor, juce::Button* button);
+
+    void reassignSelectedComboAttachments(KrumModuleEditor* sourceEditor, juce::ComboBox* comboBox);
+    void updateComboIfBeingMultiControlled(KrumModuleEditor* editor, juce::ComboBox* comboBox);
+
+    //void setSelectedParameterAttachment
+    //TODO: write function for the other attatchment types
+
 private:
 
-    KrumModuleEditor* isMouseDragOverActiveEditor(KrumModuleEditor* eventOrigin ,const juce::MouseEvent& event);
+    KrumModuleEditor* isMouseDragAreaOverActiveEditor(KrumModuleEditor* eventOrigin ,juce::Rectangle<int>& draggedArea);
     
 
     //this will need to support 
     void swapModuleEditorsDisplayIndex(int firstIndex, int secondIndex);
 
+    juce::Rectangle<int> getModulesDraggedArea();
+
     void clearActiveModuleSettingsOverlays();
 
-    void addParamListeners();
-    void removeParamListeners();
+
+    //void addParamListeners();
+    //void removeParamListeners();
     
     void setMultiControlState(bool shouldControl);
     void setModuleSelectedState(KrumModuleEditor* moduleToSelect, bool shouldSelect);
@@ -162,25 +177,29 @@ private:
 
     void timerCallback() override;
 
-    void addModuleParamIDs(KrumModuleEditor* module);
-    void removeModuleParamIDs(KrumModuleEditor* module);
+    //void addModuleParamIDs(KrumModuleEditor* module);
+    //void removeModuleParamIDs(KrumModuleEditor* module);
 
-    bool doesParamIDsContain(const juce::String& paramIDToTest);
+    //bool doesParamIDsContain(const juce::String& paramIDToTest);
 
     //this isn't working as expected, find a way to programmatically set the mod key
     juce::ModifierKeys multiControlModifierKey{juce::ModifierKeys::shiftModifier};
-    juce::StringArray paramIDs{};
+    
+    bool resetParameterAttachments = false;
+    
+    /*juce::StringArray paramIDs{};
 
     struct ParamIDValue
     {
         juce::String paramID{};
         float value{};
-    };
+    };*/
 
-    ParamIDValue nextParamChange{};
-    ParamIDValue sourceParamChange{}; //use this for handling relative slider moves?
+    //ParamIDValue nextParamChange{};
+    //ParamIDValue sourceParamChange{}; //use this for handling relative slider moves?
 
-    bool applyNextParamChange = false;
+    /*bool applyNextParamChange = false;
+    bool applyingParamChange = false;*/
     //ParamIDValue ParamChange{};
 
     void loadMidiToModulesListening(int channel, int note);
@@ -213,8 +232,10 @@ private:
 
     // need to consider multi-selection
     juce::ComponentBoundsConstrainer* moduleEditorConstrainer = nullptr;
-    bool moduleDragging = false;
-    KrumModuleEditor* currentEditorDragging = nullptr;
+    bool moduleBeingDragged = false;
+    KrumModuleEditor* editorBeingDragged = nullptr;
+
+    bool modulesSwapping = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KrumModuleContainer)
 

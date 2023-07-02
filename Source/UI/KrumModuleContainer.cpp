@@ -30,13 +30,15 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner,
     //moduleEditorConstrainer->setBoundsForComponent()
 
     refreshModuleLayout();
+
+
     startTimerHz(30);
         
 }
 
 KrumModuleContainer::~KrumModuleContainer()
 {
-    currentEditorDragging = nullptr;
+    editorBeingDragged = nullptr;
     pluginEditor->removeKeyboardListener(this);
     pluginEditor->removeKeyListener(this);
     valueTree.removeListener(this);
@@ -77,8 +79,22 @@ void KrumModuleContainer::refreshModuleLayout()
     for (int i = 0; i < numModules; i++)
     {
         auto modEd = activeModuleEditors[i];
+
+        //we don't want to reposition as the draggerComponent is handling in this case
+        //if (isModuleDragging())
+        //{
+        //    if (modEd != editorBeingDragged)
+        //    {
+        //        modEd->setTopLeftPosition(((modEd->getModuleDisplayIndex() * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage()), EditorDimensions::shrinkage); //set position based off of stored index
+        //    }
+        //}
+        //else
+        //{
+        //    modEd->setTopLeftPosition(((modEd->getModuleDisplayIndex() * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage()), EditorDimensions::shrinkage); //set position based off of stored index
+        //}
         modEd->setTopLeftPosition(((modEd->getModuleDisplayIndex() * EditorDimensions::moduleW) + EditorDimensions::extraShrinkage()), EditorDimensions::shrinkage); //set position based off of stored index
-        DBG("Module Editor " + juce::String(modEd->getModuleDisplayIndex()) +" set position to: " + juce::String(modEd->getBoundsInParent().toString()));
+
+        //DBG("Module Editor " + juce::String(modEd->getModuleDisplayIndex()) +" set position to: " + juce::String(modEd->getBoundsInParent().toString()));
     }
 
 }
@@ -101,7 +117,7 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
     else if (property == juce::Identifier(TreeIDs::moduleDisplayIndex.getParamID()))
     {
         //all other cases we don't want to refresh layout
-        if (currentEditorDragging && currentEditorDragging != getEditorFromDisplayIndex(treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex.getParamID())))
+        if (editorBeingDragged && editorBeingDragged != getEditorFromDisplayIndex(treeWhoChanged.getProperty(TreeIDs::moduleDisplayIndex.getParamID())))
         {
             refreshModuleLayout();
         }
@@ -135,19 +151,24 @@ void KrumModuleContainer::parameterChanged(const juce::String& parameterID, floa
     //are we changing a parameter that is from our moduleEditor &&
     //the sourceParamChange.paramID has not been assigned
 
-    if (isMultiControlActive() && doesParamIDsContain(parameterID) && sourceParamChange.paramID.isEmpty())
-    {
-        //we take note of which paramID caused this callback
-        sourceParamChange.paramID = parameterID;
-        
-        //set the data to be applied to the other selected Modules
-        nextParamChange.paramID = parameterID;
-        nextParamChange.value = newValue;
+    //if (applyingParamChange)
+    //    return;
 
-        //this tells the timer callback to get the data from nextParaChange, which we set above. see timerCallback()
-        applyNextParamChange = true;
+    //if (isMultiControlActive() && doesParamIDsContain(parameterID) && nextParamChange.paramID.isEmpty())
+    //{
+    //    //we take note of which paramID caused this callback
+    //    //sourceParamChange.paramID = parameterID;
+    //    
+    //    //set the data to be applied to the other selected Modules
+    //    nextParamChange.paramID = parameterID;
+    //    nextParamChange.value = newValue;
 
-    }
+    //    //this tells the timer callback to get the data from nextParaChange, which we set above. see timerCallback()
+    //    applyNextParamChange = true;
+    //    applyParameterChangeToSelectedModules(parameterID, newValue);
+    //    
+    //    //applyNextParamChange = true;
+    //}
 }
 
 //
@@ -157,8 +178,6 @@ void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
     deselectAllModules();
     clearActiveModuleSettingsOverlays();
     
-
-
 }
 //
 bool KrumModuleContainer::keyPressed(const juce::KeyPress& key, juce::Component* ogComp)
@@ -309,7 +328,8 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
 
 void KrumModuleContainer::setModuleSelectedFromClick(KrumModuleEditor* moduleToSelect, bool setSelected, const juce::MouseEvent& e)
 {
-
+    //TODO: change these use the ModifierKeys so it can be a global setting
+    //I also think I can get rid of the mouse event?
     bool shiftDown = e.mods.isShiftDown();
     bool cmdDown = e.mods.isCommandDown();
     bool multControl = isMultiControlActive();
@@ -354,19 +374,18 @@ void KrumModuleContainer::setModuleSelectedState(KrumModuleEditor* moduleToSelec
     if (shouldSelect)
     {
         currentlySelectedModules.add(moduleToSelect);
-        addModuleParamIDs(moduleToSelect);
+       // addModuleParamIDs(moduleToSelect);
     }
     else
     {
         currentlySelectedModules.removeObject(moduleToSelect, false);
-        removeModuleParamIDs(moduleToSelect);
+        //removeModuleParamIDs(moduleToSelect);
     }
 
 }
 
 void KrumModuleContainer::deselectAllModules()
 {
-    
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
         setModuleSelectedState(activeModuleEditors[i], false);
@@ -374,8 +393,13 @@ void KrumModuleContainer::deselectAllModules()
     
     //this is redundant, shoul be an assertion?
     currentlySelectedModules.clear(false);
-    paramIDs.clear();
-    DBG("ParamIDs cleared, size: " + paramIDs.size());
+    
+    if (resetParameterAttachments)
+    {
+        //reassignSelectedSliderAttachments(nullptr, nullptr);
+    }
+    //paramIDs.clear();
+    //DBG("ParamIDs cleared, size: " + paramIDs.size());
 }
 
 //selects the modules between your last selected module to the newly selected module
@@ -427,7 +451,7 @@ void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* mo
     }
 
     //this assumes the shift key was down in order for this function to get called
-    addParamListeners();
+    //addParamListeners();
 
 }
 
@@ -470,6 +494,8 @@ void KrumModuleContainer::applyValueTreeChangesToSelectedModules(juce::ValueTree
 
 void KrumModuleContainer::applyParameterChangeToSelectedModules(const juce::String& parameterID, float newValue)
 {
+    //applyingParamChange = true;
+
     auto apvts = pluginEditor->getParameters();
     juce::String moduleSamplerIndex{};
 
@@ -496,6 +522,7 @@ void KrumModuleContainer::applyParameterChangeToSelectedModules(const juce::Stri
             //apvts->state.setProperty({ newParamString }, newValue, nullptr);
             //apvts->getParameter(newParamString)->beginChangeGesture();
             apvts->getParameter(newParamString)->setValueNotifyingHost(newValue);
+            //apvts->getParameter(newParamString)->setValue(newValue);
             //apvts->getParameter(newParamString)->endChangeGesture();
 
             DBG("newParamString = " + newParamString);
@@ -503,6 +530,8 @@ void KrumModuleContainer::applyParameterChangeToSelectedModules(const juce::Stri
             
         }
     }
+
+    //applyingParamChange = false;
 
 }
 
@@ -639,20 +668,20 @@ void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEdito
     moduleEditor->setClipGainSliderVisibility(true);
 }
 
-void KrumModuleContainer::showModulePitchSlider(KrumModuleEditor* moduleEditor)
-{
-    //clears all pitchsliders
-    for (int i = 0; i < activeModuleEditors.size(); i++)
-    {
-        auto modEd = activeModuleEditors.getUnchecked(i);
-        if (modEd != nullptr && modEd != moduleEditor)
-        {
-            modEd->setPitchSliderVisibility(false);
-        }
-    }
-
-    moduleEditor->setPitchSliderVisibility(true);
-}
+//void KrumModuleContainer::showModulePitchSlider(KrumModuleEditor* moduleEditor)
+//{
+//    //clears all pitchsliders
+//    for (int i = 0; i < activeModuleEditors.size(); i++)
+//    {
+//        auto modEd = activeModuleEditors.getUnchecked(i);
+//        if (modEd != nullptr && modEd != moduleEditor)
+//        {
+//            modEd->setPitchSliderVisibility(false);
+//        }
+//    }
+//
+//    moduleEditor->setPitchSliderVisibility(true);
+//}
 
 void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
 {
@@ -694,16 +723,18 @@ void KrumModuleContainer::timerCallback()
     }
 
     //for multi-control selection 
-    if (applyNextParamChange)
-    {
-        applyParameterChangeToSelectedModules(nextParamChange.paramID, nextParamChange.value);
+    //if (applyNextParamChange)
+    //{
+    //    applyParameterChangeToSelectedModules(nextParamChange.paramID, nextParamChange.value);
+    //    //repaintAllSelectedModules();
+    //    nextParamChange = ParamIDValue{};
+    //    //sourceParamChange = ParamIDValue{};
 
-        nextParamChange = ParamIDValue{};
-        sourceParamChange = ParamIDValue{};
+    //    applyNextParamChange = false;
 
-        applyNextParamChange = false;
+    //}
 
-    }
+
 
     if (applyMidi)
     {
@@ -711,7 +742,7 @@ void KrumModuleContainer::timerCallback()
         applyMidi = false;
     }
 
-    if (moduleDragging)
+    if (moduleBeingDragged)
     {
 
     }
@@ -830,11 +861,12 @@ void KrumModuleContainer::setMultiControlState(bool shouldControl)
 
         if (shouldControl)
         {
-            addParamListeners();
+            //addParamListeners();
         }
         else
         {
-            removeParamListeners();
+            //removeParamListeners();
+
         }
 
         repaintAllSelectedModules();
@@ -842,91 +874,139 @@ void KrumModuleContainer::setMultiControlState(bool shouldControl)
 
 }
 
-void KrumModuleContainer::addParamListeners()
+//TODO: rewrite a function for each type of attachment to take in the slider or button or combo box
+//if sourceEditor is null, it will reset the selected Modules Attachments to it's own parameters
+void KrumModuleContainer::reassignSelectedSliderAttachments(KrumModuleEditor* sourceEditor, juce::Slider* slider)
 {
-    for (int i = 0; i < paramIDs.size(); i++)
+    auto& apvts = *getAPVTS();
+
+    if (sourceEditor == nullptr)
     {
-        pluginEditor->getParameters()->addParameterListener(paramIDs[i], this);
-    }
-    DBG("ParamListenersAdded");
-}
-
-void KrumModuleContainer::removeParamListeners()
-{
-    for (int i = 0; i < paramIDs.size(); i++)
-    {
-        pluginEditor->getParameters()->removeParameterListener(paramIDs[i], this);
-    }
-    DBG("ParamListenersRemoved");
-
-}
-
-void KrumModuleContainer::addModuleParamIDs(KrumModuleEditor* module)
-{
-    if (module)
-    {
-        //juce::String index = juce::String(module->getModuleSamplerIndex());
-        juce::String index = module->getSamplerIndexString();
-
-        paramIDs.add(TreeIDs::paramModuleGain.getParamID() + index);
-        paramIDs.add(TreeIDs::paramModuleClipGain.getParamID() + index);
-        paramIDs.add(TreeIDs::paramModulePan.getParamID() + index);
-        paramIDs.add(TreeIDs::paramModuleOutputChannel.getParamID() + index);
-        paramIDs.add(TreeIDs::paramModulePitchShift.getParamID() + index);
-        paramIDs.add(TreeIDs::paramModuleReverse.getParamID() + index);
-        paramIDs.add(TreeIDs::paramModuleMute.getParamID() + index);
-        
-        DBG("ParamIDs loaded from module at SamplerIndex: " + index);
-    }
-
-
-    /*for (int i = 0; i < paramIDs.size(); i++)
-    {
-        DBG("paramID[" + juce::String(i) + "] = " + paramIDs[i]);
-    }*/
-
-}
-
-void KrumModuleContainer::removeModuleParamIDs(KrumModuleEditor* module)
-{
-    if (module)
-    {
-        juce::String index = module->getSamplerIndexString();
-        //juce::String index = juce::String(module->getModuleSamplerIndex());
-
-        paramIDs.removeString(TreeIDs::paramModuleGain.getParamID() + index);
-        paramIDs.removeString(TreeIDs::paramModuleClipGain.getParamID() + index);
-        paramIDs.removeString(TreeIDs::paramModulePan.getParamID() + index);
-        paramIDs.removeString(TreeIDs::paramModuleOutputChannel.getParamID() + index);
-        paramIDs.removeString(TreeIDs::paramModulePitchShift.getParamID() + index);
-        paramIDs.removeString(TreeIDs::paramModuleReverse.getParamID() + index);
-        paramIDs.removeString(TreeIDs::paramModuleMute.getParamID() + index);
-
-        DBG("ParamIDs removed for module at SamplerIndex: " + index);
-
-    }
-
-
-    /*for (int i = 0; i < paramIDs.size(); i++)
-    {
-        DBG("paramID[" + juce::String(i) + "] = " + paramIDs[i]);
-    }*/
-
-}
-
-bool KrumModuleContainer::doesParamIDsContain(const juce::String& paramIDToTest)
-{
-    for (int i = 0; i < paramIDs.size(); i++)
-    {
-        if (paramIDs[i] == paramIDToTest)
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
         {
-            return true;
+            auto mod = currentlySelectedModules[i];
+            if (mod != sourceEditor)
+            {
+                mod->resetSliderAttachments();
+            }
+        }
+
+        resetParameterAttachments = false;
+    }
+    else
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            auto mod = currentlySelectedModules[i];
+            if (mod != sourceEditor)
+            {
+                mod->reassignSliderAttachment(slider, true);
+            }
+        }
+
+        resetParameterAttachments = true;
+    }
+
+}
+
+
+void KrumModuleContainer::updateSlidersIfBeingMultiControlled(KrumModuleEditor* editor, juce::Slider* slider)
+{
+    if (isMultiControlActive() && editor->isModuleSelected())
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            auto mod = currentlySelectedModules[i];
+            if (editor != mod)
+            {
+                mod->updateSliderFromMultiControl(slider);
+            }
         }
     }
+}
 
-    return false;
+void KrumModuleContainer::reassignSelectedButtonAttachments(KrumModuleEditor* sourceEditor, juce::Button* button)
+{
+    auto& apvts = *getAPVTS();
+
+    if (sourceEditor == nullptr)
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            auto mod = currentlySelectedModules[i];
+            if (mod != sourceEditor)
+            {
+                mod->resetButtonAttachments();
+            }
+        }
+
+        resetParameterAttachments = false;
+    }
+    else
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            auto mod = currentlySelectedModules[i];
+            if (mod != sourceEditor)
+            {
+                mod->reassignButtonAttachment(button, false);
+            }
+        }
+
+        resetParameterAttachments = true;
+    }
 
 }
+
+void KrumModuleContainer::reassignSelectedComboAttachments(KrumModuleEditor* sourceEditor, juce::ComboBox* comboBox)
+{
+    auto& apvts = *getAPVTS();
+
+    if (sourceEditor == nullptr)
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            auto mod = currentlySelectedModules[i];
+            if (mod != sourceEditor)
+            {
+                mod->resetComboAttachments();
+            }
+        }
+
+        resetParameterAttachments = false;
+    }
+    else
+    {
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            auto mod = currentlySelectedModules[i];
+            if (mod != sourceEditor)
+            {
+                mod->reassignComboAttachment(comboBox, false);
+            }
+        }
+
+        resetParameterAttachments = true;
+    }
+
+}
+
+void KrumModuleContainer::updateComboIfBeingMultiControlled(KrumModuleEditor* sourceEditor, juce::ComboBox* comboBox)
+{
+    if (isMultiControlActive() && sourceEditor->isModuleSelected())
+    {
+
+        for (int i = 0; i < currentlySelectedModules.size(); i++)
+        {
+            auto mod = currentlySelectedModules[i];
+            if (mod != sourceEditor)
+            {
+                mod->updateComboFromMultiControl(comboBox);
+            }
+        }
+    }
+}
+
 
 juce::ModifierKeys KrumModuleContainer::getMultiControlModifierKey()
 {
@@ -1054,24 +1134,39 @@ void KrumModuleContainer::startDraggingEditor(KrumModuleEditor* editorToDrag, co
     else
     {
         dragger.startDraggingComponent(editorToDrag, event);
-        currentEditorDragging = editorToDrag;
+        editorBeingDragged = editorToDrag;
     }
-
-    
 }
 
 void KrumModuleContainer::dragEditor(KrumModuleEditor* editorToDrag, const juce::MouseEvent& event)
 {
-    moduleDragging = true;
+    moduleBeingDragged = true;
     //this needs to handle moving the modules around underneath this one based off of the mouse position
     
-
     //conastrain the events y value.
     auto newEvent = event.withNewPosition(juce::Point<int>(event.position.getX(), event.getMouseDownPosition().getY()));
     dragger.dragComponent(editorToDrag, newEvent, moduleEditorConstrainer);
     
+   
+    auto viewport = pluginEditor->getModuleViewport();
+    auto mousePos = event.getEventRelativeTo(viewport).getPosition();
+    int borderThickness = 50;
+    int scrollAmount = 20;
+    int repeatMillis = 30;
+
+    if (viewport->autoScroll(mousePos.getX(), mousePos.getY(), borderThickness, scrollAmount))
+    {
+        beginDragAutoRepeat(repeatMillis);
+        //DBG("mouseX = " + juce::String(mousePos.getX()));
+    }
+
+
     //if mousePosition is over a component, which side of the comp is it on? You can change this range to fine tune dragging feel
-    auto mod = isMouseDragOverActiveEditor(editorToDrag, event.getEventRelativeTo(this));
+
+    auto draggedArea = getModulesDraggedArea();
+
+    auto mod = isMouseDragAreaOverActiveEditor(editorToDrag, draggedArea);
+
     if (mod != nullptr)
     {
         if (editorToDrag->isModuleSelected() && isMultiControlActive())
@@ -1085,12 +1180,16 @@ void KrumModuleContainer::dragEditor(KrumModuleEditor* editorToDrag, const juce:
 
             auto e = event.getEventRelativeTo(mod);
             int displayIndex = mod->getModuleDisplayIndex();
+            int endPadding = mod->getWidth() * 0.3f;
+            auto mouseXY = mod->getMouseXYRelative();
 
-            if (mod->getMouseXYRelative().getX() < (mod->getWidth() / 2))
+
+            //if (mod->getMouseXYRelative().getX() < (mod->getWidth() / 2))
+            if (mouseXY.getX() < endPadding)
             {
-                swapModuleEditorsDisplayIndex(displayIndex -1, displayIndex);
+                swapModuleEditorsDisplayIndex(displayIndex - 1, displayIndex);
             }
-            else
+            else if(mouseXY.getX() > mod->getWidth() - endPadding)
             {
                 swapModuleEditorsDisplayIndex(displayIndex, displayIndex + 1);
             }
@@ -1105,18 +1204,24 @@ void KrumModuleContainer::dragEditor(KrumModuleEditor* editorToDrag, const juce:
         
         //pluginEditor->getModuleViewport()->setViewPosition(pluginEditor->getMouseXYRelative());
         
+
+
         
         //DBG("NULL-----");
         //this means the mouse is in between components, maybe draw something?
     }
 }
 
-KrumModuleEditor* KrumModuleContainer::isMouseDragOverActiveEditor(KrumModuleEditor* eventOrigin, const juce::MouseEvent& event)
+KrumModuleEditor* KrumModuleContainer::isMouseDragAreaOverActiveEditor(KrumModuleEditor* eventOrigin, juce::Rectangle<int>& draggedArea)
 {
+    //TODO: 
+    //figure out the interaction you want. It currently is not doing what the function says it does
+    //lets try to find out if the dragged area is over 2 modules, should we return index instead? 
+
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
         auto mod = activeModuleEditors[i];
-        if (mod != eventOrigin && mod->contains(mod->getMouseXYRelative()))
+        if (mod != eventOrigin && mod->contains(mod->getMouseXYRelative())/*!mod->isModuleSelected() && draggedArea.contains(mod->getBounds()*/)
         {
             return mod;
         }
@@ -1132,34 +1237,86 @@ void KrumModuleContainer::swapModuleEditorsDisplayIndex(int firstIndex, int seco
     auto firstMod = getEditorFromDisplayIndex(firstIndex);
     auto secondMod = getEditorFromDisplayIndex(secondIndex);
 
+    if (firstMod == nullptr || secondMod == nullptr)
+        return;
 
-    firstMod->setModuleDisplayIndex(secondIndex);
-    secondMod->setModuleDisplayIndex(firstIndex);
+    //not sure if this logic is working. I'm trying to make sure they get swapped correctly depending on which you are dragging. It still sometimes changes an extra module. 
+    if (firstIndex > secondIndex)
+    {
+        secondMod->setModuleDisplayIndex(firstIndex, false);
+        firstMod->setModuleDisplayIndex(secondIndex, false);
 
+    }
+    else
+    {
+        firstMod->setModuleDisplayIndex(secondIndex, false);
+        secondMod->setModuleDisplayIndex(firstIndex, false);
+    }
+
+}
+
+juce::Rectangle<int> KrumModuleContainer::getModulesDraggedArea()
+{
+
+    juce::Rectangle<int> retRect{};
+
+    if (moduleBeingDragged && editorBeingDragged != nullptr)
+    {
+        if (isMultiControlActive())
+        {
+            for (int i = 0; i < currentlySelectedModules.size(); i++)
+            {
+                auto mod = currentlySelectedModules[i];
+                auto bounds = mod->getBoundsInParent();
+                if (retRect.isEmpty())
+                {
+                    retRect.setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+                }
+                else
+                {
+                    if (bounds.getX() < retRect.getX())
+                    {
+                        retRect.setX(bounds.getX());
+                    }
+
+                    if (bounds.getRight() > retRect.getRight())
+                    {
+                        retRect.setRight(bounds.getRight());
+                    }
+
+                }
+            }
+
+        }
+        else
+        {
+            retRect = editorBeingDragged->getBoundsInParent();
+        }
+
+    }
+
+    return retRect;
 
 }
 
 bool KrumModuleContainer::isModuleDragging()
 {
-    return moduleDragging;
+    return moduleBeingDragged;
 }
 
 void KrumModuleContainer::draggingMouseUp(const juce::MouseEvent& event)
 {
-    if (moduleDragging)
+    if (moduleBeingDragged)
     {
-        moduleDragging = false;
+        moduleBeingDragged = false;
         refreshModuleLayout();
     }
 
-    if (currentEditorDragging)
+    if (editorBeingDragged)
     {
-        currentEditorDragging = nullptr;
+        editorBeingDragged = nullptr;
     }
 }
 
 //===================================================================================================================================
 //===================================================================================================================================
-
-
-
