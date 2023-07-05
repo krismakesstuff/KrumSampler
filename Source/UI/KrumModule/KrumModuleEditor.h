@@ -224,23 +224,13 @@ private:
         MultiControlSlider(KrumModuleEditor& e, juce::String title, juce::String message);
         ~MultiControlSlider() override;
         
-        //TODO: for multi control, change the slider attachments, and return when done
-        //will probably have to write some functions in the moduleContainer as well
         void mouseDown(const juce::MouseEvent& e) override;
-        //void mouseDrag(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
-
-
 
     private:
         
         KrumModuleEditor& editor;
     };
-    
-    //InfoPanelSlider volumeSlider {"Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
-    //InfoPanelSlider panSlider {"Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
-    MultiControlSlider volumeSlider {*this, "Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
-    MultiControlSlider panSlider {*this, "Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
     
     class MultiControlComboBox : public InfoPanelComboBox
     {
@@ -254,8 +244,9 @@ private:
         KrumModuleEditor& editor;
     };
 
+    MultiControlSlider volumeSlider {*this, "Module Gain", "Sliders can be double-clicked to zero out, or CMD + click"};
+    MultiControlSlider panSlider {*this, "Module Pan", "Sliders can be double-clicked to zero out, or CMD + click"};
     MultiControlComboBox outputCombo{*this, "Output Channel", "Select which output bus you would like this module to go to. Default is Main Bus (1-2)" };
-   
 
     typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -268,7 +259,6 @@ private:
     std::unique_ptr<SliderAttachment> pitchSliderAttachment;
     std::unique_ptr<ButtonAttachment> reverseButtonAttachment;
     std::unique_ptr<ButtonAttachment> muteButtonAttachment;
-    
 
     DragAndDropThumbnail thumbnail;
     TimeHandle timeHandle;
@@ -279,7 +269,7 @@ private:
     class CustomToggleButton : public InfoPanelTextButton
     {
     public:
-        CustomToggleButton(juce::String title, juce::String message, KrumModuleEditor& editor);
+        CustomToggleButton(KrumModuleEditor& editor, juce::String title, juce::String message);
         ~CustomToggleButton() override;
 
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
@@ -287,8 +277,6 @@ private:
 
        void mouseDown(const juce::MouseEvent& event) override;
        void mouseUp(const juce::MouseEvent& event) override;
-        //void mouseEnter(const juce::MouseEvent& e) override;
-        //void mouseExit(const juce::MouseEvent& e) override;
 
     private:
         KrumModuleEditor& editor;
@@ -296,15 +284,13 @@ private:
 
     void muteButtonClicked();
 
-    CustomToggleButton reverseButton{ "Reverse Button", "Plays the sample in reverse, active when highlighted", *this };
-    CustomToggleButton muteButton{ "Mute", "Mutes this sample from being played.", *this };
-
-    //KComp<juce::TextButton> muteButton {"Mute", "Mutes this sample from being played.", "M"};
+    CustomToggleButton reverseButton{ *this, "Reverse Button", "Plays the sample in reverse, active when highlighted" };
+    CustomToggleButton muteButton{ *this, "Mute", "Mutes this sample from being played." };
 
     class OneShotButton : public InfoPanelDrawableButton
     {
     public:
-        OneShotButton(KrumModuleEditor&);
+        OneShotButton(KrumModuleEditor&, juce::String title, juce::String message);
         ~OneShotButton() override;
 
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
@@ -322,7 +308,7 @@ private:
     class MenuButton : public InfoPanelDrawableButton
     {
     public:
-        MenuButton(KrumModuleEditor& e);
+        MenuButton(KrumModuleEditor& e, juce::String title, juce::String message);
         ~MenuButton() override;
 
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
@@ -339,7 +325,7 @@ private:
     class PitchSlider : public InfoPanelSlider
     {
     public:
-        PitchSlider(KrumModuleEditor& editor);
+        PitchSlider(KrumModuleEditor& editor, juce::String title, juce::String message);
         ~PitchSlider();
 
         void paint(juce::Graphics& g) override;
@@ -356,30 +342,22 @@ private:
         juce::BubbleMessageComponent bubbleComp{};
     };
 
-    PitchSlider pitchSlider{ *this };
-    //PitchButton pitchButton{  *this };
-    
+    PitchSlider pitchSlider{ *this, "Module Pitch", "Click and Drag to shift the pitch by semi-tones, double-click to go back to zero" };
+
     class MidiLabel :   public InfoPanelComponent,
                         public juce::SettableTooltipClient
     {
     public:
-        MidiLabel(KrumModuleEditor& parentEditor);
+        MidiLabel(KrumModuleEditor& parentEditor, juce::String title, juce::String message);
         ~MidiLabel() override;
         
         void paint(juce::Graphics& g) override;
-        //juce::String getTooltip() override;
-        //void setStrings(juce::String note, juce::String channel);
-        //void mouseEnter(const juce::MouseEvent& e) override;
-        //void mouseExit(const juce::MouseEvent& e) override;
-
-        
+  
         void mouseDown(const juce::MouseEvent& e) override;
         void mouseUp(const juce::MouseEvent& e) override;
         
         juce::String noteNumber;
         juce::String channelNumber;
-
-        //static void handleResult(int result, MidiLabel* label);
 
         bool isListeningForMidi();
         void setListeningForMidi(bool shouldListen);
@@ -394,22 +372,16 @@ private:
         
     };
 
-    //TODO: change these classes to take the Infopanel info in the ctor like the sliders
-    MidiLabel midiLabel{*this};
-    
-    OneShotButton playButton{ *this };
-    MenuButton menuButton { *this};
+    MidiLabel midiLabel{*this,"Midi Label", "Displays the current Midi Note assignment, right click to learn a new key" };
+    OneShotButton playButton{ *this, "One Shot", "Plays the currently assigned sample" };
+    MenuButton menuButton { *this, "Settings", "Provides a list of actions to change the settings of the module" };
     
     class DragHandle : public InfoPanelDrawableButton
     {
     public:
-        DragHandle(KrumModuleEditor& parentEditor);
+        DragHandle(KrumModuleEditor& parentEditor, juce::String title, juce::String message);
         ~DragHandle() override;
 
-        /*void setImage(juce::Drawable* newImage);
-
-        void paint(juce::Graphics& g) override;
-        void resized() override;*/
         void paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted,
             const bool shouldDrawButtonAsDown) override;
 
@@ -421,7 +393,7 @@ private:
         KrumModuleEditor& moduleEditor;
     };
 
-    DragHandle dragHandle{ *this };
+    DragHandle dragHandle{ *this,"Drag Handle", "Click to select/deselect module. Click and drag to move module." };
     
     std::unique_ptr<ModuleSettingsOverlay> settingsOverlay = nullptr;
     

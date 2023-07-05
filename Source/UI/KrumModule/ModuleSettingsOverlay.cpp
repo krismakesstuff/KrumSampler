@@ -102,11 +102,16 @@ void ModuleSettingsOverlay::mouseExit(const juce::MouseEvent& e)
 
 void ModuleSettingsOverlay::colorButtonClicked(juce::Colour newColor)
 {
-    if (parentEditor.getModuleColor() == Colors::getModuleDefaultColor() && newColor != Colors::getModuleDefaultColor())
+    /*if (parentEditor.getModuleColor() == Colors::getModuleDefaultColor() && newColor != Colors::getModuleDefaultColor())
     {
         parentEditor.hideSettingsOverlay();
-    }
+    }*/
     
+    if (parentEditor.isModuleSelected() && parentEditor.moduleContainer.isMultiControlActive())
+    {
+        parentEditor.moduleContainer.setSelectedModulesColor(&parentEditor, newColor);
+    }
+
     parentEditor.setModuleColor(newColor);
     
 
@@ -124,7 +129,14 @@ void ModuleSettingsOverlay::cancelButtonClicked()
 
 void ModuleSettingsOverlay::deleteButtonClicked()
 {
+
+    if (parentEditor.isModuleSelected() && parentEditor.moduleContainer.isMultiControlActive())
+    {
+        parentEditor.moduleContainer.setSelectedModulesState(&parentEditor, (int)KrumModule::ModuleState::empty);
+    }
+
     parentEditor.setModuleState(KrumModule::ModuleState::empty);
+
 }
 
 

@@ -22,10 +22,6 @@ ColorPalette::ColorPalette(ModuleSettingsOverlay& pm)
     setInterceptsMouseClicks(false, true);
     setPaintingIsUnclipped(true);
 
-    //auto colorArray = ColorPaletteColors::getColorArray();
-    //ColorPaletteColors::addColorsToColorArray();
-
-
     for (int i = 0; i < ColorPaletteColors::colorArray.size(); i++)
     {
         auto color = ColorPaletteColors::colorArray[i];

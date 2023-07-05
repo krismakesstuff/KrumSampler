@@ -2441,6 +2441,7 @@ void KrumFileBrowser::resized()
 
 }
 
+
 int KrumFileBrowser::getNumSelectedItems(BrowserSections section)
 {
     if (section == BrowserSections::recent)
@@ -2532,6 +2533,7 @@ SimpleAudioPreviewer* KrumFileBrowser::getAudioPreviewer()
 void KrumFileBrowser::assignModuleContainer(KrumModuleContainer* container)
 {
     favoritesTreeView.assignModuleContainer(container);
+    moduleContainer = container;
 }
 
 void KrumFileBrowser::buildDemoKit()

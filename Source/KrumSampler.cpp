@@ -488,11 +488,6 @@ void KrumSampler::initVoices()
 void KrumSampler::setSampleRate(double newSampleRate)
 {
     setCurrentPlaybackSampleRate(newSampleRate);
-
-    /*for (int i = 0; i < voices.size(); i++)
-    {
-        voices[i]->setCurrentPlaybackSampleRate(newSampleRate);
-    }*/
 }
 
 void KrumSampler::noteOn(const int midiChannel, const int midiNoteNumber, const float velocity) 

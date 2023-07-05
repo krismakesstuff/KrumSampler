@@ -34,7 +34,6 @@ class KrumModuleContainer : public juce::Component,
                             public juce::Timer,
                             public juce::MidiKeyboardStateListener,
                             public juce::ValueTree::Listener,
-                            public juce::AudioProcessorValueTreeState::Listener,
                             public juce::KeyListener
 {
 public:
@@ -49,17 +48,7 @@ public:
     
     //valueTreeListener
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
-    //APVTS Listener
-    void parameterChanged(const juce::String& parameterID, float newValue) override;
-    
-    //Slider Listener
-    //void sliderValueChanged(juce::Slider* slider) override;
-    //ComboBoxListener
-    //void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
-    //Button::Listener
-    //void buttonClicked(juce::Button* buttonClicked) override;
-    //void buttonStateChanged(juce::Button* buttonChanged) override;
-    //Mouse Listener
+
     void mouseDown(const juce::MouseEvent& event) override;
 
     //Key Listener
@@ -89,6 +78,9 @@ public:
     void setSettingsOverlayOnSelectedModules(bool show, KrumModuleEditor* eventOrigin);
     void clickOneShotOnSelectedModules(const juce::MouseEvent& mouseDownEvent, KrumModuleEditor* eventOrigin, bool mouseDown);
 
+    void setSelectedModulesState(KrumModuleEditor* eventOrigin, int newState);
+    void setSelectedModulesColor(KrumModuleEditor* eventOrigin, juce::Colour newColor);
+
     //void sendMouseEventToSelectedComponents(juce::Component* compToExlcude, const juce::MouseEvent& event);
     void setListeningForMidiOnSelectedModules(bool shouldListen, KrumModuleEditor* originComp);
 
@@ -98,17 +90,14 @@ public:
     juce::OwnedArray<KrumModuleEditor>& getActiveModuleEditors();
     
     int getNumActiveModules();
-    //int getNumModuleEditors();
     int getNumEmptyModules();
     KrumModuleEditor* getActiveModuleEditor(int index);
 
     void showModuleClipGainSlider(KrumModuleEditor* moduleEditor);
-    //void showModulePitchSlider(KrumModuleEditor* moduleEditor);
 
     void showModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
     void hideModuleCanAcceptFile(KrumModuleEditor* moduleEditor);
 
-    //void showFirstEmptyModule();
     void createModuleEditors();
 
     void setMultiControlModifierKey(juce::ModifierKeys::Flags newModKeyFlag);
@@ -120,8 +109,8 @@ public:
     KrumModuleEditor* getEditorFromDisplayIndex(int displayIndex);
     juce::AudioProcessorValueTreeState* getAPVTS();
 
-    bool handleNewFile(juce::ValueTree fileTree);
-    bool handleNewExternalFile(juce::String fullPathName);
+    KrumModuleEditor* handleNewFile(juce::ValueTree fileTree);
+    KrumModuleEditor* handleNewExternalFile(juce::String fullPathName);
 
     void startDraggingEditor(KrumModuleEditor* editorToDrag, const juce::MouseEvent& event);
     void dragEditor(KrumModuleEditor* editorToDrag, const juce::MouseEvent& event);
@@ -134,21 +123,16 @@ public:
     void updateSlidersIfBeingMultiControlled(KrumModuleEditor* editor, juce::Slider* slider);
     
     void reassignSelectedButtonAttachments(KrumModuleEditor* sourceEditor, juce::Button* button);
-    //void updateButtonIfBeingMultiControlled(KrumModuleEditor* editor, juce::Button* button);
 
     void reassignSelectedComboAttachments(KrumModuleEditor* sourceEditor, juce::ComboBox* comboBox);
     void updateComboIfBeingMultiControlled(KrumModuleEditor* editor, juce::ComboBox* comboBox);
 
-    //void setSelectedParameterAttachment
-    //TODO: write function for the other attatchment types
 
 private:
 
     KrumModuleEditor* isMouseDragAreaOverActiveEditor(KrumModuleEditor* eventOrigin ,juce::Rectangle<int>& draggedArea);
     
-
-    //this will need to support 
-    void swapModuleEditorsDisplayIndex(int firstIndex, int secondIndex);
+    void swapModuleEditorsDisplayIndex(int firstIndex, int secondIndex, bool forward);
 
     juce::Rectangle<int> getModulesDraggedArea();
 
@@ -160,6 +144,9 @@ private:
     
     void setMultiControlState(bool shouldControl);
     void setModuleSelectedState(KrumModuleEditor* moduleToSelect, bool shouldSelect);
+    
+    //meant to be used in loading the state only
+    void loadSelectedModules();
     
     KrumModuleEditor* addModuleEditor(KrumModuleEditor* moduleToAdd, int indexToInsert = -1, bool refreshLayout = true);
 
@@ -177,30 +164,13 @@ private:
 
     void timerCallback() override;
 
-    //void addModuleParamIDs(KrumModuleEditor* module);
-    //void removeModuleParamIDs(KrumModuleEditor* module);
-
-    //bool doesParamIDsContain(const juce::String& paramIDToTest);
+    //void focusLost(juce::Component::FocusChangeType cause) override;
 
     //this isn't working as expected, find a way to programmatically set the mod key
     juce::ModifierKeys multiControlModifierKey{juce::ModifierKeys::shiftModifier};
     
     bool resetParameterAttachments = false;
     
-    /*juce::StringArray paramIDs{};
-
-    struct ParamIDValue
-    {
-        juce::String paramID{};
-        float value{};
-    };*/
-
-    //ParamIDValue nextParamChange{};
-    //ParamIDValue sourceParamChange{}; //use this for handling relative slider moves?
-
-    /*bool applyNextParamChange = false;
-    bool applyingParamChange = false;*/
-    //ParamIDValue ParamChange{};
 
     void loadMidiToModulesListening(int channel, int note);
 

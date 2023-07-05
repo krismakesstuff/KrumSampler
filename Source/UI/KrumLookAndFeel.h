@@ -807,12 +807,11 @@ public:
         }
 
         const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
-        juce::Colour gradCol1(trackColour.darker());
-        //juce::Colour gradCol1(trackColour.brighter(0.1f));
-        //juce::Colour gradCol2(juce::Colours::black.withAlpha(0.4f));
-        juce::Colour gradCol2(trackColour.darker(0.7));
-        //juce::Colour gradCol1(juce::Colours::blue);
-        //juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
+        bool defColor = trackColour == Colors::getModuleDefaultColor();
+            
+        juce::Colour gradCol1(defColor ? trackColour.darker(0.5f) : trackColour.darker().withSaturation(0.65f));
+        juce::Colour gradCol2(defColor ? trackColour : trackColour.darker(0.7).withSaturation(0.65f));
+
         juce::Path indent;
 
         float cornerSize = 4.0f;
@@ -832,6 +831,7 @@ public:
             //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
             float ix = bounds.getCentreX() - (trackWidth/* / 2*/);
             juce::Rectangle<float> trackRect(x, (float)y, trackWidth, (float)height);
+
 
             juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
             //vertGrade.addColour(0.5, trackColour.brighter(0.2f));
@@ -1000,8 +1000,8 @@ public:
         //const float sliderThumbRadius = (float)(getSliderThumbRadius(slider) - 2);
         juce::Rectangle<int> bounds{ x, y, width, height };
 
-        float sliderPorp;
-        if (slider.isHorizontal())
+        //float sliderPorp;
+        /*if (slider.isHorizontal())
         {
             sliderPorp = sliderPos / (width);
         }
@@ -1017,7 +1017,7 @@ public:
         else if (sliderPorp > 1.0f)
         {
             sliderPorp = 0.9999f;
-        }
+        }*/
 
         const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
         juce::Colour textColor = slider.findColour(juce::Slider::ColourIds::textBoxTextColourId);
@@ -1155,7 +1155,37 @@ public:
     }
 };
 
+class PitchSliderLookAndFeel : public KrumLookAndFeel
+{
+    void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const juce::Slider::SliderStyle style, juce::Slider& slider) override
+    {
+        g.setColour(slider.findColour(juce::Slider::trackColourId));
+        //g.setColour(juce::Colours::white);
+        float cornerSize = 2.0f;
 
+        juce::Rectangle<int> backgroundRect{ x, y, width, height };
+
+        float mid = (width/2) + 2;
+
+        if (sliderPos > mid)
+        {
+            backgroundRect.setTop(mid);
+            backgroundRect.setBottom(sliderPos);
+        }
+        else
+        {
+            backgroundRect.setTop(sliderPos);
+            backgroundRect.setBottom(mid);
+        }
+            
+    
+        g.fillRoundedRectangle(backgroundRect.toFloat(), cornerSize);
+        //g.fillRect(backgroundRect.toFloat());
+
+    }
+
+
+};
 
 class FileBrowserLookAndFeel : public KrumLookAndFeel
 {
@@ -1375,7 +1405,7 @@ public:
 
         if (isItemSelected)
         {
-            g.setColour(Colors::getBrowserBGColor().withAlpha(0.85f));
+            g.setColour(Colors::getHighlightColor());
         }
         else
         {
@@ -1459,5 +1489,9 @@ public:
     std::unique_ptr<juce::Drawable> audioFileIconImage = juce::Drawable::createFromImageData(BinaryData::audio_file_white_24dp_svg, BinaryData::audio_file_white_24dp_svgSize);
 
 };
+
+
+
+
 
 //===========================================================================================================

@@ -111,7 +111,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     clipGainRange.setSkewForCentre(dBToGain(0.0f));
     //clipGainRange.symmetricSkew = true;
 
-    juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 0.5f };
+    juce::NormalisableRange<float> pitchShiftRange{ -12, 12, 0.1f };
     pitchShiftRange.setSkewForCentre(0);
     pitchShiftRange.symmetricSkew = true;
     

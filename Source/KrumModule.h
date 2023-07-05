@@ -21,8 +21,6 @@
 * The two classes are independently responsible for responding to tree changes. 
 * 
 * 
-* TODO:
-* 
 * 
 */
 

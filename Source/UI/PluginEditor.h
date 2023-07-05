@@ -30,53 +30,51 @@
 
 namespace EditorDimensions
 {
-    const static int windowW = 1200;
-    const static int windowH = 600;
-    const static int windowWNoBrowser = 900;
-
-    const static int maxWindowW = 1670;
-    const static int maxWindowH = windowH;
-    const static int maxWindowWNoBrowser = 1320;
-    
-    const static int minWindowW = 800;
-    const static int minWindowH = windowH;
-    const static int minWindowWNoBrowser = 550;
+    const int windowW = 1200;
+    const int windowH = 600;
+    const int windowWNoBrowser = 900;
+    const int maxWindowW = 1670;
+    const int maxWindowH = windowH;
+    const int maxWindowWNoBrowser = 1320;
+    const int minWindowW = 800;
+    const int minWindowH = windowH;
+    const int minWindowWNoBrowser = 550;
 
     //---------------------------
 
-    const static int  topBar = 40;
-    const static int shrinkage = 5;
+    const int  topBar = 40;
+    const int shrinkage = 5;
     const juce::Rectangle<int> madeByArea{ 0, 0, 150, 35 };
-    const static int bottomBarH = 18;
+    const int bottomBarH = 18;
 
-    const static int moduleH = windowH * 0.68f;
-    const static int moduleW = 120;
+    const int moduleH = windowH * 0.68f;
+    const int moduleW = 120;
     
-    const static int dropSampleAreaW = moduleW * 0.45f;
+    const int dropSampleAreaW = moduleW * 0.45f;
 
-    const static int collapseButtonH = 45;
-    const static int collapseButtonW = 12;
+    const int collapseButtonH = 45;
+    const int collapseButtonW = 12;
 
-    const static int infoButtonSize = 25;
+    const int infoButtonSize = 25;
 
-    const static int outputW = 80;
+    const int outputW = 80;
     
-    const static int presetsW = 130;
-    const static int presetsH = 25;
+    const int presetsW = 130;
+    const int presetsH = 25;
     
-    const static int settingsButtonW = 23;
-    const static int settingsButtonH = 23;
+    const int settingsButtonW = 23;
+    const int settingsButtonH = 23;
 
-    const static int keyboardH = 85;
+    const int keyboardH = 85;
 
-    const static int titleImageW = 420; //nice
-    const static int titleSubTextOffset = 90;
-    const static int fileBrowserW = 350;
+    const int titleImageW = 420; //nice
+    const int titleSubTextOffset = 90;
+    const int fileBrowserW = 350;
 
-    const static float cornerSize = 5.0f;
-    const static float smallOutline = 0.75f;
-    const static float bigOutline = 1.5f;
-    const static float xlOutline = 3.5f;
+    const float cornerSize = 5.0f;
+    const float smallOutline = 0.75f;
+    const float bigOutline = 1.5f;
+    const float xlOutline = 3.5f;
 
 
     static int extraShrinkage(int extraMultplier = 2)
@@ -148,7 +146,7 @@ public:
     KrumLookAndFeel* getKrumLaf();
     VolumeLookAndFeel* getVolumeLaf();
     PanLookAndFeel* getPanLaf();
-
+    PitchSliderLookAndFeel* getPitchLaf();
 
     class DropSampleArea : public InfoPanelComponent,
         public juce::DragAndDropTarget,
@@ -203,6 +201,7 @@ private:
 
     VolumeLookAndFeel vLaf{};
     PanLookAndFeel pLaf{};
+    PitchSliderLookAndFeel pitchLaf{};
     FileBrowserLookAndFeel fbLaf{};
 
     juce::Image titleImage;

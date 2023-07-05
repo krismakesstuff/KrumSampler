@@ -87,7 +87,6 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     //add DropSampleArea
     addAndMakeVisible(dropSampleArea);
-    //addMouseListener(&dropSampleArea, false);
 
     //add File Browser
     fileBrowser.setLookAndFeel(&fbLaf);
@@ -499,6 +498,10 @@ PanLookAndFeel* KrumSamplerAudioProcessorEditor::getPanLaf()
     return &pLaf;
 }
 
+PitchSliderLookAndFeel* KrumSamplerAudioProcessorEditor::getPitchLaf()
+{
+    return &pitchLaf;
+}
 //==============================================================================================================================
 //==============================================================================================================================
 
@@ -608,24 +611,34 @@ void KrumSamplerAudioProcessorEditor::DropSampleArea::itemDropped(const juce::Dr
         selectedTrees = moduleContainer->pluginEditor->fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::recent);
     }
 
-    //checks to make sure we have enough modules
+    juce::Array<KrumModuleEditor*> newMods{};
+
+    bool selectNew = selectedTrees.size() > 1;
     if (selectedTrees.size() <= moduleContainer->getNumEmptyModules())
     {
         for (int i = 0; i < selectedTrees.size(); ++i)
         {
             auto fileTree = selectedTrees[i];
-
-            if (!moduleContainer->handleNewFile(fileTree))
+            auto newMod = moduleContainer->handleNewFile(fileTree);
+            if (newMod && selectNew)
             {
-                DBG("handling new file failed");
+                newMods.add(newMod);
             }
-
         }
     }
     else
     {
         juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Not enough modules available", "");
     }
+
+    if (selectNew)
+        moduleContainer->deselectAllModules();
+
+    for (int i = 0; i < newMods.size(); i++)
+    {
+        moduleContainer->setModulesSelectedToLastSelection(newMods[i]);
+    }
+
 
 }
 
@@ -677,20 +690,29 @@ void KrumSamplerAudioProcessorEditor::DropSampleArea::filesDropped(const juce::S
     }
 
 
-    //test each file for it's extension
-    
+    juce::Array<KrumModuleEditor*> newMods{};
 
+    bool selectNew = droppedFiles.size() > 1;
     if (droppedFiles.size() <= moduleContainer->getNumEmptyModules())
     {
         for (int i = 0; i < droppedFiles.size(); i++)
         {
-            if (!moduleContainer->handleNewExternalFile(droppedFiles[i].getFullPathName()))
+            auto newMod = moduleContainer->handleNewExternalFile(droppedFiles[i].getFullPathName());
+            if (newMod && selectNew)
             {
-                DBG("New External File failed");
+                newMods.add(newMod);
             }
         }
-        
     }
+
+    if (selectNew)
+        moduleContainer->deselectAllModules();
+
+    for (int i = 0; i < newMods.size(); i++)
+    {
+        moduleContainer->setModulesSelectedToLastSelection(newMods[i]);
+    }
+
 }
 
 
