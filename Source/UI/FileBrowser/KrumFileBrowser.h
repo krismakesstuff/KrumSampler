@@ -402,7 +402,8 @@ class FileChooser;
 //This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
 class FavoritesTreeView :   public juce::TreeView,
                             public juce::DragAndDropContainer,
-                            public juce::ValueTree::Listener
+                            public juce::ValueTree::Listener,
+                            public juce::Timer
 {
 public:
 
@@ -445,8 +446,9 @@ public:
     void clearFavorites();
 
     void removeItem(juce::String idString);
+    //void mouseEnter(const juce::MouseEvent& event) override;
     void mouseDrag(const juce::MouseEvent& event) override;
-
+    //void mouseExit(const juce::MouseEvent& event) override;
     void dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details) override;
 
     void setItemEditing(juce::String idString, bool isEditing);
@@ -477,10 +479,15 @@ public:
 
 private:
 
+    void setHighlightTreeView(bool shouldHighlight);
+
+    void timerCallback() override;
+
     friend class KrumTreeItem;
     
 
-    bool showDropScreen = false;
+    bool repaintHighlight = false;
+    bool highlightTreeView = false;
 
     juce::ValueTree favoritesValueTree;
     std::unique_ptr<RootHeaderItem> rootItem;

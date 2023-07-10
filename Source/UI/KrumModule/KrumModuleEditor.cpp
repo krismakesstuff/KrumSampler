@@ -27,8 +27,11 @@ KrumModuleEditor::KrumModuleEditor(juce::ValueTree& modTree, KrumModuleContainer
     setRepaintsOnMouseActivity(true);
 
     moduleTree.addListener(this);
+    
+    startTimerHz(timerHz);
 
-    startTimerHz(30);
+    
+
     setSize(EditorDimensions::moduleW, EditorDimensions::moduleH);
 
     //int state = getModuleState();
@@ -66,9 +69,10 @@ void KrumModuleEditor::paint (juce::Graphics& g)
             bc = juce::Colours::black;
             c = juce::Colours::black;
         }
-        else if (modulePlaying)
+        else if (animatePlaying)
         {
-            c = c.overlaidWith(Colors::getModulePlayingHightlightColor());
+            //c = c.overlaidWith(Colors::getModulePlayingHightlightColor());
+            c = c.brighter(0.8f).withMultipliedSaturation(20.0f);
         }
 
         if (mouseOver || mouseOverKey) 
@@ -92,7 +96,7 @@ void KrumModuleEditor::paint (juce::Graphics& g)
         }
 
         //auto bgGrade = juce::ColourGradient::vertical(c.darker(0.3f), (float)area.getY(), bc, area.getBottom());
-        auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), c.darker(0.8f), area.getBottom());
+        auto bgGrade = juce::ColourGradient::vertical(bc, (float)area.getY(), c.darker(0.6f), area.getBottom());
 
         auto gain = getModuleGain();
         auto gainProp = 1 - normalizeGainValue(gain);
@@ -246,26 +250,21 @@ void KrumModuleEditor::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged,
         else if (property == juce::Identifier(TreeIDs::moduleColor.getParamID()))
         {
             setChildCompColors();
+            if (settingsOverlay && settingsOverlay->isVisible())
+            {
+                hideSettingsOverlay();
+            }
         }
         else if (property == juce::Identifier(TreeIDs::moduleSelected.getParamID()))
         {
             repaint();
         }
     
-        //TODO: review,
-        //this passes the data for the time handles, I don't think anything else gets here... not sure
-        if (moduleContainer.isMultiControlActive() && isModuleSelected())
-        {
-            //moduleContainer.applyValueTreeChangesToSelectedModules(treeWhoChanged, property);
-        }
-
     }
-    else if (treeWhoChanged != moduleTree && treeWhoChanged.isValid() && isModuleSelected()) 
+    else if (treeWhoChanged != moduleTree && treeWhoChanged.isValid() && isModuleSelected()) //TODO: review, not sure if we need this branch
     {
         //this branch is when another module changes it's properties but we triggered this property callback manually using applyChangesToSelectedModules()
         //drag handles seem to kind of work through this
-
-
 
         moduleTree.setProperty(property, treeWhoChanged.getProperty(property), nullptr);
         repaint();
@@ -298,6 +297,8 @@ void KrumModuleEditor::buildModule()
         setModuleName(newName);
     };
    
+    
+
     juce::String i{ getSamplerIndexString() };
 
     auto& parameters = *moduleContainer.getAPVTS();
@@ -535,28 +536,14 @@ void KrumModuleEditor::hideSettingsOverlay()
 //sets visibility to true
 void KrumModuleEditor::showSettingsOverlay()
 {
-    //hideModule();
-    //setModuleButtonsClickState(false);
+
     if (settingsOverlay)
     {
         settingsOverlay->setVisible(true);
         resized();
         repaint();
     }
-    //settingsOverlay->setMidi(getModuleMidiNote(), getModuleMidiChannel());
-    //settingsOverlay->keepCurrentColor(keepCurrentColorOnExit);
-    //juce::String name = getModuleName(); //compiler reasons
-    //settingsOverlay->setTitle(name); 
-    
-    //if (selectOverlay)
-    //{
-    //    //need to clear the other modules that were previously selected
-    //    //unless you do want to, i.e. isShiftDown()
-    //    pluginEditor.getModuleContainer().deselectAllModules();
-    //    pluginEditor.getModuleContainer().setModuleSelected(this);
-    //    pluginEditor.keyboard.scrollToKey(getModuleMidiNote());
-    //    repaint();
-    //}
+   
 }
 
 void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
@@ -566,30 +553,6 @@ void KrumModuleEditor::setModuleButtonsClickState(bool isClickable)
     for (int i = 0; i < numChildren; i++)
     {
         getChildComponent(i)->setInterceptsMouseClicks(isClickable, isClickable);
-    }
-}
-
-void KrumModuleEditor::hideModule()
-{
-    for (int i = 0; i < getNumChildComponents(); i++)
-    {
-        auto child = getChildComponent(i);
-        if (child != settingsOverlay.get())
-        {
-            child->setVisible(false);
-        }
-    }
-}
-
-void KrumModuleEditor::showModule()
-{
-    for (int i = 0; i < getNumChildComponents(); i++)
-    {
-        auto child = getChildComponent(i);
-        if (child != settingsOverlay.get())
-        {
-            child->setVisible(true);
-        }
     }
 }
 
@@ -650,12 +613,10 @@ void KrumModuleEditor::setModuleDisplayIndex(int newDisplayIndex, bool sendChang
     if (sendChange)
     {
         moduleTree.setProperty(TreeIDs::moduleDisplayIndex.getParamID(), newDisplayIndex, nullptr);
-
     }
     else
     {
         moduleTree.setPropertyExcludingListener(this, TreeIDs::moduleDisplayIndex.getParamID(), newDisplayIndex, nullptr);
-
     }
 }
 
@@ -714,9 +675,21 @@ void KrumModuleEditor::setModuleMidiChannel(int newMidiChannel)
     moduleTree.setProperty(TreeIDs::moduleMidiChannel.getParamID(), newMidiChannel, nullptr);
 }
 
-void KrumModuleEditor::setModulePlaying(bool isPlaying)
+void KrumModuleEditor::setModulePlaying(bool shouldPlay)
 {
-    modulePlaying = isPlaying;
+    if (modulePlaying != shouldPlay)
+    {
+        if (shouldPlay)
+        {
+            animatePlaying = true;
+        }
+        //else if(animatePlaying)
+        //{
+        //    
+        //}
+    }
+
+    modulePlaying = shouldPlay;
 }
 
 bool KrumModuleEditor::isModulePlaying()
@@ -812,15 +785,12 @@ void KrumModuleEditor::setTimeHandles()
     timeHandle.setHandles(0, getNumSamplesInFile());
 }
 
-//the editor should only want midi if it's being assigned
 bool KrumModuleEditor::doesEditorWantMidi()
 {
-    //need to check for MidiListen toggle state here?
-    //return settingsOverlay->isVisible() && settingsOverlay->isOverlaySelected();
     return midiLabel.isListeningForMidi();
 }
 
-//this has many ways it can call a repaint, make sure not to call this method from a real-time source
+//this calls a repaint, make sure not to call this method from a real-time thread
 void KrumModuleEditor::handleMidi(int midiChannel, int midiNote)
 {
     if (midiLabel.isListeningForMidi())
@@ -838,11 +808,6 @@ void KrumModuleEditor::handleMidi(int midiChannel, int midiNote)
             }
         }
     }
-
-    /*if (settingsOverlay != nullptr && settingsOverlay->isVisible())
-    {
-        settingsOverlay->handleMidiInput(midiChannel, midiNote);
-    }*/
 }
 
 void KrumModuleEditor::toggleMenuButton()
@@ -929,11 +894,6 @@ void KrumModuleEditor::setClipGainSliderVisibility(bool sliderShouldBeVisible)
     thumbnail.clipGainSlider.setVisible(sliderShouldBeVisible);
 }
 
-//void KrumModuleEditor::setPitchSliderVisibility(bool sliderShouldBeVisible)
-//{
-//    pitchSlider.setVisible(sliderShouldBeVisible);
-//}
-
 bool KrumModuleEditor::canThumbnailAcceptFile()
 {
     return thumbnail.canAcceptFile;
@@ -946,13 +906,10 @@ void KrumModuleEditor::setThumbnailCanAcceptFile(bool shouldAcceptFile)
 }
 
 
-
 void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails &dragDetails)
 {
     //
 }
-
-
 
 void KrumModuleEditor::setModuleFile(juce::File& file)
 {
@@ -1022,19 +979,14 @@ void KrumModuleEditor::setChildCompMuteColors()
     dragHandle.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, moduleColor.darker(0.79f));
     dragHandle.setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.99f));
 
-    //panSlider.setColour(juce::Slider::ColourIds::thumbColourId, textColor);
     panSlider.setColour(juce::Slider::ColourIds::thumbColourId, bgColor);
     panSlider.setColour(juce::Slider::ColourIds::trackColourId, textColor);
     panSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, bgColor);
     panSlider.setColour(juce::TooltipWindow::textColourId, textColor);
 
-    //pitchSlider.setColour(juce::Slider::ColourIds::thumbColourId, moduleColor);
-    //pitchSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker());
-    //pitchSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
     pitchSlider.setColour(juce::Slider::ColourIds::backgroundColourId, bgColor);
     pitchSlider.setColour(juce::Slider::ColourIds::textBoxTextColourId, textColor);
 
-    //volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, textColor);
     volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, bgColor);
     volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, textColor);
     volumeSlider.setColour(juce::TooltipWindow::textColourId, moduleColor.brighter(0.8f));
@@ -1045,16 +997,10 @@ void KrumModuleEditor::setChildCompMuteColors()
     playButton.setColour(juce::TextButton::ColourIds::textColourOffId, textColor);
     playButton.setColour(juce::TextButton::ColourIds::textColourOnId, textColor.brighter(0.2f));
 
-    //playButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-    //playButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
-
     menuButton.setColour(juce::TextButton::ColourIds::buttonColourId, bgColor);
     menuButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, bgColor);
     menuButton.setColour(juce::TextButton::ColourIds::textColourOffId, textColor);
     menuButton.setColour(juce::TextButton::ColourIds::textColourOnId, textColor.brighter(0.2f));
-
-    //editButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-    //editButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::black);
 
     muteButton.setColour(juce::TextButton::ColourIds::buttonColourId, bgColor);
     muteButton.setColour(juce::TextButton::ColourIds::textColourOnId, bgColor);
@@ -1071,7 +1017,6 @@ void KrumModuleEditor::setChildCompMuteColors()
     titleBox.setColour(juce::Label::ColourIds::outlineWhenEditingColourId, moduleColor.darker());
     titleBox.setColour(juce::TextEditor::ColourIds::highlightedTextColourId, moduleColor.contrasting());
 
-
     thumbnail.setChannelColor(textColor.darker(0.95f));
     thumbnail.setThumbnailBGColor(juce::Colours::black);
     thumbnail.clipGainSlider.setColour(juce::Slider::ColourIds::trackColourId, moduleColor.darker(0.99f));
@@ -1080,24 +1025,16 @@ void KrumModuleEditor::setChildCompMuteColors()
     timeHandle.setTrackBackgroundColor(moduleColor.darker(0.9f));
     timeHandle.setHandleColor(juce::Colours::black);
 
-    //outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, moduleColor.darker(0.55f).withAlpha(0.5f));
     outputCombo.setColour(juce::ComboBox::ColourIds::backgroundColourId, bgColor);
     outputCombo.setColour(juce::ComboBox::ColourIds::textColourId, textColor);
     outputCombo.setColour(juce::ComboBox::ColourIds::arrowColourId, textColor);
     outputCombo.setColour(juce::ComboBox::ColourIds::outlineColourId, moduleColor.darker(0.8f));
 
-    //outputCombo.setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
-
     outputCombo.setColour(juce::PopupMenu::ColourIds::textColourId, moduleColor.darker());
-    //outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, moduleColor.darker());
     outputCombo.setColour(juce::PopupMenu::ColourIds::highlightedTextColourId, moduleColor);
 
     midiLabel.textColor = textColor;
     midiLabel.setColour(juce::Label::ColourIds::backgroundColourId, bgColor);
-
-    //dragHandle.setColour();
-
-    //getLookAndFeel().setColour(juce::PopupMenu::ColourIds::backgroundColourId, moduleColor.darker(0.55f));
 
 }
 
@@ -1114,7 +1051,6 @@ void KrumModuleEditor::zeroModuleTree()
     moduleTree.setProperty(TreeIDs::moduleMidiChannel.getParamID(), juce::var(0), nullptr);
     moduleTree.setProperty(TreeIDs::moduleColor.getParamID(), juce::var(""), nullptr);
     timeHandle.resetHandles();
-    
 
     DBG("Module " + getSamplerIndexString() + " zeroed");
 }
@@ -1140,12 +1076,21 @@ void KrumModuleEditor::timerCallback()
         mouseOver = false;
     }
 
-    
-    //sendToSelectedModules = moduleContainer.multipleModulesSelected() && isModuleSelected();
-    
-
-    if (mouseOverKey || modulePlaying)
+    if (mouseOverKey)
     {
+        repaint();
+    }
+
+    if (animatePlaying)
+    {
+        animationCurrentTime += timerHz;
+
+        if (animationCurrentTime >= playingAnimationTimeMs)
+        {
+            animatePlaying = false;
+            animationCurrentTime = 0.0f;
+        }
+
         repaint();
     }
 
@@ -1161,11 +1106,6 @@ void KrumModuleEditor::printValueAndPositionOfSlider()
 
 void KrumModuleEditor::handleOneShotButtonMouseDown(const juce::MouseEvent& e)
 {
-    /*if (e.mods.isShiftDown())
-    {
-        editor.keyboard.scrollToKey(getModuleMidiNote());
-    }*/
-
     triggerMouseDownOnNote(e);
 }
 
@@ -1173,7 +1113,6 @@ void KrumModuleEditor::handleOneShotButtonMouseUp(const juce::MouseEvent& e)
 {
     triggerMouseUpOnNote(e);
 }
-
 
 void KrumModuleEditor::reassignSliderAttachment(juce::Slider* sliderToAssign, bool beginGesture)
 {
@@ -1291,6 +1230,36 @@ void KrumModuleEditor::resetComboAttachments()
     outputComboAttachment.reset(new ComboBoxAttachment(apvts, TreeIDs::paramModuleOutputChannel.getParamID() + getSamplerIndexString(), outputCombo));
 
 }
+
+void KrumModuleEditor::setTitleBoxEditing(bool shouldBeEditing)
+{
+    if (shouldBeEditing)
+    {
+        titleBox.showEditor();
+    }
+
+}
+
+
+//======================= TitleBox =====================================================================================================
+
+KrumModuleEditor::TitleBox::TitleBox(KrumModuleEditor& e, juce::String title, juce::String message)
+    :editor(e), InfoPanelLabel(title, message)
+{}
+
+KrumModuleEditor::TitleBox::~TitleBox()
+{}
+
+//void KrumModuleEditor::TitleBox::focusLost(juce::Component::FocusChangeType cause)
+//{
+//    if (cause == juce::Component::FocusChangeType::focusChangedByTabKey)
+//    {
+//        editor.moduleContainer.setNextModuleTitleEditing(&editor);
+//    }
+//
+//    InfoPanelLabel::focusLost(cause);
+//}
+
 
 //======================= OneShotButton =====================================================================================================
 
@@ -1776,11 +1745,8 @@ void KrumModuleEditor::DragHandle::paintButton(juce::Graphics& g, const bool sho
 
 void KrumModuleEditor::DragHandle::mouseDown(const juce::MouseEvent& e)
 {
-    
-
     moduleEditor.setAlwaysOnTop(true);
 
-    //moduleEditor.toFront(true);
   
     if (moduleEditor.isModuleSelected() && moduleEditor.moduleContainer.isMultiControlActive())
     {
@@ -1796,12 +1762,7 @@ void KrumModuleEditor::DragHandle::mouseDown(const juce::MouseEvent& e)
 
 void KrumModuleEditor::DragHandle::mouseDrag(const juce::MouseEvent& e)
 {
-    //moduleEditor.toFront(false);
-
     moduleEditor.moduleContainer.dragEditor(&moduleEditor, e);
-
-    
-
     InfoPanelDrawableButton::mouseDrag(e);
 }
 
@@ -1817,5 +1778,3 @@ void KrumModuleEditor::DragHandle::mouseUp(const juce::MouseEvent& e)
     moduleEditor.moduleContainer.setModuleSelectedFromClick(&moduleEditor, !moduleEditor.isModuleSelected(), e);
     InfoPanelDrawableButton::mouseUp(e);
 }
-
-

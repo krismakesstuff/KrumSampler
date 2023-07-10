@@ -590,7 +590,7 @@ bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInDragSource(c
     auto desc = dragDetails.description.toString();
     return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) || desc.contains(DragStrings::recentsDragString));
 
-    return false;
+    //return false;
 }
 
 //Files from Favorites or Recents, Drag and Drop Target

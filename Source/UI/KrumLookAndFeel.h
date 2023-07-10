@@ -63,7 +63,7 @@ namespace Colors
     //contextual
     inline juce::Colour getAddAnimationColor() { return juce::Colour::fromRGB(67, 170, 139); } //zomp
     inline juce::Colour getRemoveAnimationColor() { return juce::Colour::fromRGB(249, 65, 68); } //redSalsa
-    inline juce::Colour getCanDropFileColor() { return juce::Colours::black.brighter(0.15f); }
+    inline juce::Colour getCanDropFileColor() { return getAddAnimationColor(); }
 
     
     //concertina panel header 

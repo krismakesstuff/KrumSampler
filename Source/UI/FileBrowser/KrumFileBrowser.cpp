@@ -917,6 +917,8 @@ FavoritesTreeView::FavoritesTreeView(KrumFileBrowser& fb)
     setMultiSelectEnabled(true);
     //addMouseListener(this, true);
 
+    setRepaintsOnMouseActivity(true);
+
     rootItem.reset(new RootHeaderItem(favoritesValueTree, this));
     rootItem->setLinesDrawnForSubItems(false);
     setRootItem(rootItem.get());
@@ -925,6 +927,8 @@ FavoritesTreeView::FavoritesTreeView(KrumFileBrowser& fb)
     setPaintingIsUnclipped(true);
 
     favoritesValueTree.addListener(this);
+
+    startTimerHz(20);
 
 }
 
@@ -939,6 +943,13 @@ void FavoritesTreeView::paint(juce::Graphics& g)
 
     g.setColour(Colors::getBrowserBGColor());
     g.fillRect(area.toFloat());
+
+    if (highlightTreeView && isMouseOverOrDragging())
+    {
+        g.setColour(Colors::getCanDropFileColor());
+        g.drawRect(area);
+    }
+
 
     juce::TreeView::paint(g);
 
@@ -971,6 +982,7 @@ void FavoritesTreeView::deselectAllItems()
 bool FavoritesTreeView::isInterestedInFileDrag(const juce::StringArray& files)
 {
     fileBrowser.getPanelHeader(KrumFileBrowser::BrowserSections::favorites)->setShowCanDropFile(true);
+    setHighlightTreeView(true);
     return true;
 }
 
@@ -998,6 +1010,7 @@ void FavoritesTreeView::filesDropped(const juce::StringArray& files, int x, int 
     fh->setShowCanDropFile(false);
     fh->animateAddFile();
 
+    setHighlightTreeView(false);
 
 }
 
@@ -1008,6 +1021,7 @@ bool FavoritesTreeView::isInterestedInDragSource(const juce::DragAndDropTarget::
     if (isInterested)
     {
         fileBrowser.getPanelHeader(KrumFileBrowser::BrowserSections::favorites)->setShowCanDropFile(true);
+        setHighlightTreeView(true);
     }
     return isInterested;
 }
@@ -1040,8 +1054,10 @@ void FavoritesTreeView::itemDropped(const juce::DragAndDropTarget::SourceDetails
 
     fileBrowser.getPanelHeader(KrumFileBrowser::BrowserSections::favorites)->setShowCanDropFile(false);
     fileBrowser.getPanelHeader(KrumFileBrowser::BrowserSections::favorites)->animateAddFile();
+    setHighlightTreeView(false);
 
     //DBG("File Path Dropped: " + fileChooser->getSelectedFile().getFullPathName());
+
 
 }
 
@@ -1399,6 +1415,18 @@ void FavoritesTreeView::removeItem(juce::String idString)
 
 }
 
+//void FavoritesTreeView::mouseEnter(const juce::MouseEvent& event)
+//{
+//    if (highlightTreeView)
+//    {
+//        setHighlightTreeView(true);
+//    }
+//
+//    FavoritesTreeView::mouseEnter(event);
+//}
+
+
+
 void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
 {
     if (!areAnyItemsBeingEdited() && event.mouseWasDraggedSinceMouseDown())
@@ -1482,6 +1510,16 @@ void FavoritesTreeView::mouseDrag(const juce::MouseEvent& event)
         }
     }
 }
+
+//void FavoritesTreeView::mouseExit(const juce::MouseEvent& event)
+//{
+//    if (highlightTreeView)
+//    {
+//        setHighlightTreeView(false);
+//    }
+//
+//    FavoritesTreeView::mouseExit(event);
+//}
 
 void FavoritesTreeView::dragOperationEnded(const juce::DragAndDropTarget::SourceDetails& details)
 {
@@ -1725,34 +1763,9 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
         {
             auto editor = moduleContainer->getPluginEditor();
 
-
-            //iterate through the currently selected files
             for (int fileIndex = 0; fileIndex < selectedFileTrees.size(); ++fileIndex)
             {
                 moduleContainer->handleNewFile(selectedFileTrees[fileIndex]);
-
-                //iterate through modulesTree to find an inactive tree
-                //for (int moduleTreeIndex = 0; moduleTreeIndex < modulesTree.getNumChildren(); moduleTreeIndex++)
-                //{
-                //    auto itTree = modulesTree.getChild(moduleTreeIndex);
-                //    if ((int)itTree.getProperty(TreeIDs::moduleState.getParamID()) == 0) //we grab the first empty module tree
-                //    {
-                //        KrumModuleEditor* modEd = nullptr;
-
-                //        if (fileIndex == 0)
-                //        {
-                //            modEd = moduleContainer->getModuleEditors().getLast();
-                //        }
-                //        else
-                //        {
-                //            modEd = moduleContainer->addNewModuleEditor(new KrumModuleEditor(itTree, *editor, fileBrowser.getFormatManager()));
-                //        }
-
-                //        modEd->handleNewFile(selectedFileTrees[fileIndex]);
-                //        showEmptyModule = true;
-                //        break;
-                //    }
-                //}
             }
         }
         else
@@ -1769,6 +1782,33 @@ void FavoritesTreeView::makeModulesFromSelectedFiles()
     //}
 
 }
+
+void FavoritesTreeView::setHighlightTreeView(bool shouldHighlight)
+{
+    if (shouldHighlight != highlightTreeView)
+    {
+        repaintHighlight = true;
+    }
+
+    highlightTreeView = shouldHighlight;
+    
+}
+
+void FavoritesTreeView::timerCallback()
+{
+    if (repaintHighlight)
+    {
+        //repaint();
+        fileBrowser.getPanelHeader(KrumFileBrowser::BrowserSections::favorites)->repaint();
+        //repaintHighlight = false;
+    }
+    else if(highlightTreeView && !isMouseOver())
+    {
+        setHighlightTreeView(false);
+    }
+
+}
+
 //==================================================================================================
 
 
@@ -2425,17 +2465,17 @@ void KrumFileBrowser::resized()
     int favTreeViewH = 120;
     int locationsW = 40;
 
-    concertinaPanel.setBounds(area.withTrimmedBottom(Dimensions::previewerH));
+    concertinaPanel.setBounds(area.withTrimmedBottom(Dimensions::previewerH).reduced(EditorDimensions::shrinkage, 0));
     audioPreviewer.setBounds(area.withTop(concertinaPanel.getBottom()).withRight(area.getRight()).withHeight(Dimensions::previewerH));
     
     //TO DO
     //make this reload previous concertina panel sizes
     if (init)
     {
-        //concertinaPanel.expandPanelFully(&favoritesTreeView, false);
-        concertinaPanel.setPanelSize(&favoritesTreeView, area.getHeight() * 0.2f, false);
-        concertinaPanel.setPanelSize(&recentFilesList, area.getHeight() * 0.2f, false);
-        //concertinaPanel.setPanelSize(&fileChooser, area.getHeight() * 0.2f, false);
+        concertinaPanel.expandPanelFully(&favoritesTreeView, false);
+        //concertinaPanel.setPanelSize(&favoritesTreeView, area.getHeight() * 0.2f, false);
+        //concertinaPanel.setPanelSize(&recentFilesList, area.getHeight() * 0.2f, false);
+        concertinaPanel.setPanelSize(&fileChooser, area.getHeight() * 0.3f, false);
         init = false;
     }
 
@@ -2784,7 +2824,8 @@ void PanelHeader::paint(juce::Graphics& g)
     if (showCanDropFile)
     {
         g.setColour(Colors::getCanDropFileColor());
-        g.drawRect(area);
+        g.drawRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize, EditorDimensions::xlOutline * 1.5f);
+        //g.drawRect(area);
         
     }
 }

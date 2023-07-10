@@ -20,15 +20,15 @@
 //==============================================================================
 
 /*
-* 
-* The GUI side of a Module. 
-* 
-* To construct one, you must have a parent (KrumModule) and it's processor, as well as a reference to the PluginEditor (KrumSmpalerAudioProcessorEditor)
+* The GUI side of a Module(sample). 
 * 
 * This class handles all GUI interaction and painting. 
-* The GUI can enter a ModuleSettingsOverlay state which allows the user to change the midi assignment as well as change the color of the module (redesigned settings menu to come).
+* There are 3 module states, see KrumModule::ModuleState. The valueTreePropertyChanged callback responds to changes and check the state
+* This class interfaces heavily with the KrumModuleContainer. Most actions go through the container first
 * 
+* The GUI can show a ModuleSettingsOverlay pop-up which allows the user to change the color of the module and delete the module.
 * 
+* The child components are custom subclasses of InfoPanel classes, see InfoPanel.h
 * 
 */
 
@@ -49,7 +49,6 @@ class KrumModuleEditor  :   public juce::Component,                            p
                             public juce::ValueTree::Listener
 {
 public:
-    //KrumModuleEditor(juce::ValueTree& moduleTree, KrumSamplerAudioProcessorEditor& e, juce::AudioFormatManager& fm); 
     KrumModuleEditor(juce::ValueTree& moduleTree, KrumModuleContainer& mc, juce::AudioFormatManager& fm); 
     ~KrumModuleEditor() override;
 
@@ -59,30 +58,26 @@ public:
     void paintPanSliderLines(juce::Graphics& g, juce::Rectangle<float> bounds);
 
     void resized() override;
+
+    //mouse Listener
     void mouseEnter(const juce::MouseEvent& event) override;
     void mouseExit(const juce::MouseEvent& event) override;
     void mouseDown(const juce::MouseEvent& e) override;
     void mouseUp(const juce::MouseEvent& e) override;
 
+    //valuetree callback
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
    
-    
     void buildModule();
     void setChildCompColors();
 
-    //void showSettingsMenu();
     void setModuleSelected(bool isModuleSelected);
     bool isModuleSelected();
     void setModuleButtonsClickState(bool isClickable);
     
-    //void showNewSettingsOverlay();
     void showSettingsOverlay();
     void hideSettingsOverlay();
 
-
-    void hideModule();
-    void showModule();
-    
     int getModuleState();
      
     int getModuleSamplerIndex();
@@ -132,19 +127,13 @@ public:
     bool needsToDrawThumbnail();
     void setAndDrawThumbnail();
     
-
-    //make handleNewFileDrop?
-   // bool handleNewFile(juce::ValueTree fileTree, bool overlayShouldListen = true);
-    
     void setModuleFile(juce::File& newFile);
-   // void addFileToRecentsFolder(juce::File& file, juce::String name);
 
     bool shouldCheckDroppedFile();
     void handleLastDroppedFile();
     bool isMouseOverThumbnail();
     bool thumbnailHitTest(const juce::MouseEvent& mouseEvent);
     void setClipGainSliderVisibility(bool sliderShouldBeVisible);
-    //void setPitchSliderVisibility(bool sliderShouldBeVisible);
 
     bool canThumbnailAcceptFile();
     void setThumbnailCanAcceptFile(bool shouldAcceptFile);
@@ -161,6 +150,8 @@ public:
     //tests if the given tree, is the same as this module's moduleTree;
     bool isModuleTree(juce::ValueTree& treeToTest);
 
+    void setTitleBoxEditing(bool shouldBeEditing);
+
 private:
     
     void reassignSliderAttachment(juce::Slider* sliderToAssign, bool beginGesture = true);
@@ -168,7 +159,6 @@ private:
     void resetSliderAttachments();
 
     void reassignButtonAttachment(juce::Button* button, bool beginGesrture);
-    //void updateButtonFromMultiControl(juce::Button* sourceButton);
     void resetButtonAttachments();
 
     void reassignComboAttachment(juce::ComboBox* combo, bool beginGesrture);
@@ -201,23 +191,37 @@ private:
     bool needsToBuildModuleEditor = false;
     bool mouseOver = false;
     bool mouseOverKey = false;
+    bool moduleSelected = false;
 
     bool modulePlaying = false;
-    bool moduleSelected = false;
-   
-    // sendToSelectedModules = false;
+    float timerHz = 30.0f;
+    float playingAnimationTimeMs = 75.0f;
+    bool animatePlaying = false;
+    float animationCurrentTime = 0.0f;
 
     juce::ValueTree moduleTree;
     KrumModuleContainer& moduleContainer;
-    //KrumSamplerAudioProcessorEditor& pluginEditor;
-    //Handler handler;
 
 
     juce::Colour thumbBgColor{ juce::Colours::darkgrey.darker() };
     juce::Colour titleFontColor{ juce::Colours::black };
+    class TitleBox : public InfoPanelLabel
+    {
+    public:
+        TitleBox(KrumModuleEditor& e, juce::String title, juce::String message);
+        ~TitleBox() override;
 
-    InfoPanelLabel titleBox {"Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
-    
+        //void focusLost(juce::Component::FocusChangeType cause) override;
+
+    private:
+
+        KrumModuleEditor& editor;
+
+    };
+
+    TitleBox titleBox {*this, "Title", "Double-click to edit the title of your module, by default it takes the name of your sample"};
+
+
     class MultiControlSlider : public InfoPanelSlider
     {
     public:
@@ -286,6 +290,8 @@ private:
 
     CustomToggleButton reverseButton{ *this, "Reverse Button", "Plays the sample in reverse, active when highlighted" };
     CustomToggleButton muteButton{ *this, "Mute", "Mutes this sample from being played." };
+    //TODO: implement solo feature
+    CustomToggleButton soloButton{ *this, "Solo", "Soloes the sample." };
 
     class OneShotButton : public InfoPanelDrawableButton
     {
@@ -305,6 +311,8 @@ private:
         KrumModuleEditor& editor;
     };
 
+    OneShotButton playButton{ *this, "One Shot", "Plays the currently assigned sample" };
+    
     class MenuButton : public InfoPanelDrawableButton
     {
     public:
@@ -320,6 +328,8 @@ private:
         KrumModuleEditor& editor;
     };
 
+    MenuButton menuButton { *this, "Settings", "Provides a list of actions to change the settings of the module" };
+    
     friend class KrumLookAndFeel;
 
     class PitchSlider : public InfoPanelSlider
@@ -373,8 +383,6 @@ private:
     };
 
     MidiLabel midiLabel{*this,"Midi Label", "Displays the current Midi Note assignment, right click to learn a new key" };
-    OneShotButton playButton{ *this, "One Shot", "Plays the currently assigned sample" };
-    MenuButton menuButton { *this, "Settings", "Provides a list of actions to change the settings of the module" };
     
     class DragHandle : public InfoPanelDrawableButton
     {

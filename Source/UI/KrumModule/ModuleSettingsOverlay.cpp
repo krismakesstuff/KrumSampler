@@ -114,6 +114,7 @@ void ModuleSettingsOverlay::colorButtonClicked(juce::Colour newColor)
 
     parentEditor.setModuleColor(newColor);
     
+    
 
 }
 
