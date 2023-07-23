@@ -1961,6 +1961,9 @@ void FileChooser::PathBoxItem::removeThisPlace()
 FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     :  fileBrowser(fb), previewer(p)
 {
+
+    
+
     setDirectory(defaultLocation);
     
     fileTree.setItemHeight(Dimensions::rowHeight);
@@ -2509,6 +2512,11 @@ juce::Array<juce::ValueTree> KrumFileBrowser::getSelectedFileTrees(BrowserSectio
     
     return juce::Array<juce::ValueTree>();
 }
+
+juce::Array<juce::File> KrumFileBrowser::getFileChooserSelectedFiles()
+{
+    return fileChooser.getSelectedFiles();
+}   
 
 void KrumFileBrowser::addFileToRecent(const juce::File file, juce::String name)
 {

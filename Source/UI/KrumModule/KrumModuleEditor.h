@@ -118,7 +118,7 @@ public:
 
     void setTimeHandles();
 
-    bool doesEditorWantMidi();
+    bool wantsMidi();
     void handleMidi(int midiChannel, int midiNote);
 
     void triggerMouseDownOnNote(const juce::MouseEvent& e);

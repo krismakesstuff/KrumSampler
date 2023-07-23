@@ -138,7 +138,7 @@ void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midi
             //sets the flag to paint the module
             modEd->setModulePlaying(true);
         }
-        else if (modEd->doesEditorWantMidi())
+        else if (modEd->wantsMidi())
         {
             nextMidiMessage.midiChannel = midiChannel;
             nextMidiMessage.midiNote = midiNoteNumber;
@@ -273,6 +273,7 @@ void KrumModuleContainer::removeModuleEditor(KrumModuleEditor* moduleToRemove, b
     
 }
 
+//set modules selected using a shift or cmd key. This will work out which key is down and which modules to select
 void KrumModuleContainer::setModuleSelectedFromClick(KrumModuleEditor* moduleToSelect, bool setSelected, const juce::MouseEvent& e)
 {
     //I think I can get rid of the mouse event?
@@ -311,6 +312,56 @@ void KrumModuleContainer::setModuleSelectedFromClick(KrumModuleEditor* moduleToS
 
 }
 
+//selects the modules between your last selected module to the newly selected module, useful for a shift click selection
+void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* moduleToSelect)
+{
+    if (currentlySelectedModules.size() < 1)
+    {
+        //if there is no "Last Selection", there is nothing to select up to
+        setModuleSelectedState(moduleToSelect, true);
+        return;
+    }
+
+    //get the last selected module's display index
+    int lastSelectedDisplayIndex = currentlySelectedModules.getLast()->getModuleDisplayIndex();
+
+    //get the current moduleToSelect's dispaly index
+    int moduleToSelectDisplayIndex = moduleToSelect->getModuleDisplayIndex();
+
+
+    if (lastSelectedDisplayIndex < moduleToSelectDisplayIndex) //we are selecting to the right
+    {
+        for (int i = 0; i < activeModuleEditors.size(); i++)
+        {
+            int displayIndex = activeModuleEditors[i]->getModuleDisplayIndex();
+            //we make sure the display index is in the range we want (if the index is between the selectedModule Indexes
+            if (displayIndex == moduleToSelectDisplayIndex ||
+                (displayIndex > lastSelectedDisplayIndex && displayIndex < moduleToSelectDisplayIndex))
+            {
+                setModuleSelectedState(activeModuleEditors[i], true);
+            }
+        }
+    }
+    else if (lastSelectedDisplayIndex > moduleToSelectDisplayIndex) //we are selecting to the left
+    {
+        for (int i = 0; i < activeModuleEditors.size(); i++)
+        {
+            int displayIndex = activeModuleEditors[i]->getModuleDisplayIndex();
+            //we make sure the display index is in the range we want
+            if (displayIndex == moduleToSelectDisplayIndex ||
+                (displayIndex < lastSelectedDisplayIndex && displayIndex > moduleToSelectDisplayIndex))
+            {
+                setModuleSelectedState(activeModuleEditors[i], true);
+            }
+        }
+    }
+    else
+    {
+        setModuleSelectedState(moduleToSelect, true);
+    }
+
+}
+
 //intended to be an internal function, use setModuleSelectedFromClick() if possible
 void KrumModuleContainer::setModuleSelectedState(KrumModuleEditor* moduleToSelect, bool shouldSelect)
 {
@@ -341,7 +392,6 @@ void KrumModuleContainer::loadSelectedModules()
     }
 }
 
-
 void KrumModuleContainer::deselectAllModules()
 {
     for (int i = 0; i < activeModuleEditors.size(); i++)
@@ -349,58 +399,7 @@ void KrumModuleContainer::deselectAllModules()
         setModuleSelectedState(activeModuleEditors[i], false);
     }
     
-    //this is redundant, should be an assertion?
     currentlySelectedModules.clear(false);
-}
-
-//selects the modules between your last selected module to the newly selected module, useful for a shift click selection
-void KrumModuleContainer::setModulesSelectedToLastSelection(KrumModuleEditor* moduleToSelect)
-{
-    if (currentlySelectedModules.size() < 1)
-    {
-        setModuleSelectedState(moduleToSelect, true);
-        //if there is no "Last Selection", there is nothing to select up to
-        return;
-    }
-
-    //get the last selected module's display index
-    int lastSelectedDisplayIndex = currentlySelectedModules.getLast()->getModuleDisplayIndex();
-   
-    //get the current moduleToSelect's dispaly index
-    int moduleToSelectDisplayIndex = moduleToSelect->getModuleDisplayIndex();
-
-
-    if (lastSelectedDisplayIndex < moduleToSelectDisplayIndex) //we are selecting to the right
-    {
-        for (int i = 0; i < activeModuleEditors.size(); i++)
-        {
-            int displayIndex = activeModuleEditors[i]->getModuleDisplayIndex();
-            //we make sure the display index is in the range we want (if the index is between the selectedModule Indexes
-            if (displayIndex == moduleToSelectDisplayIndex ||  
-                (displayIndex > lastSelectedDisplayIndex && displayIndex < moduleToSelectDisplayIndex)) 
-            {
-                setModuleSelectedState(activeModuleEditors[i], true);
-            }
-        }
-    }
-    else if (lastSelectedDisplayIndex > moduleToSelectDisplayIndex) //we are selecting to the left
-    {
-        for (int i = 0; i < activeModuleEditors.size(); i++)
-        {
-            int displayIndex = activeModuleEditors[i]->getModuleDisplayIndex();
-            //we make sure the display index is in the range we want
-            if (displayIndex == moduleToSelectDisplayIndex || 
-                (displayIndex < lastSelectedDisplayIndex && displayIndex > moduleToSelectDisplayIndex))
-            {
-                setModuleSelectedState(activeModuleEditors[i], true);
-            }
-        }
-    }
-    else
-    {
-        setModuleSelectedState(moduleToSelect, true);
-    }
-
 }
 
 void KrumModuleContainer::setModuleSelectedWithCommand(KrumModuleEditor* moduleToSelect)
@@ -490,9 +489,6 @@ void KrumModuleContainer::clickOneShotOnSelectedModules(const juce::MouseEvent& 
     }
 }
 
-
-
-
 void KrumModuleContainer::setListeningForMidiOnSelectedModules(bool shouldListen, KrumModuleEditor* originComp)
 {
     for (int i = 0; i < currentlySelectedModules.size(); i++)
@@ -534,7 +530,6 @@ juce::OwnedArray<KrumModuleEditor>& KrumModuleContainer::getActiveModuleEditors(
 {
     return activeModuleEditors;
 }
-
 
 int KrumModuleContainer::getNumActiveModules()
 {
@@ -599,21 +594,6 @@ void KrumModuleContainer::showModuleClipGainSlider(KrumModuleEditor* moduleEdito
     moduleEditor->setClipGainSliderVisibility(true);
 }
 
-//void KrumModuleContainer::showModulePitchSlider(KrumModuleEditor* moduleEditor)
-//{
-//    //clears all pitchsliders
-//    for (int i = 0; i < activeModuleEditors.size(); i++)
-//    {
-//        auto modEd = activeModuleEditors.getUnchecked(i);
-//        if (modEd != nullptr && modEd != moduleEditor)
-//        {
-//            modEd->setPitchSliderVisibility(false);
-//        }
-//    }
-//
-//    moduleEditor->setPitchSliderVisibility(true);
-//}
-
 void KrumModuleContainer::showModuleCanAcceptFile(KrumModuleEditor* moduleEditor)
 {
     for (int i = 0; i < activeModuleEditors.size(); i++)
@@ -666,7 +646,8 @@ void KrumModuleContainer::timerCallback()
     }
 
     //TODO: review
-    //not sure I like this
+    //not sure I like this but this is stopping an edge case where if you had a selection already made and then you tried to make multiple new modules, it would crash due to trying to select modules that didn't exist yet
+    //so... if we have modules are selected and the mouse id down in the fileBrowser, we deselect everything.
     if (currentlySelectedModules.size() > 0 && pluginEditor->fileBrowser.isMouseButtonDown(true))
     {
         deselectAllModules();
@@ -680,7 +661,7 @@ void KrumModuleContainer::loadMidiToModulesListening(int channel, int note)
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
         auto mod = activeModuleEditors[i];
-        if (mod->doesEditorWantMidi())
+        if (mod->wantsMidi())
         {
             mod->handleMidi(channel, note);
         }

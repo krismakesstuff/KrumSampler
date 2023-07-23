@@ -588,7 +588,9 @@ bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInDragSource(c
 {
     
     auto desc = dragDetails.description.toString();
-    return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) || desc.contains(DragStrings::recentsDragString));
+    return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) 
+                            || desc.contains(DragStrings::recentsDragString) 
+                            || desc.contains(DragStrings::fileChooserDragString));
 
     //return false;
 }
@@ -609,6 +611,36 @@ void KrumSamplerAudioProcessorEditor::DropSampleArea::itemDropped(const juce::Dr
     else if (desc.contains(DragStrings::recentsDragString))
     {
         selectedTrees = moduleContainer->pluginEditor->fileBrowser.getSelectedFileTrees(KrumFileBrowser::BrowserSections::recent);
+    }
+    else if (desc.contains(DragStrings::fileChooserDragString))
+    {
+        auto droppedFiles = moduleContainer->pluginEditor->fileBrowser.getFileChooserSelectedFiles();
+        juce::Array<KrumModuleEditor*> newMods{};
+
+        bool selectNew = droppedFiles.size() > 1;
+        if (droppedFiles.size() <= moduleContainer->getNumEmptyModules())
+        {
+            for (int i = 0; i < droppedFiles.size(); i++)
+            {
+                auto newMod = moduleContainer->handleNewExternalFile(droppedFiles[i].getFullPathName());
+                if (newMod && selectNew)
+                {
+                    newMods.add(newMod);
+                }
+            }
+        }
+
+        if (selectNew)
+            moduleContainer->deselectAllModules();
+
+        for (int i = 0; i < newMods.size(); i++)
+        {
+            moduleContainer->setModulesSelectedToLastSelection(newMods[i]);
+        }
+
+        DBG("File Chooser Drag: " + desc);
+
+        return;
     }
 
     juce::Array<KrumModuleEditor*> newMods{};
@@ -680,24 +712,15 @@ bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInFileDrag(con
 void KrumSamplerAudioProcessorEditor::DropSampleArea::filesDropped(const juce::StringArray& files, int x, int y)
 {
     setDraggingMouseOver(false);
-    //load the strings into file objects
-    //not sure we need to do this, we pass a string path name to the handleNewExternalFile function
-    juce::Array<juce::File> droppedFiles{};
-
-    for (int i = 0; i < files.size(); i++)
-    {
-        droppedFiles.add(juce::File{ files[i] });
-    }
-
 
     juce::Array<KrumModuleEditor*> newMods{};
 
-    bool selectNew = droppedFiles.size() > 1;
-    if (droppedFiles.size() <= moduleContainer->getNumEmptyModules())
+    bool selectNew = files.size() > 1;
+    if (files.size() <= moduleContainer->getNumEmptyModules())
     {
-        for (int i = 0; i < droppedFiles.size(); i++)
+        for (int i = 0; i < files.size(); i++)
         {
-            auto newMod = moduleContainer->handleNewExternalFile(droppedFiles[i].getFullPathName());
+            auto newMod = moduleContainer->handleNewExternalFile(files[i]);
             if (newMod && selectNew)
             {
                 newMods.add(newMod);

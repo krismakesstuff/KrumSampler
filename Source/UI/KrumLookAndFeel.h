@@ -915,25 +915,32 @@ public:
         
         g.setColour(slider.findColour(juce::Slider::ColourIds::trackColourId).darker(0.99f));
         //drawVolumeLines(g, (float)dbLineRect.getX() - 5, (float)dbLineRect.getWidth() - 5, 2.0f, -50.0f, -0.5f, slider);
-        drawVolumeLines(g, (float)dbLineRect.getX() - 5, (float)dbLineRect.getWidth() + 7, 2.0f, -50.0f, -0.5f, slider);
+        drawVolumeLines(g, (float)dbLineRect.getX() - 5, (float)dbLineRect.getWidth() + 7, 20.0f, -50.0f, -0.5f, slider);
         
         g.setColour(thumbColor);
         //g.setColour(juce::Colours::black);
         
         g.fillRoundedRectangle(thumb.toFloat(), cornerSize);
-        
-
 
         //float thumbOffset = thumbH / 2;
         float thumbOffset = 0;//getSliderThumbRadius(slider) / 2;
         int textHeight = 12;
         g.setFont( (float)textHeight );
         
-        auto twoDbPos = getSliderDecibelPosition(slider, 2.0f) + thumbOffset;
-        g.drawFittedText("+2", dbLineRect.withY(twoDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
+        auto twentyDbPos = getSliderDecibelPosition(slider, 20.0f) + thumbOffset;
+        g.drawFittedText("+20", dbLineRect.withY(twentyDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
+        
+        auto fifteenDbPos = getSliderDecibelPosition(slider, 15.0f) + thumbOffset;
+        g.drawFittedText("+15", dbLineRect.withY(fifteenDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
+        
+        auto tenDbPos = getSliderDecibelPosition(slider, 10.0f) + thumbOffset;
+        g.drawFittedText("+10", dbLineRect.withY(tenDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
+        
+        auto fiveDbPos = getSliderDecibelPosition(slider, 5.0f) + thumbOffset;
+        g.drawFittedText("+5", dbLineRect.withY(fiveDbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
 
         auto zeroDbPos = getSliderDecibelPosition(slider, 0.0f) + thumbOffset;
-        g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() - 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
+        g.drawFittedText("0", dbLineRect.withY(zeroDbPos - textHeight / 2).withX(dbLineRect.getX() + 1).withHeight(textHeight), juce::Justification::centredLeft, 1);
        
         auto n5DbPos = getSliderDecibelPosition(slider, -5.0f) + thumbOffset;
         g.drawFittedText("-5", dbLineRect.withY(n5DbPos - textHeight / 2).withX(dbLineRect.getX() - 2).withHeight(textHeight), juce::Justification::centredLeft, 1);
@@ -944,7 +951,6 @@ public:
         auto n20DbPos = getSliderDecibelPosition(slider, -20.0f) + thumbOffset;
         g.drawFittedText("-20", dbLineRect.withY(n20DbPos - textHeight / 2).withX(dbLineRect.getX() - 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
         
-       
         auto n50DbPos = getSliderDecibelPosition(slider, -50.0f) + thumbOffset;
         g.drawFittedText("-50", dbLineRect.withY(n50DbPos - textHeight / 2).withX(dbLineRect.getX() - 3).withHeight(textHeight), juce::Justification::centredLeft, 1);
 

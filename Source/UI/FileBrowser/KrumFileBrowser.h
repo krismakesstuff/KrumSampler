@@ -723,6 +723,7 @@ public:
     int getNumSelectedItems(BrowserSections section);
 
     juce::Array<juce::ValueTree> getSelectedFileTrees(BrowserSections section);
+    juce::Array<juce::File> KrumFileBrowser::getFileChooserSelectedFiles();
 
     void addFileToRecent(const juce::File file, juce::String name);
     void addFileToFavorites(juce::File file);

@@ -677,12 +677,11 @@ void KrumModuleEditor::setModuleMidiChannel(int newMidiChannel)
 
 void KrumModuleEditor::setModulePlaying(bool shouldPlay)
 {
-    if (modulePlaying != shouldPlay)
+    if (modulePlaying != shouldPlay && shouldPlay)
     {
-        if (shouldPlay)
-        {
-            animatePlaying = true;
-        }
+
+        animatePlaying = true;
+        
         //else if(animatePlaying)
         //{
         //    
@@ -741,6 +740,7 @@ void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* c
         juce::BubbleComponent::BubblePlacement bubblePlacement = juce::BubbleComponent::above;
         auto area = getLocalBounds();
         auto sliderName = slider->getName();
+
         if (sliderName == volumeSlider.getName())
         {
             pos = { slider->getBounds().getCentreX() - 5 /*+ 6*/, getMouseXYRelative().getY() - 5 };
@@ -758,7 +758,6 @@ void KrumModuleEditor::updateBubbleComp(juce::Slider* slider, juce::Component* c
             pos = {slider->getBounds().getCentreX(), slider->getBounds().getY()};
         }
         
-
         bubbleComp->setAllowedPlacement(bubblePlacement);
         bubbleComp->setPosition(pos, 0);
         bubbleComp->setColour(juce::BubbleComponent::outlineColourId, getModuleColor().darker(0.7f));
@@ -785,7 +784,7 @@ void KrumModuleEditor::setTimeHandles()
     timeHandle.setHandles(0, getNumSamplesInFile());
 }
 
-bool KrumModuleEditor::doesEditorWantMidi()
+bool KrumModuleEditor::wantsMidi()
 {
     return midiLabel.isListeningForMidi();
 }
@@ -855,7 +854,7 @@ void KrumModuleEditor::setAndDrawThumbnail()
     juce::File file{ moduleTree.getProperty(TreeIDs::moduleFile.getParamID()) };
     thumbnail.setSource (new juce::FileInputSource(file));
     
-    //if this is new file, or being reloaded from the tree
+    //if this is a new file or is being reloaded from the tree
     if (timeHandle.getEndPosition() == 0)
     {
         setTimeHandles();
@@ -914,12 +913,12 @@ void KrumModuleEditor::dragOperationEnded(const juce::DragAndDropTarget::SourceD
 void KrumModuleEditor::setModuleFile(juce::File& file)
 {
     juce::String filePath = file.getFullPathName();
+    moduleTree.setProperty(TreeIDs::moduleFile.getParamID(), filePath, nullptr);
+
     if (getModuleState() == KrumModule::ModuleState::empty)
     {
         setModuleState(KrumModule::ModuleState::hasFile);
     }
-
-    moduleTree.setProperty(TreeIDs::moduleFile.getParamID(), filePath, nullptr);
     
     drawThumbnail = true;
 }
