@@ -8,9 +8,7 @@
   ==============================================================================
 */
 
-#include <JuceHeader.h>
-#include "../UI/InfoPanel.h"
-#include "../UI/KrumLookAndFeel.h"
+#include "InfoPanel.h"
 
 //==============================================================================
 InfoPanel::InfoPanel()
@@ -41,13 +39,11 @@ void InfoPanel::paint (juce::Graphics& g)
         juce::Path titleBG;
         //titleBG.addRoundedRectangle(panelBG.getX() + 5, panelBG.getY(), panelBG.getWidth(), titleTextH, cornerSize, cornerSize, true, true, false, false);
         //g.drawFittedText(title, titleBG.getBounds().toNearestInt(), juce::Justification::centredLeft, 1);
-        auto klaf = static_cast<KrumLookAndFeel*>(&getLookAndFeel());
-        auto t = title.toUpperCase() + ": ";
-        g.setFont(klaf->getMontBoldTypeface());
-        int titleWidth = g.getCurrentFont().getStringWidth(t);
+        
+        int titleWidth = 0;
         //g.setFont(fontSize * 1.15f);
         g.setColour(fontColor);
-        g.drawFittedText(t, area.withRight(titleWidth + 5), juce::Justification::centred, 1, 1.0f);
+        g.drawFittedText("text", area.withRight(titleWidth + 5), juce::Justification::centred, 1, 1.0f);
         
         //message
         //juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight() + 2).withTrimmedLeft(5).withTrimmedRight(12).toNearestInt();
@@ -115,12 +111,10 @@ void InfoPanelComponent::setNewPanelMessage(juce::String newTitle, juce::String 
 
 InfoPanelButton::InfoPanelButton(juce::String title, juce::String newMessage, juce::String newKeycommand)
     : compTitle(title), message(newMessage), keycommand(newKeycommand), juce::Button(juce::String())
-{
-}
+{}
 
 InfoPanelButton::~InfoPanelButton()
-{
-}
+{}
 
 void InfoPanelButton::mouseEnter(const juce::MouseEvent& e)
 {
@@ -140,7 +134,8 @@ InfoPanelDrawableButton::InfoPanelDrawableButton(juce::DrawableButton::ButtonSty
     : compTitle(title), message(newMessage), keycommand(newKeycommand), juce::DrawableButton(title, buttonStyle)
 {}
 
-InfoPanelDrawableButton::~InfoPanelDrawableButton() {}
+InfoPanelDrawableButton::~InfoPanelDrawableButton() 
+{}
 
 void InfoPanelDrawableButton::mouseEnter(const juce::MouseEvent& event)
 {
