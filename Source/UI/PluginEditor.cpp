@@ -20,13 +20,16 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     setName("Plugin Editor");
     //setInterceptsMouseClicks(true, true);
 
+    
+    
     //load the image of the title from binary data
     titleImage = juce::ImageFileFormat::loadFrom(BinaryData::KrumSamplerTitle_png, BinaryData::KrumSamplerTitle_pngSize);
 
     //set the look and feel, see KrumLookAndFeel.h
     auto& laf = getLookAndFeel();
     laf.setDefaultLookAndFeel(&kLaf);
-
+    //laf.setDefaultSansSerifTypefaceName("Georgia");
+    
     //mouse over tooltip time out
     toolTipWindow->setMillisecondsBeforeTipAppears(2000);
 
@@ -82,7 +85,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     modulesViewport.setInterceptsMouseClicks(true, true);
     modulesViewport.setScrollBarsShown(false, true, false, false);
     
-    //add Info panel so we can display
+    //add Info panel
     addAndMakeVisible(InfoPanel::shared_instance());
     
     //add DropSampleArea
@@ -186,7 +189,7 @@ void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 
     //Output Label
     g.setColour(Colors::getFontColor());
-    g.setFont(kLaf.getMontBoldTypeface());
+    //g.setFont(kLaf.getMontBoldTypeface());
     g.setFont(13.0f);
     g.drawText("OUTPUT", outputGainSlider.getBounds().withTop(modulesBG.getY() + EditorDimensions::extraShrinkage()).withHeight(g.getCurrentFont().getHeight() + EditorDimensions::shrinkage),
                     juce::Justification::centred,true);

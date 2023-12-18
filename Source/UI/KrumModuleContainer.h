@@ -17,9 +17,9 @@
 //==============================================================================
 /*
 * 
-* A class to hold and manage KrumModuleEditors. It holds the module-editors and not the actual modules. It defines the viewport in which they live. 
+* A class to hold and manage KrumModuleEditors. It defines the viewport in which they live. 
 * This also manages interactions with the mouse selecting module-editors, as well as showing the clip-gain slider
-* 
+*
 * 
 */
 
@@ -31,8 +31,8 @@ class KrumSamplerAudioProcessorEditor;
 class KrumModuleContainer : public juce::Component,
                             public juce::Timer,
                             public juce::MidiKeyboardStateListener,
-                            public juce::ValueTree::Listener,
-                            public juce::KeyListener
+                            public juce::ValueTree::Listener//,
+                            //public juce::KeyListener
 {
 public:
     KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner, juce::ValueTree& valTree);
@@ -50,8 +50,8 @@ public:
     void mouseDown(const juce::MouseEvent& event) override;
 
     //Key Listener
-    bool keyPressed(const juce::KeyPress& key, juce::Component* ogComp) override;
-    bool keyStateChanged(bool isKeyDown, juce::Component* ogComp) override;
+    bool keyPressed(const juce::KeyPress& key) override;
+    bool keyStateChanged(bool isKeyDown) override;
 
     //MidiKeyboardState Listener
     void handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
@@ -140,7 +140,7 @@ private:
     bool findChildCompInSelectedModules(juce::Component* compToTest, int& origin, juce::String& type);
     void updateModuleDisplayIndicesAfterDelete(int displayIndexDeleted);
     int getNumVisibleModules();
-    juce::ValueTree& getFirstEmptyModuleTree();
+    juce::ValueTree getFirstEmptyModuleTree();
     void clearActiveModuleSettingsOverlays();
     void loadMidiToModulesListening(int channel, int note);
 

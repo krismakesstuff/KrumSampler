@@ -19,12 +19,14 @@ KrumModuleContainer::KrumModuleContainer(KrumSamplerAudioProcessorEditor* owner,
     : pluginEditor(owner), valueTree(valTree), juce::Component("ModuleContainer")
 {
 
-    setWantsKeyboardFocus(true);
+    
 
     pluginEditor->addKeyboardListener(this);
-    pluginEditor->addKeyListener(this);
+    //pluginEditor->addKeyListener(this);
     valueTree.addListener(this);
 
+    setWantsKeyboardFocus(true);
+    
     refreshModuleLayout();
     startTimerHz(30);
         
@@ -34,7 +36,7 @@ KrumModuleContainer::~KrumModuleContainer()
 {
     editorBeingDragged = nullptr;
     pluginEditor->removeKeyboardListener(this);
-    pluginEditor->removeKeyListener(this);
+    //pluginEditor->removeKeyListener(this);
     valueTree.removeListener(this);
     currentlySelectedModules.clear(false);
 }
@@ -44,7 +46,7 @@ void KrumModuleContainer::paint (juce::Graphics& g)
     auto area = getLocalBounds();
     
    g.setColour(Colors::getModuleBGColor());
-   g.fillRoundedRectangle(getLocalBounds().toFloat(), EditorDimensions::cornerSize);
+   g.fillRoundedRectangle(area.toFloat(), EditorDimensions::cornerSize);
 
 }
 
@@ -101,25 +103,30 @@ void KrumModuleContainer::valueTreePropertyChanged(juce::ValueTree& treeWhoChang
 
 void KrumModuleContainer::mouseDown(const juce::MouseEvent& event)
 {
-    //capture a mouseclick that isn't on any modules, that will clear all selected modules
+    //a mouseclick that isn't on any modules will clear all selected modules
     deselectAllModules();
     clearActiveModuleSettingsOverlays();
     
 }
 
-bool KrumModuleContainer::keyPressed(const juce::KeyPress& key, juce::Component* ogComp)
+bool KrumModuleContainer::keyPressed(const juce::KeyPress& key)
 {
+    DBG("KeyPressed: " );
     return false;
 }
 
-bool KrumModuleContainer::keyStateChanged(bool isKeyDown, juce::Component* ogComp)
+bool KrumModuleContainer::keyStateChanged(bool isKeyDown)
 {
-    if (isKeyDown && juce::ModifierKeys::currentModifiers.isShiftDown())
+    auto keyPress = juce::ModifierKeys::getCurrentModifiersRealtime();
+    //if(juce::ModifierKeys::currentModifiers.isShiftDown())
+    if(keyPress.isShiftDown())
     {
+        DBG("keystateChanged: down");
         setMultiControlState(true);
     }
-    else if (!isKeyDown)
+    else
     {
+        DBG("keystateChanged: up");
         setMultiControlState(false);
     }
     
@@ -129,7 +136,7 @@ bool KrumModuleContainer::keyStateChanged(bool isKeyDown, juce::Component* ogCom
 //this gets called by the realtime thread, need to copy data and return. No painting.
 void KrumModuleContainer::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
 {
-    bool alreadySentMidi = false;
+    //bool alreadySentMidi = false;
     for (int i = 0; i < activeModuleEditors.size(); i++)
     {
         auto modEd = activeModuleEditors[i];
@@ -279,7 +286,7 @@ void KrumModuleContainer::setModuleSelectedFromClick(KrumModuleEditor* moduleToS
     //I think I can get rid of the mouse event?
     bool shiftDown = e.mods.isShiftDown();
     bool cmdDown = e.mods.isCommandDown();
-    bool multControl = isMultiControlActive();
+    //bool multControl = isMultiControlActive();
 
     if (setSelected)
     {
@@ -647,7 +654,7 @@ void KrumModuleContainer::timerCallback()
 
     //TODO: review
     //not sure I like this but this is stopping an edge case where if you had a selection already made and then you tried to make multiple new modules, it would crash due to trying to select modules that didn't exist yet
-    //so... if we have modules are selected and the mouse id down in the fileBrowser, we deselect everything.
+    //so... if we have modules are selected and the mouse is down in the fileBrowser, we deselect everything.
     if (currentlySelectedModules.size() > 0 && pluginEditor->fileBrowser.isMouseButtonDown(true))
     {
         deselectAllModules();
@@ -950,7 +957,7 @@ void KrumModuleContainer::setMultiControlModifierKey(juce::ModifierKeys::Flags n
 
 
 
-juce::ValueTree& KrumModuleContainer::getFirstEmptyModuleTree()
+juce::ValueTree KrumModuleContainer::getFirstEmptyModuleTree()
 {
     auto modulesTree = valueTree.getChildWithName(TreeIDs::KRUMMODULES.getParamID());
     for (int i = 0; i < modulesTree.getNumChildren(); i++)

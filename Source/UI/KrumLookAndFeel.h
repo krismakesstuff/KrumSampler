@@ -110,43 +110,43 @@ public:
 
     KrumLookAndFeel() 
     {
-        setDefaultSansSerifTypeface(getMontRegularTypeface());
+        //setDefaultSansSerifTypeface(getMontRegularTypeface());
     }
 
-    juce::Typeface::Ptr getMontLightTypeface()
-    {
-        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratMedium_ttf, BinaryData::MontserratMedium_ttfSize);
-    }
+//    juce::Typeface::Ptr getMontLightTypeface()
+//    {
+//        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratLight_ttf, BinaryData::MontserratLight_ttfSize);
+//    }
+//
+//    juce::Typeface::Ptr getMontMediumTypeface()
+//    {
+//        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratMedium_ttf, BinaryData::MontserratMedium_ttfSize);
+//    }
+//
+//    juce::Typeface::Ptr getMontRegularTypeface()
+//    {
+//        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratRegular_ttf, BinaryData::MontserratRegular_ttfSize);
+//    }
+//
+//    juce::Typeface::Ptr getMontBoldTypeface()
+//    {
+//        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBold_ttf, BinaryData::MontserratBold_ttfSize);
+//    }
+//
+//    juce::Typeface::Ptr getMontBlackTypeface()
+//    {
+//        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBlack_ttf, BinaryData::MontserratBlack_ttfSize);
+//    }
+//
+//    juce::Typeface::Ptr getMontExtraBoldTypeFace()
+//    {
+//        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratExtraBold_ttf, BinaryData::MontserratExtraBold_ttfSize);
+//    }
 
-    juce::Typeface::Ptr getMontMediumTypeface()
-    {
-        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratLight_ttf, BinaryData::MontserratLight_ttfSize);
-    }
-    
-    juce::Typeface::Ptr getMontRegularTypeface()
-    {
-        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratRegular_ttf, BinaryData::MontserratRegular_ttfSize);
-    }
-
-    juce::Typeface::Ptr getMontBoldTypeface()
-    {
-        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBold_ttf, BinaryData::MontserratBold_ttfSize);
-    }
-
-    juce::Typeface::Ptr getMontBlackTypeface()
-    {
-        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratBlack_ttf, BinaryData::MontserratBlack_ttfSize);
-    }
-
-    juce::Typeface::Ptr getMontExtraBoldTypeFace()
-    {
-        return juce::Typeface::createSystemTypefaceFor(BinaryData::MontserratExtraBold_ttf, BinaryData::MontserratExtraBold_ttfSize);
-    }
-
-    juce::Typeface::Ptr getFileBrowserFont()
-    {
-        return getMontRegularTypeface();
-    }
+    //juce::Typeface::Ptr getFileBrowserFont()
+//    {
+//        return getMontRegularTypeface();
+//    }
 
   /*  juce::Typeface::Ptr getTypefaceForFont(const juce::Font& f) override
     {
@@ -538,7 +538,7 @@ public:
         label.setJustificationType(juce::Justification::centredLeft);
         label.setBounds(0, 0, box.getWidth(), box.getHeight());
         //label.setFont(getComboBoxFont(box));
-        label.setFont(getMontMediumTypeface());
+        //label.setFont(getMontMediumTypeface());
     }
 
     void drawPopupMenuBackground(juce::Graphics& g, int width, int height) override
@@ -1243,7 +1243,7 @@ public:
     {
         label.setJustificationType(juce::Justification::centred);
         label.setBounds(1, 0, box.getWidth() - 10, box.getHeight());
-        label.setFont(getMontBoldTypeface());
+        //label.setFont(getMontBoldTypeface());
         label.setFont(label.getHeight() * 0.8f);
         //label.setFont(getMontBoldTypeface());
         //label.setColour(juce::Label::ColourIds::textColourId, juce::Colours::lightgrey.darker(0.3f).withAlpha(0.7f));
@@ -1403,7 +1403,7 @@ public:
         bool isDirectory, bool isItemSelected,
         int /*itemIndex*/, juce::DirectoryContentsDisplayComponent& dcc) override
     {
-        auto fileListComp = dynamic_cast<juce::Component*> (&dcc);
+        //auto fileListComp = dynamic_cast<juce::Component*> (&dcc);
 
         bool audioFile = file.getFileExtension().compareIgnoreCase(".wav") == 0;
 
@@ -1435,7 +1435,8 @@ public:
         else
             g.setColour(Colors::getBrowserFontColor());
 
-        g.setFont(getFileBrowserFont());
+        //g.setFont(getFileBrowserFont());
+        //g.setFont(getMontRegularTypeface());
         g.setFont((float)height * Dimensions::rowTextScalar);
        // g.drawFittedText(filename, area.withX(Dimensions::fileIconSize + 5), juce::Justification::centredLeft, 1);
         g.drawText(filename, area.withX(Dimensions::fileIconSize + 5), juce::Justification::centredLeft, true);

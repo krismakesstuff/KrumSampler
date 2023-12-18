@@ -16,9 +16,10 @@
 * 
 * The File Browser holds folders and files chosen by the user for quick access. The file paths will save with the plugin as well as any custom names that are given to them by the user.
 * There is a separate display name which can be changed by the user, but does not rename any actual files.
-* There are three sections, the "Recent", "Favorites" and "File Browser sections. The Recent section gets automatically updated when a file is dropped on a new module. It will only hold files.
+* There are three sections, the "Recent", "Favorites" and "File Browser" sections.
+* The Recent section gets automatically updated when a file is dropped on a new module. It will only hold files.
 * The Favorites section is user selected and can be chosen from the File Browser section, or by drag and drop from external apps.
-* The File Browser section gives the user acces to their whole computer and can also save locations, called "Places".
+* The File Browser section gives the user acces to their whole computer and can also save locations, called "Places". Right-clicking lists available actions
  
 * This class is a bit confusing... The KrumFileBrowser holds a KrumTreeView. The KrumTreeView holds TreeViewItems. There are two types of TreeViewItems, KrumTreeHeaderItem and KrumTreeItem. 
 * The KrumTreeHeaderItem is for folders and KrumTreeItem is for files. Both also have custom component subclasses that give them some custom functionality.
@@ -723,7 +724,7 @@ public:
     int getNumSelectedItems(BrowserSections section);
 
     juce::Array<juce::ValueTree> getSelectedFileTrees(BrowserSections section);
-    juce::Array<juce::File> KrumFileBrowser::getFileChooserSelectedFiles();
+    juce::Array<juce::File> getFileChooserSelectedFiles();
 
     void addFileToRecent(const juce::File file, juce::String name);
     void addFileToFavorites(juce::File file);

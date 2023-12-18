@@ -280,7 +280,7 @@ void KrumModuleEditor::buildModule()
 
     addAndMakeVisible(titleBox);
     titleBox.setText(moduleTree.getProperty(TreeIDs::moduleName.getParamID()).toString(), juce::NotificationType::dontSendNotification);
-    titleBox.setFont(moduleContainer.getPluginEditor()->getKrumLaf()->getMontBoldTypeface());
+    //titleBox.setFont(moduleContainer.getPluginEditor()->getKrumLaf()->getMontBoldTypeface());
     titleBox.setFont({ 16.0f });
     titleBox.setColour(juce::Label::ColourIds::textColourId, titleFontColor);
     titleBox.setColour(juce::Label::ColourIds::textWhenEditingColourId, juce::Colours::black);

@@ -52,9 +52,13 @@ int RecentFilesList::getNumRows()
 
 void RecentFilesList::listBoxItemClicked(int row, const juce::MouseEvent& e)
 {
+    if(e.mods.isPopupMenu())
+        return;
+    
     juce::File file{ getFilePath(row) };
     if (previewer)
     {
+        //if auto-play is on, we load the file into the previewer
         if (previewer->isAutoPlayActive())
         {
             if (file != previewer->getCurrentFile())
@@ -73,10 +77,14 @@ void RecentFilesList::listBoxItemClicked(int row, const juce::MouseEvent& e)
 
 void RecentFilesList::listBoxItemDoubleClicked(int row, const juce::MouseEvent& e)
 {
+    if(e.mods.isPopupMenu())
+        return;
+    
     juce::File file{ getFilePath(row) };
 
     if (previewer)
     {
+        //if auto-play is off, we load the file into the previewer.
         if (!previewer->isAutoPlayActive())
         {
             if (file != previewer->getCurrentFile())
@@ -95,10 +103,10 @@ void RecentFilesList::listBoxItemDoubleClicked(int row, const juce::MouseEvent& 
 
 void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) 
 {
-    int indent = 20;
+    //int indent = 20 ;
     int spacer = 5;
 
-    auto klaf = static_cast<KrumLookAndFeel*>(&getLookAndFeel());
+    //auto klaf = static_cast<KrumLookAndFeel*>(&getLookAndFeel());
 
     juce::Rectangle<int> area = { spacer, 0, width - spacer, height };
     
@@ -117,7 +125,7 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
         g.drawRect(area);
     }
     
-    g.setFont(klaf->getFileBrowserFont());
+    //g.setFont(klaf->getFileBrowserFont());
     g.setFont((float)height * Dimensions::rowTextScalar);
     g.setColour(fontC);
     //g.drawFittedText(getFileName(rowNumber), area.withX(Dimensions::fileIconSize + indent + spacer), juce::Justification::centredLeft, 1);
@@ -130,7 +138,7 @@ void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int wid
 bool RecentFilesList::addFile(juce::File fileToAdd, juce::String name)
 {
 
-    //checks if file already exists in recent
+    //checks if file already exists in recent, returns if found
     for (int i = 0; i < recentValueTree.getNumChildren(); ++i)
     {
         auto rec = recentValueTree.getChild(i);
@@ -140,8 +148,8 @@ bool RecentFilesList::addFile(juce::File fileToAdd, juce::String name)
         }
     }
 
+    //otherwise, add file to tree and update UI
     juce::ValueTree newFileTree{ TreeIDs::File.getParamID() };
-
     newFileTree.setProperty(TreeIDs::filePath.getParamID(), fileToAdd.getFullPathName(), nullptr);
     newFileTree.setProperty(TreeIDs::fileName.getParamID(), name, nullptr);
 
@@ -255,6 +263,8 @@ int KrumTreeItem::getItemHeight() const
 
 void KrumTreeItem::itemClicked(const juce::MouseEvent& e)
 {
+    
+    
     if (previewer)
     {
         juce::File file{ getFilePath() };
@@ -1962,8 +1972,6 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
     :  fileBrowser(fb), previewer(p)
 {
 
-    
-
     setDirectory(defaultLocation);
     
     fileTree.setItemHeight(Dimensions::rowHeight);
@@ -2821,7 +2829,7 @@ void PanelHeader::paint(juce::Graphics& g)
 
     if (klaf)
     {
-        g.setFont(klaf->getMontExtraBoldTypeFace());
+        //g.setFont(klaf->getMontExtraBoldTypeFace());
         g.setFont(area.getHeight() * 0.9f);
     }
 
