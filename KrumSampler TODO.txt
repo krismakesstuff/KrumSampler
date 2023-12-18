@@ -1,0 +1,53 @@
+KrumSampler TODO:
+
+
+- file browser: when the file is selected, you can use the arrow keys to navigate. But if auto-play is selected and you use the arrow key to change the selected file, the audioPreviewer won't play back the file. The mouseDown callback is where we are triggering the audioPreviewer trigger
+- had a dragging module crash after a deleting many modules at once. Crash happened in getModulesDraggedArea()
+- not reloading state on first open in ableton
+- update documentation in code and repo
+- test in all DAWs and platforms
+- make a track with it
+- ctrl+f "TODO" current project
+
+
+OPTIMIZATION:
+-loading images from binary on module creation, good or bad?
+
+
+FOR NEXT TIME:
+- trigger mode?
+	- let's you choose between one shot or re-trigger
+- velocity? 
+	- let's you assign a sample to a velocity range, use FMOD range sliders design
+- add drop shadows on module buttons and sliders? 
+	- This will help the modules be easier to understand and will just look better I think
+- add copy module button, copies ther current settings
+	- make this work with multi-select?
+- add small fade in and fade out to sample start and end positions
+	- this will let you make any start and end position without getting clicks and pops
+	- make fade amount adjustable?
+- Add plugin presets
+- add global settings
+	- allows user to change default behaviors of function
+	- multi-control options, mod key, default behaviour
+	- mutli-sample module creatging
+		- should all modules default to multi-control and listen for everything?
+		- midi and color and volume and pan, etc. No for now but could be an option
+	- auto adding files to favorites when directly dropping from filebrowser or external app
+	- auto showing colorPalette on a new module
+	- auto previewer default
+- experiment with changing a filter based on velocity
+	- the idea being that this would make the velocity sound more real
+	- I think it just needs to be a high pass filter that changes it's cutoff depending on the veloctiy played
+	- make the sensitivity of the filter adjustable
+- consider moving pitchSlider and reverseButton above the panSlider, under the thumbnail. 
+	- try to create a seperation of sample manipulating creative parameters and utility parameters. 
+- revisit on shot multiControl action, I think it's clunky but maybe not
+
+
+DOCUMENTATION:
+
+	
+
+
+

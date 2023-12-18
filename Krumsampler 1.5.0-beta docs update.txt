@@ -1,0 +1,16 @@
+- File Management Area (adding your own samples)
+	- The left side of the plug-in is dedicated to file management. There are three sections, The File Browser, Favorites, and Recent sections. Each section header can be double-clicked to either maximize of minimize them. You can also drag them up or down to resize. 
+	- You can right click the Favorite and Recent Sections to clear them.
+	- Right click files to get a set of actions. 
+	- All audio files under 7 seconds(the sample length limit) in the File Management Area can be auditioned by double-clicking. If auto-play is on, it will audition with every click. 
+	- You can click the Hide browser button on the left and it will collapse the whole section.
+	- The File Browser section lets you browse the files on your computer and any external hard drives. 
+		- The arrow on the left of the File Browser will take your browser "up" a folder. 
+		- The address bar shows your currently viewed location, but can also be clicked on. Once clicked, a drop down list will appear and show your external drives, common places (Desktop, Documents, etc.), and user saved places. You can save a "place" by right clicking a folder and selecting "add to Places". You can additionally delete them by right clicking them in the address bar drop down list. 
+		- Add samples to the Favorites section, by right clicking and selecting "add to Favorites", you can also drag and drop them on the Favorites section. 
+	- The Favorites section is where you keep the samples you want to use for this session. These will save with your preset (next update!). For now, you have to put files into the Favorites section before you can use them. You can drag and drop files onto the Favorites section to add them, or you can right click them in the File Browser. Once you have files in the Favorites section, you can drag them to the "Drop Samples Here", to create a new module. You can right click the files to rename, reveal, or remove. 
+	- The Recent section is where the samples that have been made into modules get remebered. These will automatically populate as you assign samples. 
+		
+
+- Resizing (testing ongoing)
+	- You can now adjust the width of the plugin to pretty wide, to very small. It's not perfect, but it's a start and mostly works. 
