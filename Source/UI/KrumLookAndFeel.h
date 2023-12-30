@@ -270,10 +270,10 @@ public:
             sliderPorp = 0.9999f;
         }
 
-        const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
+        //const juce::Colour trackColour(slider.findColour(juce::Slider::trackColourId));
         //juce::Colour gradCol1(juce::Colours::black.withAlpha(0.3f));
         juce::Colour gradCol1(juce::Colours::transparentBlack);
-        juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
+        //juce::Colour gradCol2(trackColour.overlaidWith(juce::Colour(0x06000000)));
         juce::Path indent;
 
         float cornerSize = 4.0f;
@@ -306,7 +306,7 @@ public:
         {
             float trackWidth = width;// * 0.35f;
             //auto ix = /*(float)x + */(float)width * 0.5f;// -(sliderThumbRadius * 0.5f);
-            float ix = bounds.getCentreX() - (trackWidth / 2);
+            //float ix = bounds.getCentreX() - (trackWidth / 2);
             juce::Rectangle<float> trackRect (x , (float)y, trackWidth, (float)height );
 
             /*juce::ColourGradient vertGrade(gradCol1, ix, y, gradCol2, ix, trackRect.getBottom(), false);
@@ -330,10 +330,10 @@ public:
                                 const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
         float cornerSize = 1.0f;
-        juce::Line<float> line;
-        juce::Point<int> dropPoint;
+        //juce::Line<float> line;
+        //juce::Point<int> dropPoint;
 
-        int dropRad = 5;
+        //int dropRad = 5;
         int thumbX, thumbY, thumbH, thumbW;
         
         //Output Slider
@@ -818,7 +818,7 @@ public:
 
         if (slider.isHorizontal()) 
         {
-            auto iy = height * 0.25f;
+            //auto iy = height * 0.25f;
             juce::Rectangle<float> trackRect((float)x, y, (float)width, height);
 
             g.setColour(juce::Colours::grey);

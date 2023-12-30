@@ -334,7 +334,16 @@ PreviewSound::~PreviewSound()
 
 std::atomic<float>* PreviewSound::getPreviewerGain() const
 {
-    return previewer->getCurrentGain();
+    auto gain = previewer->getCurrentGain();
+    
+    if (gain == nullptr)
+    {
+        DBG("Previewer Gain NULL in PreviewSound");
+        return nullptr;
+    }
+    
+    return gain;
+    
 }
 
 //====================================================================================//
@@ -369,7 +378,14 @@ void PreviewVoice::startNote(int /*midiNoteNumber*/, float /*velocity*/, juce::S
     {
         sourceSamplePosition = 0.0;
 
-        gain.store(*sound->getPreviewerGain());
+        if(auto prevGain = sound->getPreviewerGain())
+        {
+            gain.store(*prevGain);
+        }
+        else
+        {
+            gain.store(0.0f);
+        }
         //gain = newGain;
 
         adsr.setSampleRate(sound->sourceSampleRate);
@@ -641,7 +657,8 @@ void KrumSampler::playPreviewFile()
         {
             if (previewVoice->canPlaySound(soundToPlay))
             {
-                startVoice(previewVoice, soundToPlay, 0, 0, 1); // midiNote = 0, velocity = 1, pitchwheel = 0 
+                startVoice(previewVoice, soundToPlay, 0, 0, 1); // midiNote = 0, midiChannel = 0, velocity = 1z
+                //previewVoice->startNote( 0, 1, soundToPlay, 0);
                 break;
             }
         }
@@ -652,6 +669,7 @@ void KrumSampler::playPreviewFile()
 void KrumSampler::assignPreveiwer(SimpleAudioPreviewer* previewerToUse)
 {
     filePreviewer = previewerToUse;
+    // start timer to look for preview flag in filePreviewer
     startTimerHz(30);
 }
 

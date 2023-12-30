@@ -53,7 +53,7 @@ void KrumModuleContainer::paint (juce::Graphics& g)
 void KrumModuleContainer::refreshModuleLayout()
 {
     int numModules = activeModuleEditors.size();
-    auto area = getLocalBounds();
+    //auto area = getLocalBounds();
     auto viewportBounds = pluginEditor->modulesViewport.getBounds();
     int viewportWidth = viewportBounds.getWidth();
     int viewportHeight = viewportBounds.getHeight();
@@ -823,7 +823,7 @@ void KrumModuleContainer::setMultiControlState(bool shouldControl)
 //if sourceEditor is null, it will reset the selected Modules Attachments to it's own parameters
 void KrumModuleContainer::reassignSelectedSliderAttachments(KrumModuleEditor* sourceEditor, juce::Slider* slider)
 {
-    auto& apvts = *getAPVTS();
+    //auto& apvts = *getAPVTS();
 
     if (sourceEditor == nullptr)
     {
@@ -868,7 +868,7 @@ void KrumModuleContainer::updateSlidersIfBeingMultiControlled(KrumModuleEditor* 
 
 void KrumModuleContainer::reassignSelectedButtonAttachments(KrumModuleEditor* sourceEditor, juce::Button* button)
 {
-    auto& apvts = *getAPVTS();
+    //auto& apvts = *getAPVTS();
 
     if (sourceEditor == nullptr)
     {
@@ -896,7 +896,7 @@ void KrumModuleContainer::reassignSelectedButtonAttachments(KrumModuleEditor* so
 
 void KrumModuleContainer::reassignSelectedComboAttachments(KrumModuleEditor* sourceEditor, juce::ComboBox* comboBox)
 {
-    auto& apvts = *getAPVTS();
+    //auto& apvts = *getAPVTS();
 
     if (sourceEditor == nullptr)
     {

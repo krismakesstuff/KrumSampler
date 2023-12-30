@@ -46,7 +46,7 @@ void TimeHandle::valueTreePropertyChanged(juce::ValueTree & treeWhoChanged, cons
 void TimeHandle::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
-    int spacer = 5;
+    //int spacer = 5;
     int handleH = area.getHeight()/* * 0.7f*/;
     int handleW = (int)(handleH * 0.65f);
 

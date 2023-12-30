@@ -90,7 +90,7 @@ void DragAndDropThumbnail::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
 
-    auto color = parentEditor.getModuleColor();
+    //auto color = parentEditor.getModuleColor();
 
     g.setColour(thumbnailBGColor);
     g.fillRect(area);
@@ -187,7 +187,7 @@ void DragAndDropThumbnail::resized()
 
     int sliderW = 15;
     int spacer = 5;
-    int handleH = 15;
+    //int handleH = 15;
 
     clipGainSlider.setBounds(area.getRight() - sliderW - (spacer * 2), area.getY() + spacer, sliderW, area.getHeight() - (spacer * 2));
 }

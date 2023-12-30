@@ -22,32 +22,23 @@ InfoPanel::~InfoPanel()
 void InfoPanel::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
-    float cornerSize = 3.0f;
-    auto panelBG = area/*.reduced(5)*/.toFloat();
+    //float cornerSize = 3.0f;
+    //auto panelBG = area/*.reduced(5)*/.toFloat();
     
     if (showText)
     {
-        //bg fill
-        //g.setColour(bgColor.withAlpha(0.1f));
-        //g.fillRoundedRectangle(panelBG, cornerSize);
         
         auto messageFont = g.getCurrentFont();
         
         //title
-        float titleTextH = panelBG.getHeight() / 3.7;
-        int numLines = panelBG.getHeight() / 4;
         juce::Path titleBG;
-        //titleBG.addRoundedRectangle(panelBG.getX() + 5, panelBG.getY(), panelBG.getWidth(), titleTextH, cornerSize, cornerSize, true, true, false, false);
-        //g.drawFittedText(title, titleBG.getBounds().toNearestInt(), juce::Justification::centredLeft, 1);
+        g.setFont(fontSize * 1.05f);
+        int titleWidth = g.getCurrentFont().getStringWidthFloat(title);
         
-        int titleWidth = 0;
-        //g.setFont(fontSize * 1.15f);
         g.setColour(fontColor);
-        g.drawFittedText("text", area.withRight(titleWidth + 5), juce::Justification::centred, 1, 1.0f);
+        g.drawFittedText(title, area.withRight(titleWidth + 5), juce::Justification::centred, 1, 1.0f);
         
         //message
-        //juce::Rectangle<int> messageArea = panelBG.withTrimmedTop(titleBG.getBounds().getHeight() + 2).withTrimmedLeft(5).withTrimmedRight(12).toNearestInt();
-        //g.drawFittedText(message, messageArea, juce::Justification::topLeft, numLines);
         g.setFont(messageFont.withHeight(fontSize)); 
         g.setColour(fontColor.darker(0.2f));
         g.drawText(message, area.withLeft(titleWidth + 5).withRight(getRight() - 10), juce::Justification::centredLeft, true);

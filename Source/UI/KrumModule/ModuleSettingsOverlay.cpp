@@ -68,11 +68,11 @@ void ModuleSettingsOverlay::resized()
     auto area = getLocalBounds();
 
     int spacer = 5;
-    int titleBoxH = area.getHeight() * 0.11f;
-    int midiListenButtonH = area.getHeight() * 0.056f;
-    int paletteH = area.getHeight() * 0.28; 
-    int noteNumberH = area.getHeight() * 0.145f;
-    int noteTitleH = area.getHeight() * 0.078f;
+    //int titleBoxH = area.getHeight() * 0.11f;
+    //int midiListenButtonH = area.getHeight() * 0.056f;
+    //int paletteH = area.getHeight() * 0.28;
+    //int noteNumberH = area.getHeight() * 0.145f;
+    //int noteTitleH = area.getHeight() * 0.078f;
 
     int buttonWidth = area.getWidth() * 0.325f;
     int buttonHeight = area.getHeight() * 0.275f;

@@ -159,7 +159,7 @@ KrumSamplerAudioProcessorEditor::~KrumSamplerAudioProcessorEditor()
 void KrumSamplerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     auto area = getLocalBounds();
-    int spacer = 5;
+    //int spacer = 5;
 
     //app background
     g.setColour(Colors::getbgColor());
@@ -602,8 +602,8 @@ bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInDragSource(c
 void KrumSamplerAudioProcessorEditor::DropSampleArea::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragDetails)
 {
     auto desc = dragDetails.description.toString();
-    bool addNextModule = false;                         //set flag true if files are accepted by module, otherwise leave false
-    auto& sampler = moduleContainer->pluginEditor->sampler;
+    //bool addNextModule = false;                         //set flag true if files are accepted by module, otherwise leave false
+    //auto& sampler = moduleContainer->pluginEditor->sampler;
     juce::Array<juce::ValueTree> selectedTrees;
 
     //grab the correct valueTree from the file browser

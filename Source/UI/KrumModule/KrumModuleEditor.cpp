@@ -1393,7 +1393,7 @@ void KrumModuleEditor::MidiLabel::paint(juce::Graphics& g)
     //g.fillRect(area);
     
     juce::Rectangle<int> midiNoteRect = area;//.reduced(7).withX(spacer);
-    juce::Rectangle<int> midiChanRect = area.withX(midiNoteRect.getRight() + spacer).withWidth(area.getWidth() * 0.5f);
+    //juce::Rectangle<int> midiChanRect = area.withX(midiNoteRect.getRight() + spacer).withWidth(area.getWidth() * 0.5f);
 
 
     g.setColour(findColour(juce::Label::ColourIds::backgroundColourId));
@@ -1495,12 +1495,12 @@ void KrumModuleEditor::PitchSlider::paint(juce::Graphics& g)
     auto h = bounds.getHeight();
     auto w = bounds.getWidth();
     auto len = juce::jmin(h, w) * 0.15f;
-    auto thick = len / 1.8f;
+    //auto thick = len / 1.8f;
     int titleH = 12;
 
     //auto bgColor = findColour(juce::Slider::ColourIds::backgroundColourId);
     auto moduleColor = findColour(juce::Slider::ColourIds::backgroundColourId);
-    auto bgColor = Colors::getModuleBGColor();
+    //auto bgColor = Colors::getModuleBGColor();
     auto textColor = findColour(juce::Slider::ColourIds::textBoxTextColourId);
 
     if (isMouseOverOrDragging())
@@ -1665,7 +1665,7 @@ KrumModuleEditor::CustomToggleButton::~CustomToggleButton()
 void KrumModuleEditor::CustomToggleButton::paintButton(juce::Graphics& g, const bool shouldDrawButtonAsHighlighted, const bool shouldDrawButtonAsDown)
 {
     auto area = getLocalBounds();
-    int titleH = 10;
+    //int titleH = 10;
     bool buttonOn = getToggleState();
 
     auto bgColor = findColour(buttonOn ? juce::TextButton::ColourIds::buttonOnColourId : juce::TextButton::ColourIds::buttonColourId);

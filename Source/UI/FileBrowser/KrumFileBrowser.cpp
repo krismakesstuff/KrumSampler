@@ -1764,14 +1764,14 @@ KrumTreeHeaderItem* FavoritesTreeView::findSectionHeaderParent(juce::TreeViewIte
 void FavoritesTreeView::makeModulesFromSelectedFiles()
 {
     auto selectedFileTrees = getSelectedValueTrees();
-    bool showEmptyModule = false;
+    //bool showEmptyModule = false;
 
     if (selectedFileTrees.size() <= moduleContainer->getNumEmptyModules())
     {
         auto modulesTree = fileBrowser.getStateValueTree().getChildWithName(TreeIDs::KRUMMODULES.getParamID());
         if (modulesTree.hasType(TreeIDs::KRUMMODULES.getParamID()))
         {
-            auto editor = moduleContainer->getPluginEditor();
+            //auto editor = moduleContainer->getPluginEditor();
 
             for (int fileIndex = 0; fileIndex < selectedFileTrees.size(); ++fileIndex)
             {
@@ -2459,7 +2459,7 @@ void KrumFileBrowser::paint(juce::Graphics& g)
 {
     auto area = getLocalBounds();
     float cornerSize = 5.0f;
-    float outline = 1.0f;
+    //float outline = 1.0f;
 
     g.setColour(Colors::getSectionBGColor());
     //g.setColour(juce::Colours::black);
@@ -2469,17 +2469,17 @@ void KrumFileBrowser::paint(juce::Graphics& g)
 void KrumFileBrowser::resized()
 {
     auto area = getLocalBounds().reduced(10);
-    int spacer = 5;
-    int favButtonH = 35;
-    int favButtonW = 50;
-    int recentTreeViewH = 90;
-    int favTreeViewH = 120;
-    int locationsW = 40;
+//    int spacer = 5;
+//    int favButtonH = 35;
+//    int favButtonW = 50;
+//    int recentTreeViewH = 90;
+//    int favTreeViewH = 120;
+//    int locationsW = 40;
 
     concertinaPanel.setBounds(area.withTrimmedBottom(Dimensions::previewerH).reduced(EditorDimensions::shrinkage, 0));
     audioPreviewer.setBounds(area.withTop(concertinaPanel.getBottom()).withRight(area.getRight()).withHeight(Dimensions::previewerH));
     
-    //TO DO
+    //TODO
     //make this reload previous concertina panel sizes
     if (init)
     {

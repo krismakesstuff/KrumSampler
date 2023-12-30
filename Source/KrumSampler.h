@@ -205,7 +205,7 @@ private:
     
     void timerCallback()override;
 
-    //makes a Krum Sound and adds it to the samplers sounds array, using the assigned file in the passed in module
+    //makes a KrumSound and adds it to the samplers sounds array, using the assigned file in the passed in module
     void addSample(KrumModule* moduleToAddSound);
 
     void removePreviewSound();
