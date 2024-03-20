@@ -2594,14 +2594,8 @@ void KrumFileBrowser::assignModuleContainer(KrumModuleContainer* container)
 
 void KrumFileBrowser::buildDemoKit()
 {
-    //Find the demo kit put there by the installer, instead of this nonsense below...
-    juce::File specialLocation = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
-    DBG("Location: " + specialLocation.getParentDirectory().getFullPathName());
-    juce::String separator = juce::File::getSeparatorString();
-    juce::File demoKitFolder{ specialLocation.getParentDirectory().getFullPathName() + separator + "DemoKit" };
-
+    // check to see if the DemoKit folder already exists in the favorites. If so we return
     auto favVt = fileBrowserValueTree.getChildWithName(TreeIDs::FAVORITES.getParamID());
-
     for (int i = 0; i < favVt.getNumChildren(); i++)
     {
         auto childTree = favVt.getChild(i);
@@ -2611,14 +2605,25 @@ void KrumFileBrowser::buildDemoKit()
             auto name = childTree.getProperty(TreeIDs::folderName.getParamID());
             if (name.toString().compare("DemoKit") == 0)
             {
+                DBG("Demokit found in favorites tree. Returning from buildDemoKit()");
                 return;
             }
         }
         
     }
+//
+    
+    juce::File specialLocation = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory);
+    DBG("Location: " + specialLocation.getParentDirectory().getFullPathName());
+    juce::String separator = juce::File::getSeparatorString();
+    
+    juce::File krumsamplerFolder {specialLocation.getFullPathName() + separator + "KrumSampler"};
+    juce::File demoKitFolder{ krumsamplerFolder.getFullPathName() + separator + "DemoKit" };
+
     
     //if this folder doesn't exist OR does exist but has no files in it, we add the binary audio files
-    if (!demoKitFolder.isDirectory() || demoKitFolder.getNumberOfChildFiles(juce::File::TypesOfFileToFind::findFiles) == 0)
+    //if (!demoKitFolder.isDirectory() || demoKitFolder.getNumberOfChildFiles(juce::File::TypesOfFileToFind::findFiles) == 0)
+    if (!krumsamplerFolder.isDirectory() || !demoKitFolder.isDirectory() || demoKitFolder.getNumberOfChildFiles(juce::File::TypesOfFileToFind::findFiles) == 0)
     {
         auto result = demoKitFolder.createDirectory();
         if (result.wasOk())
@@ -2661,13 +2666,14 @@ void KrumFileBrowser::buildDemoKit()
             favoritesTreeView.createNewFavoriteFolder(demoKit.getFullPathName());
         }
     }
-    else if (demoKitFolder.isDirectory())
+    else if (demoKitFolder.isDirectory()) // if directory exists and has files in it
     {
         demoKit = demoKitFolder;
-
+        DBG("Demokit folders already exists");
         DBG("DemoKit Child Files: " + juce::String(demoKit.getNumberOfChildFiles(juce::File::findFiles)));
         favoritesTreeView.createNewFavoriteFolder(demoKit.getFullPathName());
     }
+    
     
 }
 
