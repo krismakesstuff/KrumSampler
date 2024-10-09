@@ -1,7 +1,12 @@
 KrumSampler TODO:
 
 - write more detailed code comments
+- test multiple instances
+- test on mac
+- make quick vid
+- push to main and make 1.5.0-beta release.
 
+- create Docker documentation? 
 
 - had a dragging module crash after a deleting many modules at once. Crash happened in getModulesDraggedArea()
 
@@ -16,7 +21,7 @@ OPTIMIZATION:
 - loading images from binary on module creation, good or bad?
 - make loading audio previewer a more encapsulated process. Each callback for each item in the FileBrwoser is using similar if not identical code. 
 
-FOR NEXT TIME:
+FOR NEXT UPDATE:
 - trigger mode?
 	- let's you choose between one shot or re-trigger
 - velocity? 
