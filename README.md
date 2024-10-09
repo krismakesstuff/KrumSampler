@@ -1,10 +1,10 @@
 # KrumSampler
 
-### a simple to use drum sampler
+### A simple to use drum sampler
 
 A free open-source drum sampler plug-in. Use your own samples with a DAW-like channel strip layout.
 
-![image](https://github.com/krismakesstuff/KrumSampler/blob/dev/Screen%20Shot%202022-07-03%20at%202.37.28%20PM.png)
+![image](/Screen%20Shot%202022-07-03%20at%202.37.28%20PM.png)
 
 ## Newest Update: 1.5.0-beta (video coming soon)
 - 1.4.0-Beta [video](https://www.youtube.com/watch?v=LSDDeG-BdvY) 
