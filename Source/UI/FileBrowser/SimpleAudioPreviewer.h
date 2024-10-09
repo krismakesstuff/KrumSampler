@@ -80,7 +80,7 @@ private:
 
     juce::ValueTree& valueTree;
     juce::AudioProcessorValueTreeState& apvts;
-    juce::File currentAudioFile;
+    juce::File currentAudioFile{};
 
     std::unique_ptr<juce::AudioFormatReader> currentFormatReader = nullptr;
     std::unique_ptr<juce::AudioFormatReaderSource> currentAudioFileSource = nullptr;

@@ -14,21 +14,24 @@
 
 /*
 * 
-* The File Browser holds folders and files chosen by the user for quick access. The file paths will save with the plugin as well as any custom names that are given to them by the user.
-* There is a separate display name which can be changed by the user, but does not rename any actual files.
-* There are three sections, the "Recent", "Favorites" and "File Browser" sections.
-* The Recent section gets automatically updated when a file is dropped on a new module. It will only hold files.
-* The Favorites section is user selected and can be chosen from the File Browser section, or by drag and drop from external apps.
-* The File Browser section gives the user acces to their whole computer and can also save locations, called "Places". Right-clicking lists available actions
- 
-* This class is a bit confusing... The KrumFileBrowser holds a KrumTreeView. The KrumTreeView holds TreeViewItems. There are two types of TreeViewItems, KrumTreeHeaderItem and KrumTreeItem. 
-* The KrumTreeHeaderItem is for folders and KrumTreeItem is for files. Both also have custom component subclasses that give them some custom functionality.
-* The state of the tree will be saved with each use and must be restored as well. 
-* This browser also connnects to the AudioPreviewer to preview files. 
+* The KrumFileBrowser class consists of a juce::ConcertinaPanel component.
+* There are three sections in the ConcertinaPanel, the "Recent", "Favorites" and "File Browser" sections.
+* 
+* The "Recent" section (internally RecentFilesList) gets automatically updated when a file is used to make a new module. Creating a chronological record of used samples. 
+*   - Right-clicking will give options additional actions
+*   - Base component is a juce::ListBox, RecentFilesList is the ListBoxModel
+* 
+* The "Favorites" section (internally FavoritesTreeView) is user selected and can be chosen from the File Browser section, or by drag and drop from external apps.
+*   - Right-clicking will give options additional actions
+*   - Base component is a juce::TreeView, FavoritesTreeView uses KrumTreeItem and KrumTreeHeaderItem to represent files and folders.
+* 
+* The "File Browser" (internally FileChooser) section gives the user access to their whole computer and can also save locations, called "Places". Right-clicking lists available actions
+*   - Implements a juce::FileTreeComponent. 
+* 
+* This also connects to the AudioPreviewer to each section to preview files. 
 * 
 * TODO:
 * - give the favorites section it's own thread to handle big drag and drops.
-* - Fix the DemoKit building
 * 
 */
 
@@ -80,7 +83,8 @@ enum RightClickMenuIds
 //---------------------------------------
 
 
-//Represents a file in the File Browser. Contains a private subclass that responds to mouse clicks
+// Represents a file in a TreeView. Contains a private nested-class that responds to mouse clicks
+// Used by the FavoritesTreeView class
 class KrumTreeItem :    public juce::TreeViewItem,
                         public InfoPanelComponent
                         //public juce::Component
@@ -174,7 +178,8 @@ private:
 };
 
 //=================================================================================================================================//
-//Similar to the KrumTreeItem, except this is meant to represent folders. So it has some different logic, but has similar structure. Also has a subclass. 
+// Similar to the KrumTreeItem, except this is meant to represent folders. So it has some different logic, but has similar structure. Also has a nested-class to handle mouse events.
+// Used by the FavoritesTreeView class
 class KrumTreeHeaderItem :  public juce::TreeViewItem,
                             public InfoPanelComponent
                             //public juce::Component
@@ -351,6 +356,7 @@ public:
 };
 //--------------------------------------------------------------------------------------------------------------
 
+// The class to hold recently used files. see docs on juce::ListBoxModel for more info
 class RecentFilesList : public juce::ListBoxModel, 
                         public juce::Component,
                         public juce::ValueTree::Listener
@@ -402,7 +408,9 @@ private:
 
 class FileChooser;
 
-//This TreeView holds all of the TreeViewItems declared above. All items are children of the rootNode member variable. 
+// This TreeView holds all of the KrumTreeViewItems and KrumTreeViewHeaderItems declared above. 
+// All items are children of the rootNode member variable. 
+// see docs on juce::TreeView for more info on implementation.
 class FavoritesTreeView :   public juce::TreeView,
                             public juce::DragAndDropContainer,
                             public juce::ValueTree::Listener,
@@ -506,6 +514,8 @@ private:
 };
 //--------------------------------------------------------------------------------------------------------------
 
+// The UI labels this section as "File Browser". This class implements juce::FileTreeComponent to allow the user to navigate files on their system. 
+// In addition to the FileTreeComponent there are also nested-classes for additional buttons and file path management functionality. 
 
 //class FileChooserTreeView : public juce::FileTreeComponent
 class FileChooser : public juce::Component,
@@ -569,6 +579,7 @@ private:
     juce::StringArray pathBoxNames, pathBoxPaths;
     
     class CurrentPathBox;
+    
     class PathBoxItem : public juce::PopupMenu::CustomComponent
     {
     public:

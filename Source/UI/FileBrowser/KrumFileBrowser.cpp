@@ -340,7 +340,7 @@ void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
     if (isNowSelected && previewer)
     {
         juce::File file{ getFilePath() };
-        if (!file.isDirectory() && previewer->isAutoPlayActive())
+        if (previewer->isAutoPlayActive())
         {
 			if (file != previewer->getCurrentFile())
 			{
@@ -1247,7 +1247,7 @@ void FavoritesTreeView::addNewFavoriteSubFolder(juce::File& folder, int& numHidd
 
 void FavoritesTreeView::reCreateFavoritesFromValueTree()
 {
-
+    
     for (int i = 0; i < favoritesValueTree.getNumChildren(); i++)
     {
         auto childTree = favoritesValueTree.getChild(i);
