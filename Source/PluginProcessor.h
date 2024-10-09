@@ -35,7 +35,7 @@
 #define NUM_AUX_OUTS 20                     //mono channels
 #define SAVE_RELOAD_STATE 0                //quick way to enable and disable getStateInfo() and setStateInfo()
 #define PARAM_VERSION_HINT 5
-#define KRUM_BUILD_VERSION "1.5.0-Beta"     //File Browser Update
+#define KRUM_BUILD_VERSION "1.5.0-Beta"    
 
 
 //The general Tree structure
