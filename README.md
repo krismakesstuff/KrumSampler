@@ -2,6 +2,8 @@
 
 ### a simple to use drum sampler
 
+A free open-source drum sampler plug-in. Use your own samples with a DAW-like channel strip layout.
+
 ![image](https://github.com/krismakesstuff/KrumSampler/blob/dev/Screen%20Shot%202022-07-03%20at%202.37.28%20PM.png)
 
 ## Newest Update: 1.5.0-beta (video coming soon)
@@ -35,17 +37,17 @@
 - I'm a working music [producer-engineer](https://krismakesmusic.com/) in NYC and I wanted to have complete control over my drum programming workflow. Most features are built specifically to my workflow, but I would love outside perspective on other workflows.
 
 ## Workflow
-KrumSampler lets you see your samples as "DAW like" channel strips, letting you quickly view and adjust your samples' volume, pan, clip gain, midi note, bus ouput, length, color, pitch and reverse settings without having to open any menus. Here is a quick worflow example.
+KrumSampler lets you see your samples as "DAW like" channel strips, letting you quickly view and adjust volume, pan, clip gain, midi note, bus ouput, length, color, pitch and reverse settings, without having to open any menus. Here is a quick worflow example.
 
-1. Access and preview files on your system in the File Browser section or in an external file browser. 
-1. Drop your samples on the Drop Sample Area to add samples to your session and make a new channel strip module. 
-1. Assign a midi note to the newly made channel strip module(s).
-1. Quickly audition multiple samples together using Multi-Control. 
-1. Use your DAW's midi roll to program your beat. Too many drum samplers want you to learn their midi programming methods, which just isn't necessary. Keep all the midi for all your instruments in the DAW. 
-1. Loop your beat and sound design. "Hot swap" samples as needed.
-1. Use Auxillary Outputs to bus samples to DAW tracks. This allows you to use your own plugins on only certain samples. This is a common feature in many samplers, but is often under-utilizied in my opinion.
-1. Colors! Yes colors look cool, but the colors are meant to be used as a tool to easily identify a group channel strips. Color coding your drum sounds will allow you to easily navigate your channel strips. 
-1. Mix
+1. Access and preview files on your system in the "File Browser" section or use an external file browser. 
+2. Drop your samples on the "Drop Sample Area" area to make a new channel strip module. 
+3. Assign a midi note to the newly made channel strip module(s).
+4. Quickly audition multiple samples together using Multi-Control. 
+5. Use your DAW's midi roll to program your beat. Too many drum samplers want you to learn their midi programming methods, which just isn't necessary. Keep all the midi for all your instruments in the DAW. 
+6. Loop your beat and sound design. "Hot swap" samples as needed.
+7. Use Auxillary Outputs to bus samples to DAW tracks. This allows you to use your own plugins on only certain samples. This is a common feature in many samplers, but is often under-utilizied in my opinion.
+8. Colors! Yes colors look cool, but the colors are meant to be used as a tool to easily identify a group of channel strips. Color coding will allow you to easily navigate your channel strips when using a lot of samples.
+9. Mix your song. Use the channel strips to easily mix samples in with the rest of your track.
 
 ###### TIP: The Info Panel at the bottom of the UI gives contextual information about what your mouse is hovering over.
 
@@ -147,9 +149,7 @@ All of the features that comprise a channel strip module.
   
 - THIS IS IN BETA!! It runs fine in most cases, BUT testing is still on-going. Please let me know if you run into any issues!
   - You can contact me at <kris@krismakesmusic.com> or submit an [issue](https://github.com/krismakesstuff/KrumSampler/issues)
-  - I'm new to using github so if you have any suggestions on how to handle this better please don't be afraid to let me know 
-- Lastly, I would like to thank you for taking the time to check this out. I'm self taught and stoked to have gotten this far, but there is so much more I want to learn and include in this project. 
-  - ANY help or feedback is genuinely appreciated! Happy mixing nerds!
+- ANY help or feedback is genuinely appreciated! Happy mixing nerds!
 
 ## support
 - If you want to support this project, you can buy me a coffee [here!](https://www.buymeacoffee.com/kriscrawford)
