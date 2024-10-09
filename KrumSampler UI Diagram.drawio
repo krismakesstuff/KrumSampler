@@ -1,0 +1,115 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.14">
+  <diagram name="Page-1" id="5f0bae14-7c28-e335-631c-24af17079c00">
+    <mxGraphModel dx="1006" dy="878" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-5" value="PluginEditor.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="110" y="127.5" width="820" height="620" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-1" value="KrumModuleContainer.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="400" y="212.5" width="400" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-2" value="KrumFileBrowser.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;spacing=4;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="140" y="212.5" width="170" height="510" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-3" value="ConcertinaPanel" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="150" y="252.5" width="150" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-4" value="KrumModuleEditor.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="420" y="257.5" width="140" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-6" value="KrumModuleEditor.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="580" y="257.5" width="140" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-8" value="PanelHeader" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="160" y="302.5" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-9" value="PanelHeader" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="160" y="422.5" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-10" value="PanelHeader" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="160" y="532.5" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-11" value="RecentFilesList" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="160" y="342.5" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-12" value="FavoritesTreeView" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="160" y="457.5" width="130" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-13" value="FileChooser" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="160" y="567.5" width="130" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-14" value="KrumKeyboard.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="330" y="663.5" width="470" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-15" value="InfoPanel.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="330" y="702.5" width="470" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-16" value="OutputGainSlider" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="810" y="212.5" width="100" height="510" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-17" value="AudioPreviewer.h" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="150" y="652.5" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-18" value="DropSampleArea" style="rounded=0;verticalAlign=top;horizontal=1;strokeColor=#999999;whiteSpace=wrap;html=1;textDirection=vertical-rl;direction=east;flipV=0;flipH=0;" vertex="1" parent="1">
+          <mxGeometry x="330" y="212.5" width="60" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-19" value="KrumModuleContainer" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="165" width="400" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-21" value="KrumModuleEditor" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="1155" y="215" width="185" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="1KebL0kfwF-zrGTXmj1Y-23" target="1KebL0kfwF-zrGTXmj1Y-31">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1425" y="384" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-23" value="SetModuleSelected()&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="1375" y="488.75" width="140" height="32.5" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-24" value="DragHandle" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="430" width="130" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-25" value="mouseDown()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="1KebL0kfwF-zrGTXmj1Y-24">
+          <mxGeometry y="30" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-27" value="mouseUp()" style="text;strokeColor=default;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBorderColor=none;" vertex="1" parent="1KebL0kfwF-zrGTXmj1Y-24">
+          <mxGeometry y="60" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-26" value="OnDrag()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="1KebL0kfwF-zrGTXmj1Y-24">
+          <mxGeometry y="90" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="1KebL0kfwF-zrGTXmj1Y-27" target="1KebL0kfwF-zrGTXmj1Y-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-31" value="SetModuleSelectedState()" style="rounded=0;html=1;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1165" y="367.5" width="155" height="32.5" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-34" value="Other KrumModuleEditors,&amp;nbsp;&lt;div&gt;if necessary&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="252" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-33" value="SetModuleSelectedState()" style="rounded=0;html=1;verticalAlign=top;whiteSpace=wrap;dashed=1;dashPattern=8 8;strokeColor=#999999;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="294.75" width="155" height="32.5" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#999999;dashed=1;" edge="1" parent="1" source="1KebL0kfwF-zrGTXmj1Y-23" target="1KebL0kfwF-zrGTXmj1Y-33">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1460" y="340" />
+              <mxPoint x="1460" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-37" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;UI Callback&lt;/h1&gt;&lt;p&gt;&lt;span style=&quot;text-align: center;&quot;&gt;In this example, DragHandle is a Button on a KrumModuleEditor. When the user clicks the button, we call the KrumModuleContainer before changing the state of the module. This is to allow the KrumModuleContainer to make changes to other KrumModuleEditors if needed.&amp;nbsp;&lt;/span&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;text-align: center;&quot;&gt;For example, when the user holds &quot;Shift&quot; and selects a module, we don&#39;t want the previously selected modules to deselect.&amp;nbsp;&lt;/span&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="165" width="360" height="175" as="geometry" />
+        </mxCell>
+        <mxCell id="1KebL0kfwF-zrGTXmj1Y-38" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;UI Ownership Diagram&lt;/h1&gt;&lt;p&gt;&quot;.h&quot; denotes it is a class with it&#39;s own .h file. If no &quot;.h&quot; is present, the class is a sub-class and is defined in the parent .h file.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="285" y="10" width="470" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

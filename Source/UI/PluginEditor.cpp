@@ -592,7 +592,7 @@ bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInDragSource(c
     
     auto desc = dragDetails.description.toString();
 
-    DBG("DropSampleArea Drag Description: " + desc);
+    //DBG("DropSampleArea Drag Description: " + desc);
 
     return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) 
                             || desc.contains(DragStrings::recentsDragString) 
@@ -644,7 +644,7 @@ void KrumSamplerAudioProcessorEditor::DropSampleArea::itemDropped(const juce::Dr
             moduleContainer->setModulesSelectedToLastSelection(newMods[i]);
         }
 
-        DBG("File Chooser Drag: " + desc);
+        //DBG("File Chooser Drag: " + desc);
 
         return;
     }
@@ -688,13 +688,13 @@ bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInFileDrag(con
     for(auto file : files)
     {
         juce::String fileExtension{ juce::File{file}.getFileExtension() };
-        DBG("File Extension: " + fileExtension);
+        //DBG("File Extension: " + fileExtension);
 
         auto format = moduleContainer->pluginEditor->getAudioFormatManager().findFormatForFileExtension(fileExtension);
         
         if (format)
         {
-            DBG("Format valid");
+            //DBG("Format valid");
             isInterested = true;
             break;
         }

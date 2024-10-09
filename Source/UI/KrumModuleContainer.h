@@ -18,8 +18,8 @@
 /*
 * 
 * A class to hold and manage KrumModuleEditors. It defines the viewport in which they live. 
-* This also manages interactions with the mouse selecting module-editors, as well as showing the clip-gain slider
-*
+* This also manages interactions between the mouse and the modules. 
+* In most cases, the KrumModuleEditor's child components will call back to this class to handle interactions that may affect other KrumModuleEditors.
 * 
 */
 
