@@ -3,8 +3,8 @@ KrumSampler TODO:
 - write more detailed code comments
 
 
-- file browser: when the file is selected, you can use the arrow keys to navigate. But if auto-play is selected and you use the arrow key to change the selected file, the audioPreviewer won't play back the file. The mouseDown callback is where we are triggering the audioPreviewer trigger
 - had a dragging module crash after a deleting many modules at once. Crash happened in getModulesDraggedArea()
+
 - not reloading state on first open in ableton
 - update documentation in code and repo
 - test in all DAWs and platforms
