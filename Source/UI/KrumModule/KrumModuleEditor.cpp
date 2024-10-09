@@ -655,9 +655,13 @@ int KrumModuleEditor::getModuleMidiNote()
 juce::String KrumModuleEditor::getModuleMidiNoteString(bool noteName)
 {
     int noteNum = getModuleMidiNote();
-    if (noteName)
+    if (noteNum == 0)
     {
-        return juce::MidiMessage::getMidiNoteName(noteNum, true, true, 3);
+        return juce::String("No Midi");
+    }
+    else if (noteName)
+    {
+        return juce::MidiMessage::getMidiNoteName(noteNum, true, true, 3) + "(" + juce::String(noteNum) + ")";
     }
     else
     {
@@ -687,10 +691,6 @@ void KrumModuleEditor::setModulePlaying(bool shouldPlay)
 
         animatePlaying = true;
         
-        //else if(animatePlaying)
-        //{
-        //    
-        //}
     }
 
     modulePlaying = shouldPlay;
@@ -1379,7 +1379,9 @@ void KrumModuleEditor::MenuButton::mouseUp(const juce::MouseEvent& e)
 KrumModuleEditor::MidiLabel::MidiLabel(KrumModuleEditor& editor, juce::String title, juce::String message)
     : moduleEditor(editor), InfoPanelComponent(title, message)
 {
-    setTooltip("Lane: " + juce::String(moduleEditor.getSamplerIndexString()));
+    // Automation Lane is the index at which the DAW sees the module for automation purposes
+    setTooltip("Automation Lane: " + juce::String(moduleEditor.getSamplerIndexString()));
+
     setRepaintsOnMouseActivity(true);
 }
 

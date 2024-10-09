@@ -1,5 +1,5 @@
 KrumSampler TODO:
-- make new modules show "NO MIDI ASSIGNED" when first created
+
 - Make files in file browser be able to drop onto Drop Samples Here, auto add to Favorites 
 	- SEEMS TO BE WORKING, Test!
 - write more detailed code comments

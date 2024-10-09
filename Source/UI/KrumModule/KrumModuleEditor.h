@@ -20,10 +20,10 @@
 //==============================================================================
 
 /*
-* The GUI side of a Module(sample). 
+* The GUI of a channel strip Module. 
 * 
 * This class handles all GUI interaction and painting. 
-* There are 3 module states, see KrumModule::ModuleState. The valueTreePropertyChanged callback responds to changes and check the state
+* There are 3 module states, see KrumModule::ModuleState. The valueTreePropertyChanged callback responds to changes and checks the state
 * This class interfaces heavily with the KrumModuleContainer. Most actions go through the container first
 * 
 * The GUI can show a ModuleSettingsOverlay pop-up which allows the user to change the color of the module and delete the module.
@@ -270,6 +270,7 @@ private:
     float buttonClickVelocity = 0.5f;
     float buttonTextSize = 13.0f;
 
+    // Toggle button with InfoPanelTextButton, used by reverse and mute buttons
     class CustomToggleButton : public InfoPanelTextButton
     {
     public:
@@ -293,6 +294,7 @@ private:
     //TODO: implement solo feature
     CustomToggleButton soloButton{ *this, "Solo", "Soloes the sample." };
 
+    // One-shot button with InfoPanelDrawableButton, used by the play button
     class OneShotButton : public InfoPanelDrawableButton
     {
     public:
@@ -313,6 +315,7 @@ private:
 
     OneShotButton playButton{ *this, "One Shot", "Plays the currently assigned sample" };
     
+    // Menu button with InfoPanelDrawableButton
     class MenuButton : public InfoPanelDrawableButton
     {
     public:
@@ -332,6 +335,7 @@ private:
     
     friend class KrumLookAndFeel;
 
+    // Pitch slider with InfoPanelSlider
     class PitchSlider : public InfoPanelSlider
     {
     public:
@@ -354,6 +358,7 @@ private:
 
     PitchSlider pitchSlider{ *this, "Module Pitch", "Click and Drag to shift the pitch by semi-tones, double-click to go back to zero" };
 
+    // MidiLabel with InfoPanelComponent
     class MidiLabel :   public InfoPanelComponent,
                         public juce::SettableTooltipClient
     {
@@ -379,11 +384,11 @@ private:
         KrumModuleEditor& moduleEditor;
         float fontSize = 13.0f;
         
-        
     };
 
     MidiLabel midiLabel{*this,"Midi Label", "Displays the current Midi Note assignment, right click to learn a new key" };
     
+    // DragHandle with InfoPanelDrawableButton
     class DragHandle : public InfoPanelDrawableButton
     {
     public:
