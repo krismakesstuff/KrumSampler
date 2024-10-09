@@ -355,8 +355,8 @@ class RecentFilesList : public juce::ListBoxModel,
                         public juce::ValueTree::Listener
 {
 public:
-    RecentFilesList( KrumFileBrowser& fileBrowser, SimpleAudioPreviewer* previewer);
     
+    RecentFilesList( KrumFileBrowser& fileBrowser, SimpleAudioPreviewer* previewer); 
     ~RecentFilesList() override;
 
     void valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval) override;
@@ -547,7 +547,7 @@ public:
 
 private:
 
-    friend class FileChooserItem;
+    //friend class FileChooserItem;
 
     juce::String findPathFromName(juce::String itemName);
     juce::File getFileFromChosenPath();
@@ -701,7 +701,8 @@ namespace DragStrings
     const juce::String favoritesDragString{ "FavoritesFileDrag-" };
     const juce::String fileChooserDragString{ "FileChooserFileDrag-" };
 }
-
+//===============================================================================
+// The base class for the File Browser. This holds the three sections, "Recent", "Favorites" and "File Browser"
 class KrumFileBrowser : public InfoPanelComponent
 {
 public:
@@ -716,7 +717,7 @@ public:
 
     KrumFileBrowser(juce::ValueTree& fileBroswerValueTree, juce::AudioFormatManager& formatManager,
         juce::ValueTree& stateTree, juce::AudioProcessorValueTreeState& apvts, KrumSampler& s);
-    ~KrumFileBrowser();
+    ~KrumFileBrowser() override;
 
     void paint(juce::Graphics& g) override;
     void resized() override;
@@ -750,7 +751,6 @@ private:
     juce::AudioFormatManager& formatManager;
 
     SimpleAudioPreviewer audioPreviewer;
-    juce::ConcertinaPanel concertinaPanel;
 
     PanelHeader recentHeader{ "RECENT" , concertinaPanel, PanelHeader::PanelCompId::recent};
     RecentFilesList recentFilesList{ *this, &audioPreviewer };
@@ -760,6 +760,9 @@ private:
 
     PanelHeader filechooserHeader{ "FILE BROWSER", concertinaPanel, PanelHeader::PanelCompId::fileChooser };
     FileChooser fileChooser{*this, audioPreviewer};
+
+    
+    juce::ConcertinaPanel concertinaPanel;
 
     InfoPanelDrawableButton addFavoriteButton { juce::DrawableButton::ButtonStyle::ImageOnButtonBackground, "Add Favorites", "Opens a browser to select Folders and/or Files to add to the Favorites section"};
     

@@ -17,7 +17,7 @@
 * 
 * A JUCE generated class that represents the audio engine of the app. This will handle all audio and midi calls to and from the DAW, as well as state changes on startup and exit. 
 * 
-* In PluginProcessoer.cpp, there are functions defined to create the AudioProcessorValueTreeState. This is defined by JUCE, and is reffered to as "APVTS". This ValueTree connects your
+* In PluginProcessor.cpp, there are functions defined to create the AudioProcessorValueTreeState. This is defined by JUCE, and is referred to as "APVTS". This ValueTree connects your
 * sliders to parameters. 
 * 
 * There is really only one large ValueTree that holds the state and settings of the app. That Tree then has other sub-trees for specific sections of the app. 
@@ -33,7 +33,7 @@
 #define NUM_PREVIEW_VOICES 1
 #define MAX_FILE_LENGTH_SECS 20
 #define NUM_AUX_OUTS 20                     //mono channels
-#define SAVE_RELOAD_STATE 1                //quick way to enable and disable getStateInfo() and setStateInfo()
+#define SAVE_RELOAD_STATE 0                //quick way to enable and disable getStateInfo() and setStateInfo()
 #define PARAM_VERSION_HINT 5
 #define KRUM_BUILD_VERSION "1.5.0-Beta"     //File Browser Update
 
@@ -155,6 +155,7 @@ static juce::String panRangeFrom0To1(float value)
     return returnString;
 }
 
+// The "engine" of the plugin 
 
 class KrumSamplerAudioProcessor  :  public juce::AudioProcessor,
                                     public juce::Timer
@@ -166,32 +167,43 @@ public:
     ~KrumSamplerAudioProcessor() override;
 
     //==============================================================================
+    // Called before the audio engine starts
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+
+    // Called when the audio engine stops
     void releaseResources() override;
 
    #ifndef JucePlugin_PreferredChannelConfigurations
+    // Called to determine if a specific bus layout is supported
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif
 
-    
+    // Main audio processing function
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     //void processMidiKeyStateBlock(juce::MidiBuffer& midiMessages, int startSample, int numSamples, bool injectDirectEvents);
+    
+    //==============================================================================
+    
+    // Adds a listener to the midi keyboard
     void addMidiKeyboardListener(juce::MidiKeyboardStateListener*);
+    // Removes a listener from the midi keyboard
     void removeMidiKeyboardListener(juce::MidiKeyboardStateListener*);
 
     //==============================================================================
+    // Creates the plugin's editor (GUI)
     juce::AudioProcessorEditor* createEditor() override;
+    // Checks if the plugin has an editor, the DAW will call this to determine if it should show the GUI
     bool hasEditor() const override;
     
     //==============================================================================
+    // DAW calls these to get information about the plugin
+    
     const juce::String getName() const override;
-
     bool acceptsMidi() const override;
     bool producesMidi() const override;
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
 
-    //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
@@ -199,13 +211,17 @@ public:
     void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
+    // State saving and loading
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    //==============================================================================
+    // Getters for the sampler and other objects
     juce::AudioFormatManager* getFormatManager();
     juce::ValueTree* getValueTree();
     juce::MidiKeyboardState& getMidiState();
 
+    // 
     void updateModulesFromValueTree();
 
     int getNumModulesInSampler();

@@ -31,7 +31,9 @@ RecentFilesList::RecentFilesList(KrumFileBrowser& fb, SimpleAudioPreviewer* p)
 }
 
 RecentFilesList::~RecentFilesList() 
-{}
+{
+    DBG("RecentFilesList Destructor Called");
+}
 
 void RecentFilesList::valueTreeChildRemoved(juce::ValueTree& parentTree, juce::ValueTree& removedChild, int indexOfRemoval)
 {
@@ -944,6 +946,7 @@ FavoritesTreeView::FavoritesTreeView(KrumFileBrowser& fb)
 
 FavoritesTreeView::~FavoritesTreeView()
 {
+    DBG("FavoritesTreeView Destructor Called");
     setRootItem(nullptr);
 }
 
@@ -2006,7 +2009,9 @@ FileChooser::FileChooser(KrumFileBrowser& fb, SimpleAudioPreviewer& p)
 }
 
 FileChooser::~FileChooser()
-{}
+{
+    DBG("FileChooser Destructor");
+}
 
 
 void FileChooser::paint(juce::Graphics& g)
@@ -2067,6 +2072,7 @@ void FileChooser::fileClicked(const juce::File& file, const juce::MouseEvent& e)
         //with mouse Position??
         menu.showMenuAsync(menuOptions, juce::ModalCallbackFunction::create(handleRightClick, this));
     }
+
     if (!file.isDirectory() && previewer.isAutoPlayActive() && fileBrowser.doesPreviewerSupport(file.getFileExtension()))
     {
         if (previewer.getCurrentFile() != file)
@@ -2432,15 +2438,27 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
       favoritesTreeView(*this)
 {
 
+    // Add concertina panel to viewport
     addAndMakeVisible(concertinaPanel);
-    concertinaPanel.addPanel((int)BrowserSections::recent, &recentFilesList, false);
-    concertinaPanel.setCustomPanelHeader(&recentFilesList, &recentHeader, false);
-    concertinaPanel.addPanel((int)BrowserSections::favorites, &favoritesTreeView, false);
-    concertinaPanel.setCustomPanelHeader(&favoritesTreeView, &favoritesHeader, false);
-    concertinaPanel.addPanel((int)BrowserSections::fileChooser, &fileChooser, false);
-    concertinaPanel.setCustomPanelHeader(&fileChooser, &filechooserHeader, false);
+    // Add panels to concertina panel
     
+    // Each panel is a different section of the browser. Each has their own component for handling interaction. Components defined in KrumFileBrowser.h
+    // Add custom header to each panel
     
+    bool takeOwnership = false;
+
+    // Recent Panel
+    concertinaPanel.addPanel((int)BrowserSections::recent, &recentFilesList, takeOwnership);
+    concertinaPanel.setCustomPanelHeader(&recentFilesList, &recentHeader, takeOwnership);
+
+    // Favorites panel
+    concertinaPanel.addPanel((int)BrowserSections::favorites, &favoritesTreeView, takeOwnership);
+    concertinaPanel.setCustomPanelHeader(&favoritesTreeView, &favoritesHeader, takeOwnership);
+    // File Chooser panel
+    concertinaPanel.addPanel((int)BrowserSections::fileChooser, &fileChooser, takeOwnership);
+    concertinaPanel.setCustomPanelHeader(&fileChooser, &filechooserHeader, takeOwnership);
+    
+    // Update the sections with the value tree
     auto recTree = fbValueTree.getChildWithName(TreeIDs::RECENT.getParamID());
     recentFilesList.updateFileListFromTree(recTree);
     auto favTree =fbValueTree.getChildWithName(TreeIDs::FAVORITES.getParamID());
@@ -2453,7 +2471,10 @@ KrumFileBrowser::KrumFileBrowser(juce::ValueTree& fbValueTree, juce::AudioFormat
 
 
 KrumFileBrowser::~KrumFileBrowser()
-{}
+{
+    //concertinaPanel.~ConcertinaPanel();
+    concertinaPanel.removeAllChildren();
+}
 
 void KrumFileBrowser::paint(juce::Graphics& g)
 {
@@ -2786,7 +2807,9 @@ PanelHeader::PanelHeader(juce::String headerTitle, juce::ConcertinaPanel& concer
 }
 
 PanelHeader::~PanelHeader()
-{}
+{
+    DBG("PanelHeader: " + juce::String(panelCompId) + " Destructor");
+}
 
 void PanelHeader::resized()
 {
