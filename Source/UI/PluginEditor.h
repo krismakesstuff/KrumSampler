@@ -52,8 +52,8 @@ namespace EditorDimensions
     
     const int dropSampleAreaW = moduleW * 0.45f;
 
-    const int collapseButtonH = 45;
-    const int collapseButtonW = 12;
+    const int collapseButtonH = 30;
+    const int collapseButtonW = 23;
 
     const int infoButtonSize = 25;
 

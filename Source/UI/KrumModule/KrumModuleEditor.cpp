@@ -231,7 +231,7 @@ void KrumModuleEditor::valueTreePropertyChanged(juce::ValueTree& treeWhoChanged,
             {
                 buildModule();
                 setModuleColor(Colors::getModuleDefaultColor());
-                setModuleListeningForMidi(true);
+                setModuleListeningForMidi(false);
                 showSettingsOverlay(); 
 
             }

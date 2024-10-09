@@ -591,6 +591,9 @@ bool KrumSamplerAudioProcessorEditor::DropSampleArea::isInterestedInDragSource(c
 {
     
     auto desc = dragDetails.description.toString();
+
+    DBG("DropSampleArea Drag Description: " + desc);
+
     return desc.isNotEmpty() && (desc.contains(DragStrings::favoritesDragString) 
                             || desc.contains(DragStrings::recentsDragString) 
                             || desc.contains(DragStrings::fileChooserDragString));

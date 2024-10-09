@@ -207,7 +207,7 @@ KrumModuleEditor* KrumModuleContainer::handleNewExternalFile(juce::String filePa
     if (pluginEditor->sampler.isFileAcceptable(file, numSamples))
     {
         auto modTree = getFirstEmptyModuleTree();
-
+        DBG("External File Supported: " + filePathName);
         if (modTree.isValid())
         {
             //auto newMod = addNewModuleEditor(new KrumModuleEditor(modTree, *this, pluginEditor->getAudioFormatManager()));
