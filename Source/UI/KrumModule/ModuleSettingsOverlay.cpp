@@ -20,7 +20,6 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent)
     : parentEditor(parent), colorPalette(*this)
 {
 
-    //addChildComponent(cancelButton);
     auto cancelImage = juce::Drawable::createFromImageData(BinaryData::cancel_opsz24_svg, BinaryData::cancel_opsz24_svgSize);
     cancelImage->replaceColour(juce::Colours::black, juce::Colours::white.withAlpha(0.5f));
     addAndMakeVisible(cancelButton);
@@ -37,19 +36,12 @@ ModuleSettingsOverlay::ModuleSettingsOverlay(KrumModuleEditor& parent)
     deleteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     deleteButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::red.darker(0.2f));
     deleteButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::red.darker());
-    /*deleteButton.setButtonText("Delete");
-    deleteButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::darkred.darker());
-    deleteButton.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);*/
     deleteButton.onClick = [this] { deleteButtonClicked(); };
 
-    //addChildComponent(&colorPalette);
     addAndMakeVisible(colorPalette);
 
-    
-    //setMidiLabels();
-
     setRepaintsOnMouseActivity(true);
-    //startTimerHz(30);
+
 }
 
 ModuleSettingsOverlay::~ModuleSettingsOverlay()
@@ -68,18 +60,12 @@ void ModuleSettingsOverlay::resized()
     auto area = getLocalBounds();
 
     int spacer = 5;
-    //int titleBoxH = area.getHeight() * 0.11f;
-    //int midiListenButtonH = area.getHeight() * 0.056f;
-    //int paletteH = area.getHeight() * 0.28;
-    //int noteNumberH = area.getHeight() * 0.145f;
-    //int noteTitleH = area.getHeight() * 0.078f;
 
     int buttonWidth = area.getWidth() * 0.325f;
     int buttonHeight = area.getHeight() * 0.275f;
 
     colorPalette.setBounds(area.getX(), area.getY() - spacer, area.getWidth(), area.getHeight() - buttonHeight);
 
-//    confirmButton.setBounds(area.getCentreX() - confirmButtonWidth / 2, colorPalette.getBottom() + (spacer * 2), confirmButtonWidth, confirmButtonHeight);
     deleteButton.setBounds(area.getX() + spacer, colorPalette.getBottom()/* + (spacer * 2)*/, buttonWidth - spacer, buttonHeight);
     cancelButton.setBounds(deleteButton.getRight() + spacer, deleteButton.getY(), buttonWidth - spacer, buttonHeight);
 
@@ -114,8 +100,6 @@ void ModuleSettingsOverlay::colorButtonClicked(juce::Colour newColor)
 
     parentEditor.setModuleColor(newColor);
     
-    
-
 }
 
 void ModuleSettingsOverlay::cancelButtonClicked()
@@ -130,7 +114,6 @@ void ModuleSettingsOverlay::cancelButtonClicked()
 
 void ModuleSettingsOverlay::deleteButtonClicked()
 {
-
     if (parentEditor.isModuleSelected() && parentEditor.moduleContainer.isMultiControlActive())
     {
         parentEditor.moduleContainer.setSelectedModulesState(&parentEditor, (int)KrumModule::ModuleState::empty);
@@ -139,7 +122,6 @@ void ModuleSettingsOverlay::deleteButtonClicked()
     parentEditor.setModuleState(KrumModule::ModuleState::empty);
 
 }
-
 
 void ModuleSettingsOverlay::visibilityChanged()
 {
