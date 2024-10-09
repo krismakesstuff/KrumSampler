@@ -65,7 +65,7 @@ KrumSamplerAudioProcessorEditor::KrumSamplerAudioProcessorEditor (KrumSamplerAud
     
     //add Presets menu
     addAndMakeVisible(presetsComboBox);
-    presetsComboBox.setTextWhenNothingSelected("Coming Soon!!");
+    presetsComboBox.setTextWhenNothingSelected("Coming in future update");
     presetsComboBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
     presetsComboBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::black);
     presetsComboBox.setColour(juce::ComboBox::ColourIds::arrowColourId, Colors::getFontColor());

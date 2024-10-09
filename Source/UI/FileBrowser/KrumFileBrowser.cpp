@@ -102,6 +102,26 @@ void RecentFilesList::listBoxItemDoubleClicked(int row, const juce::MouseEvent& 
     }
 }
 
+void RecentFilesList::selectedRowsChanged(int lastRowSelected)
+{
+    // we handle clicked items in the itemClicked method, so this is just for the selection made using the keyboard arrows
+    if (isMouseButtonDown())
+    {
+        return;
+    }
+
+    juce::File file{ getFilePath(lastRowSelected) };
+    if (previewer && !file.isDirectory() && previewer->isAutoPlayActive())
+    {
+        if (file != previewer->getCurrentFile())
+        {
+            previewer->loadFile(file);
+        }
+        previewer->setWantsToPlayFile(true);   
+    }
+
+}
+
 
 void RecentFilesList::paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) 
 {
@@ -308,6 +328,29 @@ void KrumTreeItem::itemDoubleClicked(const juce::MouseEvent& e)
     }
 }
 
+void KrumTreeItem::itemSelectionChanged(bool isNowSelected)
+{
+    // we handle clicked items in the itemClicked method, so this is just for the selection made using the keyboard arrows
+    if(parentTreeView->isMouseButtonDown())
+    {
+		return;
+	}
+
+
+    if (isNowSelected && previewer)
+    {
+        juce::File file{ getFilePath() };
+        if (!file.isDirectory() && previewer->isAutoPlayActive())
+        {
+			if (file != previewer->getCurrentFile())
+			{
+				previewer->loadFile(file);
+			}
+
+			previewer->setWantsToPlayFile(true);
+        }
+    }
+}
 
 void KrumTreeItem::closeLabelEditor(juce::Label* label)
 {
@@ -2053,6 +2096,28 @@ void FileChooser::goUp()
 
 void FileChooser::selectionChanged()
 {
+    //DBG("Selection Changed");
+
+    // we want to filter out selection changes that are caused by the user clicking on the treeview
+    // this is intended to catch changes made from using the keyboards up and down arrows
+    if(isMouseButtonDown())
+    {
+		return;
+	}
+
+    auto file = getSelectedFile();
+
+    if (!file.isDirectory() && previewer.isAutoPlayActive() 
+        && fileBrowser.doesPreviewerSupport(file.getFileExtension()))
+    {
+        if (previewer.getCurrentFile() != file)
+        {
+            previewer.loadFile(file);
+        }
+
+        previewer.setWantsToPlayFile(true);
+    }
+
 }
 
 void FileChooser::fileClicked(const juce::File& file, const juce::MouseEvent& e)

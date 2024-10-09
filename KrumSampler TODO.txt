@@ -1,11 +1,8 @@
 KrumSampler TODO:
 
-- Make files in file browser be able to drop onto Drop Samples Here, auto add to Favorites 
-	- SEEMS TO BE WORKING, Test!
 - write more detailed code comments
 
 
-- show midi note number when hovering over keys
 - file browser: when the file is selected, you can use the arrow keys to navigate. But if auto-play is selected and you use the arrow key to change the selected file, the audioPreviewer won't play back the file. The mouseDown callback is where we are triggering the audioPreviewer trigger
 - had a dragging module crash after a deleting many modules at once. Crash happened in getModulesDraggedArea()
 - not reloading state on first open in ableton
@@ -16,8 +13,8 @@ KrumSampler TODO:
 
 
 OPTIMIZATION:
--loading images from binary on module creation, good or bad?
-
+- loading images from binary on module creation, good or bad?
+- make loading audio previewer a more encapsulated process. Each callback for each item in the FileBrwoser is using similar if not identical code. 
 
 FOR NEXT TIME:
 - trigger mode?

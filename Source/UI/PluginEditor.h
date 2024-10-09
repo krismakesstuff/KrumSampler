@@ -234,8 +234,8 @@ private:
     InfoPanelDrawableButton collapseBrowserButton { juce::DrawableButton::ButtonStyle::ImageFitted, "Hide Browser", "This will hide the browser and give you more screen real estate when you aren't using the browser anymore"};
     
 
-    InfoPanelComboBox presetsComboBox{"Presets", "COMING SOON!!"};
-    InfoPanelDrawableButton settingsButton{ juce::DrawableButton::ButtonStyle::ImageFitted, "Global Settings", "COMING SOON!!" };
+    InfoPanelComboBox presetsComboBox{"Presets", "Coming in future update"};
+    InfoPanelDrawableButton settingsButton{ juce::DrawableButton::ButtonStyle::ImageFitted, "Global Settings", "Coming in future update" };
 
     juce::ComponentBoundsConstrainer constrainer;
 

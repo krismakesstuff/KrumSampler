@@ -99,6 +99,7 @@ public:
 
     void itemClicked(const juce::MouseEvent& e) override;
     void itemDoubleClicked(const juce::MouseEvent& e) override;
+    void itemSelectionChanged(bool isNowSelected) override;
 
     void closeLabelEditor(juce::Label* label);
 
@@ -366,6 +367,7 @@ public:
     
     void listBoxItemClicked(int row, const juce::MouseEvent& e) override;
     void listBoxItemDoubleClicked(int row, const juce::MouseEvent& e) override;
+    void selectedRowsChanged(int lastRowSelected) override;
 
     void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
 
