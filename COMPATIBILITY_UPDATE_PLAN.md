@@ -14,8 +14,8 @@ This document outlines the complete plan for updating KrumSampler to work on mod
 - JUCE Version: 8.x (latest stable)
 - Build System: CMake 3.25+
 - IDE: VSCode (cross-platform)
-- Target OS: macOS 10.13+, Windows 10+
-- Architecture: Universal Binary (arm64 + x86_64) for macOS
+- Target OS: macOS 11.0+ (Big Sur), Windows 10+
+- Architecture: Apple Silicon only (arm64) for macOS
 
 ---
 
@@ -194,10 +194,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Export compile commands for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# macOS deployment target
+# macOS deployment target (Apple Silicon only)
 if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum macOS version")
-    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build universal binary")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version")
+    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Apple Silicon only")
 endif()
 
 # Add JUCE
@@ -377,17 +377,17 @@ Create `CMakePresets.json`:
             }
         },
         {
-            "name": "macos-universal",
+            "name": "macos-arm64",
             "inherits": "release",
-            "displayName": "macOS Universal",
+            "displayName": "macOS Apple Silicon",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Darwin"
             },
             "cacheVariables": {
-                "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64",
-                "CMAKE_OSX_DEPLOYMENT_TARGET": "10.13"
+                "CMAKE_OSX_ARCHITECTURES": "arm64",
+                "CMAKE_OSX_DEPLOYMENT_TARGET": "11.0"
             }
         },
         {
@@ -415,8 +415,8 @@ Create `CMakePresets.json`:
             "configurePreset": "release"
         },
         {
-            "name": "macos-universal",
-            "configurePreset": "macos-universal"
+            "name": "macos-arm64",
+            "configurePreset": "macos-arm64"
         },
         {
             "name": "windows-x64",
@@ -432,13 +432,13 @@ Create `CMakePresets.json`:
 
 ### 5.1 Initial Build Commands
 
-#### macOS
+#### macOS (Apple Silicon)
 ```bash
 # Configure
 cmake -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 \
-    -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+    -DCMAKE_OSX_ARCHITECTURES=arm64
 
 # Build
 cmake --build build
@@ -488,8 +488,7 @@ cmake --build build --config Debug
 - [ ] MIDI mapping works
 
 **Platform-Specific:**
-- [ ] macOS Intel: Test on 10.13+ if available
-- [ ] macOS Apple Silicon: Test native arm64 performance
+- [ ] macOS Apple Silicon: Test on M1/M2/M3 with macOS 11.0+
 - [ ] Windows 10: Test VST3 loading
 - [ ] Windows 11: Verify compatibility
 
@@ -719,10 +718,10 @@ Thumbs.db
 # Configure Debug
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
 
-# Configure Release (macOS Universal)
+# Configure Release (macOS Apple Silicon)
 cmake -B build -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
+    -DCMAKE_OSX_ARCHITECTURES=arm64 \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
 
 # Build
 cmake --build build
@@ -770,4 +769,4 @@ F7                    →  Build
 
 *Document Created: January 2026*
 *Target JUCE Version: 8.x*
-*Target Platforms: macOS 10.13+, Windows 10+*
+*Target Platforms: macOS 11.0+ (Apple Silicon only), Windows 10+*
